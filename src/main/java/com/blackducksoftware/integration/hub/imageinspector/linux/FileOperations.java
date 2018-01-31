@@ -34,29 +34,54 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileOperations {
+    private static final String USERS_DIR = "/Users";
     private static final Logger logger = LoggerFactory.getLogger(FileOperations.class);
 
-    public static List<File> findDirWithName(final File dirFile, final String targetName) {
+    public static List<File> findDirWithName(final int maxDepth, final File dirFile, final String targetName) {
         final List<File> results = new ArrayList<>();
         logger.trace(String.format("Looking in %s for Dir %s", dirFile.getAbsolutePath(), targetName));
-        final IOFileFilter fileFilter = new NameFileFilter(targetName);
-        final IOFileFilter dirFilter = TrueFileFilter.INSTANCE;
-        final Iterator<File> iter = FileUtils.iterateFilesAndDirs(dirFile, fileFilter, dirFilter);
-        while (iter.hasNext()) {
-            final File f = iter.next();
-            if (targetName.equals(f.getName()) && (f.isDirectory())) {
-                logger.trace(String.format("Match: %s", f.getAbsolutePath()));
-                results.add(f);
-            }
+        final List<File> iter = findDirsWithGivenName(maxDepth, 0, dirFile, targetName);
+        logger.trace("Processing the list...");
+        for (final File f : iter) {
+            logger.trace(String.format("Match: %s", f.getAbsolutePath()));
+            results.add(f);
         }
+        logger.trace("Done processing the list");
         return results;
+    }
+
+    private static List<File> findDirsWithGivenName(final int maxDepth, final int depth, final File dir, final String targetName) {
+        final List<File> filesMatchingTargetName = new ArrayList<>();
+        logger.trace(String.format("findFiles() processing dir %s", dir.getAbsolutePath()));
+        if (depth > maxDepth) {
+            logger.trace("Hit max depth; pruning tree here");
+            return filesMatchingTargetName;
+        }
+        // TODO need a general mechanism for this? include /tmp too? IDOCKER-367
+        if (USERS_DIR.equals(dir.getAbsolutePath())) {
+            logger.trace("This is the /Users dir; skipping it");
+            return filesMatchingTargetName;
+        }
+        try {
+            for (final File f : dir.listFiles()) {
+                if (f.isDirectory()) {
+                    if (targetName.equals(f.getName())) {
+                        filesMatchingTargetName.add(f);
+                    }
+                    final List<File> subDirsMatchingFiles = findDirsWithGivenName(maxDepth, depth + 1, f, targetName);
+                    filesMatchingTargetName.addAll(subDirsMatchingFiles);
+                }
+            }
+        } catch (final Throwable e) {
+            logger.debug("Error reading contents of dir; skipping it");
+        }
+        return filesMatchingTargetName;
     }
 
     public static List<File> findFilesWithExt(final File dirFile, final String fileExtension) {

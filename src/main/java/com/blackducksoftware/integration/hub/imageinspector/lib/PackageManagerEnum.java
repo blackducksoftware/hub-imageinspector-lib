@@ -23,11 +23,15 @@
  */
 package com.blackducksoftware.integration.hub.imageinspector.lib;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public enum PackageManagerEnum {
     DPKG("/var/lib/dpkg", OperatingSystemEnum.UBUNTU),
     RPM("/var/lib/rpm", OperatingSystemEnum.CENTOS),
     APK("/lib/apk", OperatingSystemEnum.ALPINE);
 
+    private static final Logger logger = LoggerFactory.getLogger(PackageManagerEnum.class);
     private final String directory;
     private final OperatingSystemEnum operatingSystem;
 
@@ -37,12 +41,14 @@ public enum PackageManagerEnum {
     }
 
     public static PackageManagerEnum getPackageManagerEnumByName(String name) {
-        PackageManagerEnum result = null;
+        logger.trace(String.format("Checking to see whether %s is a package manager", name));
+        PackageManagerEnum matchingPkgMgr = null;
         if (name != null) {
             name = name.toUpperCase();
-            result = PackageManagerEnum.valueOf(name);
+            matchingPkgMgr = PackageManagerEnum.valueOf(name);
+            logger.trace(String.format("%s matched package manager %s", name, matchingPkgMgr));
         }
-        return result;
+        return matchingPkgMgr;
     }
 
     public String getDirectory() {

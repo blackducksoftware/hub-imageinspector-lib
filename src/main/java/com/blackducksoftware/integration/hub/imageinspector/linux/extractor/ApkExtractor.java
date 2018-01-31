@@ -45,6 +45,8 @@ import com.blackducksoftware.integration.hub.imageinspector.linux.executor.ApkEx
 
 @Component
 public class ApkExtractor extends Extractor {
+    private static final int MAX_ETC_DIR_DEPTH = 3;
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -89,7 +91,7 @@ public class ApkExtractor extends Extractor {
     @Override
     public String deriveArchitecture(final File targetImageFileSystemRootDir) throws IOException {
         String architecture = null;
-        final List<File> etcDirectories = FileOperations.findDirWithName(targetImageFileSystemRootDir, "etc");
+        final List<File> etcDirectories = FileOperations.findDirWithName(MAX_ETC_DIR_DEPTH, targetImageFileSystemRootDir, "etc");
         for (final File etc : etcDirectories) {
             File architectureFile = new File(etc, "apk");
             architectureFile = new File(architectureFile, "arch");

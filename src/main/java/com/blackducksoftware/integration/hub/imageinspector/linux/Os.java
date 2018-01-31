@@ -40,7 +40,11 @@ public class Os {
 
     public OperatingSystemEnum deriveCurrentOs() throws HubIntegrationException {
         OperatingSystemEnum osEnum = null;
-
+        final String systemPropertyOsValue = System.getProperty("os.name");
+        logger.debug(String.format("Deriving current OS; System.getProperty(\"os.name\") says: %s", systemPropertyOsValue));
+        if (!isLinuxUnix(systemPropertyOsValue)) {
+            throw new HubIntegrationException(String.format("System property OS value is '%s'; this appears to be a non-Linux/Unix system", systemPropertyOsValue));
+        }
         final File rootDir = new File("/");
         final FileSys rootFileSys = new FileSys(rootDir);
         final Set<PackageManagerEnum> packageManagers = rootFileSys.getPackageManagers();
@@ -51,5 +55,12 @@ public class Os {
             return osEnum;
         }
         throw new HubIntegrationException(String.format("Unable to determine current operating system; %d package managers found: %s", packageManagers.size(), packageManagers));
+    }
+
+    private static boolean isLinuxUnix(final String osName) {
+        if (osName == null) {
+            return false;
+        }
+        return (osName.contains("nux") || osName.contains("nix") || osName.contains("aix"));
     }
 }

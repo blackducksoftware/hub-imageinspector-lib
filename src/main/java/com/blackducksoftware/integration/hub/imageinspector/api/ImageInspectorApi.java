@@ -83,8 +83,8 @@ public class ImageInspectorApi {
         final String imageTag = imageMetadata.getTagName();
         /// end parse manifest
         final File targetImageFileSystemRootDir = imageInspector.extractDockerLayers(imageRepo, imageTag, layerTars, tarfileMetadata);
-        final OperatingSystemEnum targetOs = imageInspector.detectOperatingSystem(targetImageFileSystemRootDir);
         final OperatingSystemEnum currentOs = os.deriveCurrentOs();
+        final OperatingSystemEnum targetOs = imageInspector.detectOperatingSystem(targetImageFileSystemRootDir);
         if (!targetOs.equals(currentOs)) {
             final ImageInspectorOsEnum neededInspectorOs = getImageInspectorOsEnum(targetOs);
             final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);

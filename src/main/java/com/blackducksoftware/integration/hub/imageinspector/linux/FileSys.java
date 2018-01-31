@@ -47,6 +47,7 @@ import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEn
 
 public class FileSys {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final int LIB_MAX_DEPTH = 4;
     private final File root;
 
     public FileSys(final File root) {
@@ -57,12 +58,14 @@ public class FileSys {
         final Set<PackageManagerEnum> packageManagers = new HashSet<>();
 
         logger.debug(String.format("Looking in root dir %s for lib dir", root.getAbsolutePath()));
-        final List<File> libDirs = FileOperations.findDirWithName(root, "lib");
+        final List<File> libDirs = FileOperations.findDirWithName(LIB_MAX_DEPTH, root, "lib");
         if (libDirs != null) {
             for (final File libDir : libDirs) {
                 for (final File packageManagerDirectory : libDir.listFiles()) {
                     logger.trace(String.format("Checking dir %s to see if it's a package manager dir", packageManagerDirectory.getAbsolutePath()));
                     try {
+                        // TODO this is too simplistic IDOCKER-363
+                        logger.trace(String.format("Found a lib dir: %s", packageManagerDirectory.getAbsolutePath()));
                         packageManagers.add(PackageManagerEnum.getPackageManagerEnumByName(packageManagerDirectory.getName()));
                     } catch (final IllegalArgumentException e) {
                         logger.trace(String.format("%s is not a package manager", packageManagerDirectory.getName()));
