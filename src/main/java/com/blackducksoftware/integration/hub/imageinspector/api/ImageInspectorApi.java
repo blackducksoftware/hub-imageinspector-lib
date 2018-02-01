@@ -88,7 +88,7 @@ public class ImageInspectorApi {
         if (!targetOs.equals(currentOs)) {
             final ImageInspectorOsEnum neededInspectorOs = getImageInspectorOsEnum(targetOs);
             final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
-            throw new WrongInspectorOsException(neededInspectorOs, msg);
+            throw new WrongInspectorOsException(dockerTarfilePath, neededInspectorOs, msg);
         }
         final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageRepo, imageTag, tarfileMetadata, hubProjectName, hubProjectVersion, dockerTarfile, targetImageFileSystemRootDir, targetOs);
         return imageInfoDerived;
