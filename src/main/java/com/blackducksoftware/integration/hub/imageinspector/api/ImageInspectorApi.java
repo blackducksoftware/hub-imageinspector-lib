@@ -55,11 +55,6 @@ public class ImageInspectorApi {
         return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix);
     }
 
-    public File getBdioFile(final String dockerTarfilePath) throws WrongInspectorOsException {
-        logger.info("getBdioFile()");
-        throw new UnsupportedOperationException("getBdioFile() is not supported yet");
-    }
-
     private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix) throws IOException, HubIntegrationException, InterruptedException {
         final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix);
         return imageInfoDerived.getBdioDocument();
