@@ -25,8 +25,10 @@ package com.blackducksoftware.integration.hub.imageinspector.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,17 +52,20 @@ public class ImageInspectorApi {
     @Autowired
     private Os os;
 
-    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix) throws IOException, HubIntegrationException, InterruptedException {
+    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
+            throws IOException, HubIntegrationException, InterruptedException {
         logger.info("getBdio()");
-        return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix);
+        return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
     }
 
-    private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix) throws IOException, HubIntegrationException, InterruptedException {
-        final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix);
+    private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
+            throws IOException, HubIntegrationException, InterruptedException {
+        final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
         return imageInfoDerived.getBdioDocument();
     }
 
-    ImageInfoDerived inspect(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix) throws IOException, HubIntegrationException, InterruptedException {
+    ImageInfoDerived inspect(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
+            throws IOException, HubIntegrationException, InterruptedException {
         final File dockerTarfile = new File(dockerTarfilePath);
         final File tempDir = createTempDirectory();
         final File workingDir = new File(tempDir, "working");
@@ -86,11 +91,20 @@ public class ImageInspectorApi {
             throw new WrongInspectorOsException(dockerTarfilePath, neededInspectorOs, msg);
         }
         final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageRepo, imageTag, tarfileMetadata, hubProjectName, hubProjectVersion, dockerTarfile, targetImageFileSystemRootDir, targetOs);
+        if (cleanupWorkingDir) {
+            logger.info(String.format("Deleting working dir %s", tempDir.getAbsolutePath()));
+            final boolean deleteSucceeded = FileUtils.deleteQuietly(tempDir);
+            if (!deleteSucceeded) {
+                logger.warn(String.format("Delete of %s was unsuccessful", tempDir.getAbsolutePath()));
+            }
+        }
         return imageInfoDerived;
     }
 
     private File createTempDirectory() throws IOException {
-        final File temp = File.createTempFile("ImageInspectorApi", Long.toString(System.nanoTime()));
+        final String suffix = String.format("_%s_%s", Thread.currentThread().getName(), Long.toString((new Date()).getTime()));
+        final File temp = File.createTempFile("ImageInspectorApi_", suffix);
+        logger.info(String.format("Creating working dir %s", temp.getAbsolutePath()));
         if (!(temp.delete())) {
             throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
         }
