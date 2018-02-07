@@ -10,9 +10,10 @@ buildscript {
     }
 }
 
-//plugins {
+plugins {
 //    id "io.spring.dependency-management" version "1.0.0.RELEASE"
-//}
+    id 'org.sonarqube' version '2.6.1'
+}
 apply plugin: "io.spring.dependency-management"
 
 version = '0.1.0-SNAPSHOT'
@@ -38,4 +39,12 @@ repositories {
     maven {
         url "https://oss.sonatype.org/content/repositories/snapshots/"
     }
+}
+
+sonarqube {
+    properties {
+        property 'sonar.projectName', 'Integrations - Hub Image Inspector Library'
+        property 'sonar.projectKey', 'com.blackducksoftware:int:hub-imageinspector-lib'
+        property 'sonar.verbose', false
+   }
 }
