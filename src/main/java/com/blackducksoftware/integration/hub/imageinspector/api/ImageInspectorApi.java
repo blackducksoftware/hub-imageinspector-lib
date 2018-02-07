@@ -68,6 +68,42 @@ public class ImageInspectorApi {
             throws IOException, HubIntegrationException, InterruptedException {
         final File dockerTarfile = new File(dockerTarfilePath);
         final File tempDir = createTempDirectory();
+        ImageInfoDerived imageInfoDerived = null;
+        try {
+            imageInfoDerived = inspectUsingGivenWorkingDir(dockerTarfile, hubProjectName, hubProjectVersion, codeLocationPrefix, tempDir);
+        } finally {
+            if (cleanupWorkingDir) {
+                logger.info(String.format("Deleting working dir %s", tempDir.getAbsolutePath()));
+                deleteDir(tempDir);
+            }
+        }
+        return imageInfoDerived;
+    }
+
+    // TODO move this
+    private void deleteDir(final File tempDir) {
+        for (int i = 0; i < 10; i++) {
+            logger.debug(String.format("Attempt $%d to delete dir %s", i, tempDir.getAbsolutePath()));
+            try {
+                FileUtils.deleteDirectory(tempDir);
+            } catch (final IOException e) {
+                logger.warn(String.format("Error deleting dir %s: %s", tempDir.getAbsolutePath(), e.getMessage()));
+            }
+            if (!tempDir.exists()) {
+                logger.debug(String.format("Dir %s has been deleted", tempDir.getAbsolutePath()));
+                return;
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (final InterruptedException e) {
+                logger.warn(String.format("deleteDir() sleep interrupted: %s", e.getMessage()));
+            }
+        }
+        logger.warn(String.format("Unable to delete dir %s", tempDir.getAbsolutePath()));
+    }
+
+    private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final File tempDir)
+            throws IOException, HubIntegrationException, WrongInspectorOsException, InterruptedException {
         final File workingDir = new File(tempDir, "working");
         final File outputDir = new File(tempDir, "output");
         logger.debug(String.format("imageInspector: %s", imageInspector));
@@ -75,7 +111,7 @@ public class ImageInspectorApi {
         final List<File> layerTars = imageInspector.extractLayerTars(dockerTarfile);
         final List<ManifestLayerMapping> tarfileMetadata = imageInspector.getLayerMappings(dockerTarfile.getName(), null, null);
         if (tarfileMetadata.size() != 1) {
-            final String msg = String.format("Expected a single image tarfile, but %s has %d images", dockerTarfilePath, tarfileMetadata.size());
+            final String msg = String.format("Expected a single image tarfile, but %s has %d images", dockerTarfile.getAbsolutePath(), tarfileMetadata.size());
             throw new HubIntegrationException(msg);
         }
         final ManifestLayerMapping imageMetadata = tarfileMetadata.get(0);
@@ -88,16 +124,9 @@ public class ImageInspectorApi {
         if (!targetOs.equals(currentOs)) {
             final ImageInspectorOsEnum neededInspectorOs = getImageInspectorOsEnum(targetOs);
             final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
-            throw new WrongInspectorOsException(dockerTarfilePath, neededInspectorOs, msg);
+            throw new WrongInspectorOsException(dockerTarfile.getAbsolutePath(), neededInspectorOs, msg);
         }
         final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageRepo, imageTag, tarfileMetadata, hubProjectName, hubProjectVersion, dockerTarfile, targetImageFileSystemRootDir, targetOs);
-        if (cleanupWorkingDir) {
-            logger.info(String.format("Deleting working dir %s", tempDir.getAbsolutePath()));
-            final boolean deleteSucceeded = FileUtils.deleteQuietly(tempDir);
-            if (!deleteSucceeded) {
-                logger.warn(String.format("Delete of %s was unsuccessful", tempDir.getAbsolutePath()));
-            }
-        }
         return imageInfoDerived;
     }
 
