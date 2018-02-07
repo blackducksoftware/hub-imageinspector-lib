@@ -54,7 +54,8 @@ public class ImageInspectorApi {
 
     public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
             throws IOException, HubIntegrationException, InterruptedException {
-        logger.info("getBdio()");
+        logger.info("ImageInspectorApi.getBdio()");
+        logMemory();
         return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
     }
 
@@ -139,6 +140,8 @@ public class ImageInspectorApi {
         if (!(temp.mkdir())) {
             throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
         }
+
+        logFreeDiskSpace(temp);
         return (temp);
     }
 
@@ -153,5 +156,17 @@ public class ImageInspectorApi {
         default:
             throw new HubIntegrationException("");
         }
+    }
+
+    // TODO move this?
+    private void logFreeDiskSpace(final File workingDir) {
+        logger.debug(String.format("Disk: free: %d", workingDir.getFreeSpace()));
+    }
+
+    // TODO move this?
+    private void logMemory() {
+        final Long total = Runtime.getRuntime().totalMemory();
+        final Long free = Runtime.getRuntime().freeMemory();
+        logger.debug(String.format("Heap: total: %d; free: %d", total, free));
     }
 }

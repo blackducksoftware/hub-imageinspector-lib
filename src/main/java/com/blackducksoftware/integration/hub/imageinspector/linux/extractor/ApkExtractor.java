@@ -60,12 +60,18 @@ public class ApkExtractor extends Extractor {
         initValues(PackageManagerEnum.APK, executor, forges);
     }
 
+    // Expected format: component-versionpart1-versionpart2
+    // component may contain dashes (often contains one.
     @Override
     public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList) {
         for (final String packageLine : packageList) {
             if (!packageLine.toLowerCase().startsWith("warning")) {
                 logger.trace(String.format("packageLine: %s", packageLine));
                 final String[] parts = packageLine.split("-");
+                if (parts.length < 3) {
+                    logger.error(String.format("apk output contains an invalid line: %s", packageLine));
+                    continue;
+                }
                 final String version = String.format("%s-%s", parts[parts.length - 2], parts[parts.length - 1]);
                 logger.trace(String.format("version: %s", version));
                 String component = "";
