@@ -57,22 +57,12 @@ public class ImageInspector {
     @Autowired
     private DockerTarParser tarParser;
 
-    private String outputDirPath = null;
-    private String codeLocationPrefix = null;
-
-    public void init(final String workingDirPath, final String outputDirPath, final String codeLocationPrefix) {
-        logger.debug(String.format("working dir: %s", workingDirPath));
-        tarParser.setWorkingDirectory(new File(workingDirPath));
-        this.outputDirPath = outputDirPath;
-        this.codeLocationPrefix = codeLocationPrefix;
+    public List<File> extractLayerTars(final File workingDir, final File dockerTar) throws IOException {
+        return tarParser.extractLayerTars(workingDir, dockerTar);
     }
 
-    public List<File> extractLayerTars(final File dockerTar) throws IOException {
-        return tarParser.extractLayerTars(dockerTar);
-    }
-
-    public File extractDockerLayers(final String imageName, final String imageTag, final List<File> layerTars, final List<ManifestLayerMapping> layerMappings) throws IOException {
-        return tarParser.extractDockerLayers(imageName, imageTag, layerTars, layerMappings);
+    public File extractDockerLayers(final File workingDir, final String imageName, final String imageTag, final List<File> layerTars, final List<ManifestLayerMapping> layerMappings) throws IOException {
+        return tarParser.extractDockerLayers(workingDir, imageName, imageTag, layerTars, layerMappings);
     }
 
     public OperatingSystemEnum detectOperatingSystem(final String operatingSystem) {
@@ -83,14 +73,14 @@ public class ImageInspector {
         return tarParser.detectOperatingSystem(targetImageFileSystemRootDir);
     }
 
-    public List<ManifestLayerMapping> getLayerMappings(final String tarFileName, final String dockerImageName, final String dockerTagName) throws HubIntegrationException {
-        return tarParser.getLayerMappings(tarFileName, dockerImageName, dockerTagName);
+    public List<ManifestLayerMapping> getLayerMappings(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws HubIntegrationException {
+        return tarParser.getLayerMappings(workingDir, tarFileName, dockerImageName, dockerTagName);
     }
 
     public ImageInfoDerived generateBdioFromImageFilesDir(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File dockerTar,
-            final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum) throws IOException, HubIntegrationException, InterruptedException {
+            final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum, final String codeLocationPrefix) throws IOException, HubIntegrationException, InterruptedException {
 
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, osEnum);
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, osEnum, codeLocationPrefix);
         final Extractor extractor = getExtractorByPackageManager(imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
         final SimpleBdioDocument bdioDocument = extractor.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getImageInfoParsed().getPkgMgr(), imageInfoDerived.getArchitecture(), imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName());
@@ -98,10 +88,9 @@ public class ImageInspector {
         return imageInfoDerived;
     }
 
-    public File writeBdioFile(final ImageInfoDerived imageInfoDerived) throws FileNotFoundException, IOException {
+    public File writeBdioFile(final File outputDirectory, final ImageInfoDerived imageInfoDerived) throws FileNotFoundException, IOException {
         final String bdioFilename = Names.getBdioFilename(imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getPkgMgrFilePath(), imageInfoDerived.getFinalProjectName(),
                 imageInfoDerived.getFinalProjectVersionName());
-        final File outputDirectory = new File(outputDirPath);
         FileOperations.ensureDirExists(outputDirectory);
         final File bdioOutputFile = new File(outputDirectory, bdioFilename);
         writeBdioToFile(imageInfoDerived.getBdioDocument(), bdioOutputFile);
@@ -109,7 +98,7 @@ public class ImageInspector {
     }
 
     private ImageInfoDerived deriveImageInfo(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File targetImageFileSystemRootDir,
-            final OperatingSystemEnum osEnum) throws HubIntegrationException, IOException {
+            final OperatingSystemEnum osEnum, final String codeLocationPrefix) throws HubIntegrationException, IOException {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir, osEnum));
         imageInfoDerived.setArchitecture(getExtractorByPackageManager(imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager()).deriveArchitecture(targetImageFileSystemRootDir));

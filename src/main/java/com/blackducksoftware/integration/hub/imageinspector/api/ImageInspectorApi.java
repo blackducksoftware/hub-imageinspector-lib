@@ -105,11 +105,9 @@ public class ImageInspectorApi {
     private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final File tempDir)
             throws IOException, HubIntegrationException, WrongInspectorOsException, InterruptedException {
         final File workingDir = new File(tempDir, "working");
-        final File outputDir = new File(tempDir, "output");
         logger.debug(String.format("imageInspector: %s", imageInspector));
-        imageInspector.init(workingDir.getAbsolutePath(), outputDir.getAbsolutePath(), codeLocationPrefix);
-        final List<File> layerTars = imageInspector.extractLayerTars(dockerTarfile);
-        final List<ManifestLayerMapping> tarfileMetadata = imageInspector.getLayerMappings(dockerTarfile.getName(), null, null);
+        final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
+        final List<ManifestLayerMapping> tarfileMetadata = imageInspector.getLayerMappings(workingDir, dockerTarfile.getName(), null, null);
         if (tarfileMetadata.size() != 1) {
             final String msg = String.format("Expected a single image tarfile, but %s has %d images", dockerTarfile.getAbsolutePath(), tarfileMetadata.size());
             throw new HubIntegrationException(msg);
@@ -118,7 +116,7 @@ public class ImageInspectorApi {
         final String imageRepo = imageMetadata.getImageName();
         final String imageTag = imageMetadata.getTagName();
         /// end parse manifest
-        final File targetImageFileSystemRootDir = imageInspector.extractDockerLayers(imageRepo, imageTag, layerTars, tarfileMetadata);
+        final File targetImageFileSystemRootDir = imageInspector.extractDockerLayers(workingDir, imageRepo, imageTag, layerTars, tarfileMetadata);
         final OperatingSystemEnum currentOs = os.deriveCurrentOs();
         final OperatingSystemEnum targetOs = imageInspector.detectOperatingSystem(targetImageFileSystemRootDir);
         if (!targetOs.equals(currentOs)) {
@@ -126,7 +124,8 @@ public class ImageInspectorApi {
             final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
             throw new WrongInspectorOsException(dockerTarfile.getAbsolutePath(), neededInspectorOs, msg);
         }
-        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageRepo, imageTag, tarfileMetadata, hubProjectName, hubProjectVersion, dockerTarfile, targetImageFileSystemRootDir, targetOs);
+        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageRepo, imageTag, tarfileMetadata, hubProjectName, hubProjectVersion, dockerTarfile, targetImageFileSystemRootDir, targetOs,
+                codeLocationPrefix);
         return imageInfoDerived;
     }
 

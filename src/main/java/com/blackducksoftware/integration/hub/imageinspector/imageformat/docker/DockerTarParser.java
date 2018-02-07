@@ -56,20 +56,13 @@ public class DockerTarParser {
     private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private File workingDirectory;
-    private File tarExtractionDirectory;
 
     @Autowired
     private ManifestFactory manifestFactory;
 
-    public void setWorkingDirectory(final File workingDirectory) {
+    public File extractDockerLayers(final File workingDirectory, final String imageName, final String imageTag, final List<File> layerTars, final List<ManifestLayerMapping> manifestLayerMappings) throws IOException {
         logger.debug(String.format("working dir: %s", workingDirectory));
-        this.workingDirectory = workingDirectory;
-    }
-
-    public File extractDockerLayers(final String imageName, final String imageTag, final List<File> layerTars, final List<ManifestLayerMapping> manifestLayerMappings) throws IOException {
-        logger.debug(String.format("working dir: %s", workingDirectory));
-        final File tarExtractionDirectory = getTarExtractionDirectory();
+        final File tarExtractionDirectory = getTarExtractionDirectory(workingDirectory);
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         File targetImageFileSystemRootDir = null;
         for (final ManifestLayerMapping manifestLayerMapping : manifestLayerMappings) {
@@ -122,9 +115,9 @@ public class DockerTarParser {
 
     }
 
-    public List<File> extractLayerTars(final File dockerTar) throws IOException {
+    public List<File> extractLayerTars(final File workingDirectory, final File dockerTar) throws IOException {
         logger.debug(String.format("working dir: %s", workingDirectory));
-        final File tarExtractionDirectory = getTarExtractionDirectory();
+        final File tarExtractionDirectory = getTarExtractionDirectory(workingDirectory);
         final List<File> untaredFiles = new ArrayList<>();
         final File outputDir = new File(tarExtractionDirectory, dockerTar.getName());
         final TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(dockerTar));
@@ -153,10 +146,10 @@ public class DockerTarParser {
         return untaredFiles;
     }
 
-    public List<ManifestLayerMapping> getLayerMappings(final String tarFileName, final String dockerImageName, final String dockerTagName) throws HubIntegrationException {
+    public List<ManifestLayerMapping> getLayerMappings(final File workingDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws HubIntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
         logger.debug(String.format("working dir: %s", workingDirectory));
-        final Manifest manifest = manifestFactory.createManifest(getTarExtractionDirectory(), tarFileName);
+        final Manifest manifest = manifestFactory.createManifest(getTarExtractionDirectory(workingDirectory), tarFileName);
         List<ManifestLayerMapping> mappings;
         try {
             mappings = manifest.getLayerMappings(dockerImageName, dockerTagName);
@@ -172,11 +165,8 @@ public class DockerTarParser {
         return mappings;
     }
 
-    private File getTarExtractionDirectory() {
-        if (tarExtractionDirectory == null) {
-            tarExtractionDirectory = new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
-        }
-        return tarExtractionDirectory;
+    private File getTarExtractionDirectory(final File workingDirectory) {
+        return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
     }
 
     private File extractLayerTarToDir(final String imageName, final String imageTag, final File imageFilesDir, final File layerTar, final ManifestLayerMapping mapping) throws IOException {
