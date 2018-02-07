@@ -40,7 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileOperations {
-    private static final String USERS_DIR = "/Users";
+    // TODO re-think everything about this
+    private static final String[] DIRS_TO_SKIP = { "/Users", "/proc", "/dev", "/sys", "/tmp" };
     private static final Logger logger = LoggerFactory.getLogger(FileOperations.class);
 
     public static List<File> findDirWithName(final int maxDepth, final File dirFile, final String targetName) {
@@ -64,9 +65,11 @@ public class FileOperations {
             return filesMatchingTargetName;
         }
         // TODO need a general mechanism for this? include /tmp too? IDOCKER-367
-        if (USERS_DIR.equals(dir.getAbsolutePath())) {
-            logger.trace("This is the /Users dir; skipping it");
-            return filesMatchingTargetName;
+        for (final String dirToSkip : DIRS_TO_SKIP) {
+            if (dirToSkip.equals(dir.getAbsolutePath())) {
+                logger.trace("This is the /Users dir; skipping it");
+                return filesMatchingTargetName;
+            }
         }
         try {
             for (final File f : dir.listFiles()) {

@@ -24,6 +24,7 @@
 package com.blackducksoftware.integration.hub.imageinspector.linux.executor;
 
 import java.io.IOException;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerFi
 public abstract class PkgMgrExecutor extends Executor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private static final Long CMD_TIMEOUT = 120000L;
+    private final ReentrantLock lock = new ReentrantLock();
     private String upgradeCommand;
     private String listPackagesCommand;
 
@@ -47,11 +49,16 @@ public abstract class PkgMgrExecutor extends Executor {
     }
 
     public String[] runPackageManager(final ImagePkgMgr imagePkgMgr) throws HubIntegrationException, IOException, InterruptedException {
-        final PackageManagerFiles pkgMgrFiles = new PackageManagerFiles();
-        pkgMgrFiles.stubPackageManagerFiles(imagePkgMgr);
-        final String[] packages = listPackages();
-        logger.trace(String.format("Package count: %d", packages.length));
-        return packages;
+        lock.lock();
+        try {
+            final PackageManagerFiles pkgMgrFiles = new PackageManagerFiles();
+            pkgMgrFiles.stubPackageManagerFiles(imagePkgMgr);
+            final String[] packages = listPackages();
+            logger.trace(String.format("Package count: %d", packages.length));
+            return packages;
+        } finally {
+            lock.unlock();
+        }
     }
 
     private String[] listPackages() throws HubIntegrationException, IOException, InterruptedException {

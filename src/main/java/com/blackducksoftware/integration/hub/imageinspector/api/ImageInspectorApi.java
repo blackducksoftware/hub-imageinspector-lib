@@ -84,7 +84,7 @@ public class ImageInspectorApi {
     // TODO move this
     private void deleteDir(final File tempDir) {
         for (int i = 0; i < 10; i++) {
-            logger.debug(String.format("Attempt $%d to delete dir %s", i, tempDir.getAbsolutePath()));
+            logger.debug(String.format("Attempt #%d to delete dir %s", i, tempDir.getAbsolutePath()));
             try {
                 FileUtils.deleteDirectory(tempDir);
             } catch (final IOException e) {
