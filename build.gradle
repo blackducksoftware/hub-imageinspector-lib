@@ -16,7 +16,7 @@ plugins {
 }
 apply plugin: "io.spring.dependency-management"
 
-version = '0.1.0-SNAPSHOT'
+version = '1.0.0'
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencies {
