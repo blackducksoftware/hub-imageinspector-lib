@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.imageinspector.lib;
 
+import org.apache.commons.lang3.StringUtils;
+
 public enum OperatingSystemEnum {
     ALPINE("alpine"),
     CENTOS("centos"),
@@ -44,7 +46,7 @@ public enum OperatingSystemEnum {
 
     public static OperatingSystemEnum determineOperatingSystem(String operatingSystemName) {
         OperatingSystemEnum result = null;
-        if (operatingSystemName != null) {
+        if (!StringUtils.isBlank(operatingSystemName)) {
             operatingSystemName = operatingSystemName.toUpperCase();
             result = OperatingSystemEnum.valueOf(operatingSystemName);
         }

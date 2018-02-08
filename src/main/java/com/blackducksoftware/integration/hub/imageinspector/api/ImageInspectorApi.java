@@ -52,26 +52,26 @@ public class ImageInspectorApi {
     @Autowired
     private Os os;
 
-    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
+    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
             throws IOException, HubIntegrationException, InterruptedException {
         logger.info("ImageInspectorApi.getBdio()");
         logMemory();
-        return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
+        return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, currentLinuxDistro);
     }
 
-    private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
+    private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
             throws IOException, HubIntegrationException, InterruptedException {
-        final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
+        final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, currentLinuxDistro);
         return imageInfoDerived.getBdioDocument();
     }
 
-    ImageInfoDerived inspect(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
+    ImageInfoDerived inspect(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
             throws IOException, HubIntegrationException, InterruptedException {
         final File dockerTarfile = new File(dockerTarfilePath);
         final File tempDir = createTempDirectory();
         ImageInfoDerived imageInfoDerived = null;
         try {
-            imageInfoDerived = inspectUsingGivenWorkingDir(dockerTarfile, hubProjectName, hubProjectVersion, codeLocationPrefix, tempDir);
+            imageInfoDerived = inspectUsingGivenWorkingDir(dockerTarfile, hubProjectName, hubProjectVersion, codeLocationPrefix, currentLinuxDistro, tempDir);
         } finally {
             if (cleanupWorkingDir) {
                 logger.info(String.format("Deleting working dir %s", tempDir.getAbsolutePath()));
@@ -103,7 +103,7 @@ public class ImageInspectorApi {
         logger.warn(String.format("Unable to delete dir %s", tempDir.getAbsolutePath()));
     }
 
-    private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final File tempDir)
+    private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final String currentLinuxDistro, final File tempDir)
             throws IOException, HubIntegrationException, WrongInspectorOsException, InterruptedException {
         final File workingDir = new File(tempDir, "working");
         logger.debug(String.format("imageInspector: %s", imageInspector));
@@ -118,7 +118,7 @@ public class ImageInspectorApi {
         final String imageTag = imageMetadata.getTagName();
         /// end parse manifest
         final File targetImageFileSystemRootDir = imageInspector.extractDockerLayers(workingDir, imageRepo, imageTag, layerTars, tarfileMetadata);
-        final OperatingSystemEnum currentOs = os.deriveCurrentOs();
+        final OperatingSystemEnum currentOs = os.deriveCurrentOs(currentLinuxDistro);
         final OperatingSystemEnum targetOs = imageInspector.detectOperatingSystem(targetImageFileSystemRootDir);
         if (!targetOs.equals(currentOs)) {
             final ImageInspectorOsEnum neededInspectorOs = getImageInspectorOsEnum(targetOs);

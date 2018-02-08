@@ -38,8 +38,13 @@ import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEn
 public class Os {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public OperatingSystemEnum deriveCurrentOs() throws HubIntegrationException {
-        OperatingSystemEnum osEnum = null;
+    // TODO currentLinuxDistro should be Optional
+    public OperatingSystemEnum deriveCurrentOs(final String currentLinuxDistro) throws HubIntegrationException {
+        OperatingSystemEnum osEnum = OperatingSystemEnum.determineOperatingSystem(currentLinuxDistro);
+        if (osEnum != null) {
+            logger.debug(String.format("Using given value for current OS: %s", osEnum.toString()));
+            return osEnum;
+        }
         final String systemPropertyOsValue = System.getProperty("os.name");
         logger.debug(String.format("Deriving current OS; System.getProperty(\"os.name\") says: %s", systemPropertyOsValue));
         if (!isLinuxUnix(systemPropertyOsValue)) {
