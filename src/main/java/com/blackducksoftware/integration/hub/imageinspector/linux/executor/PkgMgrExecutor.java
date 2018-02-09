@@ -49,7 +49,9 @@ public abstract class PkgMgrExecutor extends Executor {
     }
 
     public String[] runPackageManager(final ImagePkgMgr imagePkgMgr) throws HubIntegrationException, IOException, InterruptedException {
+        logger.info("Requesting lock for package manager execution");
         lock.lock();
+        logger.info("Acquired lock for package manager execution");
         try {
             final PackageManagerFiles pkgMgrFiles = new PackageManagerFiles();
             pkgMgrFiles.stubPackageManagerFiles(imagePkgMgr);
@@ -57,7 +59,9 @@ public abstract class PkgMgrExecutor extends Executor {
             logger.trace(String.format("Package count: %d", packages.length));
             return packages;
         } finally {
+            logger.info("Finished package manager execution");
             lock.unlock();
+            logger.info("Released lock after package manager execution");
         }
     }
 

@@ -54,7 +54,7 @@ public class ImageInspectorApi {
 
     public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
             throws IOException, HubIntegrationException, InterruptedException {
-        logger.info("ImageInspectorApi.getBdio()");
+        logger.info("getBdio()");
         logMemory();
         return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, currentLinuxDistro);
     }
