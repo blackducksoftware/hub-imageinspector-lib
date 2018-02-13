@@ -14,10 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.DockerTarParser;
@@ -28,7 +25,6 @@ import com.blackducksoftware.integration.hub.imageinspector.lib.ImageInfoDerived
 import com.blackducksoftware.integration.hub.imageinspector.lib.ImageInspector;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEnum;
-import com.blackducksoftware.integration.hub.imageinspector.linux.FileOperations;
 import com.blackducksoftware.integration.hub.imageinspector.linux.executor.ApkExecutor;
 import com.blackducksoftware.integration.hub.imageinspector.linux.executor.DpkgExecutor;
 import com.blackducksoftware.integration.hub.imageinspector.linux.executor.PkgMgrExecutor;
@@ -37,8 +33,6 @@ import com.blackducksoftware.integration.hub.imageinspector.linux.extractor.Dpkg
 import com.blackducksoftware.integration.hub.imageinspector.linux.extractor.Extractor;
 import com.blackducksoftware.integration.hub.imageinspector.linux.extractor.ExtractorManager;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(FileOperations.class)
 public class ImageInspectorTest {
 
     @BeforeClass

@@ -52,13 +52,17 @@ import com.blackducksoftware.integration.hub.imageinspector.name.Names;
 
 @Component
 public class DockerTarParser {
-    private static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
+    static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
     private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
     private ManifestFactory manifestFactory;
+
+    @Autowired
+    public void setManifestFactory(final ManifestFactory manifestFactory) {
+        this.manifestFactory = manifestFactory;
+    }
 
     public File extractDockerLayers(final File workingDirectory, final String imageName, final String imageTag, final List<File> layerTars, final List<ManifestLayerMapping> manifestLayerMappings) throws IOException {
         logger.debug(String.format("working dir: %s", workingDirectory));
