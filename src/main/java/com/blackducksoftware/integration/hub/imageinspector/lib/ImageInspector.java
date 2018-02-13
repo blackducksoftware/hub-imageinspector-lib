@@ -50,12 +50,18 @@ import com.google.gson.Gson;
 @Component
 public class ImageInspector {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Autowired
     private ExtractorManager extractorManager;
+    private DockerTarParser tarParser;
 
     @Autowired
-    private DockerTarParser tarParser;
+    public void setExtractorManager(final ExtractorManager extractorManager) {
+        this.extractorManager = extractorManager;
+    }
+
+    @Autowired
+    public void setTarParser(final DockerTarParser tarParser) {
+        this.tarParser = tarParser;
+    }
 
     public List<File> extractLayerTars(final File workingDir, final File dockerTar) throws IOException {
         return tarParser.extractLayerTars(workingDir, dockerTar);

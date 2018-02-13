@@ -56,7 +56,7 @@ public abstract class Extractor {
 
     public abstract void extractComponents(MutableDependencyGraph dependencies, String dockerImageRepo, String dockerImageTag, String architecture, String[] packageList);
 
-    void initValues(final PackageManagerEnum packageManagerEnum, final PkgMgrExecutor executor, final List<String> forges) {
+    public void initValues(final PackageManagerEnum packageManagerEnum, final PkgMgrExecutor executor, final List<String> forges) {
         this.packageManagerEnum = packageManagerEnum;
         this.executor = executor;
         this.forges = forges;
