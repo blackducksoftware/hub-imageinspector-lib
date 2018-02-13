@@ -11,7 +11,6 @@ import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -66,7 +65,6 @@ public class ImageInspectorApiTest {
     public static void tearDownAfterClass() throws Exception {
     }
 
-    @Ignore // TODO temp
     @Test
     public void testOnWrongOs() throws HubIntegrationException, IOException, InterruptedException {
         assertNotNull(imageInspectorApi);
@@ -80,7 +78,6 @@ public class ImageInspectorApiTest {
         }
     }
 
-    @Ignore // TODO temp
     @Test
     public void testOnRightOs() throws HubIntegrationException, IOException, InterruptedException {
         assertNotNull(imageInspectorApi);
