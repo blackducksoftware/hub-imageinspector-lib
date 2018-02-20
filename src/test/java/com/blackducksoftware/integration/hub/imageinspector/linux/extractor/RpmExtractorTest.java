@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.bdio.BdioWriter;
+import com.blackducksoftware.integration.hub.bdio.model.Forge;
 import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
 import com.blackducksoftware.integration.hub.imageinspector.TestUtils;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
@@ -42,7 +43,7 @@ public class RpmExtractorTest {
 
         final RpmExtractor extractor = new RpmExtractor();
         final ExecutorMock executor = new ExecutorMock(resourceFile);
-        final List<String> forges = Arrays.asList(OperatingSystemEnum.CENTOS.getForge());
+        final List<Forge> forges = Arrays.asList(OperatingSystemEnum.CENTOS.getForge());
 
         extractor.initValues(PackageManagerEnum.RPM, executor, forges);
 

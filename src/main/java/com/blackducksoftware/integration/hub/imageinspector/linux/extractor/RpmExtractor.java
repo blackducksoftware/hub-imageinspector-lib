@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.hub.bdio.graph.MutableDependencyGraph;
+import com.blackducksoftware.integration.hub.bdio.model.Forge;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEnum;
 import com.blackducksoftware.integration.hub.imageinspector.linux.executor.RpmExecutor;
@@ -48,7 +49,7 @@ public class RpmExtractor extends Extractor {
     @Override
     @PostConstruct
     public void init() {
-        final List<String> forges = new ArrayList<>();
+        final List<Forge> forges = new ArrayList<>();
         forges.add(OperatingSystemEnum.CENTOS.getForge());
         forges.add(OperatingSystemEnum.FEDORA.getForge());
         forges.add(OperatingSystemEnum.REDHAT.getForge());

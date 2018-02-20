@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.hub.bdio.graph.MutableDependencyGraph;
+import com.blackducksoftware.integration.hub.bdio.model.Forge;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEnum;
 import com.blackducksoftware.integration.hub.imageinspector.linux.FileOperations;
@@ -55,7 +56,7 @@ public class ApkExtractor extends Extractor {
     @Override
     @PostConstruct
     public void init() {
-        final List<String> forges = new ArrayList<>();
+        final List<Forge> forges = new ArrayList<>();
         forges.add(OperatingSystemEnum.ALPINE.getForge());
         initValues(PackageManagerEnum.APK, executor, forges);
     }

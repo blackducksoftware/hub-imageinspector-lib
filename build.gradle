@@ -17,7 +17,7 @@ plugins {
 }
 apply plugin: "io.spring.dependency-management"
 
-version = '1.0.2'
+version = '1.0.3-SNAPSHOT'
 apply plugin: 'com.blackducksoftware.integration.library'
 
 // For integration tests
@@ -47,7 +47,7 @@ dependencyManagement {
 }
 
 dependencies {
-    compile('com.blackducksoftware.integration:integration-bdio:8.0.0')
+    compile 'com.blackducksoftware.integration:integration-bdio:12.0.0'
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile 'org.springframework:spring-context'
     compile 'commons-io:commons-io:2.5'

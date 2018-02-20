@@ -25,22 +25,24 @@ package com.blackducksoftware.integration.hub.imageinspector.lib;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.blackducksoftware.integration.hub.bdio.model.Forge;
+
 public enum OperatingSystemEnum {
-    ALPINE("alpine"),
-    CENTOS("centos"),
-    DEBIAN("debian"),
-    FEDORA("fedora"),
-    UBUNTU("ubuntu"),
-    REDHAT("redhat"), // this may not be needed
-    RHEL("redhat");
+    ALPINE(Forge.ALPINE),
+    CENTOS(Forge.CENTOS),
+    DEBIAN(Forge.DEBIAN),
+    FEDORA(Forge.FEDORA),
+    UBUNTU(Forge.UBUNTU),
+    REDHAT(Forge.REDHAT), // this may not be needed
+    RHEL(Forge.REDHAT);
 
-    private final String forge;
+    private final Forge forge;
 
-    private OperatingSystemEnum(final String forge) {
+    private OperatingSystemEnum(final Forge forge) {
         this.forge = forge;
     }
 
-    public String getForge() {
+    public Forge getForge() {
         return forge;
     }
 

@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.bdio.model.Forge;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.DockerTarParser;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
@@ -49,7 +50,7 @@ public class ImageInspectorTest {
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
         final PkgMgrExecutor executor = Mockito.mock(DpkgExecutor.class);
         Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgr.class))).thenReturn(packages);
-        final List<String> forges = Arrays.asList(OperatingSystemEnum.DEBIAN.getForge(), OperatingSystemEnum.UBUNTU.getForge());
+        final List<Forge> forges = Arrays.asList(OperatingSystemEnum.DEBIAN.getForge(), OperatingSystemEnum.UBUNTU.getForge());
         doTest("ubuntu", "1.0", OperatingSystemEnum.UBUNTU, PackageManagerEnum.DPKG, new DpkgExtractor(), executor, forges);
     }
 
@@ -59,11 +60,11 @@ public class ImageInspectorTest {
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
         final PkgMgrExecutor executor = Mockito.mock(ApkExecutor.class);
         Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgr.class))).thenReturn(packages);
-        final List<String> forges = Arrays.asList(OperatingSystemEnum.ALPINE.getForge());
+        final List<Forge> forges = Arrays.asList(OperatingSystemEnum.ALPINE.getForge());
         doTest("alpine", "1.0", OperatingSystemEnum.ALPINE, PackageManagerEnum.APK, new ApkExtractor(), executor, forges);
     }
 
-    private void doTest(final String imageName, final String tagName, final OperatingSystemEnum os, final PackageManagerEnum pkgMgr, final Extractor extractor, final PkgMgrExecutor executor, final List<String> forges)
+    private void doTest(final String imageName, final String tagName, final OperatingSystemEnum os, final PackageManagerEnum pkgMgr, final Extractor extractor, final PkgMgrExecutor executor, final List<Forge> forges)
             throws FileNotFoundException, IOException, IntegrationException, InterruptedException {
 
         final File imageTarFile = new File("test/image.tar");
