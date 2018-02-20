@@ -19,9 +19,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.bdio.model.BdioProject;
 import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.blackducksoftware.integration.hub.imageinspector.lib.ImageInfoDerived;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
@@ -66,7 +66,7 @@ public class ImageInspectorApiTest {
     }
 
     @Test
-    public void testOnWrongOs() throws HubIntegrationException, IOException, InterruptedException {
+    public void testOnWrongOs() throws IntegrationException, IOException, InterruptedException {
         assertNotNull(imageInspectorApi);
         Mockito.when(os.deriveCurrentOs(Mockito.any(String.class))).thenReturn(null);
         try {
@@ -79,7 +79,7 @@ public class ImageInspectorApiTest {
     }
 
     @Test
-    public void testOnRightOs() throws HubIntegrationException, IOException, InterruptedException {
+    public void testOnRightOs() throws IntegrationException, IOException, InterruptedException {
         assertNotNull(imageInspectorApi);
         Mockito.when(os.deriveCurrentOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.ALPINE);
         final List<Extractor> mockExtractors = new ArrayList<>();

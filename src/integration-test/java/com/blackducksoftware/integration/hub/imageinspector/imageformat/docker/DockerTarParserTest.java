@@ -30,7 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.TestUtils;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
@@ -47,7 +47,7 @@ public class DockerTarParserTest {
     private static final String LAYER_ID = "layerId1";
 
     @Test
-    public void testExtractFullImage() throws HubIntegrationException, IOException {
+    public void testExtractFullImage() throws IntegrationException, IOException {
         final File dockerTar = new File("build/images/test/centos_minus_vim_plus_bacula.tar");
         final File workingDirectory = TestUtils.createTempDirectory();
         System.out.println("workingDirectory: ${workingDirectory.getAbsolutePath()}");

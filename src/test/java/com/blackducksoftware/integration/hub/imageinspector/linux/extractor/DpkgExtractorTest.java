@@ -12,9 +12,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.bdio.BdioWriter;
 import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.TestUtils;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
@@ -33,11 +33,11 @@ public class DpkgExtractorTest {
     }
 
     @Test
-    public void testDpkgFile1() throws HubIntegrationException, IOException, InterruptedException {
+    public void testDpkgFile1() throws IntegrationException, IOException, InterruptedException {
         testDpkgExtraction("ubuntu_dpkg_output_1.txt", "testDpkgBdio1.jsonld");
     }
 
-    private void testDpkgExtraction(final String resourceName, final String bdioOutputFileName) throws IOException, HubIntegrationException, InterruptedException {
+    private void testDpkgExtraction(final String resourceName, final String bdioOutputFileName) throws IOException, IntegrationException, InterruptedException {
         final File resourceFile = new File(String.format("src/test/resources/%s", resourceName));
 
         final DpkgExtractor extractor = new DpkgExtractor();

@@ -35,9 +35,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.bdio.BdioWriter;
 import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.DockerTarParser;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
@@ -75,16 +75,16 @@ public class ImageInspector {
         return tarParser.detectOperatingSystem(operatingSystem);
     }
 
-    public OperatingSystemEnum detectOperatingSystem(final File targetImageFileSystemRootDir) throws HubIntegrationException, IOException {
+    public OperatingSystemEnum detectOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
         return tarParser.detectOperatingSystem(targetImageFileSystemRootDir);
     }
 
-    public List<ManifestLayerMapping> getLayerMappings(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws HubIntegrationException {
+    public List<ManifestLayerMapping> getLayerMappings(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
         return tarParser.getLayerMappings(workingDir, tarFileName, dockerImageName, dockerTagName);
     }
 
     public ImageInfoDerived generateBdioFromImageFilesDir(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File dockerTar,
-            final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum, final String codeLocationPrefix) throws IOException, HubIntegrationException, InterruptedException {
+            final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
 
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, osEnum, codeLocationPrefix);
         final Extractor extractor = getExtractorByPackageManager(imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
@@ -104,7 +104,7 @@ public class ImageInspector {
     }
 
     private ImageInfoDerived deriveImageInfo(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File targetImageFileSystemRootDir,
-            final OperatingSystemEnum osEnum, final String codeLocationPrefix) throws HubIntegrationException, IOException {
+            final OperatingSystemEnum osEnum, final String codeLocationPrefix) throws IntegrationException, IOException {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir, osEnum));
         imageInfoDerived.setArchitecture(getExtractorByPackageManager(imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager()).deriveArchitecture(targetImageFileSystemRootDir));
@@ -127,7 +127,7 @@ public class ImageInspector {
         return pkgMgrFilePath;
     }
 
-    private ManifestLayerMapping findManifestLayerMapping(final List<ManifestLayerMapping> layerMappings, final ImageInfoParsed imageInfo, final String imageDirectoryName) throws HubIntegrationException {
+    private ManifestLayerMapping findManifestLayerMapping(final List<ManifestLayerMapping> layerMappings, final ImageInfoParsed imageInfo, final String imageDirectoryName) throws IntegrationException {
         ManifestLayerMapping manifestMapping = null;
         for (final ManifestLayerMapping mapping : layerMappings) {
             if (StringUtils.compare(imageDirectoryName, imageInfo.getFileSystemRootDirName()) == 0) {
@@ -135,7 +135,7 @@ public class ImageInspector {
             }
         }
         if (manifestMapping == null) {
-            throw new HubIntegrationException(String.format("Mapping for %s not found in target image manifest file", imageInfo.getFileSystemRootDirName()));
+            throw new IntegrationException(String.format("Mapping for %s not found in target image manifest file", imageInfo.getFileSystemRootDirName()));
         }
         return manifestMapping;
     }
@@ -170,12 +170,12 @@ public class ImageInspector {
         return hubVersionName;
     }
 
-    private Extractor getExtractorByPackageManager(final PackageManagerEnum packageManagerEnum) throws HubIntegrationException {
+    private Extractor getExtractorByPackageManager(final PackageManagerEnum packageManagerEnum) throws IntegrationException {
         for (final Extractor currentExtractor : extractorManager.getExtractors()) {
             if (currentExtractor.getPackageManagerEnum() == packageManagerEnum) {
                 return currentExtractor;
             }
         }
-        throw new HubIntegrationException(String.format("Extractor not found for packageManager %s", packageManagerEnum.toString()));
+        throw new IntegrationException(String.format("Extractor not found for packageManager %s", packageManagerEnum.toString()));
     }
 }

@@ -21,9 +21,9 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.bdio.BdioWriter;
 import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.TestUtils;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
@@ -34,11 +34,11 @@ import com.google.gson.Gson;
 public class ApkExtractorTest {
 
     @Test
-    public void testApkFile1() throws HubIntegrationException, IOException, InterruptedException {
+    public void testApkFile1() throws IntegrationException, IOException, InterruptedException {
         testApkExtraction("alpine_apk_output_1.txt", "testApkBdio1.jsonld");
     }
 
-    private void testApkExtraction(final String resourceName, final String bdioOutputFileName) throws IOException, HubIntegrationException, InterruptedException {
+    private void testApkExtraction(final String resourceName, final String bdioOutputFileName) throws IOException, IntegrationException, InterruptedException {
         final File resourceFile = new File(String.format("src/test/resources/%s", resourceName));
 
         final ApkExtractor extractor = new ApkExtractor();

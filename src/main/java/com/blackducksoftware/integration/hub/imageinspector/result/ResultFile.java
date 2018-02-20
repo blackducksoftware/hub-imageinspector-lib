@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.google.gson.Gson;
 
@@ -40,17 +40,17 @@ import com.google.gson.Gson;
 public class ResultFile {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public Result read(final Gson gson, final String resultFilePath) throws HubIntegrationException {
+    public Result read(final Gson gson, final String resultFilePath) throws IntegrationException {
         Result result = null;
         try {
             final File resultFile = new File(resultFilePath);
             final String resultFileContent = FileUtils.readFileToString(resultFile, "UTF8");
             result = gson.fromJson(resultFileContent, Result.class);
         } catch (final IOException e) {
-            throw new HubIntegrationException(String.format("Error reading result file %s: %s", resultFilePath, e.getMessage()));
+            throw new IntegrationException(String.format("Error reading result file %s: %s", resultFilePath, e.getMessage()));
         }
         if (result == null) {
-            throw new HubIntegrationException(String.format("Error reading result file %s: result object is null", resultFilePath));
+            throw new IntegrationException(String.format("Error reading result file %s: result object is null", resultFilePath));
         }
         return result;
     }

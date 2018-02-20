@@ -23,9 +23,9 @@
  */
 package com.blackducksoftware.integration.hub.imageinspector.api;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 
-public class WrongInspectorOsException extends HubIntegrationException {
+public class WrongInspectorOsException extends IntegrationException {
     private static final long serialVersionUID = -1109859596321015457L;
     private final String dockerTarfilePath;
     private final ImageInspectorOsEnum correctInspectorOs;

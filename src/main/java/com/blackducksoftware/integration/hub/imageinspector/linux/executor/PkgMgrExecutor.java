@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerFiles;
 
@@ -48,7 +48,7 @@ public abstract class PkgMgrExecutor extends Executor {
         this.listPackagesCommand = listPackagesCommand;
     }
 
-    public String[] runPackageManager(final ImagePkgMgr imagePkgMgr) throws HubIntegrationException, IOException, InterruptedException {
+    public String[] runPackageManager(final ImagePkgMgr imagePkgMgr) throws IntegrationException, IOException, InterruptedException {
         logger.info("Requesting lock for package manager execution");
         lock.lock();
         logger.info("Acquired lock for package manager execution");
@@ -65,7 +65,7 @@ public abstract class PkgMgrExecutor extends Executor {
         }
     }
 
-    private String[] listPackages() throws HubIntegrationException, IOException, InterruptedException {
+    private String[] listPackages() throws IntegrationException, IOException, InterruptedException {
         String[] results;
         logger.debug("Executing package manager");
         try {

@@ -36,7 +36,7 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.name.ImageNameResolver;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -59,7 +59,7 @@ public class Manifest {
         this.manifestLayerMappingFactory = manifestLayerMappingFactory;
     }
 
-    public List<ManifestLayerMapping> getLayerMappings(final String targetImageName, final String targetTagName) throws HubIntegrationException, IOException {
+    public List<ManifestLayerMapping> getLayerMappings(final String targetImageName, final String targetTagName) throws IntegrationException, IOException {
         logger.debug(String.format("getLayerMappings(): targetImageName: %s; targetTagName: %s", targetImageName, targetTagName));
         final List<ManifestLayerMapping> mappings = new ArrayList<>();
         final List<ImageInfo> images = getManifestContents();
@@ -79,7 +79,7 @@ public class Manifest {
         return mappings;
     }
 
-    private String findRepoTag(final int numImages, final ImageInfo image, final String targetImageName, final String targetTagName) throws HubIntegrationException {
+    private String findRepoTag(final int numImages, final ImageInfo image, final String targetImageName, final String targetTagName) throws IntegrationException {
         // user didn't specify which image, and there is only one: return it
         if ((numImages == 1) && StringUtils.isBlank(targetImageName) && StringUtils.isBlank(targetTagName)) {
             logger.debug(String.format("User did not specify a repo:tag, and there's only one; inspecting that one: %s", image.repoTags.get(0)));
@@ -121,11 +121,11 @@ public class Manifest {
         return specifiedRepoTag;
     }
 
-    private void validateImageSpecificity(final List<ImageInfo> images, final String targetImageName, final String targetTagName) throws HubIntegrationException {
+    private void validateImageSpecificity(final List<ImageInfo> images, final String targetImageName, final String targetTagName) throws IntegrationException {
         if ((images.size() > 1) && (StringUtils.isBlank(targetImageName) || StringUtils.isBlank(targetTagName))) {
             final String msg = "When the manifest contains multiple images or tags, the target image and tag to inspect must be specified";
             logger.debug(msg);
-            throw new HubIntegrationException(msg);
+            throw new IntegrationException(msg);
         }
     }
 

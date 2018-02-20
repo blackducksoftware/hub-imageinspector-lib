@@ -47,7 +47,7 @@ dependencyManagement {
 }
 
 dependencies {
-    compile('com.blackducksoftware.integration:hub-common:18.0.0')
+    compile('com.blackducksoftware.integration:integration-bdio:8.0.0')
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile 'org.springframework:spring-context'
     compile 'commons-io:commons-io:2.5'

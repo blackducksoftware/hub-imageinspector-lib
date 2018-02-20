@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
 
 public class ExecutorMock extends PkgMgrExecutor {
@@ -30,7 +30,7 @@ public class ExecutorMock extends PkgMgrExecutor {
     }
 
     @Override
-    public String[] runPackageManager(final ImagePkgMgr imagePkgMgr) throws HubIntegrationException, IOException, InterruptedException {
+    public String[] runPackageManager(final ImagePkgMgr imagePkgMgr) throws IntegrationException, IOException, InterruptedException {
         final String[] packages = listPackages();
         return packages;
     }

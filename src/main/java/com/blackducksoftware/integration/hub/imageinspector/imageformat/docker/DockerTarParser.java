@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.Manifest;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
@@ -91,18 +91,18 @@ public class DockerTarParser {
         return osEnum;
     }
 
-    public OperatingSystemEnum detectOperatingSystem(final File targetImageFileSystemRootDir) throws HubIntegrationException, IOException {
+    public OperatingSystemEnum detectOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
         final OperatingSystemEnum osEnum = deriveOsFromPkgMgr(targetImageFileSystemRootDir);
         if (osEnum != null) {
             return osEnum;
         }
-        throw new HubIntegrationException("No package manager files were found, and no operating system name was provided.");
+        throw new IntegrationException("No package manager files were found, and no operating system name was provided.");
     }
 
-    public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum) throws HubIntegrationException {
+    public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum) throws IntegrationException {
         logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
         if (osEnum == null) {
-            throw new HubIntegrationException("Operating System value is null");
+            throw new IntegrationException("Operating System value is null");
         }
         for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
             final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
@@ -115,7 +115,7 @@ public class DockerTarParser {
                 logger.debug(String.format("Package manager dir %s does not exist", packageManagerDirectory.getAbsolutePath()));
             }
         }
-        throw new HubIntegrationException("No package manager files found in this Docker image.");
+        throw new IntegrationException("No package manager files found in this Docker image.");
 
     }
 
@@ -150,7 +150,7 @@ public class DockerTarParser {
         return untaredFiles;
     }
 
-    public List<ManifestLayerMapping> getLayerMappings(final File workingDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws HubIntegrationException {
+    public List<ManifestLayerMapping> getLayerMappings(final File workingDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
         logger.debug(String.format("working dir: %s", workingDirectory));
         final Manifest manifest = manifestFactory.createManifest(getTarExtractionDirectory(workingDirectory), tarFileName);
@@ -160,11 +160,11 @@ public class DockerTarParser {
         } catch (final Exception e) {
             final String msg = String.format("Could not parse the image manifest file : %s", e.getMessage());
             logger.error(msg);
-            throw new HubIntegrationException(msg, e);
+            throw new IntegrationException(msg, e);
         }
         if (mappings.size() == 0) {
             final String msg = String.format("Could not find image %s:%s in tar file %s", dockerImageName, dockerTagName, tarFileName);
-            throw new HubIntegrationException(msg);
+            throw new IntegrationException(msg);
         }
         return mappings;
     }

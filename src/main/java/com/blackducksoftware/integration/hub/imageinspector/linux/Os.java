@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEnum;
 
@@ -39,7 +39,7 @@ public class Os {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // TODO currentLinuxDistro should be Optional
-    public OperatingSystemEnum deriveCurrentOs(final String currentLinuxDistro) throws HubIntegrationException {
+    public OperatingSystemEnum deriveCurrentOs(final String currentLinuxDistro) throws IntegrationException {
         OperatingSystemEnum osEnum = OperatingSystemEnum.determineOperatingSystem(currentLinuxDistro);
         if (osEnum != null) {
             logger.debug(String.format("Using given value for current OS: %s", osEnum.toString()));
@@ -48,7 +48,7 @@ public class Os {
         final String systemPropertyOsValue = System.getProperty("os.name");
         logger.debug(String.format("Deriving current OS; System.getProperty(\"os.name\") says: %s", systemPropertyOsValue));
         if (!isLinuxUnix(systemPropertyOsValue)) {
-            throw new HubIntegrationException(String.format("System property OS value is '%s'; this appears to be a non-Linux/Unix system", systemPropertyOsValue));
+            throw new IntegrationException(String.format("System property OS value is '%s'; this appears to be a non-Linux/Unix system", systemPropertyOsValue));
         }
         final File rootDir = new File("/");
         final FileSys rootFileSys = new FileSys(rootDir);
@@ -59,7 +59,7 @@ public class Os {
             logger.debug(String.format("Current Operating System %s", osEnum.name()));
             return osEnum;
         }
-        throw new HubIntegrationException(String.format("Unable to determine current operating system; %d package managers found: %s", packageManagers.size(), packageManagers));
+        throw new IntegrationException(String.format("Unable to determine current operating system; %d package managers found: %s", packageManagers.size(), packageManagers));
     }
 
     private static boolean isLinuxUnix(final String osName) {

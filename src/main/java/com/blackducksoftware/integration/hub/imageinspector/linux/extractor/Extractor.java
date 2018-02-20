@@ -30,6 +30,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.bdio.BdioWriter;
 import com.blackducksoftware.integration.hub.bdio.SimpleBdioFactory;
 import com.blackducksoftware.integration.hub.bdio.graph.MutableDependencyGraph;
@@ -37,7 +38,6 @@ import com.blackducksoftware.integration.hub.bdio.model.Forge;
 import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
 import com.blackducksoftware.integration.hub.bdio.model.dependency.Dependency;
 import com.blackducksoftware.integration.hub.bdio.model.externalid.ExternalId;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEnum;
 import com.blackducksoftware.integration.hub.imageinspector.linux.executor.PkgMgrExecutor;
@@ -67,7 +67,7 @@ public abstract class Extractor {
     }
 
     public SimpleBdioDocument extract(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version)
-            throws HubIntegrationException, IOException, InterruptedException {
+            throws IntegrationException, IOException, InterruptedException {
 
         final SimpleBdioDocument bdioDocument = extractBdio(dockerImageRepo, dockerImageTag, imagePkgMgr, architecture, codeLocationName, projectName, version);
         return bdioDocument;
@@ -78,7 +78,7 @@ public abstract class Extractor {
     }
 
     private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version)
-            throws HubIntegrationException, IOException, InterruptedException {
+            throws IntegrationException, IOException, InterruptedException {
         final Forge forgeObject = new Forge(forges.get(0), "/");
         final ExternalId projectExternalId = (new SimpleBdioFactory()).createNameVersionExternalId(forgeObject, projectName, version);
         final SimpleBdioDocument bdioDocument = (new SimpleBdioFactory()).createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);

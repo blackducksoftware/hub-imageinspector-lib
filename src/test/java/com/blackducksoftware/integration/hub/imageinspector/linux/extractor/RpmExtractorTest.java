@@ -12,9 +12,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.bdio.BdioWriter;
 import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.TestUtils;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
@@ -33,11 +33,11 @@ public class RpmExtractorTest {
     }
 
     @Test
-    public void testRpmFile1() throws HubIntegrationException, IOException, InterruptedException {
+    public void testRpmFile1() throws IntegrationException, IOException, InterruptedException {
         testRpmExtraction("centos_rpm_output_1.txt", "testRpmBdio1.jsonld");
     }
 
-    private void testRpmExtraction(final String resourceName, final String bdioOutputFileName) throws IOException, HubIntegrationException, InterruptedException {
+    private void testRpmExtraction(final String resourceName, final String bdioOutputFileName) throws IOException, IntegrationException, InterruptedException {
         final File resourceFile = new File(String.format("src/test/resources/%s", resourceName));
 
         final RpmExtractor extractor = new RpmExtractor();

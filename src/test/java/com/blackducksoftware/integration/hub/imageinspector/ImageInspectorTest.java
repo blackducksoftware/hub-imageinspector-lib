@@ -16,7 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.DockerTarParser;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.ImagePkgMgr;
@@ -44,7 +44,7 @@ public class ImageInspectorTest {
     }
 
     @Test
-    public void testDpkg() throws IOException, HubIntegrationException, InterruptedException {
+    public void testDpkg() throws IOException, IntegrationException, InterruptedException {
         final List<String> fileLines = FileUtils.readLines(new File("src/test/resources/ubuntu_dpkg_output_1.txt"), StandardCharsets.UTF_8);
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
         final PkgMgrExecutor executor = Mockito.mock(DpkgExecutor.class);
@@ -54,7 +54,7 @@ public class ImageInspectorTest {
     }
 
     @Test
-    public void testApk() throws IOException, HubIntegrationException, InterruptedException {
+    public void testApk() throws IOException, IntegrationException, InterruptedException {
         final List<String> fileLines = FileUtils.readLines(new File("src/test/resources/alpine_apk_output_1.txt"), StandardCharsets.UTF_8);
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
         final PkgMgrExecutor executor = Mockito.mock(ApkExecutor.class);
@@ -64,7 +64,7 @@ public class ImageInspectorTest {
     }
 
     private void doTest(final String imageName, final String tagName, final OperatingSystemEnum os, final PackageManagerEnum pkgMgr, final Extractor extractor, final PkgMgrExecutor executor, final List<String> forges)
-            throws FileNotFoundException, IOException, HubIntegrationException, InterruptedException {
+            throws FileNotFoundException, IOException, IntegrationException, InterruptedException {
 
         final File imageTarFile = new File("test/image.tar");
         final ImagePkgMgr imagePkgMgr = new ImagePkgMgr(new File(String.format("test/resources/imageDir/image_%s_v_%s/%s", imageName, tagName, pkgMgr.getDirectory())), pkgMgr);

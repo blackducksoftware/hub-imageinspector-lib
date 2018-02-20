@@ -37,13 +37,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
+
 
 @Component
 public class Executor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public String[] executeCommand(final String commandString, final Long timeoutMillisec) throws HubIntegrationException, UnsupportedEncodingException {
+    public String[] executeCommand(final String commandString, final Long timeoutMillisec) throws IntegrationException, UnsupportedEncodingException {
         logger.debug(String.format("Executing: %s with timeout %s", commandString, timeoutMillisec));
         final CommandLine cmdLine = CommandLine.parse(commandString);
         final DefaultExecutor executor = new DefaultExecutor();
@@ -60,17 +61,17 @@ public class Executor {
         } catch (final ExecuteException e) {
             exitValue = e.getExitValue();
             logger.trace(String.format("Execution of command: %s: ExecutionException: %s; exitCode: %d; Continuing anyway...", commandString, e.getMessage(), exitValue));
-            // throw new HubIntegrationException(String.format("Execution of command: %s: ExecutionException: %s", commandString, e.getMessage()));
+            // throw new IntegrationException(String.format("Execution of command: %s: ExecutionException: %s", commandString, e.getMessage()));
         } catch (final IOException e) {
-            throw new HubIntegrationException(String.format("Execution of command: %s: IOException: %s", commandString, e.getMessage()));
+            throw new IntegrationException(String.format("Execution of command: %s: IOException: %s", commandString, e.getMessage()));
         }
         if (watchdog.killedProcess()) {
-            throw new HubIntegrationException(String.format("Execution of command: %s with timeout %d timed out", commandString, timeoutMillisec, exitValue));
+            throw new IntegrationException(String.format("Execution of command: %s with timeout %d timed out", commandString, timeoutMillisec, exitValue));
         }
         if (exitValue == 0) {
             logger.debug(String.format("Success executing command: %s", commandString));
         } else {
-            throw new HubIntegrationException(String.format("Execution of command: %s: Error code: %d: stderr: %s", commandString, exitValue, errorStream.toString(StandardCharsets.UTF_8.name())));
+            throw new IntegrationException(String.format("Execution of command: %s: Error code: %d: stderr: %s", commandString, exitValue, errorStream.toString(StandardCharsets.UTF_8.name())));
         }
 
         logger.debug(String.format("Command output: %s", outputStream.toString(StandardCharsets.UTF_8.name())));

@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.blackducksoftware.integration.hub.imageinspector.lib.ImageInfoDerived;
 import com.blackducksoftware.integration.hub.imageinspector.lib.ImageInspector;
@@ -53,20 +53,20 @@ public class ImageInspectorApi {
     private Os os;
 
     public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
-            throws IOException, HubIntegrationException, InterruptedException {
+            throws IOException, IntegrationException, InterruptedException {
         logger.info("getBdio()");
         logMemory();
         return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, currentLinuxDistro);
     }
 
     private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
-            throws IOException, HubIntegrationException, InterruptedException {
+            throws IOException, IntegrationException, InterruptedException {
         final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, currentLinuxDistro);
         return imageInfoDerived.getBdioDocument();
     }
 
     ImageInfoDerived inspect(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
-            throws IOException, HubIntegrationException, InterruptedException {
+            throws IOException, IntegrationException, InterruptedException {
         final File dockerTarfile = new File(dockerTarfilePath);
         final File tempDir = createTempDirectory();
         ImageInfoDerived imageInfoDerived = null;
@@ -104,14 +104,14 @@ public class ImageInspectorApi {
     }
 
     private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final String currentLinuxDistro, final File tempDir)
-            throws IOException, HubIntegrationException, WrongInspectorOsException, InterruptedException {
+            throws IOException, IntegrationException, WrongInspectorOsException, InterruptedException {
         final File workingDir = new File(tempDir, "working");
         logger.debug(String.format("imageInspector: %s", imageInspector));
         final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
         final List<ManifestLayerMapping> tarfileMetadata = imageInspector.getLayerMappings(workingDir, dockerTarfile.getName(), null, null);
         if (tarfileMetadata.size() != 1) {
             final String msg = String.format("Expected a single image tarfile, but %s has %d images", dockerTarfile.getAbsolutePath(), tarfileMetadata.size());
-            throw new HubIntegrationException(msg);
+            throw new IntegrationException(msg);
         }
         final ManifestLayerMapping imageMetadata = tarfileMetadata.get(0);
         final String imageRepo = imageMetadata.getImageName();
@@ -145,7 +145,7 @@ public class ImageInspectorApi {
         return (temp);
     }
 
-    private ImageInspectorOsEnum getImageInspectorOsEnum(final OperatingSystemEnum osEnum) throws HubIntegrationException {
+    private ImageInspectorOsEnum getImageInspectorOsEnum(final OperatingSystemEnum osEnum) throws IntegrationException {
         switch (osEnum) {
         case UBUNTU:
             return ImageInspectorOsEnum.UBUNTU;
@@ -154,7 +154,7 @@ public class ImageInspectorApi {
         case ALPINE:
             return ImageInspectorOsEnum.ALPINE;
         default:
-            throw new HubIntegrationException("");
+            throw new IntegrationException("");
         }
     }
 
