@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.imageinspector.api.PkgMgrDataNotFoundException;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.Manifest;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
@@ -92,11 +93,7 @@ public class DockerTarParser {
     }
 
     public OperatingSystemEnum detectOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
-        final OperatingSystemEnum osEnum = deriveOsFromPkgMgr(targetImageFileSystemRootDir);
-        if (osEnum != null) {
-            return osEnum;
-        }
-        throw new IntegrationException("No package manager files were found, and no operating system name was provided.");
+        return deriveOsFromPkgMgr(targetImageFileSystemRootDir);
     }
 
     public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum) throws IntegrationException {
@@ -193,7 +190,7 @@ public class DockerTarParser {
         return layerTar;
     }
 
-    private OperatingSystemEnum deriveOsFromPkgMgr(final File targetImageFileSystemRootDir) {
+    private OperatingSystemEnum deriveOsFromPkgMgr(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
         OperatingSystemEnum osEnum = null;
 
         final FileSys extractedFileSys = new FileSys(targetImageFileSystemRootDir);
@@ -203,9 +200,10 @@ public class DockerTarParser {
             osEnum = packageManager.getOperatingSystem();
             logger.debug(String.format("Package manager %s returns Operating System %s", packageManager.name(), osEnum.name()));
             return osEnum;
+        } else if (packageManagers.size() == 0) {
+            throw new PkgMgrDataNotFoundException("No package manager data found");
+        } else {
+            throw new PkgMgrDataNotFoundException("Data found for more than one package manager");
         }
-        return null;
-
     }
-
 }
