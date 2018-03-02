@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,9 @@ import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEn
 import com.blackducksoftware.integration.hub.imageinspector.linux.Os;
 import com.blackducksoftware.integration.hub.imageinspector.linux.extractor.Extractor;
 import com.blackducksoftware.integration.hub.imageinspector.linux.extractor.ExtractorManager;
+import com.blackducksoftware.integration.test.annotation.IntegrationTest;
 
+@Category(IntegrationTest.class)
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { AppConfig.class })
 public class ImageInspectorApiTest {

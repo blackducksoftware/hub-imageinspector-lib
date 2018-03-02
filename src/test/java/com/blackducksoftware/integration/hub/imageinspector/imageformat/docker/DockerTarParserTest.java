@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.imageinspector.TestUtils;
@@ -36,7 +37,9 @@ import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.m
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.blackducksoftware.integration.hub.imageinspector.linux.executor.Executor;
+import com.blackducksoftware.integration.test.annotation.IntegrationTest;
 
+@Category(IntegrationTest.class)
 public class DockerTarParserTest {
     private final static int DPKG_STATUS_FILE_SIZE = 98016;
 
@@ -104,7 +107,7 @@ public class DockerTarParserTest {
         assertEquals("layerId1", layerDirPath.getFileName().toString());
 
         final File dockerTar = new File(layerDir, "layer.tar");
-        Files.copy((new File(String.format("src/test/resources/%s/layer.tar", testFileDir))).toPath(), dockerTar.toPath(), REPLACE_EXISTING);
+        Files.copy(new File(String.format("src/test/resources/%s/layer.tar", testFileDir)).toPath(), dockerTar.toPath(), REPLACE_EXISTING);
         final List<File> layerTars = new ArrayList<>();
         layerTars.add(dockerTar);
 

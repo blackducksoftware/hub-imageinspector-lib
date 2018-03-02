@@ -20,26 +20,6 @@ apply plugin: "io.spring.dependency-management"
 version = '1.0.3-SNAPSHOT'
 apply plugin: 'com.blackducksoftware.integration.library'
 
-// For integration tests
-sourceSets {
-    integrationTest {
-        java {
-            compileClasspath += main.output + test.output
-            compileClasspath += main.compileClasspath  // experiment
-            compileClasspath += test.compileClasspath // experiment
-            runtimeClasspath += main.output + test.output
-            runtimeClasspath += test.runtimeClasspath // experiment
-            java.srcDir file('src/integration-test/java')
-        }
-        resources.srcDir file('src/integration-test/resources')
-    }
-}
-
-configurations {
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
-}
-
 dependencyManagement {
     imports {
     	mavenBom 'io.spring.platform:platform-bom:Brussels-SR7'
@@ -55,7 +35,7 @@ dependencies {
     compile 'org.apache.commons:commons-compress:1.15'
     compile 'org.apache.commons:commons-exec:1.3'
     testCompile 'org.mockito:mockito-all:1.10.19'
-    integrationTestCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
 
 repositories {
@@ -128,19 +108,7 @@ task buildAlpineTestDockerTarfile(type: Exec, dependsOn: [createImagesDir, pullA
 
 task buildTestTarfiles(dependsOn: [buildTestDockerTarfile, buildAlpineTestDockerTarfile]) {}
 
-task itOnly(type: Test) {
-    testClassesDir = new File("build/classes/java/integrationTest")
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    outputs.upToDateWhen { false }
-    mustRunAfter tasks.test
-}
+testIntegration.dependsOn buildTestTarfiles
 
-task integrationTest(type: Test, dependsOn: [build, buildTestTarfiles, itOnly]) {
-	// So that Gradle knows where the integration test classes are:
-    testClassesDir = sourceSets.integrationTest.output.classesDir // experiment
- 
-    // So that Gradle knows which runtime class path to use:
-    classpath = sourceSets.integrationTest.runtimeClasspath // experiment
-}
 // End of stuff for integration tests
 ////////////////////////////////////////////////
