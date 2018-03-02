@@ -74,26 +74,33 @@ public abstract class Extractor {
     }
 
     public static void writeBdio(final BdioWriter bdioWriter, final SimpleBdioDocument bdioDocument) {
-        (new SimpleBdioFactory()).writeSimpleBdioDocument(bdioWriter, bdioDocument);
+        new SimpleBdioFactory().writeSimpleBdioDocument(bdioWriter, bdioDocument);
     }
 
     private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version)
             throws IntegrationException, IOException, InterruptedException {
-        final ExternalId projectExternalId = (new SimpleBdioFactory()).createNameVersionExternalId(forges.get(0), projectName, version);
-        final SimpleBdioDocument bdioDocument = (new SimpleBdioFactory()).createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
-        final MutableDependencyGraph dependencies = (new SimpleBdioFactory()).createMutableDependencyGraph();
+        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(forges.get(0), projectName, version);
+        final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
+        final MutableDependencyGraph dependencies = new SimpleBdioFactory().createMutableDependencyGraph();
 
         extractComponents(dependencies, dockerImageRepo, dockerImageTag, architecture, executor.runPackageManager(imagePkgMgr));
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 
-        (new SimpleBdioFactory()).populateComponents(bdioDocument, projectExternalId, dependencies);
+        new SimpleBdioFactory().populateComponents(bdioDocument, projectExternalId, dependencies);
+        return bdioDocument;
+    }
+
+    public SimpleBdioDocument createEmptyBdio(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName, final String version)
+            throws IntegrationException, IOException, InterruptedException {
+        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(forges.get(0), projectName, version);
+        final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
         return bdioDocument;
     }
 
     public void createBdioComponent(final MutableDependencyGraph dependencies, final String name, final String version, final String externalId, final String arch) {
         for (final Forge forge : forges) {
-            final ExternalId extId = (new SimpleBdioFactory()).createArchitectureExternalId(forge, name, version, arch);
-            final Dependency dep = (new SimpleBdioFactory()).createDependency(name, version, extId); // createDependencyNode(forge, name, version, arch);
+            final ExternalId extId = new SimpleBdioFactory().createArchitectureExternalId(forge, name, version, arch);
+            final Dependency dep = new SimpleBdioFactory().createDependency(name, version, extId); // createDependencyNode(forge, name, version, arch);
             logger.trace(String.format("adding %s as child to dependency node tree; dataId: %s", dep.name, dep.externalId.createBdioId()));
             dependencies.addChildToRoot(dep);
         }
