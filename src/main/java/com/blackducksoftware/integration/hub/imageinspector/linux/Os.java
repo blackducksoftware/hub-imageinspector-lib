@@ -38,7 +38,6 @@ import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEn
 public class Os {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    // TODO currentLinuxDistro should be Optional
     public OperatingSystemEnum deriveCurrentOs(final String currentLinuxDistro) throws IntegrationException {
         OperatingSystemEnum osEnum = OperatingSystemEnum.determineOperatingSystem(currentLinuxDistro);
         if (osEnum != null) {
@@ -62,10 +61,16 @@ public class Os {
         throw new IntegrationException(String.format("Unable to determine current operating system; %d package managers found: %s", packageManagers.size(), packageManagers));
     }
 
+    public void logMemory() {
+        final Long total = Runtime.getRuntime().totalMemory();
+        final Long free = Runtime.getRuntime().freeMemory();
+        logger.debug(String.format("Heap: total: %d; free: %d", total, free));
+    }
+
     private static boolean isLinuxUnix(final String osName) {
         if (osName == null) {
             return false;
         }
-        return (osName.contains("nux") || osName.contains("nix") || osName.contains("aix"));
+        return osName.contains("nux") || osName.contains("nix") || osName.contains("aix");
     }
 }

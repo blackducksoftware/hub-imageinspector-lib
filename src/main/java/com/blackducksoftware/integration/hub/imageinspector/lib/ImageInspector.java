@@ -51,6 +51,8 @@ import com.google.gson.Gson;
 
 @Component
 public class ImageInspector {
+    private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
+    private static final String UNKNOWN_ARCH = "unknown";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private ExtractorManager extractorManager;
     private DockerTarParser tarParser;
@@ -124,27 +126,19 @@ public class ImageInspector {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
         final ImagePkgMgr imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
-        if (imagePkgMgr != null) {
-            imageInfoDerived.setArchitecture(getExtractorByPackageManager(imagePkgMgr.getPackageManager()).deriveArchitecture(targetImageFileSystemRootDir));
-        } else {
-            // TODO unhardcode these constant strings
-            imageInfoDerived.setArchitecture("unknown");
-        }
-        logger.debug(String.format("generateBdioFromImageFilesDir(): architecture: %s", imageInfoDerived.getArchitecture()));
-
         imageInfoDerived.setImageDirName(Names.getTargetImageFileSystemRootDirName(dockerImageRepo, dockerImageTag));
         imageInfoDerived.setManifestLayerMapping(findManifestLayerMapping(mappings, imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageDirName()));
-        // TODO combine this conditional with the one above
         if (imagePkgMgr != null) {
+            imageInfoDerived.setArchitecture(getExtractorByPackageManager(imagePkgMgr.getPackageManager()).deriveArchitecture(targetImageFileSystemRootDir));
             imageInfoDerived.setPkgMgrFilePath(determinePkgMgrFilePath(imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageDirName()));
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
                     imageInfoDerived.getPkgMgrFilePath(), imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager().toString()));
         } else {
-            imageInfoDerived.setPkgMgrFilePath("noPkgMgrFound");
+            imageInfoDerived.setPkgMgrFilePath(NO_PKG_MGR_FOUND);
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
-                    imageInfoDerived.getPkgMgrFilePath(), "noPkgMgrFound"));
+                    imageInfoDerived.getPkgMgrFilePath(), NO_PKG_MGR_FOUND));
+            imageInfoDerived.setArchitecture(UNKNOWN_ARCH);
         }
-
         imageInfoDerived.setFinalProjectName(deriveHubProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName));
         imageInfoDerived.setFinalProjectVersionName(deriveHubProjectVersion(imageInfoDerived.getManifestLayerMapping(), versionName));
         logger.info(String.format("Hub project: %s, version: %s; Code location : %s", imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getCodeLocationName()));

@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +39,7 @@ import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.m
 import com.blackducksoftware.integration.hub.imageinspector.lib.ImageInfoDerived;
 import com.blackducksoftware.integration.hub.imageinspector.lib.ImageInspector;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
+import com.blackducksoftware.integration.hub.imageinspector.linux.FileOperations;
 import com.blackducksoftware.integration.hub.imageinspector.linux.Os;
 
 @Component
@@ -55,7 +55,7 @@ public class ImageInspectorApi {
     public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
             throws IOException, IntegrationException, InterruptedException {
         logger.info("getBdio()");
-        logMemory();
+        os.logMemory();
         return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, currentLinuxDistro);
     }
 
@@ -75,32 +75,10 @@ public class ImageInspectorApi {
         } finally {
             if (cleanupWorkingDir) {
                 logger.info(String.format("Deleting working dir %s", tempDir.getAbsolutePath()));
-                deleteDir(tempDir);
+                FileOperations.deleteDirPersistently(tempDir);
             }
         }
         return imageInfoDerived;
-    }
-
-    // TODO move this
-    private void deleteDir(final File tempDir) {
-        for (int i = 0; i < 10; i++) {
-            logger.debug(String.format("Attempt #%d to delete dir %s", i, tempDir.getAbsolutePath()));
-            try {
-                FileUtils.deleteDirectory(tempDir);
-            } catch (final IOException e) {
-                logger.warn(String.format("Error deleting dir %s: %s", tempDir.getAbsolutePath(), e.getMessage()));
-            }
-            if (!tempDir.exists()) {
-                logger.debug(String.format("Dir %s has been deleted", tempDir.getAbsolutePath()));
-                return;
-            }
-            try {
-                Thread.sleep(1000L);
-            } catch (final InterruptedException e) {
-                logger.warn(String.format("deleteDir() sleep interrupted: %s", e.getMessage()));
-            }
-        }
-        logger.warn(String.format("Unable to delete dir %s", tempDir.getAbsolutePath()));
     }
 
     private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final String currentLinuxDistro, final File tempDir)
@@ -131,18 +109,18 @@ public class ImageInspectorApi {
     }
 
     private File createTempDirectory() throws IOException {
-        final String suffix = String.format("_%s_%s", Thread.currentThread().getName(), Long.toString((new Date()).getTime()));
+        final String suffix = String.format("_%s_%s", Thread.currentThread().getName(), Long.toString(new Date().getTime()));
         final File temp = File.createTempFile("ImageInspectorApi_", suffix);
         logger.info(String.format("Creating working dir %s", temp.getAbsolutePath()));
-        if (!(temp.delete())) {
+        if (!temp.delete()) {
             throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
         }
-        if (!(temp.mkdir())) {
+        if (!temp.mkdir()) {
             throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
         }
 
-        logFreeDiskSpace(temp);
-        return (temp);
+        FileOperations.logFreeDiskSpace(temp);
+        return temp;
     }
 
     private ImageInspectorOsEnum getImageInspectorOsEnum(final OperatingSystemEnum osEnum) throws IntegrationException {
@@ -158,15 +136,4 @@ public class ImageInspectorApi {
         }
     }
 
-    // TODO move this?
-    private void logFreeDiskSpace(final File workingDir) {
-        logger.debug(String.format("Disk: free: %d", workingDir.getFreeSpace()));
-    }
-
-    // TODO move this?
-    private void logMemory() {
-        final Long total = Runtime.getRuntime().totalMemory();
-        final Long free = Runtime.getRuntime().freeMemory();
-        logger.debug(String.format("Heap: total: %d; free: %d", total, free));
-    }
 }

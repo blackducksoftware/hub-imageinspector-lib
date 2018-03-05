@@ -57,36 +57,6 @@ public class FileOperations {
         return results;
     }
 
-    private static List<File> findDirsWithGivenName(final int maxDepth, final int depth, final File dir, final String targetName) {
-        final List<File> filesMatchingTargetName = new ArrayList<>();
-        logger.trace(String.format("findFiles() processing dir %s", dir.getAbsolutePath()));
-        if (depth > maxDepth) {
-            logger.trace("Hit max depth; pruning tree here");
-            return filesMatchingTargetName;
-        }
-        // TODO need a general mechanism for this? include /tmp too? IDOCKER-367
-        for (final String dirToSkip : DIRS_TO_SKIP) {
-            if (dirToSkip.equals(dir.getAbsolutePath())) {
-                logger.trace("This is the /Users dir; skipping it");
-                return filesMatchingTargetName;
-            }
-        }
-        try {
-            for (final File f : dir.listFiles()) {
-                if (f.isDirectory()) {
-                    if (targetName.equals(f.getName())) {
-                        filesMatchingTargetName.add(f);
-                    }
-                    final List<File> subDirsMatchingFiles = findDirsWithGivenName(maxDepth, depth + 1, f, targetName);
-                    filesMatchingTargetName.addAll(subDirsMatchingFiles);
-                }
-            }
-        } catch (final Throwable e) {
-            logger.debug("Error reading contents of dir; skipping it");
-        }
-        return filesMatchingTargetName;
-    }
-
     public static List<File> findFilesWithExt(final File dirFile, final String fileExtension) {
         final List<File> results = new ArrayList<>();
         logger.trace(String.format("Looking in %s for files with extension %s", dirFile.getAbsolutePath(), fileExtension));
@@ -167,5 +137,60 @@ public class FileOperations {
             logger.trace(String.format("dirPath %s: # files: %d", dirPath, dir.listFiles().length));
         }
         return dir;
+    }
+
+    public static void deleteDirPersistently(final File dir) {
+        for (int i = 0; i < 10; i++) {
+            logger.debug(String.format("Attempt #%d to delete dir %s", i, dir.getAbsolutePath()));
+            try {
+                FileUtils.deleteDirectory(dir);
+            } catch (final IOException e) {
+                logger.warn(String.format("Error deleting dir %s: %s", dir.getAbsolutePath(), e.getMessage()));
+            }
+            if (!dir.exists()) {
+                logger.debug(String.format("Dir %s has been deleted", dir.getAbsolutePath()));
+                return;
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (final InterruptedException e) {
+                logger.warn(String.format("deleteDir() sleep interrupted: %s", e.getMessage()));
+            }
+        }
+        logger.warn(String.format("Unable to delete dir %s", dir.getAbsolutePath()));
+    }
+
+    public static void logFreeDiskSpace(final File dir) {
+        logger.debug(String.format("Disk: free: %d", dir.getFreeSpace()));
+    }
+
+    private static List<File> findDirsWithGivenName(final int maxDepth, final int depth, final File dir, final String targetName) {
+        final List<File> filesMatchingTargetName = new ArrayList<>();
+        logger.trace(String.format("findFiles() processing dir %s", dir.getAbsolutePath()));
+        if (depth > maxDepth) {
+            logger.trace("Hit max depth; pruning tree here");
+            return filesMatchingTargetName;
+        }
+        // TODO need a general mechanism for this? include /tmp too? IDOCKER-367
+        for (final String dirToSkip : DIRS_TO_SKIP) {
+            if (dirToSkip.equals(dir.getAbsolutePath())) {
+                logger.trace("This is the /Users dir; skipping it");
+                return filesMatchingTargetName;
+            }
+        }
+        try {
+            for (final File f : dir.listFiles()) {
+                if (f.isDirectory()) {
+                    if (targetName.equals(f.getName())) {
+                        filesMatchingTargetName.add(f);
+                    }
+                    final List<File> subDirsMatchingFiles = findDirsWithGivenName(maxDepth, depth + 1, f, targetName);
+                    filesMatchingTargetName.addAll(subDirsMatchingFiles);
+                }
+            }
+        } catch (final Throwable e) {
+            logger.debug("Error reading contents of dir; skipping it");
+        }
+        return filesMatchingTargetName;
     }
 }
