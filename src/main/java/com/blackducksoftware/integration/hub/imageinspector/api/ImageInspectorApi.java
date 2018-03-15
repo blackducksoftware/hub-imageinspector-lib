@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,7 @@ import com.blackducksoftware.integration.hub.imageinspector.lib.ImageInfoDerived
 import com.blackducksoftware.integration.hub.imageinspector.lib.ImageInspector;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.blackducksoftware.integration.hub.imageinspector.linux.FileOperations;
+import com.blackducksoftware.integration.hub.imageinspector.linux.FileSys;
 import com.blackducksoftware.integration.hub.imageinspector.linux.Os;
 
 @Component
@@ -52,26 +55,29 @@ public class ImageInspectorApi {
     @Autowired
     private Os os;
 
-    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
-            throws IOException, IntegrationException, InterruptedException {
+    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String containerFileSystemOutputPath,
+            final String currentLinuxDistro)
+            throws IOException, IntegrationException, InterruptedException, CompressorException {
         logger.info("getBdio()");
         os.logMemory();
-        return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, currentLinuxDistro);
+        return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro);
     }
 
-    private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
-            throws IOException, IntegrationException, InterruptedException {
-        final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, currentLinuxDistro);
+    private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir,
+            final String containerFileSystemOutputPath, final String currentLinuxDistro)
+            throws IOException, IntegrationException, InterruptedException, CompressorException {
+        final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro);
         return imageInfoDerived.getBdioDocument();
     }
 
-    ImageInfoDerived inspect(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String currentLinuxDistro)
-            throws IOException, IntegrationException, InterruptedException {
+    ImageInfoDerived inspect(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String containerFileSystemOutputPath,
+            final String currentLinuxDistro)
+            throws IOException, IntegrationException, InterruptedException, CompressorException {
         final File dockerTarfile = new File(dockerTarfilePath);
         final File tempDir = createTempDirectory();
         ImageInfoDerived imageInfoDerived = null;
         try {
-            imageInfoDerived = inspectUsingGivenWorkingDir(dockerTarfile, hubProjectName, hubProjectVersion, codeLocationPrefix, currentLinuxDistro, tempDir);
+            imageInfoDerived = inspectUsingGivenWorkingDir(dockerTarfile, hubProjectName, hubProjectVersion, codeLocationPrefix, containerFileSystemOutputPath, currentLinuxDistro, tempDir);
         } finally {
             if (cleanupWorkingDir) {
                 logger.info(String.format("Deleting working dir %s", tempDir.getAbsolutePath()));
@@ -81,8 +87,9 @@ public class ImageInspectorApi {
         return imageInfoDerived;
     }
 
-    private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final String currentLinuxDistro, final File tempDir)
-            throws IOException, IntegrationException, WrongInspectorOsException, InterruptedException {
+    private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final String containerFileSystemOutputPath,
+            final String currentLinuxDistro, final File tempDir)
+            throws IOException, IntegrationException, WrongInspectorOsException, InterruptedException, CompressorException {
         final File workingDir = new File(tempDir, "working");
         logger.debug(String.format("imageInspector: %s", imageInspector));
         final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
@@ -105,7 +112,19 @@ public class ImageInspectorApi {
         }
         final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageRepo, imageTag, tarfileMetadata, hubProjectName, hubProjectVersion, dockerTarfile, targetImageFileSystemRootDir, targetOs,
                 codeLocationPrefix);
+        createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);
         return imageInfoDerived;
+    }
+
+    private void createContainerFileSystemTarIfRequested(final File targetImageFileSystemRootDir, final String containerFileSystemOutputPath) throws IOException, CompressorException {
+        if (StringUtils.isNotBlank(containerFileSystemOutputPath)) {
+            logger.info("Including container file system in output");
+            final File outputDirectory = new File(containerFileSystemOutputPath);
+            final File containerFileSystemTarFile = new File(containerFileSystemOutputPath);
+            logger.debug(String.format("Creating container filesystem tarfile %s from %s into %s", containerFileSystemTarFile.getAbsolutePath(), targetImageFileSystemRootDir.getAbsolutePath(), outputDirectory.getAbsolutePath()));
+            final FileSys containerFileSys = new FileSys(targetImageFileSystemRootDir);
+            containerFileSys.createTarGz(containerFileSystemTarFile);
+        }
     }
 
     private File createTempDirectory() throws IOException {
