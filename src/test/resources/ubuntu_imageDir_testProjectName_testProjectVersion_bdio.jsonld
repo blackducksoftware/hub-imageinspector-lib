@@ -2,7 +2,13 @@
   {
     "specVersion": "1.1.0",
     "spdx:name": "ubuntu_1.0_var_lib_dpkg_DPKG",
-    "@id": "uuid:68a0f3f2-7c1d-42d4-819d-1b1745ef29e4",
+    "creationInfo": {
+      "spdx:creator": [
+        "Tool: IntegrationBdio-13.0.0"
+      ],
+      "spdx:created": "2018-04-27T14:37:21.716Z"
+    },
+    "@id": "uuid:2cf01f30-a248-44cd-bec7-283ea0730d96",
     "@type": "BillOfMaterials",
     "relationship": []
   },

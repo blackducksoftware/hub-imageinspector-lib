@@ -17,7 +17,7 @@ plugins {
 }
 apply plugin: "io.spring.dependency-management"
 
-version = '2.0.0'
+version = '2.0.1'
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencyManagement {
@@ -27,7 +27,7 @@ dependencyManagement {
 }
 
 dependencies {
-    compile 'com.blackducksoftware.integration:integration-bdio:12.1.0'
+    compile 'com.blackducksoftware.integration:integration-bdio:13.0.0'
     compile 'org.springframework.boot:spring-boot-starter'
     compile 'org.springframework:spring-context'
     compile 'commons-io:commons-io:2.5'

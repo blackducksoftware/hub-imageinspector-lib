@@ -62,8 +62,8 @@ public class DpkgExtractorTest {
         final File file1 = new File("src/test/resources/testDpkgBdio1.jsonld");
         final File file2 = new File("test/testDpkgBdio1.jsonld");
         System.out.println(String.format("Comparing %s to %s", file2.getAbsolutePath(), file1.getAbsolutePath()));
-        final List<String> ignoreLinesWith = Arrays.asList("\"@id\":", "\"externalSystemTypeId\":");
-        final boolean filesAreEqual = TestUtils.contentEquals(file1, file2, ignoreLinesWith);
+        final List<String> linesToExclude = Arrays.asList("\"@id\":", "\"externalSystemTypeId\":", "spdx:created");
+        final boolean filesAreEqual = TestUtils.contentEquals(file1, file2, linesToExclude);
         assertTrue(filesAreEqual);
     }
 }

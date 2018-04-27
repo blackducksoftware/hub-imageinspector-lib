@@ -106,7 +106,8 @@ public class ImageInspectorTest {
         final File file1 = new File(String.format("src/test/resources/%s_imageDir_testProjectName_testProjectVersion_bdio.jsonld", imageName));
         final File file2 = bdioFile;
         System.out.println(String.format("Comparing %s to %s", file2.getAbsolutePath(), file1.getAbsolutePath()));
-        final boolean filesAreEqual = TestUtils.contentEquals(file1, file2, Arrays.asList("\"@id\":", "\"externalSystemTypeId\":", "_Users_"));
+        final List<String> linesToExclude = Arrays.asList("\"@id\":", "\"externalSystemTypeId\":", "_Users_", "spdx:created");
+        final boolean filesAreEqual = TestUtils.contentEquals(file1, file2, linesToExclude);
         assertTrue(filesAreEqual);
     }
 }

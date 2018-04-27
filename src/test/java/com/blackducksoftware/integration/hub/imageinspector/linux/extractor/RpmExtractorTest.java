@@ -63,7 +63,8 @@ public class RpmExtractorTest {
         final File file1 = new File("src/test/resources/testRpmBdio1.jsonld");
         final File file2 = new File("test/testRpmBdio1.jsonld");
         System.out.println(String.format("Comparing %s to %s", file2.getAbsolutePath(), file1.getAbsolutePath()));
-        final boolean filesAreEqual = TestUtils.contentEquals(file1, file2, Arrays.asList("\"@id\":", "\"externalSystemTypeId\":"));
+        final List<String> linesToExclude = Arrays.asList("\"@id\":", "\"externalSystemTypeId\":", "spdx:created");
+        final boolean filesAreEqual = TestUtils.contentEquals(file1, file2, linesToExclude);
         assertTrue(filesAreEqual);
     }
 }

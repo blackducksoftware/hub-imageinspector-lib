@@ -2,7 +2,13 @@
   {
     "specVersion": "1.1.0",
     "spdx:name": "CodeLocationName",
-    "@id": "uuid:5b2a2346-79f7-43de-a1e3-24f5395ec6e2",
+    "creationInfo": {
+      "spdx:creator": [
+        "Tool: IntegrationBdio-13.0.0"
+      ],
+      "spdx:created": "2018-04-27T14:46:04.273Z"
+    },
+    "@id": "uuid:603d22ac-c0c1-4ce2-90f4-aef94979a568",
     "@type": "BillOfMaterials",
     "relationship": []
   },
