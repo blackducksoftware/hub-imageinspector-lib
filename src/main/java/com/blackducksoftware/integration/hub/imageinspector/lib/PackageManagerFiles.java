@@ -43,6 +43,7 @@ public class PackageManagerFiles {
         if (packageManagerDirectory.exists()) {
             deleteFilesOnly(packageManagerDirectory);
             if (imagePkgMgr.getPackageManager() == PackageManagerEnum.DPKG) {
+                // TODO this does not belong here
                 final File statusFile = new File(packageManagerDirectory, "status");
                 statusFile.createNewFile();
                 final File updatesDir = new File(packageManagerDirectory, "updates");

@@ -67,7 +67,7 @@ public class Os {
         logger.debug(String.format("Heap: total: %d; free: %d", total, free));
     }
 
-    private static boolean isLinuxUnix(final String osName) {
+    private boolean isLinuxUnix(final String osName) {
         if (osName == null) {
             return false;
         }

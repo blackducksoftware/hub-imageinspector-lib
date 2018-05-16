@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileOperations {
-    // TODO re-think everything about this
     private static final String[] DIRS_TO_SKIP = { "/Users", "/proc", "/dev", "/sys", "/tmp" };
     private static final Logger logger = LoggerFactory.getLogger(FileOperations.class);
 
@@ -167,24 +166,29 @@ public class FileOperations {
     private static List<File> findDirsWithGivenName(final int maxDepth, final int depth, final File dir, final String targetName) {
         final List<File> filesMatchingTargetName = new ArrayList<>();
         logger.trace(String.format("findFiles() processing dir %s", dir.getAbsolutePath()));
+        String dirCanonicalPath;
+        try {
+            dirCanonicalPath = dir.getCanonicalPath();
+        } catch (final IOException e1) {
+            dirCanonicalPath = dir.getAbsolutePath();
+        }
         if (depth > maxDepth) {
             logger.trace("Hit max depth; pruning tree here");
             return filesMatchingTargetName;
         }
-        // TODO need a general mechanism for this? include /tmp too? IDOCKER-367
         for (final String dirToSkip : DIRS_TO_SKIP) {
-            if (dirToSkip.equals(dir.getAbsolutePath())) {
-                logger.trace("This is the /Users dir; skipping it");
+            if (dirToSkip.equals(dirCanonicalPath)) {
+                logger.trace(String.format("dir %s is in the skip list; skipping it", dir.getAbsolutePath()));
                 return filesMatchingTargetName;
             }
         }
         try {
-            for (final File f : dir.listFiles()) {
-                if (f.isDirectory()) {
-                    if (targetName.equals(f.getName())) {
-                        filesMatchingTargetName.add(f);
+            for (final File fileWithinDir : dir.listFiles()) {
+                if (fileWithinDir.isDirectory()) {
+                    if (targetName.equals(fileWithinDir.getName())) {
+                        filesMatchingTargetName.add(fileWithinDir);
                     }
-                    final List<File> subDirsMatchingFiles = findDirsWithGivenName(maxDepth, depth + 1, f, targetName);
+                    final List<File> subDirsMatchingFiles = findDirsWithGivenName(maxDepth, depth + 1, fileWithinDir, targetName);
                     filesMatchingTargetName.addAll(subDirsMatchingFiles);
                 }
             }
