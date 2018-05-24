@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.imageinspector.name;
 
+import java.io.File;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -63,7 +65,7 @@ public class Names {
         parts[3] = hubVersionName;
 
         String filename = generateFilename(cleanImageName, cleanPkgMgrFilePath, cleanHubProjectName, hubVersionName);
-        for (int i = 0; (filename.length() >= 255) && (i < 4); i++) {
+        for (int i = 0; filename.length() >= 255 && i < 4; i++) {
             parts[i] = DigestUtils.sha1Hex(parts[i]);
             if (parts[i].length() > 15) {
                 parts[i] = parts[i].substring(0, 15);
@@ -86,8 +88,19 @@ public class Names {
         return slashesToUnderscore(hubProjectName);
     }
 
-    public static String getContainerFileSystemTarFilename(final String imageName, final String tagName) {
-        return String.format("%s_%s_containerfilesystem.tar.gz", cleanImageName(imageName), tagName);
+    public static String getContainerFileSystemTarFilename(final String imageNameTag, final String tarPath) {
+        final String containerFilesystemFilenameSuffix = "containerfilesystem.tar.gz";
+        if (StringUtils.isNotBlank(imageNameTag)) {
+            return String.format("%s_%s", cleanImageName(imageNameTag), containerFilesystemFilenameSuffix);
+        } else {
+            final File tarFile = new File(tarPath);
+            final String tarFilename = tarFile.getName();
+            if (tarFilename.contains(".")) {
+                final int finalPeriodIndex = tarFilename.lastIndexOf('.');
+                return String.format("%s_%s", tarFilename.substring(0, finalPeriodIndex), containerFilesystemFilenameSuffix);
+            }
+            return String.format("%s_%s", cleanImageName(tarFilename), containerFilesystemFilenameSuffix);
+        }
     }
 
     private static String colonsToUnderscores(final String imageName) {
