@@ -77,6 +77,7 @@ public class FileSys {
     }
 
     public void createTarGz(final File outputTarFile) throws CompressorException, IOException {
+        outputTarFile.getParentFile().mkdirs();
         FileOutputStream fOut = null;
         BufferedOutputStream bOut = null;
         GzipCompressorOutputStream gzOut = null;
