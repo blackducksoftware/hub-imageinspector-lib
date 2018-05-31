@@ -50,8 +50,8 @@ public class DpkgExtractor extends Extractor {
     @PostConstruct
     public void init() {
         final List<Forge> forges = new ArrayList<>();
-        forges.add(OperatingSystemEnum.DEBIAN.getForge());
         forges.add(OperatingSystemEnum.UBUNTU.getForge());
+        forges.add(OperatingSystemEnum.DEBIAN.getForge());
         initValues(PackageManagerEnum.DPKG, executor, forges);
     }
 
