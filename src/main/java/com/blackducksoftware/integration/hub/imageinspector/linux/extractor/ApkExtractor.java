@@ -56,7 +56,6 @@ public class ApkExtractor extends Extractor {
     @Override
     @PostConstruct
     public void init() {
-        // First forge in list should be the inspector OS
         final List<Forge> forges = new ArrayList<>();
         forges.add(OperatingSystemEnum.ALPINE.getForge());
         initValues(PackageManagerEnum.APK, executor, forges);

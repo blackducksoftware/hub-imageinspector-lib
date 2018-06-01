@@ -56,8 +56,6 @@ public abstract class Extractor {
 
     public abstract void extractComponents(MutableDependencyGraph dependencies, String dockerImageRepo, String dockerImageTag, String architecture, String[] packageList);
 
-    // First forge in forges list becomes the BDIO's top level forge. Putting the inspector OS first in the list makes it possible to
-    // derive the package manager from the BDIO file using only PackageManagerEnum.
     public void initValues(final PackageManagerEnum packageManagerEnum, final PkgMgrExecutor executor, final List<Forge> forges) {
         this.packageManagerEnum = packageManagerEnum;
         this.executor = executor;
@@ -81,7 +79,7 @@ public abstract class Extractor {
 
     private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version)
             throws IntegrationException, IOException, InterruptedException {
-        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(forges.get(0), projectName, version);
+        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(packageManagerEnum.getForge(), projectName, version);
         final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
         final MutableDependencyGraph dependencies = new SimpleBdioFactory().createMutableDependencyGraph();
 
@@ -94,7 +92,7 @@ public abstract class Extractor {
 
     public SimpleBdioDocument createEmptyBdio(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName, final String version)
             throws IntegrationException, IOException, InterruptedException {
-        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(forges.get(0), projectName, version);
+        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(packageManagerEnum.getForge(), projectName, version);
         final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
         return bdioDocument;
     }

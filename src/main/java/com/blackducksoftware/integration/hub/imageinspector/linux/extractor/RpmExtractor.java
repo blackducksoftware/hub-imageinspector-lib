@@ -49,7 +49,6 @@ public class RpmExtractor extends Extractor {
     @Override
     @PostConstruct
     public void init() {
-        // First forge in list should be the inspector OS
         final List<Forge> forges = new ArrayList<>();
         forges.add(OperatingSystemEnum.CENTOS.getForge());
         forges.add(OperatingSystemEnum.FEDORA.getForge());

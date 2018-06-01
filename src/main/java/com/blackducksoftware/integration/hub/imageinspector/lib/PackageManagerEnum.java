@@ -26,18 +26,22 @@ package com.blackducksoftware.integration.hub.imageinspector.lib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.hub.bdio.model.Forge;
+
 public enum PackageManagerEnum {
-    DPKG("/var/lib/dpkg", OperatingSystemEnum.UBUNTU),
-    RPM("/var/lib/rpm", OperatingSystemEnum.CENTOS),
-    APK("/lib/apk", OperatingSystemEnum.ALPINE);
+    DPKG("/var/lib/dpkg", OperatingSystemEnum.UBUNTU, OperatingSystemEnum.DEBIAN.getForge()),
+    RPM("/var/lib/rpm", OperatingSystemEnum.CENTOS, OperatingSystemEnum.CENTOS.getForge()),
+    APK("/lib/apk", OperatingSystemEnum.ALPINE, OperatingSystemEnum.ALPINE.getForge());
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManagerEnum.class);
     private final String directory;
     private final OperatingSystemEnum inspectorOperatingSystem;
+    private final Forge forge;
 
-    private PackageManagerEnum(final String directory, final OperatingSystemEnum inspectorOperatingSystem) {
+    private PackageManagerEnum(final String directory, final OperatingSystemEnum inspectorOperatingSystem, final Forge forge) {
         this.directory = directory;
         this.inspectorOperatingSystem = inspectorOperatingSystem;
+        this.forge = forge;
     }
 
     public static PackageManagerEnum getPackageManagerEnumByName(String name) {
@@ -59,4 +63,7 @@ public enum PackageManagerEnum {
         return inspectorOperatingSystem;
     }
 
+    public Forge getForge() {
+        return forge;
+    }
 }

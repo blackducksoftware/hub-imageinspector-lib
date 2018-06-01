@@ -49,7 +49,6 @@ public class DpkgExtractor extends Extractor {
     @Override
     @PostConstruct
     public void init() {
-        // First forge in list should be the inspector OS
         final List<Forge> forges = new ArrayList<>();
         forges.add(OperatingSystemEnum.UBUNTU.getForge());
         forges.add(OperatingSystemEnum.DEBIAN.getForge());
