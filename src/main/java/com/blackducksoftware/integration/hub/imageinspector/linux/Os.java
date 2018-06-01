@@ -54,7 +54,7 @@ public class Os {
         final Set<PackageManagerEnum> packageManagers = rootFileSys.getPackageManagers();
         if (packageManagers.size() == 1) {
             final PackageManagerEnum packageManager = packageManagers.iterator().next();
-            osEnum = packageManager.getOperatingSystem();
+            osEnum = packageManager.getInspectorOperatingSystem();
             logger.debug(String.format("Current Operating System %s", osEnum.name()));
             return osEnum;
         }

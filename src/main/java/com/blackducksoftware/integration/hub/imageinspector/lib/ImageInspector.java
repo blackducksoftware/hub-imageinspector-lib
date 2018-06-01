@@ -82,8 +82,8 @@ public class ImageInspector {
         return tarParser.detectOperatingSystem(operatingSystem);
     }
 
-    public OperatingSystemEnum detectOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
-        return tarParser.detectOperatingSystem(targetImageFileSystemRootDir);
+    public OperatingSystemEnum detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
+        return tarParser.detectInspectorOperatingSystem(targetImageFileSystemRootDir);
     }
 
     public List<ManifestLayerMapping> getLayerMappings(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {

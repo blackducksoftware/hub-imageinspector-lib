@@ -92,8 +92,8 @@ public class DockerTarParser {
         return osEnum;
     }
 
-    public OperatingSystemEnum detectOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
-        return deriveOsFromPkgMgr(targetImageFileSystemRootDir);
+    public OperatingSystemEnum detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
+        return deriveInspectorOsFromPkgMgr(targetImageFileSystemRootDir);
     }
 
     public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum) throws IntegrationException {
@@ -190,16 +190,16 @@ public class DockerTarParser {
         return layerTar;
     }
 
-    private OperatingSystemEnum deriveOsFromPkgMgr(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
-        OperatingSystemEnum osEnum = null;
+    private OperatingSystemEnum deriveInspectorOsFromPkgMgr(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
+        OperatingSystemEnum inspectorOsEnum = null;
 
         final FileSys extractedFileSys = new FileSys(targetImageFileSystemRootDir);
         final Set<PackageManagerEnum> packageManagers = extractedFileSys.getPackageManagers();
         if (packageManagers.size() == 1) {
             final PackageManagerEnum packageManager = packageManagers.iterator().next();
-            osEnum = packageManager.getOperatingSystem();
-            logger.debug(String.format("Package manager %s returns Operating System %s", packageManager.name(), osEnum.name()));
-            return osEnum;
+            inspectorOsEnum = packageManager.getInspectorOperatingSystem();
+            logger.debug(String.format("Package manager %s returns Operating System %s", packageManager.name(), inspectorOsEnum.name()));
+            return inspectorOsEnum;
         } else if (packageManagers.size() == 0) {
             throw new PkgMgrDataNotFoundException("No package manager data found");
         } else {

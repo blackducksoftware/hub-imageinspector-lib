@@ -33,11 +33,11 @@ public enum PackageManagerEnum {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManagerEnum.class);
     private final String directory;
-    private final OperatingSystemEnum operatingSystem;
+    private final OperatingSystemEnum inspectorOperatingSystem;
 
-    private PackageManagerEnum(final String directory, final OperatingSystemEnum operatingSystem) {
+    private PackageManagerEnum(final String directory, final OperatingSystemEnum inspectorOperatingSystem) {
         this.directory = directory;
-        this.operatingSystem = operatingSystem;
+        this.inspectorOperatingSystem = inspectorOperatingSystem;
     }
 
     public static PackageManagerEnum getPackageManagerEnumByName(String name) {
@@ -55,8 +55,8 @@ public enum PackageManagerEnum {
         return directory;
     }
 
-    public OperatingSystemEnum getOperatingSystem() {
-        return operatingSystem;
+    public OperatingSystemEnum getInspectorOperatingSystem() {
+        return inspectorOperatingSystem;
     }
 
 }

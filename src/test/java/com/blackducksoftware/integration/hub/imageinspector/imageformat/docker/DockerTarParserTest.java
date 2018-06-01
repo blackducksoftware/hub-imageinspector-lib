@@ -63,7 +63,7 @@ public class DockerTarParserTest {
         assertEquals(1, layerMappings.size());
         assertEquals(2, layerMappings.get(0).getLayers().size());
         final File imageFilesDir = tarParser.extractDockerLayers(workingDirectory, "imageName", "imageTag", layerTars, layerMappings);
-        final OperatingSystemEnum targetOsEnum = tarParser.detectOperatingSystem(imageFilesDir);
+        final OperatingSystemEnum targetOsEnum = tarParser.detectInspectorOperatingSystem(imageFilesDir);
         assertEquals(OperatingSystemEnum.CENTOS, targetOsEnum);
         final ImageInfoParsed tarExtractionResults = tarParser.collectPkgMgrInfo(imageFilesDir, targetOsEnum);
         assertEquals("/var/lib/rpm", tarExtractionResults.getPkgMgr().getPackageManager().getDirectory());

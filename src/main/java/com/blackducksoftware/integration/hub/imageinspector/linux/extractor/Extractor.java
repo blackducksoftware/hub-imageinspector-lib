@@ -56,6 +56,8 @@ public abstract class Extractor {
 
     public abstract void extractComponents(MutableDependencyGraph dependencies, String dockerImageRepo, String dockerImageTag, String architecture, String[] packageList);
 
+    // First forge in forges list becomes the BDIO's top level forge. Putting the inspector OS first in the list makes it possible to
+    // derive the package manager from the BDIO file using only PackageManagerEnum.
     public void initValues(final PackageManagerEnum packageManagerEnum, final PkgMgrExecutor executor, final List<Forge> forges) {
         this.packageManagerEnum = packageManagerEnum;
         this.executor = executor;
