@@ -23,8 +23,31 @@
  */
 package com.blackducksoftware.integration.hub.imageinspector.api;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
+
 public enum ImageInspectorOsEnum {
-    UBUNTU,
-    CENTOS,
-    ALPINE
+    UBUNTU(OperatingSystemEnum.UBUNTU),
+    CENTOS(OperatingSystemEnum.CENTOS),
+    ALPINE(OperatingSystemEnum.ALPINE);
+
+    private final OperatingSystemEnum rawOs;
+
+    private ImageInspectorOsEnum(final OperatingSystemEnum rawOs) {
+        this.rawOs = rawOs;
+    }
+
+    public static ImageInspectorOsEnum determineOperatingSystem(String operatingSystemName) {
+        ImageInspectorOsEnum result = null;
+        if (!StringUtils.isBlank(operatingSystemName)) {
+            operatingSystemName = operatingSystemName.toUpperCase();
+            result = ImageInspectorOsEnum.valueOf(operatingSystemName);
+        }
+        return result;
+    }
+
+    public OperatingSystemEnum getRawOs() {
+        return rawOs;
+    }
 }
