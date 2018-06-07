@@ -57,7 +57,7 @@ public class ImageInspectorApi {
 
     public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String containerFileSystemOutputPath,
             final String currentLinuxDistro)
-            throws IOException, IntegrationException, InterruptedException, CompressorException {
+            throws IntegrationException {
         logger.info("getBdio()");
         os.logMemory();
         return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro);
@@ -65,19 +65,26 @@ public class ImageInspectorApi {
 
     private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir,
             final String containerFileSystemOutputPath, final String currentLinuxDistro)
-            throws IOException, IntegrationException, InterruptedException, CompressorException {
+            throws IntegrationException {
         final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro);
         return imageInfoDerived.getBdioDocument();
     }
 
     ImageInfoDerived inspect(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir, final String containerFileSystemOutputPath,
             final String currentLinuxDistro)
-            throws IOException, IntegrationException, InterruptedException, CompressorException {
+            throws IntegrationException {
         final File dockerTarfile = new File(dockerTarfilePath);
-        final File tempDir = createTempDirectory();
+        File tempDir;
+        try {
+            tempDir = createTempDirectory();
+        } catch (final IOException e) {
+            throw new IntegrationException(String.format("Error creating temp dir: %s", e.getMessage()), e);
+        }
         ImageInfoDerived imageInfoDerived = null;
         try {
             imageInfoDerived = inspectUsingGivenWorkingDir(dockerTarfile, hubProjectName, hubProjectVersion, codeLocationPrefix, containerFileSystemOutputPath, currentLinuxDistro, tempDir);
+        } catch (IOException | InterruptedException | CompressorException e) {
+            throw new IntegrationException(String.format("Error inspecting image: %s", e.getMessage()), e);
         } finally {
             if (cleanupWorkingDir) {
                 logger.info(String.format("Deleting working dir %s", tempDir.getAbsolutePath()));
