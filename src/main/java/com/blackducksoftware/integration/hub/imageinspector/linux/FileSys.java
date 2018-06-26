@@ -29,12 +29,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.archivers.tar.TarConstants;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
@@ -108,10 +110,19 @@ public class FileSys {
 
     private void addFileToTar(final TarArchiveOutputStream tOut, final File fileToAdd, final String base) throws IOException {
         final String entryName = base + fileToAdd.getName();
-        final TarArchiveEntry tarEntry = new TarArchiveEntry(fileToAdd, entryName);
+
+        TarArchiveEntry tarEntry = null;
+        if (Files.isSymbolicLink(fileToAdd.toPath())) {
+            tarEntry = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK);
+            tarEntry.setLinkName(Files.readSymbolicLink(fileToAdd.toPath()).toString());
+        } else {
+            tarEntry = new TarArchiveEntry(fileToAdd, entryName);
+        }
         tOut.putArchiveEntry(tarEntry);
 
-        if (fileToAdd.isFile()) {
+        if (Files.isSymbolicLink(fileToAdd.toPath())) {
+            tOut.closeArchiveEntry();
+        } else if (fileToAdd.isFile()) {
             try (final InputStream fileToAddInputStream = new FileInputStream(fileToAdd)) {
                 IOUtils.copy(fileToAddInputStream, tOut);
             }
