@@ -108,7 +108,7 @@ public class ImageInspectorApiTest {
         assertEquals("apk", imageInfo.getImageInfoParsed().getPkgMgr().getExtractedPackageManagerDirectory().getName());
         assertEquals(IMAGE_TAG, imageInfo.getManifestLayerMapping().getTagName());
         assertEquals(IMAGE_REPO, imageInfo.getManifestLayerMapping().getImageName());
-        assertEquals("8925ab09eb6e0ccf350d7d374254a1372a626c90ecff7b387ac3967f4ad312e8", imageInfo.getManifestLayerMapping().getLayers().get(0));
+        assertEquals("389b5d2bd6e402bbadceb41c326e37244f9f1611510d5ef449f4e457b6ccf1c5", imageInfo.getManifestLayerMapping().getLayers().get(0));
         assertEquals("lib/apk", imageInfo.getPkgMgrFilePath());
 
         final SimpleBdioDocument returnedBdioDocument = imageInfo.getBdioDocument();
