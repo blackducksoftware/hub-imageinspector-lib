@@ -106,7 +106,7 @@ public class ImageInspector {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null, null);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, osEnum, codeLocationPrefix, imageInfoParsed);
         final Extractor extractor = nullExtractor;
-        final SimpleBdioDocument bdioDocument = extractor.createEmptyBdio(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(),
+        final SimpleBdioDocument bdioDocument = extractor.createEmptyBdio(imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName());
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;

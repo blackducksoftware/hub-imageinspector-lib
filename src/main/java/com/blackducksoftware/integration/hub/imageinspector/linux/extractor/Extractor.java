@@ -90,7 +90,7 @@ public abstract class Extractor {
         return bdioDocument;
     }
 
-    public SimpleBdioDocument createEmptyBdio(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName, final String version)
+    public SimpleBdioDocument createEmptyBdio(final String codeLocationName, final String projectName, final String version)
             throws IntegrationException, IOException, InterruptedException {
         final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(packageManagerEnum.getForge(), projectName, version);
         final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);

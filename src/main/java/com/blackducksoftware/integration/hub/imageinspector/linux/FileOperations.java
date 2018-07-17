@@ -28,6 +28,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -117,9 +120,28 @@ public class FileOperations {
     }
 
     public static void ensureDirExists(final File dir) {
-        logger.debug(String.format("Creating %s (if it does not exist)", dir.getAbsoluteFile()));
+        logger.debug(String.format("Creating %s (if it does not exist)", dir.getAbsolutePath()));
         final boolean mkdirsResult = dir.mkdirs();
         logger.debug(String.format("\tmkdirs result: %b", mkdirsResult));
+    }
+
+    public static void logFileOwnerGroupPerms(final File file) {
+        logger.debug(String.format("Current process owner: %s", System.getProperty("user.name")));
+        if (!file.exists()) {
+            logger.debug(String.format("File %s does not exist", file.getAbsolutePath()));
+            return;
+        }
+        if (file.isDirectory()) {
+            logger.debug(String.format("File %s is a directory", file.getAbsolutePath()));
+        }
+        PosixFileAttributes attrs;
+        try {
+            attrs = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class)
+                    .readAttributes();
+            logger.debug(String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions())));
+        } catch (final IOException e) {
+            logger.debug(String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage()));
+        }
     }
 
     public static File purgeDir(final String dirPath) {

@@ -27,34 +27,20 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 
 public class PkgMgrDataNotFoundException extends IntegrationException {
     private static final long serialVersionUID = 1L;
-    private final String dockerTarfilePath;
 
-    public PkgMgrDataNotFoundException(final String dockerTarfilePath) {
-        super();
-        this.dockerTarfilePath = dockerTarfilePath;
-    }
-
-    public PkgMgrDataNotFoundException(final String dockerTarfilePath, final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
+    public PkgMgrDataNotFoundException(final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.dockerTarfilePath = dockerTarfilePath;
     }
 
-    public PkgMgrDataNotFoundException(final String dockerTarfilePath, final String message, final Throwable cause) {
+    public PkgMgrDataNotFoundException(final String message, final Throwable cause) {
         super(message, cause);
-        this.dockerTarfilePath = dockerTarfilePath;
     }
 
-    public PkgMgrDataNotFoundException(final String dockerTarfilePath, final String message) {
+    public PkgMgrDataNotFoundException(final String message) {
         super(message);
-        this.dockerTarfilePath = dockerTarfilePath;
     }
 
-    public PkgMgrDataNotFoundException(final String dockerTarfilePath, final Throwable cause) {
+    public PkgMgrDataNotFoundException(final Throwable cause) {
         super(cause);
-        this.dockerTarfilePath = dockerTarfilePath;
-    }
-
-    public String getDockerTarfilePath() {
-        return dockerTarfilePath;
     }
 }
