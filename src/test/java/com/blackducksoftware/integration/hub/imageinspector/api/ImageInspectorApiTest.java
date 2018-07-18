@@ -74,7 +74,7 @@ public class ImageInspectorApiTest {
         assertNotNull(imageInspectorApi);
         Mockito.when(os.deriveCurrentOs(Mockito.any(String.class))).thenReturn(null);
         try {
-            imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, false, null, null);
+            imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, null, null);
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs().name()));
@@ -96,7 +96,7 @@ public class ImageInspectorApiTest {
         Mockito.when(mockExtractor.extract(Mockito.anyString(), Mockito.anyString(), Mockito.any(ImagePkgMgr.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(mockedBdioDocument);
         mockExtractors.add(mockExtractor);
         Mockito.when(extractorManager.getExtractors()).thenReturn(mockExtractors);
-        final ImageInfoDerived imageInfo = imageInspectorApi.inspect(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, CODE_LOCATION_PREFIX, false, null, null);
+        final ImageInfoDerived imageInfo = imageInspectorApi.inspect(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, CODE_LOCATION_PREFIX, null, null, false, null, null);
         assertEquals(TEST_ARCH, imageInfo.getArchitecture());
         assertEquals(String.format("%s_alpine_latest_lib_apk_APK", CODE_LOCATION_PREFIX), imageInfo.getCodeLocationName());
         assertEquals(PROJECT, imageInfo.getFinalProjectName());
