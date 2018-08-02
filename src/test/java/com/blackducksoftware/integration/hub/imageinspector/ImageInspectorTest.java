@@ -69,7 +69,7 @@ public class ImageInspectorTest {
 
         final File imageTarFile = new File("test/image.tar");
         final ImagePkgMgr imagePkgMgr = new ImagePkgMgr(new File(String.format("test/resources/imageDir/image_%s_v_%s/%s", imageName, tagName, pkgMgr.getDirectory())), pkgMgr);
-        final ImageInfoParsed imageInfo = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), os, imagePkgMgr);
+        final ImageInfoParsed imageInfo = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgr);
 
         final List<Extractor> extractors = new ArrayList<>();
         extractor.initValues(pkgMgr, executor, forges);
@@ -93,7 +93,7 @@ public class ImageInspectorTest {
         etcDirs.add(etcDir);
 
         final DockerTarParser tarParser = Mockito.mock(DockerTarParser.class);
-        Mockito.when(tarParser.collectPkgMgrInfo(Mockito.any(File.class), Mockito.any(OperatingSystemEnum.class))).thenReturn(imageInfo);
+        Mockito.when(tarParser.collectPkgMgrInfo(Mockito.any(File.class))).thenReturn(imageInfo);
         imageInspector.setTarParser(tarParser);
         final List<ManifestLayerMapping> mappings = new ArrayList<>();
         final List<String> layerIds = new ArrayList<>();
@@ -101,7 +101,7 @@ public class ImageInspectorTest {
         final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, layerIds);
         mappings.add(mapping);
         final File imageFilesDir = new File("src/test/resources/imageDir");
-        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageName, tagName, mappings, "testProjectName", "testProjectVersion", imageTarFile, imageFilesDir, os, "");
+        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageName, tagName, mappings, null, "testProjectName", "testProjectVersion", imageTarFile, imageFilesDir, "");
         final File bdioFile = imageInspector.writeBdioFile(new File(tempDirPath), imageInfoDerived);
         final File file1 = new File(String.format("src/test/resources/%s_imageDir_testProjectName_testProjectVersion_bdio.jsonld", imageName));
         final File file2 = bdioFile;

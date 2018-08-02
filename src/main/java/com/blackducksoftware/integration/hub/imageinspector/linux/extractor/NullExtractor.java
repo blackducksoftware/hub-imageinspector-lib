@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.hub.bdio.graph.MutableDependencyGraph;
 import com.blackducksoftware.integration.hub.bdio.model.Forge;
+import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEnum;
 
 @Component
@@ -48,7 +49,8 @@ public class NullExtractor extends Extractor {
     }
 
     @Override
-    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList) {
+    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList,
+            final OperatingSystemEnum preferredForgeOs) {
     }
 
     @Override

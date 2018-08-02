@@ -29,9 +29,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -39,17 +41,21 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarConstants;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEnum;
 
 public class FileSys {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final int LIB_MAX_DEPTH = 4;
+    private static final int ETC_MAX_DEPTH = 0;
     private final File root;
 
     public FileSys(final File root) {
@@ -76,6 +82,61 @@ public class FileSys {
             }
         }
         return packageManagers;
+    }
+
+    public Optional<OperatingSystemEnum> getOperatingSystem() {
+        logger.debug(String.format("Looking in root dir %s for etc dir", root.getAbsolutePath()));
+        final List<File> etcDirs = FileOperations.findDirWithName(ETC_MAX_DEPTH, root, "etc");
+        if (etcDirs.size() != 1) {
+            logger.warn(String.format("Unable to determine image OS: Unable to find /etc dir in %s", root.getAbsolutePath()));
+            return Optional.empty();
+        }
+        File distroDetailsFile;
+        final Optional<File> lsbReleaseFile = FileOperations.findFileWithName(etcDirs.get(0), "lsb-release");
+        String distroNameKey;
+        Optional<File> osReleaseFile;
+        if (lsbReleaseFile.isPresent()) {
+            distroDetailsFile = lsbReleaseFile.get();
+            distroNameKey = "DISTRIB_ID";
+        } else {
+            osReleaseFile = FileOperations.findFileWithName(etcDirs.get(0), "os-release");
+            if (osReleaseFile.isPresent()) {
+                distroDetailsFile = osReleaseFile.get();
+                distroNameKey = "ID";
+            } else {
+                return Optional.empty();
+            }
+        }
+        String distroName;
+        try {
+            distroName = getDistroNameFromDistroDetailsFile(distroDetailsFile, distroNameKey);
+        } catch (final Exception distroNameParseException) {
+            logger.warn(String.format("Unable to read operating system name from file %s: %s", distroDetailsFile.getAbsolutePath(),
+                    distroNameParseException.getMessage()));
+            return Optional.empty();
+        }
+        OperatingSystemEnum distro;
+        try {
+            distro = OperatingSystemEnum.determineOperatingSystem(distroName);
+        } catch (final IllegalArgumentException distroNameConversionException) {
+            logger.warn(String.format("Unrecognized operating system name (%s) read from file %s. Error: %s", distroName, distroDetailsFile.getAbsolutePath(), distroNameConversionException.getMessage()));
+            return Optional.empty();
+        }
+        return Optional.of(distro);
+    }
+
+    private String getDistroNameFromDistroDetailsFile(final File distroDetailsFile, final String distroNameKey) throws IOException, IntegrationException {
+        final String targetPrefix = String.format("%s=", distroNameKey);
+        final List<String> lines = FileUtils.readLines(distroDetailsFile, StandardCharsets.UTF_8);
+        for (final String line : lines) {
+            if (line.startsWith(targetPrefix)) {
+                if (line.length() == targetPrefix.length()) {
+                    throw new IntegrationException(String.format("Distro name in file %s is empty", distroDetailsFile.getAbsolutePath()));
+                }
+                return line.substring(targetPrefix.length());
+            }
+        }
+        throw new IntegrationException(String.format("Distro name not found in file %s", distroDetailsFile.getAbsolutePath()));
     }
 
     public void createTarGz(final File outputTarFile) throws CompressorException, IOException {

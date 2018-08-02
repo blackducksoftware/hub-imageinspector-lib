@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -78,8 +79,8 @@ public class ImageInspector {
         return tarParser.extractDockerLayers(workingDir, imageName, imageTag, layerTars, layerMappings);
     }
 
-    public OperatingSystemEnum detectOperatingSystem(final String operatingSystem) {
-        return tarParser.detectOperatingSystem(operatingSystem);
+    public Optional<OperatingSystemEnum> detectImageOperatingSystem(final File targetImageFileSystemRootDir) {
+        return tarParser.detectImageOperatingSystem(targetImageFileSystemRootDir);
     }
 
     public OperatingSystemEnum detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
@@ -90,21 +91,24 @@ public class ImageInspector {
         return tarParser.getLayerMappings(workingDir, tarFileName, dockerImageName, dockerTagName);
     }
 
-    public ImageInfoDerived generateBdioFromImageFilesDir(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File dockerTar,
-            final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
-        final ImageInfoParsed imageInfoParsed = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir, osEnum);
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, osEnum, codeLocationPrefix, imageInfoParsed);
+    public ImageInfoDerived generateBdioFromImageFilesDir(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final OperatingSystemEnum preferredForgeOs, final String projectName,
+            final String versionName, final File dockerTar,
+            final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
+        // TODO Do we really need ImageInfoParsed and ImageInfoParsed?
+        final ImageInfoParsed imageInfoParsed = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
         final Extractor extractor = getExtractorByPackageManager(imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
         final SimpleBdioDocument bdioDocument = extractor.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getImageInfoParsed().getPkgMgr(), imageInfoDerived.getArchitecture(), imageInfoDerived.getCodeLocationName(),
-                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName());
+                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(),
+                preferredForgeOs);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
 
     public ImageInfoDerived generateEmptyBdio(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File dockerTar,
             final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
-        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null, null);
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, osEnum, codeLocationPrefix, imageInfoParsed);
+        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null);
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
         final Extractor extractor = nullExtractor;
         final SimpleBdioDocument bdioDocument = extractor.createEmptyBdio(imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName());
@@ -122,7 +126,7 @@ public class ImageInspector {
     }
 
     private ImageInfoDerived deriveImageInfo(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File targetImageFileSystemRootDir,
-            final OperatingSystemEnum osEnum, final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) throws IntegrationException, IOException {
+            final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) throws IntegrationException, IOException {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
         final ImagePkgMgr imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();

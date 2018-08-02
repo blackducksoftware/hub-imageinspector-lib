@@ -30,12 +30,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,29 +84,26 @@ public class DockerTarParser {
         return targetImageFileSystemRootDir;
     }
 
-    public OperatingSystemEnum detectOperatingSystem(final String operatingSystem) {
-        OperatingSystemEnum osEnum = null;
-        if (StringUtils.isNotBlank(operatingSystem)) {
-            osEnum = OperatingSystemEnum.determineOperatingSystem(operatingSystem);
-        }
-        return osEnum;
+    // TODO: Seems like methods that operate on targetImageFileSystemRootDir belong in their own class
+    // Move them to FileSys?
+    public Optional<OperatingSystemEnum> detectImageOperatingSystem(final File targetImageFileSystemRootDir) {
+        // TODO maybe avoid creating FileSys so often
+        final FileSys extractedFileSys = new FileSys(targetImageFileSystemRootDir);
+        return extractedFileSys.getOperatingSystem();
     }
 
     public OperatingSystemEnum detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
         return deriveInspectorOsFromPkgMgr(targetImageFileSystemRootDir);
     }
 
-    public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum) throws IntegrationException {
+    public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir) throws IntegrationException {
         logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
-        if (osEnum == null) {
-            throw new IntegrationException("Operating System value is null");
-        }
         for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
             final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
             if (packageManagerDirectory.exists()) {
                 logger.info(String.format("Found package Manager Dir: %s", packageManagerDirectory.getAbsolutePath()));
                 final ImagePkgMgr targetImagePkgMgr = new ImagePkgMgr(packageManagerDirectory, packageManagerEnum);
-                final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), osEnum, targetImagePkgMgr);
+                final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), targetImagePkgMgr);
                 return imagePkgMgrInfo;
             } else {
                 logger.debug(String.format("Package manager dir %s does not exist", packageManagerDirectory.getAbsolutePath()));

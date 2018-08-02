@@ -56,7 +56,8 @@ public class DpkgExtractor extends Extractor {
     }
 
     @Override
-    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String givenArchitecture, final String[] packageList) {
+    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String givenArchitecture, final String[] packageList,
+            final OperatingSystemEnum preferredForgeOs) {
         boolean startOfComponents = false;
         for (final String packageLine : packageList) {
 
@@ -77,7 +78,8 @@ public class DpkgExtractor extends Extractor {
                         final String externalId = String.format("%s/%s/%s", name, version, architecture);
                         logger.trace(String.format("Constructed externalId: %s", externalId));
 
-                        createBdioComponent(dependencies, name, version, externalId, architecture);
+                        createBdioComponent(dependencies, name, version, externalId, architecture,
+                                preferredForgeOs);
                     } else {
                         logger.trace(String.format("Package \"%s\" is listed but not installed (package status: %s)", packageLine, packageStatus));
                     }

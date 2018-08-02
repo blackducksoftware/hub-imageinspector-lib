@@ -26,25 +26,17 @@ package com.blackducksoftware.integration.hub.imageinspector.imageformat.docker;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
-import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
-
 public class ImageInfoParsed {
     private final String fileSystemRootDirName;
-    private final OperatingSystemEnum operatingSystemEnum;
     private final ImagePkgMgr pkgMgr;
 
-    public ImageInfoParsed(final String fileSystemRootDirName, final OperatingSystemEnum operatingSystemEnum, final ImagePkgMgr pkgMgr) {
+    public ImageInfoParsed(final String fileSystemRootDirName, final ImagePkgMgr pkgMgr) {
         this.fileSystemRootDirName = fileSystemRootDirName;
-        this.operatingSystemEnum = operatingSystemEnum;
         this.pkgMgr = pkgMgr;
     }
 
     public String getFileSystemRootDirName() {
         return fileSystemRootDirName;
-    }
-
-    public OperatingSystemEnum getOperatingSystemEnum() {
-        return operatingSystemEnum;
     }
 
     public ImagePkgMgr getPkgMgr() {

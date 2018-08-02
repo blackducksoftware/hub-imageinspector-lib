@@ -34,9 +34,11 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.slf4j.Logger;
@@ -45,6 +47,17 @@ import org.slf4j.LoggerFactory;
 public class FileOperations {
     private static final String[] DIRS_TO_SKIP = { "/Users", "/proc", "/dev", "/sys", "/tmp" };
     private static final Logger logger = LoggerFactory.getLogger(FileOperations.class);
+
+    public static Optional<File> findFileWithName(final File dirFile, final String filename) {
+        logger.trace(String.format("Looking in %s for file %s", dirFile.getAbsolutePath(), filename));
+        final IOFileFilter fileFilter = new NameFileFilter(filename);
+        final Iterator<File> iter = FileUtils.iterateFiles(dirFile, fileFilter, null);
+        if (iter.hasNext()) {
+            final File f = iter.next();
+            return Optional.of(f);
+        }
+        return Optional.empty();
+    }
 
     public static List<File> findDirWithName(final int maxDepth, final File dirFile, final String targetName) {
         final List<File> results = new ArrayList<>();

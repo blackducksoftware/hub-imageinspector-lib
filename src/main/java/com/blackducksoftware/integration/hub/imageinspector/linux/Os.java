@@ -38,7 +38,7 @@ import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEn
 public class Os {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public OperatingSystemEnum deriveCurrentOs(final String currentLinuxDistro) throws IntegrationException {
+    public OperatingSystemEnum deriveCurrentImageInspectorOs(final String currentLinuxDistro) throws IntegrationException {
         OperatingSystemEnum osEnum = OperatingSystemEnum.determineOperatingSystem(currentLinuxDistro);
         if (osEnum != null) {
             logger.debug(String.format("Using given value for current OS: %s", osEnum.toString()));
