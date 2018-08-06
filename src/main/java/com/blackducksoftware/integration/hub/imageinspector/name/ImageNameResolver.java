@@ -34,16 +34,34 @@ public class ImageNameResolver {
     public ImageNameResolver(final String givenImageName) {
         if (StringUtils.isNotBlank(givenImageName)) {
             newImageTag = Optional.of("latest");
-            final int lastColonIndex = givenImageName.lastIndexOf(':');
-            if (lastColonIndex < 0) {
+            final int tagColonIndex = findColonBeforeTag(givenImageName);
+            if (tagColonIndex < 0) {
                 newImageRepo = Optional.of(givenImageName);
             } else {
-                newImageRepo = Optional.of(givenImageName.substring(0, lastColonIndex));
-                if ((lastColonIndex + 1) != givenImageName.length()) {
-                    newImageTag = Optional.of(givenImageName.substring(lastColonIndex + 1));
+                newImageRepo = Optional.of(givenImageName.substring(0, tagColonIndex));
+                if (tagColonIndex + 1 != givenImageName.length()) {
+                    newImageTag = Optional.of(givenImageName.substring(tagColonIndex + 1));
                 }
             }
         }
+    }
+
+    private int findColonBeforeTag(final String givenImageName) {
+        final int lastColonIndex = givenImageName.lastIndexOf(':');
+        if (lastColonIndex < 0) {
+            // This is just: repo (no tag)
+            return -1;
+        }
+        final int lastSlashIndex = givenImageName.lastIndexOf('/');
+        if (lastSlashIndex < 0) {
+            // This is a urlOrOrg/repo:tag
+            return lastColonIndex;
+        }
+        if (lastColonIndex < lastSlashIndex) {
+            // This colon is part of the repo (the colon before the port #)
+            return -1;
+        }
+        return lastColonIndex;
     }
 
     public Optional<String> getNewImageRepo() {
