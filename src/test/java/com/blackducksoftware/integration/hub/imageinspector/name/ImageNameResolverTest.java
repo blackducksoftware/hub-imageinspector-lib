@@ -24,6 +24,13 @@ public class ImageNameResolverTest {
     }
 
     @Test
+    public void testNull() {
+        final ImageNameResolver resolver = new ImageNameResolver("null:null");
+        assertEquals("null", resolver.getNewImageRepo().get());
+        assertEquals("null", resolver.getNewImageTag().get());
+    }
+
+    @Test
     public void testWithoutTag() {
         final ImageNameResolver resolver = new ImageNameResolver("alpine");
         assertEquals("alpine", resolver.getNewImageRepo().get());

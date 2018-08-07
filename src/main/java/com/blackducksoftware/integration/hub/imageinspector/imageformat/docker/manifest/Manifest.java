@@ -81,9 +81,9 @@ public class Manifest {
 
     private String findRepoTag(final int numImages, final ImageInfo image, final String targetImageName, final String targetTagName) throws IntegrationException {
         // user didn't specify which image, and there is only one: return it
-        if ((numImages == 1) && StringUtils.isBlank(targetImageName) && StringUtils.isBlank(targetTagName)) {
-            logger.debug(String.format("User did not specify a repo:tag, and there's only one; inspecting that one: %s", image.repoTags.get(0)));
-            return image.repoTags.get(0);
+        if (numImages == 1 && StringUtils.isBlank(targetImageName) && StringUtils.isBlank(targetTagName)) {
+            logger.debug(String.format("User did not specify a repo:tag, and there's only one imamge; inspecting that one: %s", getRepoTag(image)));
+            return getRepoTag(image);
         }
         final String targetRepoTag = deriveSpecifiedRepoTag(targetImageName, targetTagName);
         logger.debug(String.format("findRepoTag(): specifiedRepoTag: %s", targetRepoTag));
@@ -95,6 +95,13 @@ public class Manifest {
             }
         }
         return null;
+    }
+
+    private String getRepoTag(final ImageInfo image) {
+        if (image.repoTags == null || image.repoTags.size() == 0) {
+            return "null:null";
+        }
+        return image.repoTags.get(0);
     }
 
     private void addMapping(final List<ManifestLayerMapping> mappings, final ImageInfo image, final String imageName, final String tagName) {
@@ -122,7 +129,7 @@ public class Manifest {
     }
 
     private void validateImageSpecificity(final List<ImageInfo> images, final String targetImageName, final String targetTagName) throws IntegrationException {
-        if ((images.size() > 1) && (StringUtils.isBlank(targetImageName) || StringUtils.isBlank(targetTagName))) {
+        if (images.size() > 1 && (StringUtils.isBlank(targetImageName) || StringUtils.isBlank(targetTagName))) {
             final String msg = "When the manifest contains multiple images or tags, the target image and tag to inspect must be specified";
             logger.debug(msg);
             throw new IntegrationException(msg);
