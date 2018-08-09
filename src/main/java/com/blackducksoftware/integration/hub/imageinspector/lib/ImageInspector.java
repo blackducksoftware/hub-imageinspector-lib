@@ -139,9 +139,9 @@ public class ImageInspector {
                     imageInfoDerived.getPkgMgrFilePath(), NO_PKG_MGR_FOUND));
             imageInfoDerived.setArchitecture(UNKNOWN_ARCH);
         }
-        imageInfoDerived.setFinalProjectName(deriveHubProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName));
-        imageInfoDerived.setFinalProjectVersionName(deriveHubProjectVersion(imageInfoDerived.getManifestLayerMapping(), versionName));
-        logger.info(String.format("Hub project: %s, version: %s; Code location : %s", imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getCodeLocationName()));
+        imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName));
+        imageInfoDerived.setFinalProjectVersionName(deriveBlackDuckProjectVersion(imageInfoDerived.getManifestLayerMapping(), versionName));
+        logger.info(String.format("Black Duck project: %s, version: %s; Code location : %s", imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getCodeLocationName()));
         return imageInfoDerived;
     }
 
@@ -172,26 +172,26 @@ public class ImageInspector {
         }
     }
 
-    private String deriveHubProject(final String imageName, final String projectName) {
-        String hubProjectName;
+    private String deriveBlackDuckProject(final String imageName, final String projectName) {
+        String blackDuckProjectName;
         if (StringUtils.isBlank(projectName)) {
-            hubProjectName = Names.getHubProjectNameFromImageName(imageName);
+            blackDuckProjectName = Names.getblackDuckProjectNameFromImageName(imageName);
         } else {
             logger.debug("Using project from config property");
-            hubProjectName = projectName;
+            blackDuckProjectName = projectName;
         }
-        return hubProjectName;
+        return blackDuckProjectName;
     }
 
-    private String deriveHubProjectVersion(final ManifestLayerMapping mapping, final String versionName) {
-        String hubVersionName;
+    private String deriveBlackDuckProjectVersion(final ManifestLayerMapping mapping, final String versionName) {
+        String blackDuckVersionName;
         if (StringUtils.isBlank(versionName)) {
-            hubVersionName = mapping.getTagName();
+            blackDuckVersionName = mapping.getTagName();
         } else {
             logger.debug("Using project version from config property");
-            hubVersionName = versionName;
+            blackDuckVersionName = versionName;
         }
-        return hubVersionName;
+        return blackDuckVersionName;
     }
 
     private Extractor getExtractorByPackageManager(final PackageManagerEnum packageManagerEnum) throws IntegrationException {

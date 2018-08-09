@@ -52,19 +52,19 @@ public class Names {
         return givenString.replaceAll("/", "_");
     }
 
-    public static String getBdioFilename(final String imageName, final String pkgMgrFilePath, final String hubProjectName, final String hubVersionName) {
-        logger.debug(String.format("imageName: %s, pkgMgrFilePath: %s, hubProjectName: %s, hubVersionName: %s", imageName, pkgMgrFilePath, hubProjectName, hubVersionName));
-        return createBdioFilename(cleanImageName(imageName), cleanPath(pkgMgrFilePath), cleanHubProjectName(hubProjectName), hubVersionName);
+    public static String getBdioFilename(final String imageName, final String pkgMgrFilePath, final String blackDuckProjectName, final String blackDuckVersionName) {
+        logger.debug(String.format("imageName: %s, pkgMgrFilePath: %s, blackDuckProjectName: %s, blackDuckVersionName: %s", imageName, pkgMgrFilePath, blackDuckProjectName, blackDuckVersionName));
+        return createBdioFilename(cleanImageName(imageName), cleanPath(pkgMgrFilePath), cleanblackDuckProjectName(blackDuckProjectName), blackDuckVersionName);
     }
 
-    private static String createBdioFilename(final String cleanImageName, final String cleanPkgMgrFilePath, final String cleanHubProjectName, final String hubVersionName) {
+    private static String createBdioFilename(final String cleanImageName, final String cleanPkgMgrFilePath, final String cleanblackDuckProjectName, final String blackDuckVersionName) {
         final String[] parts = new String[4];
         parts[0] = cleanImageName;
         parts[1] = cleanPkgMgrFilePath;
-        parts[2] = cleanHubProjectName;
-        parts[3] = hubVersionName;
+        parts[2] = cleanblackDuckProjectName;
+        parts[3] = blackDuckVersionName;
 
-        String filename = generateFilename(cleanImageName, cleanPkgMgrFilePath, cleanHubProjectName, hubVersionName);
+        String filename = generateFilename(cleanImageName, cleanPkgMgrFilePath, cleanblackDuckProjectName, blackDuckVersionName);
         for (int i = 0; filename.length() >= 255 && i < 4; i++) {
             parts[i] = DigestUtils.sha1Hex(parts[i]);
             if (parts[i].length() > 15) {
@@ -76,7 +76,7 @@ public class Names {
         return filename;
     }
 
-    public static String getHubProjectNameFromImageName(final String imageName) {
+    public static String getblackDuckProjectNameFromImageName(final String imageName) {
         return cleanImageName(imageName);
     }
 
@@ -84,8 +84,8 @@ public class Names {
         return colonsToUnderscores(slashesToUnderscore(imageName));
     }
 
-    private static String cleanHubProjectName(final String hubProjectName) {
-        return slashesToUnderscore(hubProjectName);
+    private static String cleanblackDuckProjectName(final String blackDuckProjectName) {
+        return slashesToUnderscore(blackDuckProjectName);
     }
 
     public static String getContainerFileSystemTarFilename(final String imageNameTag, final String tarPath) {
@@ -107,8 +107,8 @@ public class Names {
         return imageName.replaceAll(":", "_");
     }
 
-    private static String generateFilename(final String cleanImageName, final String cleanPkgMgrFilePath, final String cleanHubProjectName, final String hubVersionName) {
-        return String.format("%s_%s_%s_%s_bdio.jsonld", cleanImageName, cleanPkgMgrFilePath, cleanHubProjectName, hubVersionName);
+    private static String generateFilename(final String cleanImageName, final String cleanPkgMgrFilePath, final String cleanblackDuckProjectName, final String blackDuckVersionName) {
+        return String.format("%s_%s_%s_%s_bdio.jsonld", cleanImageName, cleanPkgMgrFilePath, cleanblackDuckProjectName, blackDuckVersionName);
     }
 
     private static String cleanPath(final String path) {

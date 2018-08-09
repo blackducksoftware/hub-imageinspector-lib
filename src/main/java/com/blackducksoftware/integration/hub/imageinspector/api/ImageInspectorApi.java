@@ -55,24 +55,26 @@ public class ImageInspectorApi {
     @Autowired
     private Os os;
 
-    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
+    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
             final boolean cleanupWorkingDir, final String containerFileSystemOutputPath,
             final String currentLinuxDistro)
             throws IntegrationException {
         logger.info("getBdio()");
         os.logMemory();
-        return getBdioDocument(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro);
+        return getBdioDocument(dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro);
     }
 
-    private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
+    private SimpleBdioDocument getBdioDocument(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix, final String givenImageRepo,
+            final String givenImageTag,
             final boolean cleanupWorkingDir,
             final String containerFileSystemOutputPath, final String currentLinuxDistro)
             throws IntegrationException {
-        final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro);
+        final ImageInfoDerived imageInfoDerived = inspect(dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, cleanupWorkingDir, containerFileSystemOutputPath,
+                currentLinuxDistro);
         return imageInfoDerived.getBdioDocument();
     }
 
-    ImageInfoDerived inspect(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
+    ImageInfoDerived inspect(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
             final boolean cleanupWorkingDir, final String containerFileSystemOutputPath,
             final String currentLinuxDistro)
             throws IntegrationException {
@@ -85,7 +87,7 @@ public class ImageInspectorApi {
         }
         ImageInfoDerived imageInfoDerived = null;
         try {
-            imageInfoDerived = inspectUsingGivenWorkingDir(dockerTarfile, hubProjectName, hubProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, containerFileSystemOutputPath, currentLinuxDistro, tempDir);
+            imageInfoDerived = inspectUsingGivenWorkingDir(dockerTarfile, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, containerFileSystemOutputPath, currentLinuxDistro, tempDir);
         } catch (IOException | InterruptedException | CompressorException e) {
             throw new IntegrationException(String.format("Error inspecting image: %s", e.getMessage()), e);
         } finally {
@@ -97,7 +99,8 @@ public class ImageInspectorApi {
         return imageInfoDerived;
     }
 
-    private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
+    private ImageInfoDerived inspectUsingGivenWorkingDir(final File dockerTarfile, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix, final String givenImageRepo,
+            final String givenImageTag,
             final String containerFileSystemOutputPath,
             final String currentLinuxDistro, final File tempDir)
             throws IOException, IntegrationException, WrongInspectorOsException, InterruptedException, CompressorException {
@@ -124,10 +127,10 @@ public class ImageInspectorApi {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
                 throw new WrongInspectorOsException(dockerTarfile.getAbsolutePath(), neededInspectorOs, msg);
             }
-            imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageRepo, imageTag, tarfileMetadata, hubProjectName, hubProjectVersion, dockerTarfile, targetImageFileSystemRootDir, inspectorOs,
+            imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageRepo, imageTag, tarfileMetadata, blackDuckProjectName, blackDuckProjectVersion, dockerTarfile, targetImageFileSystemRootDir, inspectorOs,
                     codeLocationPrefix);
         } catch (final PkgMgrDataNotFoundException e) {
-            imageInfoDerived = imageInspector.generateEmptyBdio(imageRepo, imageTag, tarfileMetadata, hubProjectName, hubProjectVersion, dockerTarfile, targetImageFileSystemRootDir, inspectorOs,
+            imageInfoDerived = imageInspector.generateEmptyBdio(imageRepo, imageTag, tarfileMetadata, blackDuckProjectName, blackDuckProjectVersion, dockerTarfile, targetImageFileSystemRootDir, inspectorOs,
                     codeLocationPrefix);
         }
         createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);
