@@ -37,7 +37,7 @@ import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.m
 import com.blackducksoftware.integration.hub.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.blackducksoftware.integration.hub.imageinspector.lib.OperatingSystemEnum;
 import com.blackducksoftware.integration.hub.imageinspector.linux.executor.Executor;
-import com.blackducksoftware.integration.test.annotation.IntegrationTest;
+import com.synopsys.integration.test.annotation.IntegrationTest;
 
 @Category(IntegrationTest.class)
 public class DockerTarParserTest {

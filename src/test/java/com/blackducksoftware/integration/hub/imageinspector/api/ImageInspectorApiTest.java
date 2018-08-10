@@ -31,7 +31,7 @@ import com.blackducksoftware.integration.hub.imageinspector.lib.PackageManagerEn
 import com.blackducksoftware.integration.hub.imageinspector.linux.Os;
 import com.blackducksoftware.integration.hub.imageinspector.linux.extractor.Extractor;
 import com.blackducksoftware.integration.hub.imageinspector.linux.extractor.ExtractorManager;
-import com.blackducksoftware.integration.test.annotation.IntegrationTest;
+import com.synopsys.integration.test.annotation.IntegrationTest;
 
 @Category(IntegrationTest.class)
 @RunWith(SpringJUnit4ClassRunner.class)
