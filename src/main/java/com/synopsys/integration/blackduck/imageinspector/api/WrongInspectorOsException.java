@@ -1,0 +1,70 @@
+/**
+ * hub-imageinspector-lib
+ *
+ * Copyright (C) 2018 Black Duck Software, Inc.
+ * http://www.blackducksoftware.com/
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package com.synopsys.integration.blackduck.imageinspector.api;
+
+import com.blackducksoftware.integration.exception.IntegrationException;
+
+public class WrongInspectorOsException extends IntegrationException {
+    private static final long serialVersionUID = -1109859596321015457L;
+    private final String dockerTarfilePath;
+    private final ImageInspectorOsEnum correctInspectorOs;
+
+    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs) {
+        super();
+        this.dockerTarfilePath = dockerTarfilePath;
+        this.correctInspectorOs = correctInspectorOs;
+    }
+
+    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs, final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+        this.dockerTarfilePath = dockerTarfilePath;
+        this.correctInspectorOs = correctInspectorOs;
+    }
+
+    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs, final String message, final Throwable cause) {
+        super(message, cause);
+        this.dockerTarfilePath = dockerTarfilePath;
+        this.correctInspectorOs = correctInspectorOs;
+    }
+
+    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs, final String message) {
+        super(message);
+        this.dockerTarfilePath = dockerTarfilePath;
+        this.correctInspectorOs = correctInspectorOs;
+    }
+
+    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs, final Throwable cause) {
+        super(cause);
+        this.dockerTarfilePath = dockerTarfilePath;
+        this.correctInspectorOs = correctInspectorOs;
+    }
+
+    public ImageInspectorOsEnum getcorrectInspectorOs() {
+        return correctInspectorOs;
+    }
+
+    public String getDockerTarfilePath() {
+        return dockerTarfilePath;
+    }
+}
