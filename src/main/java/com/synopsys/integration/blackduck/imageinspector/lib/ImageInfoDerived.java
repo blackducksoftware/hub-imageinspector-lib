@@ -23,9 +23,9 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
-import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 public class ImageInfoDerived {
     private final ImageInfoParsed imageInfoParsed;

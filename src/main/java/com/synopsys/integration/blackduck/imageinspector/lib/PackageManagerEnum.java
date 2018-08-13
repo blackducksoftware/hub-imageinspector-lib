@@ -26,7 +26,7 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.hub.bdio.model.Forge;
+import com.synopsys.integration.hub.bdio.model.Forge;
 
 public enum PackageManagerEnum {
     DPKG("/var/lib/dpkg", OperatingSystemEnum.UBUNTU, OperatingSystemEnum.DEBIAN.getForge()),

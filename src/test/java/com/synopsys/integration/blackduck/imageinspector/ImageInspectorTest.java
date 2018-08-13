@@ -16,8 +16,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.bdio.model.Forge;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
@@ -33,6 +31,8 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ApkExtr
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ExtractorManager;
+import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.hub.bdio.model.Forge;
 
 public class ImageInspectorTest {
 
@@ -106,7 +106,7 @@ public class ImageInspectorTest {
         final File file1 = new File(String.format("src/test/resources/%s_imageDir_testProjectName_testProjectVersion_bdio.jsonld", imageName));
         final File file2 = bdioFile;
         System.out.println(String.format("Comparing %s to %s", file2.getAbsolutePath(), file1.getAbsolutePath()));
-        final List<String> linesToExclude = Arrays.asList("\"@id\":", "\"externalSystemTypeId\":", "_Users_", "spdx:created");
+        final List<String> linesToExclude = Arrays.asList("\"@id\":", "\"externalSystemTypeId\":", "_Users_", "spdx:created", "Tool: ");
         final boolean filesAreEqual = TestUtils.contentEquals(file1, file2, linesToExclude);
         assertTrue(filesAreEqual);
     }

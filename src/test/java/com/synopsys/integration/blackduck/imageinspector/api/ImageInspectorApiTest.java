@@ -21,11 +21,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.bdio.model.BdioProject;
-import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorApi;
-import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
@@ -33,6 +28,9 @@ import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ExtractorManager;
+import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.hub.bdio.model.BdioProject;
+import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.test.annotation.IntegrationTest;
 
 @Category(IntegrationTest.class)

@@ -18,9 +18,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
+import com.synopsys.integration.exception.IntegrationException;
 
 public class ExecutorMock extends PkgMgrExecutor {
 

@@ -12,18 +12,16 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.bdio.BdioWriter;
-import com.blackducksoftware.integration.hub.bdio.model.Forge;
-import com.blackducksoftware.integration.hub.bdio.model.SimpleBdioDocument;
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ExecutorMock;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgExtractor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
+import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.hub.bdio.BdioWriter;
+import com.synopsys.integration.hub.bdio.model.Forge;
+import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 public class DpkgExtractorTest {
 
@@ -64,7 +62,7 @@ public class DpkgExtractorTest {
         final File file1 = new File("src/test/resources/testDpkgBdio1.jsonld");
         final File file2 = new File("test/testDpkgBdio1.jsonld");
         System.out.println(String.format("Comparing %s to %s", file2.getAbsolutePath(), file1.getAbsolutePath()));
-        final List<String> linesToExclude = Arrays.asList("\"@id\":", "\"externalSystemTypeId\":", "spdx:created");
+        final List<String> linesToExclude = Arrays.asList("\"@id\":", "\"externalSystemTypeId\":", "spdx:created", "Tool: ");
         final boolean filesAreEqual = TestUtils.contentEquals(file1, file2, linesToExclude);
         assertTrue(filesAreEqual);
     }

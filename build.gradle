@@ -26,7 +26,7 @@ dependencyManagement {
 }
 
 dependencies {
-    compile 'com.blackducksoftware.integration:integration-bdio:13.0.0'
+    compile 'com.blackducksoftware.integration:integration-bdio:16.0.0'
     compile 'org.springframework.boot:spring-boot-starter'
     compile 'org.springframework:spring-context'
     compile 'commons-io:commons-io:2.5'

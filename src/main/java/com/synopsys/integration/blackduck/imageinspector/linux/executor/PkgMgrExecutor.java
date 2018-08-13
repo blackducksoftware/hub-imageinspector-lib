@@ -30,9 +30,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerFiles;
+import com.synopsys.integration.exception.IntegrationException;
 
 public abstract class PkgMgrExecutor extends Executor {
     private final Logger logger = LoggerFactory.getLogger(getClass());

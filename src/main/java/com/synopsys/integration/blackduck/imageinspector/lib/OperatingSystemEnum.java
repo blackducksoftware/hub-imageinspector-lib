@@ -25,7 +25,7 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.blackducksoftware.integration.hub.bdio.model.Forge;
+import com.synopsys.integration.hub.bdio.model.Forge;
 
 public enum OperatingSystemEnum {
     ALPINE(Forge.ALPINE),

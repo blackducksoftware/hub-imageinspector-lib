@@ -23,7 +23,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.api;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
+import com.synopsys.integration.exception.IntegrationException;
 
 public class PkgMgrDataNotFoundException extends IntegrationException {
     private static final long serialVersionUID = 1L;
