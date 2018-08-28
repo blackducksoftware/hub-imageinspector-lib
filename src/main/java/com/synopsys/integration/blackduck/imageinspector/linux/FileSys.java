@@ -66,7 +66,6 @@ public class FileSys {
                 for (final File packageManagerDirectory : libDir.listFiles()) {
                     logger.trace(String.format("Checking dir %s to see if it's a package manager dir", packageManagerDirectory.getAbsolutePath()));
                     try {
-                        // TODO this is too simplistic IDOCKER-363
                         logger.trace(String.format("Found a lib dir: %s", packageManagerDirectory.getAbsolutePath()));
                         packageManagers.add(PackageManagerEnum.getPackageManagerEnumByName(packageManagerDirectory.getName()));
                     } catch (final IllegalArgumentException e) {

@@ -23,15 +23,16 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerFiles;
 import com.synopsys.integration.exception.IntegrationException;
 
 public abstract class PkgMgrExecutor extends Executor {
@@ -53,8 +54,12 @@ public abstract class PkgMgrExecutor extends Executor {
         lock.lock();
         logger.info("Acquired lock for package manager execution");
         try {
-            final PackageManagerFiles pkgMgrFiles = new PackageManagerFiles();
-            pkgMgrFiles.stubPackageManagerFiles(imagePkgMgr);
+            final File packageManagerDirectory = new File(imagePkgMgr.getPackageManager().getDirectory());
+            if (packageManagerDirectory.exists()) {
+                initPkgMgrDir(packageManagerDirectory);
+            }
+            logger.debug(String.format("Copying %s to %s", imagePkgMgr.getExtractedPackageManagerDirectory().getAbsolutePath(), packageManagerDirectory.getAbsolutePath()));
+            FileUtils.copyDirectory(imagePkgMgr.getExtractedPackageManagerDirectory(), packageManagerDirectory);
             final String[] packages = listPackages();
             logger.trace(String.format("Package count: %d", packages.length));
             return packages;
@@ -64,6 +69,8 @@ public abstract class PkgMgrExecutor extends Executor {
             logger.info("Released lock after package manager execution");
         }
     }
+
+    protected abstract void initPkgMgrDir(final File packageManagerDirectory) throws IOException;
 
     private String[] listPackages() throws IntegrationException, IOException, InterruptedException {
         String[] results;

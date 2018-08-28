@@ -23,9 +23,14 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
+import java.io.File;
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 @Component
 public class DpkgExecutor extends PkgMgrExecutor {
@@ -33,5 +38,14 @@ public class DpkgExecutor extends PkgMgrExecutor {
     @PostConstruct
     public void init() {
         initValues(null, "dpkg -l");
+    }
+
+    @Override
+    protected void initPkgMgrDir(final File packageManagerDirectory) throws IOException {
+        FileOperations.deleteFilesOnly(packageManagerDirectory);
+        final File statusFile = new File(packageManagerDirectory, "status");
+        statusFile.createNewFile();
+        final File updatesDir = new File(packageManagerDirectory, "updates");
+        updatesDir.mkdir();
     }
 }

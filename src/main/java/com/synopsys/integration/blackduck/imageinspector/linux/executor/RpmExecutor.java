@@ -23,9 +23,14 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
+import java.io.File;
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 @Component
 public class RpmExecutor extends PkgMgrExecutor {
@@ -33,5 +38,10 @@ public class RpmExecutor extends PkgMgrExecutor {
     @PostConstruct
     public void init() {
         initValues("rpm --rebuilddb", "rpm -qa");
+    }
+
+    @Override
+    protected void initPkgMgrDir(final File packageManagerDirectory) throws IOException {
+        FileOperations.deleteFilesOnly(packageManagerDirectory);
     }
 }

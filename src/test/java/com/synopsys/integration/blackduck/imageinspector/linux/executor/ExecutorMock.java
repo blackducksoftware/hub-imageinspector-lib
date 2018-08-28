@@ -43,4 +43,8 @@ public class ExecutorMock extends PkgMgrExecutor {
     @Override
     public void init() {
     }
+
+    @Override
+    protected void initPkgMgrDir(final File packageManagerDirectory) throws IOException {
+    }
 }

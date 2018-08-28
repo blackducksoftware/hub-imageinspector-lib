@@ -119,6 +119,16 @@ public class FileOperations {
         }
     }
 
+    public static void deleteFilesOnly(final File file) {
+        if (file.isDirectory()) {
+            for (final File subFile : file.listFiles()) {
+                deleteFilesOnly(subFile);
+            }
+        } else {
+            file.delete();
+        }
+    }
+
     public static void ensureDirExists(final File dir) {
         logger.debug(String.format("Creating %s (if it does not exist)", dir.getAbsolutePath()));
         final boolean mkdirsResult = dir.mkdirs();
