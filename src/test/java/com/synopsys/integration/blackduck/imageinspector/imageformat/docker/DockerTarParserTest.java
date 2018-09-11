@@ -31,14 +31,11 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
+import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.test.annotation.IntegrationTest;
 
 @Category(IntegrationTest.class)
@@ -65,9 +62,7 @@ public class DockerTarParserTest {
         assertEquals(1, layerMappings.size());
         assertEquals(2, layerMappings.get(0).getLayers().size());
         final File imageFilesDir = tarParser.extractDockerLayers(workingDirectory, "imageName", "imageTag", layerTars, layerMappings);
-        final OperatingSystemEnum targetOsEnum = tarParser.detectInspectorOperatingSystem(imageFilesDir);
-        assertEquals(OperatingSystemEnum.CENTOS, targetOsEnum);
-        final ImageInfoParsed tarExtractionResults = tarParser.collectPkgMgrInfo(imageFilesDir, targetOsEnum);
+        final ImageInfoParsed tarExtractionResults = tarParser.collectPkgMgrInfo(imageFilesDir);
         assertEquals("/var/lib/rpm", tarExtractionResults.getPkgMgr().getPackageManager().getDirectory());
 
         boolean varLibRpmNameFound = false;

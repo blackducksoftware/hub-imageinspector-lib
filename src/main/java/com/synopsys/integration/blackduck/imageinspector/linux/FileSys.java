@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -50,6 +51,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 public class FileSys {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final int LIB_MAX_DEPTH = 4;
+    private static final int ETC_MAX_DEPTH = 0;
     private final File root;
 
     public FileSys(final File root) {
@@ -75,6 +77,15 @@ public class FileSys {
             }
         }
         return packageManagers;
+    }
+
+    public Optional<File> getEtcDir() {
+        logger.debug(String.format("Looking in root dir %s for etc dir", root.getAbsolutePath()));
+        final List<File> etcDirs = FileOperations.findDirWithName(ETC_MAX_DEPTH, root, "etc");
+        if (etcDirs != null && etcDirs.size() == 1) {
+            return Optional.of(etcDirs.get(0));
+        }
+        return Optional.empty();
     }
 
     public void createTarGz(final File outputTarFile) throws CompressorException, IOException {

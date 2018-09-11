@@ -30,12 +30,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +48,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileSys;
+import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 
@@ -59,6 +60,9 @@ public class DockerTarParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private ManifestFactory manifestFactory;
+
+    @Autowired
+    private Os os;
 
     @Autowired
     public void setManifestFactory(final ManifestFactory manifestFactory) {
@@ -84,36 +88,25 @@ public class DockerTarParser {
         return targetImageFileSystemRootDir;
     }
 
-    public OperatingSystemEnum detectOperatingSystem(final String operatingSystem) {
-        OperatingSystemEnum osEnum = null;
-        if (StringUtils.isNotBlank(operatingSystem)) {
-            osEnum = OperatingSystemEnum.determineOperatingSystem(operatingSystem);
-        }
-        return osEnum;
-    }
-
     public OperatingSystemEnum detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
         return deriveInspectorOsFromPkgMgr(targetImageFileSystemRootDir);
     }
 
-    public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir, final OperatingSystemEnum osEnum) throws IntegrationException {
+    public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir) throws IntegrationException {
         logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
-        if (osEnum == null) {
-            throw new IntegrationException("Operating System value is null");
-        }
         for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
             final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
             if (packageManagerDirectory.exists()) {
                 logger.info(String.format("Found package Manager Dir: %s", packageManagerDirectory.getAbsolutePath()));
                 final ImagePkgMgr targetImagePkgMgr = new ImagePkgMgr(packageManagerDirectory, packageManagerEnum);
-                final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), osEnum, targetImagePkgMgr);
+                final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
+                final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), targetImagePkgMgr, linuxDistroName);
                 return imagePkgMgrInfo;
             } else {
                 logger.debug(String.format("Package manager dir %s does not exist", packageManagerDirectory.getAbsolutePath()));
             }
         }
         throw new IntegrationException("No package manager files found in this Docker image.");
-
     }
 
     public List<File> extractLayerTars(final File workingDirectory, final File dockerTar) throws IOException {
@@ -164,6 +157,32 @@ public class DockerTarParser {
             throw new IntegrationException(msg);
         }
         return mappings;
+    }
+
+    private Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {
+        final FileSys extractedFileSys = new FileSys(targetImageFileSystemRootDir);
+        final Optional<File> etcDir = extractedFileSys.getEtcDir();
+        if (!etcDir.isPresent()) {
+            return Optional.empty();
+        }
+        return extractLinuxDistroNameFromEtcDir(etcDir.get());
+    }
+
+    private Optional<String> extractLinuxDistroNameFromEtcDir(final File etcDir) {
+        logger.trace(String.format("/etc directory: %s", etcDir.getAbsolutePath()));
+        if (etcDir.listFiles().length == 0) {
+            logger.warn(String.format("Could not determine the Operating System because the /etc dir (%s) is empty", etcDir.getAbsolutePath()));
+        }
+        return extractLinuxDistroNameFromFiles(etcDir.listFiles());
+    }
+
+    private Optional<String> extractLinuxDistroNameFromFiles(final File[] etcFiles) {
+        for (final File etcFile : etcFiles) {
+            if (os.isLinuxDistroFile(etcFile)) {
+                return os.getLinxDistroName(etcFile);
+            }
+        }
+        return Optional.empty();
     }
 
     private File getTarExtractionDirectory(final File workingDirectory) {

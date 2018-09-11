@@ -61,7 +61,7 @@ public class RpmExtractor extends Extractor {
     }
 
     @Override
-    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList) {
+    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList, final String extractedForgeName) {
         logger.debug("extractComponents: Received ${packageList.length} package lines");
         for (final String packageLine : packageList) {
             if (valid(packageLine)) {
@@ -74,7 +74,7 @@ public class RpmExtractor extends Extractor {
                 final String artifact = packageLine.substring(0, secondToLastDashIndex);
                 final String externalId = String.format("%s/%s/%s", artifact, versionRelease, arch);
                 logger.debug(String.format("Adding externalId %s to components list", externalId));
-                createBdioComponent(dependencies, artifact, versionRelease, externalId, arch);
+                createBdioComponent(dependencies, artifact, versionRelease, externalId, arch, extractedForgeName);
             }
         }
     }

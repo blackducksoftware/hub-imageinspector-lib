@@ -64,7 +64,7 @@ public class ApkExtractor extends Extractor {
     // Expected format: component-versionpart1-versionpart2
     // component may contain dashes (often contains one.
     @Override
-    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList) {
+    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList, final String extractedForgeName) {
         for (final String packageLine : packageList) {
             if (!packageLine.toLowerCase().startsWith("warning")) {
                 logger.trace(String.format("packageLine: %s", packageLine));
@@ -89,7 +89,7 @@ public class ApkExtractor extends Extractor {
                 if (!component.startsWith(".")) {
                     final String externalId = String.format("%s/%s/%s", component, version, architecture);
                     logger.debug(String.format("Constructed externalId: %s", externalId));
-                    createBdioComponent(dependencies, component, version, externalId, architecture);
+                    createBdioComponent(dependencies, component, version, externalId, architecture, extractedForgeName);
                 }
             }
         }

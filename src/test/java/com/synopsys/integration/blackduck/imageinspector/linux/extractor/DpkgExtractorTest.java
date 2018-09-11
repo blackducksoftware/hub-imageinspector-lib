@@ -55,7 +55,7 @@ public class DpkgExtractorTest {
         final BdioWriter bdioWriter = new BdioWriter(new Gson(), new FileWriter(bdioOutputFile));
 
         final ImagePkgMgr imagePkgMgr = new ImagePkgMgr(new File("nonexistentdir"), PackageManagerEnum.DPKG);
-        final SimpleBdioDocument bdioDocument = extractor.extract("root", "1.0", imagePkgMgr, "x86", "CodeLocationName", "Test", "1");
+        final SimpleBdioDocument bdioDocument = extractor.extract("root", "1.0", imagePkgMgr, "x86", "CodeLocationName", "Test", "1", null);
         Extractor.writeBdio(bdioWriter, bdioDocument);
         bdioWriter.close();
 

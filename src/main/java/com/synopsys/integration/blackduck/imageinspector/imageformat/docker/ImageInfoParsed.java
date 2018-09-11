@@ -26,29 +26,27 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
-
 public class ImageInfoParsed {
     private final String fileSystemRootDirName;
-    private final OperatingSystemEnum operatingSystemEnum;
     private final ImagePkgMgr pkgMgr;
+    private final String linuxDistroName;
 
-    public ImageInfoParsed(final String fileSystemRootDirName, final OperatingSystemEnum operatingSystemEnum, final ImagePkgMgr pkgMgr) {
+    public ImageInfoParsed(final String fileSystemRootDirName, final ImagePkgMgr pkgMgr, final String linuxDistroName) {
         this.fileSystemRootDirName = fileSystemRootDirName;
-        this.operatingSystemEnum = operatingSystemEnum;
         this.pkgMgr = pkgMgr;
+        this.linuxDistroName = linuxDistroName;
     }
 
     public String getFileSystemRootDirName() {
         return fileSystemRootDirName;
     }
 
-    public OperatingSystemEnum getOperatingSystemEnum() {
-        return operatingSystemEnum;
-    }
-
     public ImagePkgMgr getPkgMgr() {
         return pkgMgr;
+    }
+
+    public String getLinuxDistroName() {
+        return linuxDistroName;
     }
 
     @Override
