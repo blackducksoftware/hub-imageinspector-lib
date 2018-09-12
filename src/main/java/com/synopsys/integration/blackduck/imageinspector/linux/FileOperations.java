@@ -208,6 +208,7 @@ public class FileOperations {
             logger.trace("Hit max depth; pruning tree here");
             return filesMatchingTargetName;
         }
+        // TODO IDOCKER-508: this compares relative path like /Users to full path!
         for (final String dirToSkip : DIRS_TO_SKIP) {
             if (dirToSkip.equals(dirCanonicalPath)) {
                 logger.trace(String.format("dir %s is in the skip list; skipping it", dir.getAbsolutePath()));

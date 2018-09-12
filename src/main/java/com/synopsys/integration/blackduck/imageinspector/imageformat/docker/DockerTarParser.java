@@ -60,9 +60,12 @@ public class DockerTarParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private ManifestFactory manifestFactory;
+    private Os os;
 
     @Autowired
-    private Os os;
+    public void setOs(final Os os) {
+        this.os = os;
+    }
 
     @Autowired
     public void setManifestFactory(final ManifestFactory manifestFactory) {

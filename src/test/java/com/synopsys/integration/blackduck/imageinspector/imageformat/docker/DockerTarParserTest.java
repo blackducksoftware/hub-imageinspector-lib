@@ -34,6 +34,7 @@ import org.junit.experimental.categories.Category;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.test.annotation.IntegrationTest;
@@ -56,6 +57,7 @@ public class DockerTarParserTest {
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new HardwiredManifestFactory());
+        tarParser.setOs(new Os());
 
         final List<File> layerTars = tarParser.extractLayerTars(workingDirectory, dockerTar);
         final List<ManifestLayerMapping> layerMappings = tarParser.getLayerMappings(workingDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
