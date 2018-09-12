@@ -100,9 +100,10 @@ public abstract class Extractor {
     }
 
     public void createBdioComponent(final MutableDependencyGraph dependencies, final String name, final String version, final String externalId, final String arch, final String extractedForgeName) {
+        logger.debug(String.format("createBdioComponent(): extractedForgeName: %s", extractedForgeName));
         if (extractedForgeName != null) {
             final String preferredNamespace = String.format("@%s", extractedForgeName);
-            logger.trace(String.format("Generating component with preferred namespace %s", preferredNamespace));
+            logger.debug(String.format("Generating component with preferred namespace %s", preferredNamespace));
             final Forge preferredNamespaceForge = new Forge("/", "/", preferredNamespace);
             addDependency(dependencies, name, version, arch, preferredNamespaceForge);
         } else {
