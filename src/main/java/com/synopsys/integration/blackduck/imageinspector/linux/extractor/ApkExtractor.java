@@ -25,8 +25,10 @@ package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -39,14 +41,13 @@ import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
 import com.synopsys.integration.hub.bdio.graph.MutableDependencyGraph;
 import com.synopsys.integration.hub.bdio.model.Forge;
 
 @Component
 public class ApkExtractor extends Extractor {
-    private static final int MAX_ETC_DIR_DEPTH = 3;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -98,13 +99,14 @@ public class ApkExtractor extends Extractor {
     @Override
     public String deriveArchitecture(final File targetImageFileSystemRootDir) throws IOException {
         String architecture = null;
-        final List<File> etcDirectories = FileOperations.findDirWithName(MAX_ETC_DIR_DEPTH, targetImageFileSystemRootDir, "etc");
-        for (final File etc : etcDirectories) {
-            File architectureFile = new File(etc, "apk");
-            architectureFile = new File(architectureFile, "arch");
-            if (architectureFile.exists()) {
-                architecture = FileUtils.readLines(architectureFile, "UTF-8").get(0);
-                break;
+        final Optional<File> etc = new LinuxFileSystem(targetImageFileSystemRootDir).getEtcDir();
+        if (etc.isPresent()) {
+            final File apkDir = new File(etc.get(), "apk");
+            if (apkDir.isDirectory()) {
+                final File architectureFile = new File(apkDir, "arch");
+                if (architectureFile.isFile()) {
+                    architecture = FileUtils.readLines(architectureFile, StandardCharsets.UTF_8).get(0);
+                }
             }
         }
         return architecture;

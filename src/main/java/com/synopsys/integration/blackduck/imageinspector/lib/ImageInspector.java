@@ -78,8 +78,8 @@ public class ImageInspector {
         return tarParser.extractDockerLayers(workingDir, imageName, imageTag, layerTars, layerMappings);
     }
 
-    public OperatingSystemEnum detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
-        return tarParser.detectInspectorOperatingSystem(targetImageFileSystemRootDir);
+    public ImageInfoParsed detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
+        return tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
     }
 
     public List<ManifestLayerMapping> getLayerMappings(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {

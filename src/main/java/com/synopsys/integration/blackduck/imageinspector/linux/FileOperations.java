@@ -43,17 +43,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileOperations {
-    private static final String[] DIRS_TO_SKIP = { "/Users", "/proc", "/dev", "/sys", "/tmp" };
+
     private static final Logger logger = LoggerFactory.getLogger(FileOperations.class);
 
-    public static List<File> findDirWithName(final int maxDepth, final File dirFile, final String targetName) {
+    // TODO When docker exec mode goes away, this method can go away
+    public static List<File> findDirsWithName(final int maxDepth, final File dirFile, final String targetName, final List<String> rootLevelDirsToSkip) {
         final List<File> results = new ArrayList<>();
         logger.trace(String.format("Looking in %s for Dir %s", dirFile.getAbsolutePath(), targetName));
-        final List<File> iter = findDirsWithGivenName(maxDepth, 0, dirFile, targetName);
+        final List<File> dirsFoundWithGivenName = findDirsWithGivenName(maxDepth, 0, dirFile, targetName, rootLevelDirsToSkip);
         logger.trace("Processing the list...");
-        for (final File f : iter) {
-            logger.trace(String.format("Match: %s", f.getAbsolutePath()));
-            results.add(f);
+        for (final File dirFound : dirsFoundWithGivenName) {
+            logger.trace(String.format("Match: %s", dirFound.getAbsolutePath()));
+            results.add(dirFound);
         }
         logger.trace("Done processing the list");
         return results;
@@ -195,33 +196,28 @@ public class FileOperations {
         logger.debug(String.format("Disk: free: %d", dir.getFreeSpace()));
     }
 
-    private static List<File> findDirsWithGivenName(final int maxDepth, final int depth, final File dir, final String targetName) {
+    private static List<File> findDirsWithGivenName(final int maxDepth, final int currentDepth, final File currentDir, final String targetName, final List<String> rootLevelDirsToSkip) {
         final List<File> filesMatchingTargetName = new ArrayList<>();
-        logger.trace(String.format("findFiles() processing dir %s", dir.getAbsolutePath()));
-        String dirCanonicalPath;
-        try {
-            dirCanonicalPath = dir.getCanonicalPath();
-        } catch (final IOException e1) {
-            dirCanonicalPath = dir.getAbsolutePath();
-        }
-        if (depth > maxDepth) {
+        logger.trace(String.format("findFiles() processing dir %s", currentDir.getAbsolutePath()));
+        if (currentDepth > maxDepth) {
             logger.trace("Hit max depth; pruning tree here");
             return filesMatchingTargetName;
         }
-        // TODO IDOCKER-508: this compares relative path like /Users to full path!
-        for (final String dirToSkip : DIRS_TO_SKIP) {
-            if (dirToSkip.equals(dirCanonicalPath)) {
-                logger.trace(String.format("dir %s is in the skip list; skipping it", dir.getAbsolutePath()));
-                return filesMatchingTargetName;
+        if (currentDepth == 1 && rootLevelDirsToSkip != null) {
+            for (final String dirToSkip : rootLevelDirsToSkip) {
+                if (dirToSkip.equals(currentDir.getName())) {
+                    logger.trace(String.format("dir %s is in the skip list; skipping it", currentDir.getAbsolutePath()));
+                    return filesMatchingTargetName;
+                }
             }
         }
         try {
-            for (final File fileWithinDir : dir.listFiles()) {
+            for (final File fileWithinDir : currentDir.listFiles()) {
                 if (fileWithinDir.isDirectory()) {
                     if (targetName.equals(fileWithinDir.getName())) {
                         filesMatchingTargetName.add(fileWithinDir);
                     }
-                    final List<File> subDirsMatchingFiles = findDirsWithGivenName(maxDepth, depth + 1, fileWithinDir, targetName);
+                    final List<File> subDirsMatchingFiles = findDirsWithGivenName(maxDepth, currentDepth + 1, fileWithinDir, targetName, rootLevelDirsToSkip);
                     filesMatchingTargetName.addAll(subDirsMatchingFiles);
                 }
             }

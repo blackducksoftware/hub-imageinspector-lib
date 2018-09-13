@@ -11,7 +11,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.FileSys;
+import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 
 public class FileSysTest {
 
@@ -25,7 +25,7 @@ public class FileSysTest {
 
     @Test
     public void test() throws CompressorException, IOException {
-        final FileSys fSys = new FileSys(new File("src/test/resources/imageDir"));
+        final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/imageDir"));
         final File outputTarFile = new File("test/containerFileSystem.tar.gz");
         outputTarFile.delete();
         assertFalse(outputTarFile.exists());

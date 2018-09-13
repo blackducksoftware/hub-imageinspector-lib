@@ -48,13 +48,14 @@ public class Os {
             logger.debug(String.format("Using given value for current OS: %s", osEnum.toString()));
             return osEnum;
         }
+        // TODO: The rest of this method can go away when docker exec mode goes away
         final String systemPropertyOsValue = System.getProperty("os.name");
         logger.debug(String.format("Deriving current OS; System.getProperty(\"os.name\") says: %s", systemPropertyOsValue));
         if (!isLinuxUnix(systemPropertyOsValue)) {
             throw new IntegrationException(String.format("System property OS value is '%s'; this appears to be a non-Linux/Unix system", systemPropertyOsValue));
         }
         final File rootDir = new File("/");
-        final FileSys rootFileSys = new FileSys(rootDir);
+        final LinuxFileSystem rootFileSys = new LinuxFileSystem(rootDir);
         final Set<PackageManagerEnum> packageManagers = rootFileSys.getPackageManagers();
         if (packageManagers.size() == 1) {
             final PackageManagerEnum packageManager = packageManagers.iterator().next();

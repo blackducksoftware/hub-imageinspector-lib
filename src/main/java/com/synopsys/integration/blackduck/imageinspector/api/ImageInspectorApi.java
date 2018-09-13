@@ -35,12 +35,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileSys;
+import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
@@ -59,7 +60,7 @@ public class ImageInspectorApi {
             final boolean cleanupWorkingDir, final boolean usePreferredAliasNamespaceForge, final String containerFileSystemOutputPath,
             final String currentLinuxDistro)
             throws IntegrationException {
-        logger.info("getBdio()");
+        logger.info("getBdio():");
         os.logMemory();
         return getBdioDocument(dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, cleanupWorkingDir, usePreferredAliasNamespaceForge, containerFileSystemOutputPath,
                 currentLinuxDistro);
@@ -124,12 +125,14 @@ public class ImageInspectorApi {
         OperatingSystemEnum inspectorOs = null;
         ImageInfoDerived imageInfoDerived;
         try {
-            inspectorOs = imageInspector.detectInspectorOperatingSystem(targetImageFileSystemRootDir);
+            final ImageInfoParsed imageInfoParsed = imageInspector.detectInspectorOperatingSystem(targetImageFileSystemRootDir);
+            inspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
             if (!inspectorOs.equals(currentOs)) {
                 final ImageInspectorOsEnum neededInspectorOs = getImageInspectorOsEnum(inspectorOs);
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
                 throw new WrongInspectorOsException(dockerTarfile.getAbsolutePath(), neededInspectorOs, msg);
             }
+            // TODO: This gets imageInfoParsed again; could change this to accept that object to avoid it being gotten twice
             imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageRepo, imageTag, tarfileMetadata, blackDuckProjectName, blackDuckProjectVersion, dockerTarfile, targetImageFileSystemRootDir,
                     codeLocationPrefix, usePreferredAliasNamespaceForge);
         } catch (final PkgMgrDataNotFoundException e) {
@@ -146,7 +149,7 @@ public class ImageInspectorApi {
             final File outputDirectory = new File(containerFileSystemOutputPath);
             final File containerFileSystemTarFile = new File(containerFileSystemOutputPath);
             logger.debug(String.format("Creating container filesystem tarfile %s from %s into %s", containerFileSystemTarFile.getAbsolutePath(), targetImageFileSystemRootDir.getAbsolutePath(), outputDirectory.getAbsolutePath()));
-            final FileSys containerFileSys = new FileSys(targetImageFileSystemRootDir);
+            final LinuxFileSystem containerFileSys = new LinuxFileSystem(targetImageFileSystemRootDir);
             containerFileSys.createTarGz(containerFileSystemTarFile);
         }
     }

@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -41,28 +42,38 @@ import org.apache.commons.compress.archivers.tar.TarConstants;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
+import com.synopsys.integration.util.Stringable;
 
-public class FileSys {
+public class LinuxFileSystem extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private static final int LIB_MAX_DEPTH = 4;
-    private static final int ETC_MAX_DEPTH = 0;
+    private static final int LIB_MAX_DEPTH = 3;
+    private static final List<String> ROOT_LEVEL_DIRS_TO_SKIP = Arrays.asList("Users", "proc", "dev", "sys", "tmp", "home");
+
     private final File root;
 
-    public FileSys(final File root) {
+    public LinuxFileSystem(final File root) {
         this.root = root;
     }
 
+    public Optional<File> getEtcDir() {
+        logger.debug(String.format("Looking in root dir %s for etc dir", root.getAbsolutePath()));
+        final File etcDir = new File(root, "etc");
+        if (etcDir.isDirectory()) {
+            return Optional.of(etcDir);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    // TODO This method can go away when docker exec mode goes away
     public Set<PackageManagerEnum> getPackageManagers() {
         final Set<PackageManagerEnum> packageManagers = new HashSet<>();
-
         logger.debug(String.format("Looking in root dir %s for lib dir", root.getAbsolutePath()));
-        final List<File> libDirs = FileOperations.findDirWithName(LIB_MAX_DEPTH, root, "lib");
+        final List<File> libDirs = FileOperations.findDirsWithName(LIB_MAX_DEPTH, root, "lib", ROOT_LEVEL_DIRS_TO_SKIP);
         if (libDirs != null) {
             for (final File libDir : libDirs) {
                 for (final File packageManagerDirectory : libDir.listFiles()) {
@@ -77,15 +88,6 @@ public class FileSys {
             }
         }
         return packageManagers;
-    }
-
-    public Optional<File> getEtcDir() {
-        logger.debug(String.format("Looking in root dir %s for etc dir", root.getAbsolutePath()));
-        final List<File> etcDirs = FileOperations.findDirWithName(ETC_MAX_DEPTH, root, "etc");
-        if (etcDirs != null && etcDirs.size() == 1) {
-            return Optional.of(etcDirs.get(0));
-        }
-        return Optional.empty();
     }
 
     public void createTarGz(final File outputTarFile) throws CompressorException, IOException {
@@ -148,10 +150,5 @@ public class FileSys {
                 }
             }
         }
-    }
-
-    @Override
-    public String toString() {
-        return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE);
     }
 }

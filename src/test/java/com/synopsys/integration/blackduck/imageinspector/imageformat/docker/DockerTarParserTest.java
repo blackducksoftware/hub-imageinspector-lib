@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
@@ -37,9 +36,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.test.annotation.IntegrationTest;
 
-@Category(IntegrationTest.class)
 public class DockerTarParserTest {
     private final static int DPKG_STATUS_FILE_SIZE = 98016;
 
@@ -87,7 +84,7 @@ public class DockerTarParserTest {
         assertTrue(varLibRpmNameFound);
 
         // MacOS file system does not preserve case which throws off the count
-        System.out.println("Extracted ${numFilesFound} files");
+        System.out.printf("Extracted %d files\n", numFilesFound);
         assertTrue(numFilesFound > 18000);
         assertTrue(numFilesFound < 19000);
     }

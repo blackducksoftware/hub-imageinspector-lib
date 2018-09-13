@@ -31,7 +31,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -41,13 +40,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileSys;
+import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
@@ -89,10 +86,6 @@ public class DockerTarParser {
             }
         }
         return targetImageFileSystemRootDir;
-    }
-
-    public OperatingSystemEnum detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
-        return deriveInspectorOsFromPkgMgr(targetImageFileSystemRootDir);
     }
 
     public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir) throws IntegrationException {
@@ -163,7 +156,7 @@ public class DockerTarParser {
     }
 
     private Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {
-        final FileSys extractedFileSys = new FileSys(targetImageFileSystemRootDir);
+        final LinuxFileSystem extractedFileSys = new LinuxFileSystem(targetImageFileSystemRootDir);
         final Optional<File> etcDir = extractedFileSys.getEtcDir();
         if (!etcDir.isPresent()) {
             return Optional.empty();
@@ -210,22 +203,5 @@ public class DockerTarParser {
             }
         }
         return layerTar;
-    }
-
-    private OperatingSystemEnum deriveInspectorOsFromPkgMgr(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
-        OperatingSystemEnum inspectorOsEnum = null;
-
-        final FileSys extractedFileSys = new FileSys(targetImageFileSystemRootDir);
-        final Set<PackageManagerEnum> packageManagers = extractedFileSys.getPackageManagers();
-        if (packageManagers.size() == 1) {
-            final PackageManagerEnum packageManager = packageManagers.iterator().next();
-            inspectorOsEnum = packageManager.getInspectorOperatingSystem();
-            logger.debug(String.format("Package manager %s returns Operating System %s", packageManager.name(), inspectorOsEnum.name()));
-            return inspectorOsEnum;
-        } else if (packageManagers.size() == 0) {
-            throw new PkgMgrDataNotFoundException("No package manager data found");
-        } else {
-            throw new PkgMgrDataNotFoundException("Data found for more than one package manager");
-        }
     }
 }
