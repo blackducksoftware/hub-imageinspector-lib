@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
@@ -88,7 +89,7 @@ public class DockerTarParser {
         return targetImageFileSystemRootDir;
     }
 
-    public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir) throws IntegrationException {
+    public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
         logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
         for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
             final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
@@ -102,7 +103,7 @@ public class DockerTarParser {
                 logger.debug(String.format("Package manager dir %s does not exist", packageManagerDirectory.getAbsolutePath()));
             }
         }
-        throw new IntegrationException("No package manager files found in this Docker image.");
+        throw new PkgMgrDataNotFoundException("No package manager files found in this Docker image.");
     }
 
     public List<File> extractLayerTars(final File workingDirectory, final File dockerTar) throws IOException {
