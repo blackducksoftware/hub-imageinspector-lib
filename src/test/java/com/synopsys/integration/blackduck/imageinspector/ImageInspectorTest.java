@@ -14,15 +14,20 @@ import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.synopsys.integration.blackduck.imageinspector.api.AppConfig;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
@@ -32,9 +37,22 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgExt
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ExtractorManager;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.hub.bdio.model.Forge;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = { AppConfig.class })
 public class ImageInspectorTest {
+
+    @Autowired
+    private ApkExtractor apkExtractor;
+
+    @Autowired
+    private DpkgExtractor dpkgExtractor;
+
+    @MockBean
+    private DpkgExecutor dpkgExecutor;
+
+    @MockBean
+    private ApkExecutor apkExecutor;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -48,23 +66,21 @@ public class ImageInspectorTest {
     public void testDpkg() throws IOException, IntegrationException, InterruptedException {
         final List<String> fileLines = FileUtils.readLines(new File("src/test/resources/ubuntu_dpkg_output_1.txt"), StandardCharsets.UTF_8);
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
-        final PkgMgrExecutor executor = Mockito.mock(DpkgExecutor.class);
+        final PkgMgrExecutor executor = dpkgExecutor;
         Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgr.class))).thenReturn(packages);
-        final List<Forge> forges = Arrays.asList(OperatingSystemEnum.DEBIAN.getForge(), OperatingSystemEnum.UBUNTU.getForge());
-        doTest("ubuntu", "1.0", PackageManagerEnum.DPKG, new DpkgExtractor(), executor, forges);
+        doTest("ubuntu", "1.0", PackageManagerEnum.DPKG, dpkgExtractor, executor);
     }
 
     @Test
     public void testApk() throws IOException, IntegrationException, InterruptedException {
         final List<String> fileLines = FileUtils.readLines(new File("src/test/resources/alpine_apk_output_1.txt"), StandardCharsets.UTF_8);
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
-        final PkgMgrExecutor executor = Mockito.mock(ApkExecutor.class);
+        final PkgMgrExecutor executor = apkExecutor;
         Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgr.class))).thenReturn(packages);
-        final List<Forge> forges = Arrays.asList(OperatingSystemEnum.ALPINE.getForge());
-        doTest("alpine", "1.0", PackageManagerEnum.APK, new ApkExtractor(), executor, forges);
+        doTest("alpine", "1.0", PackageManagerEnum.APK, apkExtractor, executor);
     }
 
-    private void doTest(final String imageName, final String tagName, final PackageManagerEnum pkgMgr, final Extractor extractor, final PkgMgrExecutor executor, final List<Forge> forges)
+    private void doTest(final String imageName, final String tagName, final PackageManagerEnum pkgMgr, final Extractor extractor, final PkgMgrExecutor executor)
             throws FileNotFoundException, IOException, IntegrationException, InterruptedException {
 
         final File imageTarFile = new File("test/image.tar");
@@ -72,9 +88,6 @@ public class ImageInspectorTest {
         final ImageInfoParsed imageInfo = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgr, null);
 
         final List<Extractor> extractors = new ArrayList<>();
-        extractor.initValues(pkgMgr, executor, forges);
-        executor.init();
-
         extractors.add(extractor);
         final ExtractorManager extractorManager = Mockito.mock(ExtractorManager.class);
         Mockito.when(extractorManager.getExtractors()).thenReturn(extractors);

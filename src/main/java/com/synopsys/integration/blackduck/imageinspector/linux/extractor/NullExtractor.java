@@ -48,7 +48,7 @@ public class NullExtractor extends Extractor {
     }
 
     @Override
-    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList, final String extractedForgeName) {
+    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList, final String preferredAliasNamespace) {
     }
 
     @Override

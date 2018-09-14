@@ -46,71 +46,70 @@ public abstract class Extractor {
     private final Logger logger = LoggerFactory.getLogger(Extractor.class);
     private PackageManagerEnum packageManagerEnum;
     private PkgMgrExecutor executor;
-    private List<Forge> forges;
+    private List<Forge> defaultForges;
 
     public abstract void init();
 
-    public String deriveArchitecture(final File targetImageFileSystemRootDir) throws IOException {
-        return null;
-    }
+    public abstract String deriveArchitecture(final File targetImageFileSystemRootDir) throws IOException;
 
-    public abstract void extractComponents(MutableDependencyGraph dependencies, String dockerImageRepo, String dockerImageTag, String architecture, String[] packageList, final String extractedForgeName);
+    public abstract void extractComponents(MutableDependencyGraph dependencies, String dockerImageRepo, String dockerImageTag, String architecture, String[] packageList, final String preferredAliasNamespace);
 
-    public void initValues(final PackageManagerEnum packageManagerEnum, final PkgMgrExecutor executor, final List<Forge> forges) {
-        this.packageManagerEnum = packageManagerEnum;
-        this.executor = executor;
-        this.forges = forges;
-    }
-
-    public PackageManagerEnum getPackageManagerEnum() {
+    public final PackageManagerEnum getPackageManagerEnum() {
         return packageManagerEnum;
     }
 
-    public SimpleBdioDocument extract(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String projectVersion,
-            final String extractedForgeName)
+    public final SimpleBdioDocument extract(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName,
+            final String projectVersion,
+            final String preferredAliasNamespace)
             throws IntegrationException, IOException, InterruptedException {
 
-        final SimpleBdioDocument bdioDocument = extractBdio(dockerImageRepo, dockerImageTag, imagePkgMgr, architecture, codeLocationName, projectName, projectVersion, extractedForgeName);
+        final SimpleBdioDocument bdioDocument = extractBdio(dockerImageRepo, dockerImageTag, imagePkgMgr, architecture, codeLocationName, projectName, projectVersion, preferredAliasNamespace);
         return bdioDocument;
     }
 
-    public static void writeBdio(final BdioWriter bdioWriter, final SimpleBdioDocument bdioDocument) {
-        new SimpleBdioFactory().writeSimpleBdioDocument(bdioWriter, bdioDocument);
-    }
-
-    private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version,
-            final String extractedForgeName)
-            throws IntegrationException, IOException, InterruptedException {
-        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(packageManagerEnum.getForge(), projectName, version);
-        final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
-        final MutableDependencyGraph dependencies = new SimpleBdioFactory().createMutableDependencyGraph();
-
-        extractComponents(dependencies, dockerImageRepo, dockerImageTag, architecture, executor.runPackageManager(imagePkgMgr), extractedForgeName);
-        logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
-
-        new SimpleBdioFactory().populateComponents(bdioDocument, projectExternalId, dependencies);
-        return bdioDocument;
-    }
-
-    public SimpleBdioDocument createEmptyBdio(final String codeLocationName, final String projectName, final String version)
+    public final SimpleBdioDocument createEmptyBdio(final String codeLocationName, final String projectName, final String version)
             throws IntegrationException, IOException, InterruptedException {
         final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(new Forge("/", "/", "unknown"), projectName, version);
         final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
         return bdioDocument;
     }
 
-    public void createBdioComponent(final MutableDependencyGraph dependencies, final String name, final String version, final String externalId, final String arch, final String extractedForgeName) {
-        logger.debug(String.format("createBdioComponent(): extractedForgeName: %s", extractedForgeName));
-        if (extractedForgeName != null) {
-            final String preferredNamespace = String.format("@%s", extractedForgeName);
-            logger.debug(String.format("Generating component with preferred namespace %s", preferredNamespace));
-            final Forge preferredNamespaceForge = new Forge("/", "/", preferredNamespace);
+    public static final void writeBdio(final BdioWriter bdioWriter, final SimpleBdioDocument bdioDocument) {
+        new SimpleBdioFactory().writeSimpleBdioDocument(bdioWriter, bdioDocument);
+    }
+
+    protected final void initValues(final PackageManagerEnum packageManagerEnum, final PkgMgrExecutor executor, final List<Forge> defaultForges) {
+        this.packageManagerEnum = packageManagerEnum;
+        this.executor = executor;
+        this.defaultForges = defaultForges;
+    }
+
+    protected void createBdioComponent(final MutableDependencyGraph dependencies, final String name, final String version, final String externalId, final String arch, final String preferredAliasNamespace) {
+        if (preferredAliasNamespace != null) {
+            final String forgeId = String.format("@%s", preferredAliasNamespace);
+            logger.debug(String.format("Generating component with preferred alias namespace (forge=@LinuxDistro): %s", forgeId));
+            final Forge preferredNamespaceForge = new Forge("/", "/", forgeId);
             addDependency(dependencies, name, version, arch, preferredNamespaceForge);
         } else {
-            for (final Forge forge : forges) {
+            logger.debug("Generating components with all package manager-appropriate namespaces (forges)");
+            for (final Forge forge : defaultForges) {
                 addDependency(dependencies, name, version, arch, forge);
             }
         }
+    }
+
+    private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version,
+            final String preferredAliasNamespace)
+            throws IntegrationException, IOException, InterruptedException {
+        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(packageManagerEnum.getForge(), projectName, version);
+        final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
+        final MutableDependencyGraph dependencies = new SimpleBdioFactory().createMutableDependencyGraph();
+
+        extractComponents(dependencies, dockerImageRepo, dockerImageTag, architecture, executor.runPackageManager(imagePkgMgr), preferredAliasNamespace);
+        logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
+
+        new SimpleBdioFactory().populateComponents(bdioDocument, projectExternalId, dependencies);
+        return bdioDocument;
     }
 
     private void addDependency(final MutableDependencyGraph dependencies, final String name, final String version, final String arch, final Forge forge) {

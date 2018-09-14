@@ -23,6 +23,8 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,12 +58,14 @@ public class RpmExtractor extends Extractor {
         initValues(PackageManagerEnum.RPM, executor, forges);
     }
 
-    private boolean valid(final String packageLine) {
-        return packageLine.matches(".+-.+-.+\\..*");
+    @Override
+    public String deriveArchitecture(final File targetImageFileSystemRootDir) throws IOException {
+        // For dpkg, it's extracted from each component (below)
+        return null;
     }
 
     @Override
-    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList, final String extractedForgeName) {
+    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String givenArchitecture, final String[] packageList, final String preferredAliasNamespace) {
         logger.debug("extractComponents: Received ${packageList.length} package lines");
         for (final String packageLine : packageList) {
             if (valid(packageLine)) {
@@ -74,8 +78,12 @@ public class RpmExtractor extends Extractor {
                 final String artifact = packageLine.substring(0, secondToLastDashIndex);
                 final String externalId = String.format("%s/%s/%s", artifact, versionRelease, arch);
                 logger.debug(String.format("Adding externalId %s to components list", externalId));
-                createBdioComponent(dependencies, artifact, versionRelease, externalId, arch, extractedForgeName);
+                createBdioComponent(dependencies, artifact, versionRelease, externalId, arch, preferredAliasNamespace);
             }
         }
+    }
+
+    private boolean valid(final String packageLine) {
+        return packageLine.matches(".+-.+-.+\\..*");
     }
 }
