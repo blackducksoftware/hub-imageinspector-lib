@@ -44,6 +44,7 @@ import com.synopsys.integration.hub.bdio.model.externalid.ExternalId;
 
 public abstract class Extractor {
     private final Logger logger = LoggerFactory.getLogger(Extractor.class);
+    protected static final String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";
     private PackageManagerEnum packageManagerEnum;
     private PkgMgrExecutor executor;
     private List<Forge> defaultForges;

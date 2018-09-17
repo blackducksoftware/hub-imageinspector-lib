@@ -48,6 +48,9 @@ import com.synopsys.integration.hub.bdio.model.Forge;
 
 @Component
 public class ApkExtractor extends Extractor {
+    private static final String ARCH_FILENAME = "arch";
+
+    private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -62,16 +65,16 @@ public class ApkExtractor extends Extractor {
         initValues(PackageManagerEnum.APK, executor, forges);
     }
 
-    // Expected format: component-versionpart1-versionpart2
-    // component may contain dashes (often contains one.
     @Override
     public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList, final String preferredAliasNamespace) {
         for (final String packageLine : packageList) {
             if (!packageLine.toLowerCase().startsWith("warning")) {
                 logger.trace(String.format("packageLine: %s", packageLine));
+                // Expected format: component-versionpart1-versionpart2
+                // component may contain dashes (often contains one).
                 final String[] parts = packageLine.split("-");
                 if (parts.length < 3) {
-                    logger.error(String.format("apk output contains an invalid line: %s", packageLine));
+                    logger.warn(String.format("apk output contains an invalid line: %s", packageLine));
                     continue;
                 }
                 final String version = String.format("%s-%s", parts[parts.length - 2], parts[parts.length - 1]);
@@ -86,9 +89,9 @@ public class ApkExtractor extends Extractor {
                     }
                 }
                 logger.trace(String.format("component: %s", component));
-                // if a package starts with a period, we should ignore it because it is a virtual meta package and the version information is missing
+                // if a package starts with a period, ignore it. It's a virtual meta package and the version information is missing
                 if (!component.startsWith(".")) {
-                    final String externalId = String.format("%s/%s/%s", component, version, architecture);
+                    final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, component, version, architecture);
                     logger.debug(String.format("Constructed externalId: %s", externalId));
                     createBdioComponent(dependencies, component, version, externalId, architecture, preferredAliasNamespace);
                 }
@@ -101,9 +104,9 @@ public class ApkExtractor extends Extractor {
         String architecture = null;
         final Optional<File> etc = new LinuxFileSystem(targetImageFileSystemRootDir).getEtcDir();
         if (etc.isPresent()) {
-            final File apkDir = new File(etc.get(), "apk");
+            final File apkDir = new File(etc.get(), ETC_SUBDIR_CONTAINING_ARCH);
             if (apkDir.isDirectory()) {
-                final File architectureFile = new File(apkDir, "arch");
+                final File architectureFile = new File(apkDir, ARCH_FILENAME);
                 if (architectureFile.isFile()) {
                     architecture = FileUtils.readLines(architectureFile, StandardCharsets.UTF_8).get(0);
                 }

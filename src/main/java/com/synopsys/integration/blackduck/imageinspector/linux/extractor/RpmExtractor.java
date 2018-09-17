@@ -44,6 +44,7 @@ import com.synopsys.integration.hub.bdio.model.Forge;
 @Component
 public class RpmExtractor extends Extractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final String PATTERN_FOR_VALID_PACKAGE_LINE = ".+-.+-.+\\..*";
 
     @Autowired
     private RpmExecutor executor;
@@ -60,15 +61,15 @@ public class RpmExtractor extends Extractor {
 
     @Override
     public String deriveArchitecture(final File targetImageFileSystemRootDir) throws IOException {
-        // For dpkg, it's extracted from each component (below)
+        // For rpm, it's extracted from each component (below)
         return null;
     }
 
     @Override
     public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String givenArchitecture, final String[] packageList, final String preferredAliasNamespace) {
-        logger.debug("extractComponents: Received ${packageList.length} package lines");
         for (final String packageLine : packageList) {
             if (valid(packageLine)) {
+                // Expected format: name-versionpart1-versionpart2.arch
                 final int lastDotIndex = packageLine.lastIndexOf('.');
                 final String arch = packageLine.substring(lastDotIndex + 1);
                 final int lastDashIndex = packageLine.lastIndexOf('-');
@@ -76,7 +77,7 @@ public class RpmExtractor extends Extractor {
                 final int secondToLastDashIndex = nameVersion.lastIndexOf('-');
                 final String versionRelease = packageLine.substring(secondToLastDashIndex + 1, lastDotIndex);
                 final String artifact = packageLine.substring(0, secondToLastDashIndex);
-                final String externalId = String.format("%s/%s/%s", artifact, versionRelease, arch);
+                final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, artifact, versionRelease, arch);
                 logger.debug(String.format("Adding externalId %s to components list", externalId));
                 createBdioComponent(dependencies, artifact, versionRelease, externalId, arch, preferredAliasNamespace);
             }
@@ -84,6 +85,6 @@ public class RpmExtractor extends Extractor {
     }
 
     private boolean valid(final String packageLine) {
-        return packageLine.matches(".+-.+-.+\\..*");
+        return packageLine.matches(PATTERN_FOR_VALID_PACKAGE_LINE);
     }
 }

@@ -43,7 +43,9 @@ import com.synopsys.integration.hub.bdio.model.Forge;
 
 @Component
 public class DpkgExtractor extends Extractor {
-    private final Logger logger = LoggerFactory.getLogger(DpkgExtractor.class);
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
+    private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
 
     @Autowired
     private DpkgExecutor executor;
@@ -69,20 +71,22 @@ public class DpkgExtractor extends Extractor {
         for (final String packageLine : packageList) {
 
             if (packageLine != null) {
-                if (packageLine.matches("\\+\\+\\+-=+-=+-=+-=+")) {
+                if (packageLine.matches(PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST)) {
                     startOfComponents = true;
                 } else if (startOfComponents) {
+                    // Expect: statusChar name version arch
+                    // Or: statusChar name:arch version arch
                     final char packageStatus = packageLine.charAt(1);
                     if (isInstalledStatus(packageStatus)) {
                         final String componentInfo = packageLine.substring(3);
-                        final String[] componentInfoParts = componentInfo.trim().split("[  ]+");
+                        final String[] componentInfoParts = componentInfo.trim().split(PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR);
                         String name = componentInfoParts[0];
                         final String version = componentInfoParts[1];
                         final String architecture = componentInfoParts[2];
                         if (name.contains(":")) {
                             name = name.substring(0, name.indexOf(":"));
                         }
-                        final String externalId = String.format("%s/%s/%s", name, version, architecture);
+                        final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, name, version, architecture);
                         logger.trace(String.format("Constructed externalId: %s", externalId));
 
                         createBdioComponent(dependencies, name, version, externalId, architecture, preferredAliasNamespace);
@@ -95,8 +99,7 @@ public class DpkgExtractor extends Extractor {
     }
 
     private boolean isInstalledStatus(final Character packageStatus) {
-        final String packageStatusString = packageStatus.toString();
-        if ("iWt".contains(packageStatusString)) {
+        if (packageStatus == 'i' || packageStatus == 'W' || packageStatus == 't') {
             return true;
         }
         return false;
