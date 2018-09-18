@@ -5,22 +5,23 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.ExecutorMock;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.BdioWriter;
-import com.synopsys.integration.hub.bdio.model.Forge;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 public class RpmExtractorTest {
@@ -41,11 +42,11 @@ public class RpmExtractorTest {
     private void testRpmExtraction(final String resourceName, final String bdioOutputFileName) throws IOException, IntegrationException, InterruptedException {
         final File resourceFile = new File(String.format("src/test/resources/%s", resourceName));
 
-        final RpmExtractor extractor = new RpmExtractor();
-        final ExecutorMock executor = new ExecutorMock(resourceFile);
-        final List<Forge> forges = Arrays.asList(OperatingSystemEnum.CENTOS.getForge());
-
-        extractor.initValues(PackageManagerEnum.RPM, executor, forges);
+        final RpmExecutor executor = Mockito.mock(RpmExecutor.class);
+        final List<String> lines = FileUtils.readLines(resourceFile, StandardCharsets.UTF_8);
+        final String[] pkgMgrOutput = lines.toArray(new String[lines.size()]);
+        Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgr.class))).thenReturn(pkgMgrOutput);
+        final RpmExtractor extractor = new RpmExtractor(executor);
 
         File bdioOutputFile = new File("test");
         bdioOutputFile = new File(bdioOutputFile, bdioOutputFileName);

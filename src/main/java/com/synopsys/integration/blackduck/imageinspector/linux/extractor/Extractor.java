@@ -48,8 +48,14 @@ public abstract class Extractor {
     private PackageManagerEnum packageManagerEnum;
     private PkgMgrExecutor executor;
     private List<Forge> defaultForges;
+    private SimpleBdioFactory simpleBdioFactory;
 
-    public abstract void init();
+    protected Extractor(final PackageManagerEnum packageManagerEnum, final PkgMgrExecutor executor, final List<Forge> forges, final SimpleBdioFactory simpleBdioFactory) {
+        this.packageManagerEnum = packageManagerEnum;
+        this.executor = executor;
+        this.defaultForges = forges;
+        this.simpleBdioFactory = simpleBdioFactory;
+    }
 
     public abstract String deriveArchitecture(final File targetImageFileSystemRootDir) throws IOException;
 
@@ -70,8 +76,8 @@ public abstract class Extractor {
 
     public final SimpleBdioDocument createEmptyBdio(final String codeLocationName, final String projectName, final String version)
             throws IntegrationException, IOException, InterruptedException {
-        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(new Forge("/", "/", "unknown"), projectName, version);
-        final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
+        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(new Forge("/", "/", "unknown"), projectName, version);
+        final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
         return bdioDocument;
     }
 
@@ -79,10 +85,11 @@ public abstract class Extractor {
         new SimpleBdioFactory().writeSimpleBdioDocument(bdioWriter, bdioDocument);
     }
 
-    protected final void initValues(final PackageManagerEnum packageManagerEnum, final PkgMgrExecutor executor, final List<Forge> defaultForges) {
+    protected final void initValues(final PackageManagerEnum packageManagerEnum, final PkgMgrExecutor executor, final List<Forge> defaultForges, final SimpleBdioFactory simpleBdioFactory) {
         this.packageManagerEnum = packageManagerEnum;
         this.executor = executor;
         this.defaultForges = defaultForges;
+        this.simpleBdioFactory = simpleBdioFactory;
     }
 
     protected void createBdioComponent(final MutableDependencyGraph dependencies, final String name, final String version, final String externalId, final String arch, final String preferredAliasNamespace) {
@@ -102,20 +109,20 @@ public abstract class Extractor {
     private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version,
             final String preferredAliasNamespace)
             throws IntegrationException, IOException, InterruptedException {
-        final ExternalId projectExternalId = new SimpleBdioFactory().createNameVersionExternalId(packageManagerEnum.getForge(), projectName, version);
-        final SimpleBdioDocument bdioDocument = new SimpleBdioFactory().createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
-        final MutableDependencyGraph dependencies = new SimpleBdioFactory().createMutableDependencyGraph();
+        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(packageManagerEnum.getForge(), projectName, version);
+        final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
+        final MutableDependencyGraph dependencies = simpleBdioFactory.createMutableDependencyGraph();
 
         extractComponents(dependencies, dockerImageRepo, dockerImageTag, architecture, executor.runPackageManager(imagePkgMgr), preferredAliasNamespace);
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 
-        new SimpleBdioFactory().populateComponents(bdioDocument, projectExternalId, dependencies);
+        simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, dependencies);
         return bdioDocument;
     }
 
     private void addDependency(final MutableDependencyGraph dependencies, final String name, final String version, final String arch, final Forge forge) {
-        final ExternalId extId = new SimpleBdioFactory().createArchitectureExternalId(forge, name, version, arch);
-        final Dependency dep = new SimpleBdioFactory().createDependency(name, version, extId); // createDependencyNode(forge, name, version, arch);
+        final ExternalId extId = simpleBdioFactory.createArchitectureExternalId(forge, name, version, arch);
+        final Dependency dep = simpleBdioFactory.createDependency(name, version, extId); // createDependencyNode(forge, name, version, arch);
         logger.trace(String.format("adding %s as child to dependency node tree; dataId: %s", dep.name, dep.externalId.createBdioId()));
         dependencies.addChildToRoot(dep);
     }

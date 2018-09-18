@@ -26,11 +26,9 @@ package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,26 +41,24 @@ import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
+import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.graph.MutableDependencyGraph;
 import com.synopsys.integration.hub.bdio.model.Forge;
 
 @Component
 public class ApkExtractor extends Extractor {
-    private static final String ARCH_FILENAME = "arch";
-
-    private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final String ARCH_FILENAME = "arch";
+    private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
+    private final static List<Forge> forges = Arrays.asList(OperatingSystemEnum.ALPINE.getForge());
 
     @Autowired
-    ApkExecutor executor;
+    private final ApkExecutor executor;
 
-    @Override
-    @PostConstruct
-    public void init() {
-        final List<Forge> forges = new ArrayList<>();
-        forges.add(OperatingSystemEnum.ALPINE.getForge());
-        initValues(PackageManagerEnum.APK, executor, forges);
+    @Autowired
+    public ApkExtractor(final ApkExecutor executor) {
+        super(PackageManagerEnum.APK, executor, forges, new SimpleBdioFactory());
+        this.executor = executor;
     }
 
     @Override

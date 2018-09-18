@@ -25,26 +25,25 @@ package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
+import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.graph.MutableDependencyGraph;
 import com.synopsys.integration.hub.bdio.model.Forge;
 
 @Component
 public class NullExtractor extends Extractor {
+    private final static List<Forge> forges = Arrays.asList(new Forge("/", "/", "unknown"));
 
-    @Override
-    @PostConstruct
-    public void init() {
-        final List<Forge> forges = new ArrayList<>();
-        forges.add(new Forge("/", "/", "unknown"));
-        initValues(PackageManagerEnum.APK, null, forges);
+    @Autowired
+    public NullExtractor(final ApkExecutor executor) {
+        super(PackageManagerEnum.APK, null, forges, new SimpleBdioFactory());
     }
 
     @Override

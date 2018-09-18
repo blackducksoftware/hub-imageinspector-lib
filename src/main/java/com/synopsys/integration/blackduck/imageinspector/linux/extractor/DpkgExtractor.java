@@ -25,10 +25,8 @@ package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +36,7 @@ import org.springframework.stereotype.Component;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
+import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.graph.MutableDependencyGraph;
 import com.synopsys.integration.hub.bdio.model.Forge;
 
@@ -46,17 +45,16 @@ public class DpkgExtractor extends Extractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
     private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
+    private final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
+    private final static List<Forge> forges = Arrays.asList(OperatingSystemEnum.UBUNTU.getForge(), OperatingSystemEnum.DEBIAN.getForge());
 
     @Autowired
-    private DpkgExecutor executor;
+    private final DpkgExecutor executor;
 
-    @Override
-    @PostConstruct
-    public void init() {
-        final List<Forge> forges = new ArrayList<>();
-        forges.add(OperatingSystemEnum.UBUNTU.getForge());
-        forges.add(OperatingSystemEnum.DEBIAN.getForge());
-        initValues(PackageManagerEnum.DPKG, executor, forges);
+    @Autowired
+    public DpkgExtractor(final DpkgExecutor executor) {
+        super(PackageManagerEnum.DPKG, executor, forges, new SimpleBdioFactory());
+        this.executor = executor;
     }
 
     @Override
