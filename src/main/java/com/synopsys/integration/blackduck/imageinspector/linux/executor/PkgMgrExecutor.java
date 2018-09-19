@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.exception.IntegrationException;
 
 public abstract class PkgMgrExecutor extends Executor {
@@ -49,7 +49,7 @@ public abstract class PkgMgrExecutor extends Executor {
         this.listPackagesCommand = listPackagesCommand;
     }
 
-    public String[] runPackageManager(final ImagePkgMgr imagePkgMgr) throws IntegrationException, IOException, InterruptedException {
+    public String[] runPackageManager(final ImagePkgMgrDatabase imagePkgMgr) throws IntegrationException, IOException, InterruptedException {
         logger.info("Requesting lock for package manager execution");
         lock.lock();
         logger.info("Acquired lock for package manager execution");

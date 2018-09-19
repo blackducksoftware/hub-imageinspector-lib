@@ -25,17 +25,15 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import java.io.File;
 
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
+import com.synopsys.integration.util.Stringable;
 
-public class ImagePkgMgr {
+public class ImagePkgMgrDatabase extends Stringable {
 
     private final File extractedPackageManagerDirectory;
     private final PackageManagerEnum packageManager;
 
-    public ImagePkgMgr(final File extractedPackageManagerDirectory, final PackageManagerEnum packageManager) {
+    public ImagePkgMgrDatabase(final File extractedPackageManagerDirectory, final PackageManagerEnum packageManager) {
         this.extractedPackageManagerDirectory = extractedPackageManagerDirectory;
         this.packageManager = packageManager;
     }
@@ -46,10 +44,5 @@ public class ImagePkgMgr {
 
     public PackageManagerEnum getPackageManager() {
         return packageManager;
-    }
-
-    @Override
-    public String toString() {
-        return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE);
     }
 }

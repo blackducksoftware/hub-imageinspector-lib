@@ -22,7 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
@@ -96,7 +96,7 @@ public class ImageInspectorApiTest {
         final SimpleBdioDocument mockedBdioDocument = new SimpleBdioDocument();
         mockedBdioDocument.project = new BdioProject();
         mockedBdioDocument.project.id = MOCKED_PROJECT_ID;
-        Mockito.when(mockExtractor.extract(Mockito.anyString(), Mockito.anyString(), Mockito.any(ImagePkgMgr.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+        Mockito.when(mockExtractor.extract(Mockito.anyString(), Mockito.anyString(), Mockito.any(ImagePkgMgrDatabase.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(mockedBdioDocument);
         mockExtractors.add(mockExtractor);
         Mockito.when(extractorManager.getExtractors()).thenReturn(mockExtractors);

@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
@@ -125,7 +125,7 @@ public class ImageInspector {
             final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) throws IntegrationException, IOException {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
-        final ImagePkgMgr imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
+        final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
         imageInfoDerived.setImageDirName(Names.getTargetImageFileSystemRootDirName(dockerImageRepo, dockerImageTag));
         imageInfoDerived.setManifestLayerMapping(findManifestLayerMapping(mappings, imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageDirName()));
         if (imagePkgMgr != null) {

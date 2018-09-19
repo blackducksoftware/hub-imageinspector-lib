@@ -24,7 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.synopsys.integration.blackduck.imageinspector.api.AppConfig;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
@@ -67,7 +67,7 @@ public class ImageInspectorTest {
         final List<String> fileLines = FileUtils.readLines(new File("src/test/resources/ubuntu_dpkg_output_1.txt"), StandardCharsets.UTF_8);
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
         final PkgMgrExecutor executor = dpkgExecutor;
-        Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgr.class))).thenReturn(packages);
+        Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(packages);
         doTest("ubuntu", "1.0", PackageManagerEnum.DPKG, dpkgExtractor, executor);
     }
 
@@ -76,7 +76,7 @@ public class ImageInspectorTest {
         final List<String> fileLines = FileUtils.readLines(new File("src/test/resources/alpine_apk_output_1.txt"), StandardCharsets.UTF_8);
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
         final PkgMgrExecutor executor = apkExecutor;
-        Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgr.class))).thenReturn(packages);
+        Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(packages);
         doTest("alpine", "1.0", PackageManagerEnum.APK, apkExtractor, executor);
     }
 
@@ -84,7 +84,7 @@ public class ImageInspectorTest {
             throws FileNotFoundException, IOException, IntegrationException, InterruptedException {
 
         final File imageTarFile = new File("test/image.tar");
-        final ImagePkgMgr imagePkgMgr = new ImagePkgMgr(new File(String.format("test/resources/imageDir/image_%s_v_%s/%s", imageName, tagName, pkgMgr.getDirectory())), pkgMgr);
+        final ImagePkgMgrDatabase imagePkgMgr = new ImagePkgMgrDatabase(new File(String.format("test/resources/imageDir/image_%s_v_%s/%s", imageName, tagName, pkgMgr.getDirectory())), pkgMgr);
         final ImageInfoParsed imageInfo = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgr, null);
 
         final List<Extractor> extractors = new ArrayList<>();

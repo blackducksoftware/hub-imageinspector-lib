@@ -30,7 +30,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
@@ -65,7 +65,7 @@ public abstract class Extractor {
         return packageManagerEnum;
     }
 
-    public final SimpleBdioDocument extract(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName,
+    public final SimpleBdioDocument extract(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgr, final String architecture, final String codeLocationName, final String projectName,
             final String projectVersion,
             final String preferredAliasNamespace)
             throws IntegrationException, IOException, InterruptedException {
@@ -106,7 +106,7 @@ public abstract class Extractor {
         }
     }
 
-    private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgr imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version,
+    private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version,
             final String preferredAliasNamespace)
             throws IntegrationException, IOException, InterruptedException {
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(packageManagerEnum.getForge(), projectName, version);

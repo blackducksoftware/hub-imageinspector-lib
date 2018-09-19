@@ -17,7 +17,7 @@ import org.mockito.Mockito;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
 import com.synopsys.integration.exception.IntegrationException;
@@ -45,7 +45,7 @@ public class DpkgExtractorTest {
         final DpkgExecutor executor = Mockito.mock(DpkgExecutor.class);
         final List<String> lines = FileUtils.readLines(resourceFile, StandardCharsets.UTF_8);
         final String[] pkgMgrOutput = lines.toArray(new String[lines.size()]);
-        Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgr.class))).thenReturn(pkgMgrOutput);
+        Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutput);
         final DpkgExtractor extractor = new DpkgExtractor(executor);
 
         File bdioOutputFile = new File("test");
@@ -56,7 +56,7 @@ public class DpkgExtractorTest {
         bdioOutputFile.getParentFile().mkdirs();
         final BdioWriter bdioWriter = new BdioWriter(new Gson(), new FileWriter(bdioOutputFile));
 
-        final ImagePkgMgr imagePkgMgr = new ImagePkgMgr(new File("nonexistentdir"), PackageManagerEnum.DPKG);
+        final ImagePkgMgrDatabase imagePkgMgr = new ImagePkgMgrDatabase(new File("nonexistentdir"), PackageManagerEnum.DPKG);
         final SimpleBdioDocument bdioDocument = extractor.extract("root", "1.0", imagePkgMgr, "x86", "CodeLocationName", "Test", "1", null);
         Extractor.writeBdio(bdioWriter, bdioDocument);
         bdioWriter.close();
