@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed;
+package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import com.synopsys.integration.util.Stringable;
 

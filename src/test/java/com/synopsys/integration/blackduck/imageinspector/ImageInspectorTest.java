@@ -29,7 +29,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.ExtractorComposed;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.exception.IntegrationException;
 
 // TODO: This test has some value; need to port it to ExtractorComposed
@@ -76,7 +76,7 @@ public class ImageInspectorTest {
     // doTest("alpine", "1.0", PackageManagerEnum.APK, apkExtractor, executor);
     // }
 
-    private void doTest(final String imageName, final String tagName, final PackageManagerEnum pkgMgr, final ExtractorComposed extractor, final PkgMgrExecutor executor)
+    private void doTest(final String imageName, final String tagName, final PackageManagerEnum pkgMgr, final BdioGenerator extractor, final PkgMgrExecutor executor)
             throws FileNotFoundException, IOException, IntegrationException, InterruptedException {
 
         final File imageTarFile = new File("test/image.tar");

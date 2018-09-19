@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed;
+package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +21,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrEx
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.Forge;
 
-public class ApkExtractorBehavior implements ExtractorBehavior {
+public class ApkComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String ARCH_FILENAME = "arch";
     private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
@@ -31,7 +31,7 @@ public class ApkExtractorBehavior implements ExtractorBehavior {
     private final File imageFileSystem;
     private String architecture;
 
-    public ApkExtractorBehavior(final PkgMgrExecutor pkgMgrExecutor, final File imageFileSystem) {
+    public ApkComponentExtractor(final PkgMgrExecutor pkgMgrExecutor, final File imageFileSystem) {
         this.pkgMgrExecutor = pkgMgrExecutor;
         this.imageFileSystem = imageFileSystem;
     }

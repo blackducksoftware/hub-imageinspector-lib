@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed;
+package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.io.File;
 
@@ -15,7 +15,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecu
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 
 @Component
-public class PkgMgrExtractorFactory {
+public class BdioGeneratorFactory {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -27,26 +27,26 @@ public class PkgMgrExtractorFactory {
     @Autowired
     private RpmExecutor rpmExecutor;
 
-    public ExtractorComposed createExtractor(final File imageFileSystem, final PackageManagerEnum packageManagerEnum) {
+    public BdioGenerator createExtractor(final File imageFileSystem, final PackageManagerEnum packageManagerEnum) {
         if (packageManagerEnum == PackageManagerEnum.APK) {
             final File pkgMgrDatabaseDir = new File(imageFileSystem, packageManagerEnum.getDirectory());
             final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(pkgMgrDatabaseDir, packageManagerEnum);
-            final ExtractorBehavior extractor = new ApkExtractorBehavior(apkExecutor, imageFileSystem);
-            return new ExtractorComposed(new SimpleBdioFactory(), extractor, imagePkgMgrDatabase);
+            final ComponentExtractor componentExtractor = new ApkComponentExtractor(apkExecutor, imageFileSystem);
+            return new BdioGenerator(new SimpleBdioFactory(), componentExtractor, imagePkgMgrDatabase);
         } else if (packageManagerEnum == PackageManagerEnum.DPKG) {
             final File pkgMgrDatabaseDir = new File(imageFileSystem, packageManagerEnum.getDirectory());
             final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(pkgMgrDatabaseDir, packageManagerEnum);
-            final ExtractorBehavior extractor = new DpkgExtractorBehavior(dpkgExecutor);
-            return new ExtractorComposed(new SimpleBdioFactory(), extractor, imagePkgMgrDatabase);
+            final ComponentExtractor componentExtractor = new DpkgComponentExtractor(dpkgExecutor);
+            return new BdioGenerator(new SimpleBdioFactory(), componentExtractor, imagePkgMgrDatabase);
         } else if (packageManagerEnum == PackageManagerEnum.RPM) {
             final File pkgMgrDatabaseDir = new File(imageFileSystem, packageManagerEnum.getDirectory());
             final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(pkgMgrDatabaseDir, packageManagerEnum);
-            final ExtractorBehavior extractor = new RpmExtractorBehavior(rpmExecutor);
-            return new ExtractorComposed(new SimpleBdioFactory(), extractor, imagePkgMgrDatabase);
+            final ComponentExtractor componentExtractor = new RpmComponentExtractor(rpmExecutor);
+            return new BdioGenerator(new SimpleBdioFactory(), componentExtractor, imagePkgMgrDatabase);
         } else {
             logger.info("No supported package manager found; will generate empty BDIO");
-            final ExtractorBehavior extractor = new NullExtractorBehavior();
-            return new ExtractorComposed(new SimpleBdioFactory(), extractor, null);
+            final ComponentExtractor componentExtractor = new NullComponentExtractor();
+            return new BdioGenerator(new SimpleBdioFactory(), componentExtractor, null);
         }
     }
 }

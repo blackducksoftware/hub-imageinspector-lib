@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed;
+package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,15 +16,15 @@ import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.hub.bdio.model.dependency.Dependency;
 import com.synopsys.integration.hub.bdio.model.externalid.ExternalId;
 
-public class ExtractorComposed {
+public class BdioGenerator {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final ExtractorBehavior extractorBehavior;
+    private final ComponentExtractor componentExtractor;
     private final SimpleBdioFactory simpleBdioFactory;
     private final ImagePkgMgrDatabase imagePkgMgrDatabase;
 
-    public ExtractorComposed(final SimpleBdioFactory simpleBdioFactory, final ExtractorBehavior extractorBehavior, final ImagePkgMgrDatabase imagePkgMgrDatabase) {
-        this.extractorBehavior = extractorBehavior;
+    public BdioGenerator(final SimpleBdioFactory simpleBdioFactory, final ComponentExtractor componentExtractor, final ImagePkgMgrDatabase imagePkgMgrDatabase) {
+        this.componentExtractor = componentExtractor;
         this.simpleBdioFactory = simpleBdioFactory;
         this.imagePkgMgrDatabase = imagePkgMgrDatabase;
     }
@@ -46,10 +46,10 @@ public class ExtractorComposed {
             final String version,
             final String preferredAliasNamespace)
             throws IntegrationException, IOException, InterruptedException {
-        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(extractorBehavior.getPackageManagerEnum().getForge(), projectName, version);
+        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(componentExtractor.getPackageManagerEnum().getForge(), projectName, version);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
 
-        final List<ComponentDetails> comps = extractorBehavior.extractComponents(dockerImageRepo, dockerImageTag, imagePkgMgrDatabase, preferredAliasNamespace);
+        final List<ComponentDetails> comps = componentExtractor.extractComponents(dockerImageRepo, dockerImageTag, imagePkgMgrDatabase, preferredAliasNamespace);
         final MutableDependencyGraph dependencies = generateDependencies(comps);
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 
@@ -67,7 +67,7 @@ public class ExtractorComposed {
                 addDependency(dependencies, comp.getName(), comp.getVersion(), comp.getArchitecture(), preferredNamespaceForge);
             } else {
                 logger.debug("Generating components with all package manager-appropriate namespaces (forges)");
-                for (final Forge forge : extractorBehavior.getDefaultForges()) {
+                for (final Forge forge : componentExtractor.getDefaultForges()) {
                     addDependency(dependencies, comp.getName(), comp.getVersion(), comp.getArchitecture(), forge);
                 }
             }

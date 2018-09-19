@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed;
+package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,14 +14,14 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrEx
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.Forge;
 
-public class RpmExtractorBehavior implements ExtractorBehavior {
+public class RpmComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String PATTERN_FOR_VALID_PACKAGE_LINE = ".+-.+-.+\\..*";
     private final PackageManagerEnum packageManagerEnum = PackageManagerEnum.RPM;
     private final static List<Forge> defaultForges = Arrays.asList(OperatingSystemEnum.CENTOS.getForge(), OperatingSystemEnum.FEDORA.getForge(), OperatingSystemEnum.REDHAT.getForge());
     private final PkgMgrExecutor pkgMgrExecutor;
 
-    public RpmExtractorBehavior(final PkgMgrExecutor pkgMgrExecutor) {
+    public RpmComponentExtractor(final PkgMgrExecutor pkgMgrExecutor) {
         this.pkgMgrExecutor = pkgMgrExecutor;
     }
 

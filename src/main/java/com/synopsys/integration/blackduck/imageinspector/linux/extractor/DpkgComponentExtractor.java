@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed;
+package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +14,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrEx
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.Forge;
 
-public class DpkgExtractorBehavior implements ExtractorBehavior {
+public class DpkgComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
     private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
@@ -22,7 +22,7 @@ public class DpkgExtractorBehavior implements ExtractorBehavior {
     private final static List<Forge> defaultForges = Arrays.asList(OperatingSystemEnum.UBUNTU.getForge(), OperatingSystemEnum.DEBIAN.getForge());
     private final PkgMgrExecutor pkgMgrExecutor;
 
-    public DpkgExtractorBehavior(final PkgMgrExecutor pkgMgrExecutor) {
+    public DpkgComponentExtractor(final PkgMgrExecutor pkgMgrExecutor) {
         this.pkgMgrExecutor = pkgMgrExecutor;
     }
 

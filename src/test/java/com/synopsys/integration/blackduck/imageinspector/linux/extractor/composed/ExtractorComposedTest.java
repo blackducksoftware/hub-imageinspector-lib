@@ -15,6 +15,12 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecu
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ApkComponentExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgComponentExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.NullComponentExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.RpmComponentExtractor;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.model.BdioComponent;
@@ -31,11 +37,11 @@ public class ExtractorComposedTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ExtractorBehavior extractorBehavior = new ApkExtractorBehavior(pkgMgrExecutor, null);
+        final ComponentExtractor componentExtractor = new ApkComponentExtractor(pkgMgrExecutor, null);
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
-        final ExtractorComposed extractorComposed = new ExtractorComposed(simpleBdioFactory, extractorBehavior, imagePkgMgrDatabase);
+        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
 
         final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
         assertEquals(2, bdio.components.size());
@@ -68,11 +74,11 @@ public class ExtractorComposedTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ExtractorBehavior extractorBehavior = new DpkgExtractorBehavior(pkgMgrExecutor);
+        final ComponentExtractor componentExtractor = new DpkgComponentExtractor(pkgMgrExecutor);
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.DPKG);
-        final ExtractorComposed extractorComposed = new ExtractorComposed(simpleBdioFactory, extractorBehavior, imagePkgMgrDatabase);
+        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
 
         final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
 
@@ -105,11 +111,11 @@ public class ExtractorComposedTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ExtractorBehavior extractorBehavior = new RpmExtractorBehavior(pkgMgrExecutor);
+        final ComponentExtractor componentExtractor = new RpmComponentExtractor(pkgMgrExecutor);
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.RPM);
-        final ExtractorComposed extractorComposed = new ExtractorComposed(simpleBdioFactory, extractorBehavior, imagePkgMgrDatabase);
+        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
 
         final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
 
@@ -136,8 +142,8 @@ public class ExtractorComposedTest {
     public void testNull() throws IntegrationException, IOException, InterruptedException {
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ExtractorBehavior extractorBehavior = new NullExtractorBehavior();
-        final ExtractorComposed extractorComposed = new ExtractorComposed(simpleBdioFactory, extractorBehavior, null);
+        final ComponentExtractor componentExtractor = new NullComponentExtractor();
+        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, null);
 
         final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
 

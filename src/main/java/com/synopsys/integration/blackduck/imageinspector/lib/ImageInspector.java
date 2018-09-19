@@ -41,8 +41,8 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Imag
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.ExtractorComposed;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.PkgMgrExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGeneratorFactory;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.BdioWriter;
@@ -55,7 +55,7 @@ public class ImageInspector {
     private DockerTarParser tarParser;
 
     @Autowired
-    private PkgMgrExtractorFactory pkgMgrExtractorFactory;
+    private BdioGeneratorFactory bdioGeneratorFactory;
 
     @Autowired
     public void setTarParser(final DockerTarParser tarParser) {
@@ -82,14 +82,14 @@ public class ImageInspector {
             final File targetImageFileSystemRootDir, final String codeLocationPrefix, final boolean usePreferredAliasNamespaceForge) throws IOException, IntegrationException, InterruptedException {
         final ImageInfoParsed imageInfoParsed = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-        final ExtractorComposed extractor = pkgMgrExtractorFactory.createExtractor(targetImageFileSystemRootDir, imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
+        final BdioGenerator bdioGenerator = bdioGeneratorFactory.createExtractor(targetImageFileSystemRootDir, imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
 
         // TODO: To commit to usePreferredAliasNamespaceForge, remove this if
         String extractedLinuxDistroName = null;
         if (usePreferredAliasNamespaceForge) {
             extractedLinuxDistroName = imageInfoDerived.getImageInfoParsed().getLinuxDistroName();
         }
-        final SimpleBdioDocument bdioDocument = extractor.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(),
+        final SimpleBdioDocument bdioDocument = bdioGenerator.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), extractedLinuxDistroName);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
@@ -99,8 +99,8 @@ public class ImageInspector {
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null, null);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-        final ExtractorComposed extractor = pkgMgrExtractorFactory.createExtractor(null, PackageManagerEnum.NULL);
-        final SimpleBdioDocument bdioDocument = extractor.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(), projectName, versionName, null);
+        final BdioGenerator bdioGenerator = bdioGeneratorFactory.createExtractor(null, PackageManagerEnum.NULL);
+        final SimpleBdioDocument bdioDocument = bdioGenerator.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(), projectName, versionName, null);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
@@ -158,7 +158,7 @@ public class ImageInspector {
     private void writeBdioToFile(final SimpleBdioDocument bdioDocument, final File bdioOutputFile) throws IOException, FileNotFoundException {
         try (FileOutputStream bdioOutputStream = new FileOutputStream(bdioOutputFile)) {
             try (BdioWriter bdioWriter = new BdioWriter(new Gson(), bdioOutputStream)) {
-                ExtractorComposed.writeBdio(bdioWriter, bdioDocument);
+                BdioGenerator.writeBdio(bdioWriter, bdioDocument);
             }
         }
     }

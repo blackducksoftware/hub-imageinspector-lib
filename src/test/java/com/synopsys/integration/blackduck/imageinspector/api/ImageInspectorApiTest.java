@@ -22,7 +22,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.ExtractorComposed;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.BdioProject;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
@@ -80,7 +80,7 @@ public class ImageInspectorApiTest {
     public void testOnRightOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
         assertNotNull(imageInspectorApi);
         Mockito.when(os.deriveCurrentOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.ALPINE);
-        final ExtractorComposed mockExtractor = Mockito.mock(ExtractorComposed.class);
+        final BdioGenerator mockExtractor = Mockito.mock(BdioGenerator.class);
         // Mockito.when(mockExtractor.getPackageManagerEnum()).thenReturn(PackageManagerEnum.APK);
         final SimpleBdioDocument mockedBdioDocument = new SimpleBdioDocument();
         mockedBdioDocument.project = new BdioProject();
