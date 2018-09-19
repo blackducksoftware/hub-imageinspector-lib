@@ -49,7 +49,7 @@ public abstract class PkgMgrExecutor extends Executor {
         this.listPackagesCommand = listPackagesCommand;
     }
 
-    public String[] runPackageManager(final ImagePkgMgrDatabase imagePkgMgr) throws IntegrationException, IOException, InterruptedException {
+    public String[] runPackageManager(final ImagePkgMgrDatabase imagePkgMgr) throws IntegrationException {
         logger.info("Requesting lock for package manager execution");
         lock.lock();
         logger.info("Acquired lock for package manager execution");
@@ -63,6 +63,8 @@ public abstract class PkgMgrExecutor extends Executor {
             final String[] packages = listPackages();
             logger.trace(String.format("Package count: %d", packages.length));
             return packages;
+        } catch (IOException | InterruptedException e) {
+            throw new IntegrationException(String.format("Error installing or querying image's package manager database", e.getMessage()), e);
         } finally {
             logger.info("Finished package manager execution");
             lock.unlock();

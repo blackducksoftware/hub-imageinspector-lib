@@ -128,4 +128,16 @@ public class ExtractorComposedTest {
         assertTrue(foundComp1);
         assertTrue(foundComp2);
     }
+
+    @Test
+    public void testNull() throws IntegrationException, IOException, InterruptedException {
+
+        final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
+        final ExtractorBehavior extractorBehavior = new NullExtractorBehavior();
+        final ExtractorComposed extractorComposed = new ExtractorComposed(simpleBdioFactory, extractorBehavior, null);
+
+        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "architecture", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+
+        assertEquals(0, bdio.components.size());
+    }
 }

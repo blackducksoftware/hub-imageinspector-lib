@@ -44,7 +44,7 @@ public class ExtractorComposed {
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(extractorBehavior.getPackageManagerEnum().getForge(), projectName, version);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
 
-        final List<ComponentDetails> comps = extractorBehavior.extractComponents(dockerImageRepo, dockerImageTag, architecture, extractorBehavior.getPkgMgrExecutor().runPackageManager(imagePkgMgrDatabase), preferredAliasNamespace);
+        final List<ComponentDetails> comps = extractorBehavior.extractComponents(dockerImageRepo, dockerImageTag, architecture, imagePkgMgrDatabase, preferredAliasNamespace);
         final MutableDependencyGraph dependencies = generateDependencies(comps);
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 

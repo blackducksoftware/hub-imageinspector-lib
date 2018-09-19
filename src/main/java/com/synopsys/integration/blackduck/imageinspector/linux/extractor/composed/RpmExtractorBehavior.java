@@ -6,8 +6,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
+import com.synopsys.integration.exception.IntegrationException;
 
 public class RpmExtractorBehavior implements ExtractorBehavior {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -30,8 +32,10 @@ public class RpmExtractorBehavior implements ExtractorBehavior {
     }
 
     @Override
-    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final String givenArch, final String[] packageList, final String preferredAliasNamespace) {
+    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final String givenArch, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace)
+            throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
+        final String[] packageList = getPkgMgrExecutor().runPackageManager(imagePkgMgrDatabase);
         for (final String packageLine : packageList) {
             if (valid(packageLine)) {
                 // Expected format: name-versionpart1-versionpart2.arch
