@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.Forge;
@@ -18,22 +17,11 @@ public class DpkgComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
     private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
-    private final PackageManagerEnum packageManagerEnum = PackageManagerEnum.DPKG;
     private final static List<Forge> defaultForges = Arrays.asList(OperatingSystemEnum.UBUNTU.getForge(), OperatingSystemEnum.DEBIAN.getForge());
     private final PkgMgrExecutor pkgMgrExecutor;
 
     public DpkgComponentExtractor(final PkgMgrExecutor pkgMgrExecutor) {
         this.pkgMgrExecutor = pkgMgrExecutor;
-    }
-
-    @Override
-    public PkgMgrExecutor getPkgMgrExecutor() {
-        return pkgMgrExecutor;
-    }
-
-    @Override
-    public PackageManagerEnum getPackageManagerEnum() {
-        return packageManagerEnum;
     }
 
     @Override
@@ -45,7 +33,7 @@ public class DpkgComponentExtractor implements ComponentExtractor {
     public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace)
             throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
-        final String[] packageList = getPkgMgrExecutor().runPackageManager(imagePkgMgrDatabase);
+        final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
         boolean startOfComponents = false;
         for (final String packageLine : packageList) {
 

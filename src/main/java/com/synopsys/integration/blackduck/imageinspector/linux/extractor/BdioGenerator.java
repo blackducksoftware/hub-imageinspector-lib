@@ -46,7 +46,7 @@ public class BdioGenerator {
             final String version,
             final String preferredAliasNamespace)
             throws IntegrationException, IOException, InterruptedException {
-        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(componentExtractor.getPackageManagerEnum().getForge(), projectName, version);
+        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(componentExtractor.getDefaultForges().get(0), projectName, version);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
 
         final List<ComponentDetails> comps = componentExtractor.extractComponents(dockerImageRepo, dockerImageTag, imagePkgMgrDatabase, preferredAliasNamespace);

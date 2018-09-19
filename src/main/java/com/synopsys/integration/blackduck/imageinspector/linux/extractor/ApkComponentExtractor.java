@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
@@ -25,7 +24,6 @@ public class ApkComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String ARCH_FILENAME = "arch";
     private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
-    private final PackageManagerEnum packageManagerEnum = PackageManagerEnum.APK;
     private final static List<Forge> defaultForges = Arrays.asList(OperatingSystemEnum.ALPINE.getForge());
     private final PkgMgrExecutor pkgMgrExecutor;
     private final File imageFileSystem;
@@ -37,16 +35,6 @@ public class ApkComponentExtractor implements ComponentExtractor {
     }
 
     @Override
-    public PkgMgrExecutor getPkgMgrExecutor() {
-        return pkgMgrExecutor;
-    }
-
-    @Override
-    public PackageManagerEnum getPackageManagerEnum() {
-        return packageManagerEnum;
-    }
-
-    @Override
     public List<Forge> getDefaultForges() {
         return defaultForges;
     }
@@ -55,7 +43,7 @@ public class ApkComponentExtractor implements ComponentExtractor {
     public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase,
             final String preferredAliasNamespace) throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
-        final String[] packageList = getPkgMgrExecutor().runPackageManager(imagePkgMgrDatabase);
+        final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
         for (final String packageLine : packageList) {
             if (!packageLine.toLowerCase().startsWith("warning")) {
                 logger.trace(String.format("packageLine: %s", packageLine));

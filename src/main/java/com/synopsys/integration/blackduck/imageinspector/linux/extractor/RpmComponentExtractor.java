@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.Forge;
@@ -17,22 +16,11 @@ import com.synopsys.integration.hub.bdio.model.Forge;
 public class RpmComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String PATTERN_FOR_VALID_PACKAGE_LINE = ".+-.+-.+\\..*";
-    private final PackageManagerEnum packageManagerEnum = PackageManagerEnum.RPM;
     private final static List<Forge> defaultForges = Arrays.asList(OperatingSystemEnum.CENTOS.getForge(), OperatingSystemEnum.FEDORA.getForge(), OperatingSystemEnum.REDHAT.getForge());
     private final PkgMgrExecutor pkgMgrExecutor;
 
     public RpmComponentExtractor(final PkgMgrExecutor pkgMgrExecutor) {
         this.pkgMgrExecutor = pkgMgrExecutor;
-    }
-
-    @Override
-    public PkgMgrExecutor getPkgMgrExecutor() {
-        return pkgMgrExecutor;
-    }
-
-    @Override
-    public PackageManagerEnum getPackageManagerEnum() {
-        return packageManagerEnum;
     }
 
     @Override
@@ -44,7 +32,7 @@ public class RpmComponentExtractor implements ComponentExtractor {
     public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace)
             throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
-        final String[] packageList = getPkgMgrExecutor().runPackageManager(imagePkgMgrDatabase);
+        final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
         for (final String packageLine : packageList) {
             if (valid(packageLine)) {
                 // Expected format: name-versionpart1-versionpart2.arch
