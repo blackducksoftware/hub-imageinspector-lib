@@ -1,6 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,13 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.hub.bdio.model.Forge;
 
 public class ApkExtractorBehavior implements ExtractorBehavior {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final PackageManagerEnum packageManagerEnum = PackageManagerEnum.APK;
+    private final static List<Forge> defaultForges = Arrays.asList(OperatingSystemEnum.ALPINE.getForge());
     private final PkgMgrExecutor pkgMgrExecutor;
 
     public ApkExtractorBehavior(final PkgMgrExecutor pkgMgrExecutor) {
@@ -29,6 +33,11 @@ public class ApkExtractorBehavior implements ExtractorBehavior {
     @Override
     public PackageManagerEnum getPackageManagerEnum() {
         return packageManagerEnum;
+    }
+
+    @Override
+    public List<Forge> getDefaultForges() {
+        return defaultForges;
     }
 
     @Override

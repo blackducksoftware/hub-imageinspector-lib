@@ -55,10 +55,17 @@ public class ExtractorComposed {
     private MutableDependencyGraph generateDependencies(final List<ComponentDetails> comps) {
         final MutableDependencyGraph dependencies = simpleBdioFactory.createMutableDependencyGraph();
         for (final ComponentDetails comp : comps) {
-            final String forgeId = String.format("@%s", comp.getPreferredAliasNamespace());
-            logger.debug(String.format("Generating component with preferred alias namespace (forge=@LinuxDistro): %s", forgeId));
-            final Forge preferredNamespaceForge = new Forge("/", "/", forgeId);
-            addDependency(dependencies, comp.getName(), comp.getVersion(), comp.getArchitecture(), preferredNamespaceForge);
+            if (comp.getPreferredAliasNamespace() != null) {
+                final String forgeId = String.format("@%s", comp.getPreferredAliasNamespace());
+                logger.debug(String.format("Generating component with preferred alias namespace (forge=@LinuxDistro): %s", forgeId));
+                final Forge preferredNamespaceForge = new Forge("/", "/", forgeId);
+                addDependency(dependencies, comp.getName(), comp.getVersion(), comp.getArchitecture(), preferredNamespaceForge);
+            } else {
+                logger.debug("Generating components with all package manager-appropriate namespaces (forges)");
+                for (final Forge forge : extractorBehavior.getDefaultForges()) {
+                    addDependency(dependencies, comp.getName(), comp.getVersion(), comp.getArchitecture(), forge);
+                }
+            }
         }
         return dependencies;
     }

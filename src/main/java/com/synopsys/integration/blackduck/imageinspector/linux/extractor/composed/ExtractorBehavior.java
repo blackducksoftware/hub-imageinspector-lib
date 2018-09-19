@@ -6,6 +6,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Imag
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.hub.bdio.model.Forge;
 
 public interface ExtractorBehavior {
     static final String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";
@@ -13,6 +14,8 @@ public interface ExtractorBehavior {
     PkgMgrExecutor getPkgMgrExecutor();
 
     PackageManagerEnum getPackageManagerEnum();
+
+    List<Forge> getDefaultForges();
 
     List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final String architecture, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace)
             throws IntegrationException;
