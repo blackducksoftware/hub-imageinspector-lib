@@ -29,7 +29,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.ExtractorComposed;
 import com.synopsys.integration.exception.IntegrationException;
 
 // TODO: This test has some value; need to port it to ExtractorComposed
@@ -76,15 +76,13 @@ public class ImageInspectorTest {
     // doTest("alpine", "1.0", PackageManagerEnum.APK, apkExtractor, executor);
     // }
 
-    private void doTest(final String imageName, final String tagName, final PackageManagerEnum pkgMgr, final Extractor extractor, final PkgMgrExecutor executor)
+    private void doTest(final String imageName, final String tagName, final PackageManagerEnum pkgMgr, final ExtractorComposed extractor, final PkgMgrExecutor executor)
             throws FileNotFoundException, IOException, IntegrationException, InterruptedException {
 
         final File imageTarFile = new File("test/image.tar");
         final ImagePkgMgrDatabase imagePkgMgr = new ImagePkgMgrDatabase(new File(String.format("test/resources/imageDir/image_%s_v_%s/%s", imageName, tagName, pkgMgr.getDirectory())), pkgMgr);
         final ImageInfoParsed imageInfo = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgr, null);
 
-        final List<Extractor> extractors = new ArrayList<>();
-        extractors.add(extractor);
         // final ExtractorManager extractorManager = Mockito.mock(ExtractorManager.class);
         // Mockito.when(extractorManager.getExtractors()).thenReturn(extractors);
         final ImageInspector imageInspector = new ImageInspector();

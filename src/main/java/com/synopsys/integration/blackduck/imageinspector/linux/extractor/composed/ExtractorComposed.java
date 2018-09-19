@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.hub.bdio.BdioWriter;
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.graph.MutableDependencyGraph;
 import com.synopsys.integration.hub.bdio.model.Forge;
@@ -35,6 +36,10 @@ public class ExtractorComposed {
 
         final SimpleBdioDocument bdioDocument = extractBdio(dockerImageRepo, dockerImageTag, codeLocationName, projectName, projectVersion, preferredAliasNamespace);
         return bdioDocument;
+    }
+
+    public static final void writeBdio(final BdioWriter bdioWriter, final SimpleBdioDocument bdioDocument) {
+        new SimpleBdioFactory().writeSimpleBdioDocument(bdioWriter, bdioDocument);
     }
 
     private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName,

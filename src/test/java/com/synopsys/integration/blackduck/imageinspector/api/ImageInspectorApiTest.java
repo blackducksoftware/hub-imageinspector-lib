@@ -5,8 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.compress.compressors.CompressorException;
 import org.junit.AfterClass;
@@ -21,12 +19,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.ExtractorComposed;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.BdioProject;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
@@ -84,15 +80,13 @@ public class ImageInspectorApiTest {
     public void testOnRightOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
         assertNotNull(imageInspectorApi);
         Mockito.when(os.deriveCurrentOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.ALPINE);
-        final List<Extractor> mockExtractors = new ArrayList<>();
-        final Extractor mockExtractor = Mockito.mock(Extractor.class);
-        Mockito.when(mockExtractor.getPackageManagerEnum()).thenReturn(PackageManagerEnum.APK);
+        final ExtractorComposed mockExtractor = Mockito.mock(ExtractorComposed.class);
+        // Mockito.when(mockExtractor.getPackageManagerEnum()).thenReturn(PackageManagerEnum.APK);
         final SimpleBdioDocument mockedBdioDocument = new SimpleBdioDocument();
         mockedBdioDocument.project = new BdioProject();
         mockedBdioDocument.project.id = MOCKED_PROJECT_ID;
-        Mockito.when(mockExtractor.extract(Mockito.anyString(), Mockito.anyString(), Mockito.any(ImagePkgMgrDatabase.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(mockedBdioDocument);
-        mockExtractors.add(mockExtractor);
+        // Mockito.when(mockExtractor.extract(Mockito.anyString(), Mockito.anyString(), Mockito.any(ImagePkgMgrDatabase.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+        // .thenReturn(mockedBdioDocument);
         // Mockito.when(extractorManager.getExtractors()).thenReturn(mockExtractors);
         final ImageInfoDerived imageInfo = imageInspectorApi.inspect(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, CODE_LOCATION_PREFIX, null, null, false, false, null, null);
         assertEquals(String.format("%s_alpine_latest_lib_apk_APK", CODE_LOCATION_PREFIX), imageInfo.getCodeLocationName());

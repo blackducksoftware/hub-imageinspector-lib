@@ -41,7 +41,6 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Imag
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.ExtractorComposed;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.PkgMgrExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
@@ -159,7 +158,7 @@ public class ImageInspector {
     private void writeBdioToFile(final SimpleBdioDocument bdioDocument, final File bdioOutputFile) throws IOException, FileNotFoundException {
         try (FileOutputStream bdioOutputStream = new FileOutputStream(bdioOutputFile)) {
             try (BdioWriter bdioWriter = new BdioWriter(new Gson(), bdioOutputStream)) {
-                Extractor.writeBdio(bdioWriter, bdioDocument);
+                ExtractorComposed.writeBdio(bdioWriter, bdioDocument);
             }
         }
     }
