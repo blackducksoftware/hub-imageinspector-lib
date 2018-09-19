@@ -36,7 +36,7 @@ public class PkgMgrExtractorFactory {
         } else if (packageManagerEnum == PackageManagerEnum.DPKG) {
             final File pkgMgrDatabaseDir = new File(imageFileSystem, packageManagerEnum.getDirectory());
             final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(pkgMgrDatabaseDir, packageManagerEnum);
-            final ExtractorBehavior extractor = new ApkExtractorBehavior(dpkgExecutor);
+            final ExtractorBehavior extractor = new DpkgExtractorBehavior(dpkgExecutor);
             return new ExtractorComposed(new SimpleBdioFactory(), extractor, imagePkgMgrDatabase);
         } else if (packageManagerEnum == PackageManagerEnum.RPM) {
             final File pkgMgrDatabaseDir = new File(imageFileSystem, packageManagerEnum.getDirectory());
