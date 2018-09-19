@@ -27,7 +27,7 @@ public class NullExtractorBehavior implements ExtractorBehavior {
     }
 
     @Override
-    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final String architecture, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace) {
+    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace) {
         return new ArrayList<>();
     }
 }

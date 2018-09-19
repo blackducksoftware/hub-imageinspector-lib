@@ -42,7 +42,7 @@ public class DpkgExtractorBehavior implements ExtractorBehavior {
     }
 
     @Override
-    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final String givenArch, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace)
+    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace)
             throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
         final String[] packageList = getPkgMgrExecutor().runPackageManager(imagePkgMgrDatabase);

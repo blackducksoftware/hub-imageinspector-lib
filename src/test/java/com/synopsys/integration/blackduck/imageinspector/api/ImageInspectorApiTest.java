@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,6 @@ import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ExtractorManager;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.BdioProject;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
@@ -61,9 +59,6 @@ public class ImageInspectorApiTest {
     @MockBean
     private Os os;
 
-    @MockBean
-    private ExtractorManager extractorManager;
-
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
     }
@@ -91,7 +86,6 @@ public class ImageInspectorApiTest {
         Mockito.when(os.deriveCurrentOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.ALPINE);
         final List<Extractor> mockExtractors = new ArrayList<>();
         final Extractor mockExtractor = Mockito.mock(Extractor.class);
-        Mockito.when(mockExtractor.deriveArchitecture(Mockito.any(File.class))).thenReturn(TEST_ARCH);
         Mockito.when(mockExtractor.getPackageManagerEnum()).thenReturn(PackageManagerEnum.APK);
         final SimpleBdioDocument mockedBdioDocument = new SimpleBdioDocument();
         mockedBdioDocument.project = new BdioProject();
@@ -99,9 +93,8 @@ public class ImageInspectorApiTest {
         Mockito.when(mockExtractor.extract(Mockito.anyString(), Mockito.anyString(), Mockito.any(ImagePkgMgrDatabase.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(mockedBdioDocument);
         mockExtractors.add(mockExtractor);
-        Mockito.when(extractorManager.getExtractors()).thenReturn(mockExtractors);
+        // Mockito.when(extractorManager.getExtractors()).thenReturn(mockExtractors);
         final ImageInfoDerived imageInfo = imageInspectorApi.inspect(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, CODE_LOCATION_PREFIX, null, null, false, false, null, null);
-        assertEquals(TEST_ARCH, imageInfo.getArchitecture());
         assertEquals(String.format("%s_alpine_latest_lib_apk_APK", CODE_LOCATION_PREFIX), imageInfo.getCodeLocationName());
         assertEquals(PROJECT, imageInfo.getFinalProjectName());
         assertEquals(PROJECT_VERSION, imageInfo.getFinalProjectVersionName());

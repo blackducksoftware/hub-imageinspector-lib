@@ -42,8 +42,6 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Imag
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Extractor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ExtractorManager;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.NullExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.ExtractorComposed;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed.PkgMgrExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
@@ -54,21 +52,11 @@ import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 @Component
 public class ImageInspector {
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
-    private static final String UNKNOWN_ARCH = "unknown";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private ExtractorManager extractorManager;
     private DockerTarParser tarParser;
 
     @Autowired
     private PkgMgrExtractorFactory pkgMgrExtractorFactory;
-
-    @Autowired
-    private NullExtractor nullExtractor;
-
-    @Autowired
-    public void setExtractorManager(final ExtractorManager extractorManager) {
-        this.extractorManager = extractorManager;
-    }
 
     @Autowired
     public void setTarParser(final DockerTarParser tarParser) {
@@ -95,31 +83,25 @@ public class ImageInspector {
             final File targetImageFileSystemRootDir, final String codeLocationPrefix, final boolean usePreferredAliasNamespaceForge) throws IOException, IntegrationException, InterruptedException {
         final ImageInfoParsed imageInfoParsed = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-
-        // TODO new:
         final ExtractorComposed extractor = pkgMgrExtractorFactory.createExtractor(targetImageFileSystemRootDir, imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
 
-        // TODO old:
-        // final Extractor extractor = getExtractorByPackageManager(imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
+        // TODO: To commit to usePreferredAliasNamespaceForge, remove this if
         String extractedLinuxDistroName = null;
         if (usePreferredAliasNamespaceForge) {
             extractedLinuxDistroName = imageInfoDerived.getImageInfoParsed().getLinuxDistroName();
         }
-        // TODO cleanup:
-        final SimpleBdioDocument bdioDocument = extractor.extract(dockerImageRepo, dockerImageTag, /* imageInfoDerived.getImageInfoParsed().getPkgMgr(), */ imageInfoDerived.getArchitecture(), imageInfoDerived.getCodeLocationName(),
+        final SimpleBdioDocument bdioDocument = extractor.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), extractedLinuxDistroName);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
 
-    // TODO Port to new extractor
     public ImageInfoDerived generateEmptyBdio(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File dockerTar,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null, null);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-        final Extractor extractor = nullExtractor;
-        final SimpleBdioDocument bdioDocument = extractor.createEmptyBdio(imageInfoDerived.getCodeLocationName(),
-                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName());
+        final ExtractorComposed extractor = pkgMgrExtractorFactory.createExtractor(null, PackageManagerEnum.NULL);
+        final SimpleBdioDocument bdioDocument = extractor.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(), projectName, versionName, null);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
@@ -141,7 +123,6 @@ public class ImageInspector {
         imageInfoDerived.setImageDirName(Names.getTargetImageFileSystemRootDirName(dockerImageRepo, dockerImageTag));
         imageInfoDerived.setManifestLayerMapping(findManifestLayerMapping(mappings, imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageDirName()));
         if (imagePkgMgr != null) {
-            imageInfoDerived.setArchitecture(getExtractorByPackageManager(imagePkgMgr.getPackageManager()).deriveArchitecture(targetImageFileSystemRootDir));
             imageInfoDerived.setPkgMgrFilePath(determinePkgMgrFilePath(imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageDirName()));
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
                     imageInfoDerived.getPkgMgrFilePath(), imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager().toString()));
@@ -149,7 +130,6 @@ public class ImageInspector {
             imageInfoDerived.setPkgMgrFilePath(NO_PKG_MGR_FOUND);
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
                     imageInfoDerived.getPkgMgrFilePath(), NO_PKG_MGR_FOUND));
-            imageInfoDerived.setArchitecture(UNKNOWN_ARCH);
         }
         imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName));
         imageInfoDerived.setFinalProjectVersionName(deriveBlackDuckProjectVersion(imageInfoDerived.getManifestLayerMapping(), versionName));
@@ -204,14 +184,5 @@ public class ImageInspector {
             blackDuckVersionName = versionName;
         }
         return blackDuckVersionName;
-    }
-
-    private Extractor getExtractorByPackageManager(final PackageManagerEnum packageManagerEnum) throws IntegrationException {
-        for (final Extractor currentExtractor : extractorManager.getExtractors()) {
-            if (currentExtractor.getPackageManagerEnum() == packageManagerEnum) {
-                return currentExtractor;
-            }
-        }
-        throw new IntegrationException(String.format("Extractor not found for packageManager %s", packageManagerEnum.toString()));
     }
 }

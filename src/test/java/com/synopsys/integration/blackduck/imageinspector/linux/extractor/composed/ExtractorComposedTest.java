@@ -31,13 +31,13 @@ public class ExtractorComposedTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ExtractorBehavior extractorBehavior = new ApkExtractorBehavior(pkgMgrExecutor);
+        final ExtractorBehavior extractorBehavior = new ApkExtractorBehavior(pkgMgrExecutor, null);
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
         final ExtractorComposed extractorComposed = new ExtractorComposed(simpleBdioFactory, extractorBehavior, imagePkgMgrDatabase);
 
-        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "givenArch", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
         boolean foundComp2 = false;
@@ -74,7 +74,7 @@ public class ExtractorComposedTest {
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.DPKG);
         final ExtractorComposed extractorComposed = new ExtractorComposed(simpleBdioFactory, extractorBehavior, imagePkgMgrDatabase);
 
-        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "architecture", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
 
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
@@ -111,7 +111,7 @@ public class ExtractorComposedTest {
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.RPM);
         final ExtractorComposed extractorComposed = new ExtractorComposed(simpleBdioFactory, extractorBehavior, imagePkgMgrDatabase);
 
-        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "architecture", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
 
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
@@ -139,7 +139,7 @@ public class ExtractorComposedTest {
         final ExtractorBehavior extractorBehavior = new NullExtractorBehavior();
         final ExtractorComposed extractorComposed = new ExtractorComposed(simpleBdioFactory, extractorBehavior, null);
 
-        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "architecture", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
 
         assertEquals(0, bdio.components.size());
     }

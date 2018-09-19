@@ -23,7 +23,6 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -56,8 +55,6 @@ public abstract class Extractor {
         this.defaultForges = forges;
         this.simpleBdioFactory = simpleBdioFactory;
     }
-
-    public abstract String deriveArchitecture(final File targetImageFileSystemRootDir) throws IOException;
 
     public abstract void extractComponents(MutableDependencyGraph dependencies, String dockerImageRepo, String dockerImageTag, String architecture, String[] packageList, final String preferredAliasNamespace);
 
@@ -106,7 +103,8 @@ public abstract class Extractor {
         }
     }
 
-    private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgr, final String architecture, final String codeLocationName, final String projectName, final String version,
+    private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgr, final String architecture, final String codeLocationName, final String projectName,
+            final String version,
             final String preferredAliasNamespace)
             throws IntegrationException, IOException, InterruptedException {
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(packageManagerEnum.getForge(), projectName, version);

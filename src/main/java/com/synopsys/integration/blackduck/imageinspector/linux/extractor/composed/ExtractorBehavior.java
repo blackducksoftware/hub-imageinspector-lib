@@ -17,6 +17,6 @@ public interface ExtractorBehavior {
 
     List<Forge> getDefaultForges();
 
-    List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final String architecture, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace)
+    List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace)
             throws IntegrationException;
 }

@@ -28,23 +28,23 @@ public class ExtractorComposed {
         this.imagePkgMgrDatabase = imagePkgMgrDatabase;
     }
 
-    public final SimpleBdioDocument extract(final String dockerImageRepo, final String dockerImageTag, final String architecture, final String codeLocationName, final String projectName,
+    public final SimpleBdioDocument extract(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName,
             final String projectVersion,
             final String preferredAliasNamespace)
             throws IntegrationException, IOException, InterruptedException {
 
-        final SimpleBdioDocument bdioDocument = extractBdio(dockerImageRepo, dockerImageTag, architecture, codeLocationName, projectName, projectVersion, preferredAliasNamespace);
+        final SimpleBdioDocument bdioDocument = extractBdio(dockerImageRepo, dockerImageTag, codeLocationName, projectName, projectVersion, preferredAliasNamespace);
         return bdioDocument;
     }
 
-    private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final String architecture, final String codeLocationName, final String projectName,
+    private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName,
             final String version,
             final String preferredAliasNamespace)
             throws IntegrationException, IOException, InterruptedException {
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(extractorBehavior.getPackageManagerEnum().getForge(), projectName, version);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
 
-        final List<ComponentDetails> comps = extractorBehavior.extractComponents(dockerImageRepo, dockerImageTag, architecture, imagePkgMgrDatabase, preferredAliasNamespace);
+        final List<ComponentDetails> comps = extractorBehavior.extractComponents(dockerImageRepo, dockerImageTag, imagePkgMgrDatabase, preferredAliasNamespace);
         final MutableDependencyGraph dependencies = generateDependencies(comps);
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 
