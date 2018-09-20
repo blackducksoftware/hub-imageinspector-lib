@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.synopsys.integration.hub.bdio.model.Forge;
 
 public enum PackageManagerEnum {
-    DPKG("/var/lib/dpkg", OperatingSystemEnum.UBUNTU, OperatingSystemEnum.DEBIAN.getForge()),
+    DPKG("/var/lib/dpkg", OperatingSystemEnum.UBUNTU, OperatingSystemEnum.UBUNTU.getForge()),
     RPM("/var/lib/rpm", OperatingSystemEnum.CENTOS, OperatingSystemEnum.CENTOS.getForge()),
     APK("/lib/apk", OperatingSystemEnum.ALPINE, OperatingSystemEnum.ALPINE.getForge()),
     NULL(null, null, new Forge("/", "/", "unknown"));

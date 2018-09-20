@@ -77,7 +77,7 @@ public class ImageInspectorApi {
         return imageInfoDerived.getBdioDocument();
     }
 
-    ImageInfoDerived inspect(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
+    private ImageInfoDerived inspect(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
             final boolean cleanupWorkingDir, final boolean usePreferredAliasNamespaceForge, final String containerFileSystemOutputPath,
             final String currentLinuxDistro)
             throws IntegrationException {

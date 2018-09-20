@@ -88,7 +88,7 @@ public class ImageInspectorApiTest {
         // Mockito.when(mockExtractor.extract(Mockito.anyString(), Mockito.anyString(), Mockito.any(ImagePkgMgrDatabase.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         // .thenReturn(mockedBdioDocument);
         // Mockito.when(extractorManager.getExtractors()).thenReturn(mockExtractors);
-        final ImageInfoDerived imageInfo = imageInspectorApi.inspect(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, CODE_LOCATION_PREFIX, null, null, false, false, null, null);
+        final ImageInfoDerived imageInfo = null; // imageInspectorApi.inspect(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, CODE_LOCATION_PREFIX, null, null, false, false, null, null);
         assertEquals(String.format("%s_alpine_latest_lib_apk_APK", CODE_LOCATION_PREFIX), imageInfo.getCodeLocationName());
         assertEquals(PROJECT, imageInfo.getFinalProjectName());
         assertEquals(PROJECT_VERSION, imageInfo.getFinalProjectVersionName());
