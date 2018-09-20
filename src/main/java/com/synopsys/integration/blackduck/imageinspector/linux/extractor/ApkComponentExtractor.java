@@ -70,7 +70,7 @@ public class ApkComponentExtractor implements ComponentExtractor {
                 if (!component.startsWith(".")) {
                     final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, component, version, getArchitecture());
                     logger.debug(String.format("Constructed externalId: %s", externalId));
-                    components.add(new ComponentDetails(component, version, externalId, architecture, preferredAliasNamespace));
+                    components.add(new ComponentDetails(component, version, externalId, getArchitecture(), preferredAliasNamespace));
                 }
             }
         }
@@ -79,6 +79,7 @@ public class ApkComponentExtractor implements ComponentExtractor {
 
     private String getArchitecture() throws IntegrationException {
         if (architecture == null) {
+            architecture = "";
             final Optional<File> etc = new LinuxFileSystem(imageFileSystem).getEtcDir();
             if (etc.isPresent()) {
                 final File apkDir = new File(etc.get(), ETC_SUBDIR_CONTAINING_ARCH);
