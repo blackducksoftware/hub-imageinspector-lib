@@ -24,6 +24,8 @@
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public enum OperatingSystemEnum {
     ALPINE,
@@ -31,15 +33,19 @@ public enum OperatingSystemEnum {
     DEBIAN,
     FEDORA,
     UBUNTU,
-    REDHAT, // this may not be needed
-    RHEL();
+    RHEL;
+
+    private static final Logger logger = LoggerFactory.getLogger(OperatingSystemEnum.class);
 
     public static OperatingSystemEnum determineOperatingSystem(String operatingSystemName) {
-        OperatingSystemEnum result = null;
+        if (operatingSystemName.equalsIgnoreCase("REDHAT")) {
+            logger.warn("Encountered operating system name REDHAT (expected RHEL)");
+            return OperatingSystemEnum.RHEL;
+        }
         if (!StringUtils.isBlank(operatingSystemName)) {
             operatingSystemName = operatingSystemName.toUpperCase();
-            result = OperatingSystemEnum.valueOf(operatingSystemName);
+            return OperatingSystemEnum.valueOf(operatingSystemName);
         }
-        return result;
+        return null;
     }
 }
