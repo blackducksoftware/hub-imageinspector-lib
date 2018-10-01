@@ -53,9 +53,12 @@ public class ImageInspector {
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private DockerTarParser tarParser;
+    private BdioGeneratorFactory bdioGeneratorFactory;
 
     @Autowired
-    private BdioGeneratorFactory bdioGeneratorFactory;
+    public void setBdioGeneratorFactory(final BdioGeneratorFactory bdioGeneratorFactory) {
+        this.bdioGeneratorFactory = bdioGeneratorFactory;
+    }
 
     @Autowired
     public void setTarParser(final DockerTarParser tarParser) {
