@@ -25,26 +25,14 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.synopsys.integration.hub.bdio.model.Forge;
-
 public enum OperatingSystemEnum {
-    ALPINE(Forge.ALPINE),
-    CENTOS(Forge.CENTOS),
-    DEBIAN(Forge.DEBIAN),
-    FEDORA(Forge.FEDORA),
-    UBUNTU(Forge.UBUNTU),
-    REDHAT(Forge.REDHAT), // this may not be needed
-    RHEL(Forge.REDHAT);
-
-    private final Forge forge;
-
-    private OperatingSystemEnum(final Forge forge) {
-        this.forge = forge;
-    }
-
-    public Forge getForge() {
-        return forge;
-    }
+    ALPINE,
+    CENTOS,
+    DEBIAN,
+    FEDORA,
+    UBUNTU,
+    REDHAT, // this may not be needed
+    RHEL();
 
     public static OperatingSystemEnum determineOperatingSystem(String operatingSystemName) {
         OperatingSystemEnum result = null;

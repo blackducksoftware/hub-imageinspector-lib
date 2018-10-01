@@ -7,14 +7,14 @@ public class ComponentDetails extends Stringable {
     private final String version;
     private final String externalId;
     private final String architecture;
-    private final String preferredAliasNamespace;
+    private final String linuxDistroName;
 
-    public ComponentDetails(final String name, final String version, final String externalId, final String architecture, final String preferredAliasNamespace) {
+    public ComponentDetails(final String name, final String version, final String externalId, final String architecture, final String linuxDistroName) {
         this.name = name;
         this.version = version;
         this.externalId = externalId;
         this.architecture = architecture;
-        this.preferredAliasNamespace = preferredAliasNamespace;
+        this.linuxDistroName = linuxDistroName;
     }
 
     public String getName() {
@@ -33,7 +33,7 @@ public class ComponentDetails extends Stringable {
         return architecture;
     }
 
-    public String getPreferredAliasNamespace() {
-        return preferredAliasNamespace;
+    public String getLinuxDistroName() {
+        return linuxDistroName;
     }
 }

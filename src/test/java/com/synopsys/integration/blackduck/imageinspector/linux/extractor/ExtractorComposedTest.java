@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor.composed;
+package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -15,12 +15,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecu
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ApkComponentExtractor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgComponentExtractor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.NullComponentExtractor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.RpmComponentExtractor;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.model.BdioComponent;
@@ -37,7 +31,7 @@ public class ExtractorComposedTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ComponentExtractor componentExtractor = new ApkComponentExtractor(pkgMgrExecutor, null);
+        final ComponentExtractor componentExtractor = new ApkComponentExtractor(pkgMgrExecutor, new File("src/test/resources/testApkFileSystem"));
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
@@ -52,11 +46,11 @@ public class ExtractorComposedTest {
             assertEquals("@preferredAliasNamespace", comp.bdioExternalIdentifier.forge);
             if ("alpine-baselayout".equals(comp.name)) {
                 foundComp1 = true;
-                assertEquals("alpine-baselayout/3.1.0-r0/givenArch", comp.bdioExternalIdentifier.externalId);
+                assertEquals("alpine-baselayout/3.1.0-r0/x86_64", comp.bdioExternalIdentifier.externalId);
             }
             if ("musl-utils".equals(comp.name)) {
                 foundComp2 = true;
-                assertEquals("musl-utils/1.1.19-r10/givenArch", comp.bdioExternalIdentifier.externalId);
+                assertEquals("musl-utils/1.1.19-r10/x86_64", comp.bdioExternalIdentifier.externalId);
             }
         }
         assertTrue(foundComp1);

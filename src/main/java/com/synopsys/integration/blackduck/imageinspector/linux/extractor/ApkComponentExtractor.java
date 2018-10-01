@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,17 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.hub.bdio.model.Forge;
 
 public class ApkComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String ARCH_FILENAME = "arch";
     private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
-    private final static List<Forge> defaultForges = Arrays.asList(OperatingSystemEnum.ALPINE.getForge());
     private final PkgMgrExecutor pkgMgrExecutor;
     private final File imageFileSystem;
     private String architecture;
@@ -35,13 +31,8 @@ public class ApkComponentExtractor implements ComponentExtractor {
     }
 
     @Override
-    public List<Forge> getDefaultForges() {
-        return defaultForges;
-    }
-
-    @Override
     public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase,
-            final String preferredAliasNamespace) throws IntegrationException {
+            final String linuxDistroName) throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
         final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
         for (final String packageLine : packageList) {
@@ -70,7 +61,7 @@ public class ApkComponentExtractor implements ComponentExtractor {
                 if (!component.startsWith(".")) {
                     final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, component, version, getArchitecture());
                     logger.debug(String.format("Constructed externalId: %s", externalId));
-                    components.add(new ComponentDetails(component, version, externalId, getArchitecture(), preferredAliasNamespace));
+                    components.add(new ComponentDetails(component, version, externalId, getArchitecture(), linuxDistroName));
                 }
             }
         }

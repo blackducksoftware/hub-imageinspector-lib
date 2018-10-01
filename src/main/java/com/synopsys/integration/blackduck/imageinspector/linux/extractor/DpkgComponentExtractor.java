@@ -1,23 +1,19 @@
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.hub.bdio.model.Forge;
 
 public class DpkgComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
     private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
-    private final static List<Forge> defaultForges = Arrays.asList(OperatingSystemEnum.UBUNTU.getForge(), OperatingSystemEnum.DEBIAN.getForge());
     private final PkgMgrExecutor pkgMgrExecutor;
 
     public DpkgComponentExtractor(final PkgMgrExecutor pkgMgrExecutor) {
@@ -25,12 +21,7 @@ public class DpkgComponentExtractor implements ComponentExtractor {
     }
 
     @Override
-    public List<Forge> getDefaultForges() {
-        return defaultForges;
-    }
-
-    @Override
-    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String preferredAliasNamespace)
+    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
             throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
         final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
@@ -55,7 +46,7 @@ public class DpkgComponentExtractor implements ComponentExtractor {
                         }
                         final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, name, version, archFromPkgMgrOutput);
                         logger.trace(String.format("Constructed externalId: %s", externalId));
-                        components.add(new ComponentDetails(name, version, externalId, archFromPkgMgrOutput, preferredAliasNamespace));
+                        components.add(new ComponentDetails(name, version, externalId, archFromPkgMgrOutput, linuxDistroName));
                     } else {
                         logger.trace(String.format("Package \"%s\" is listed but not installed (package status: %s)", packageLine, packageStatus));
                     }

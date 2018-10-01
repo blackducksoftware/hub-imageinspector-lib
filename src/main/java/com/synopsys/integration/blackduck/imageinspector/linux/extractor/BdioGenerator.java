@@ -31,10 +31,10 @@ public class BdioGenerator {
 
     public final SimpleBdioDocument extract(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName,
             final String projectVersion,
-            final String preferredAliasNamespace)
+            final String linuxDistroName)
             throws IntegrationException, IOException, InterruptedException {
 
-        final SimpleBdioDocument bdioDocument = extractBdio(dockerImageRepo, dockerImageTag, codeLocationName, projectName, projectVersion, preferredAliasNamespace);
+        final SimpleBdioDocument bdioDocument = extractBdio(dockerImageRepo, dockerImageTag, codeLocationName, projectName, projectVersion, linuxDistroName);
         return bdioDocument;
     }
 
@@ -44,12 +44,13 @@ public class BdioGenerator {
 
     private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName,
             final String version,
-            final String preferredAliasNamespace)
+            final String linuxDistroName)
             throws IntegrationException, IOException, InterruptedException {
-        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(componentExtractor.getDefaultForges().get(0), projectName, version);
+        final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
+        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, version);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
 
-        final List<ComponentDetails> comps = componentExtractor.extractComponents(dockerImageRepo, dockerImageTag, imagePkgMgrDatabase, preferredAliasNamespace);
+        final List<ComponentDetails> comps = componentExtractor.extractComponents(dockerImageRepo, dockerImageTag, imagePkgMgrDatabase, linuxDistroName);
         final MutableDependencyGraph dependencies = generateDependencies(comps);
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 
@@ -60,17 +61,9 @@ public class BdioGenerator {
     private MutableDependencyGraph generateDependencies(final List<ComponentDetails> comps) {
         final MutableDependencyGraph dependencies = simpleBdioFactory.createMutableDependencyGraph();
         for (final ComponentDetails comp : comps) {
-            if (comp.getPreferredAliasNamespace() != null) {
-                final String forgeId = String.format("@%s", comp.getPreferredAliasNamespace());
-                logger.debug(String.format("Generating component with preferred alias namespace (forge=@LinuxDistro): %s", forgeId));
-                final Forge preferredNamespaceForge = new Forge("/", "/", forgeId);
-                addDependency(dependencies, comp.getName(), comp.getVersion(), comp.getArchitecture(), preferredNamespaceForge);
-            } else {
-                logger.debug("Generating components with all package manager-appropriate namespaces (forges)");
-                for (final Forge forge : componentExtractor.getDefaultForges()) {
-                    addDependency(dependencies, comp.getName(), comp.getVersion(), comp.getArchitecture(), forge);
-                }
-            }
+            final Forge forge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
+            logger.debug(String.format("Generating component with forge: %s", forge.getName()));
+            addDependency(dependencies, comp.getName(), comp.getVersion(), comp.getArchitecture(), forge);
         }
         return dependencies;
     }

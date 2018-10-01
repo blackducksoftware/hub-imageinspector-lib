@@ -97,7 +97,7 @@ public class ImageInspectorTest {
         final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, layerIds);
         mappings.add(mapping);
         final File imageFilesDir = new File("src/test/resources/imageDir");
-        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageName, tagName, mappings, "testProjectName", "testProjectVersion", imageTarFile, imageFilesDir, "", false);
+        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageName, tagName, mappings, "testProjectName", "testProjectVersion", imageTarFile, imageFilesDir, "");
         final File bdioFile = imageInspector.writeBdioFile(new File(tempDirPath), imageInfoDerived);
         final File file1 = new File(String.format("src/test/resources/%s_imageDir_testProjectName_testProjectVersion_bdio.jsonld", imageName));
         final File file2 = bdioFile;

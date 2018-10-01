@@ -79,16 +79,12 @@ public class ImageInspector {
     }
 
     public ImageInfoDerived generateBdioFromImageFilesDir(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File dockerTar,
-            final File targetImageFileSystemRootDir, final String codeLocationPrefix, final boolean usePreferredAliasNamespaceForge) throws IOException, IntegrationException, InterruptedException {
+            final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         final ImageInfoParsed imageInfoParsed = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
         final BdioGenerator bdioGenerator = bdioGeneratorFactory.createExtractor(targetImageFileSystemRootDir, imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
 
-        // TODO: To commit to usePreferredAliasNamespaceForge, remove this if
-        String extractedLinuxDistroName = null;
-        if (usePreferredAliasNamespaceForge) {
-            extractedLinuxDistroName = imageInfoDerived.getImageInfoParsed().getLinuxDistroName();
-        }
+        final String extractedLinuxDistroName = imageInfoDerived.getImageInfoParsed().getLinuxDistroName();
         final SimpleBdioDocument bdioDocument = bdioGenerator.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), extractedLinuxDistroName);
         imageInfoDerived.setBdioDocument(bdioDocument);
@@ -124,11 +120,11 @@ public class ImageInspector {
         if (imagePkgMgr != null) {
             imageInfoDerived.setPkgMgrFilePath(determinePkgMgrFilePath(imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageDirName()));
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
-                    imageInfoDerived.getPkgMgrFilePath(), imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager().toString()));
+                    imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager().toString()));
         } else {
             imageInfoDerived.setPkgMgrFilePath(NO_PKG_MGR_FOUND);
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
-                    imageInfoDerived.getPkgMgrFilePath(), NO_PKG_MGR_FOUND));
+                    NO_PKG_MGR_FOUND));
         }
         imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName));
         imageInfoDerived.setFinalProjectVersionName(deriveBlackDuckProjectVersion(imageInfoDerived.getManifestLayerMapping(), versionName));
