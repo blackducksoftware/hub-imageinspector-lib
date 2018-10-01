@@ -39,6 +39,7 @@ public enum OperatingSystemEnum {
 
     public static OperatingSystemEnum determineOperatingSystem(String operatingSystemName) {
         if (operatingSystemName.equalsIgnoreCase("REDHAT")) {
+            // The suspicion is that we'll never encounter "REDHAT"
             logger.warn("Encountered operating system name REDHAT (expected RHEL)");
             return OperatingSystemEnum.RHEL;
         }

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.exception.IntegrationException;
 
-public abstract class PkgMgrExecutor extends Executor {
+public abstract class PkgMgrExecutor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private static final Long CMD_TIMEOUT = 120000L;
     private final ReentrantLock lock = new ReentrantLock();
@@ -78,13 +78,13 @@ public abstract class PkgMgrExecutor extends Executor {
         String[] results;
         logger.debug("Executing package manager");
         try {
-            results = executeCommand(listPackagesCommand, CMD_TIMEOUT);
+            results = Executor.executeCommand(listPackagesCommand, CMD_TIMEOUT);
             logger.info(String.format("Command %s executed successfully", listPackagesCommand));
         } catch (final Exception e) {
             if (!StringUtils.isBlank(upgradeCommand)) {
                 logger.warn(String.format("Error executing \"%s\": %s; Trying to upgrade package database by executing: %s", listPackagesCommand, e.getMessage(), upgradeCommand));
-                executeCommand(upgradeCommand, CMD_TIMEOUT);
-                results = executeCommand(listPackagesCommand, CMD_TIMEOUT);
+                Executor.executeCommand(upgradeCommand, CMD_TIMEOUT);
+                results = Executor.executeCommand(listPackagesCommand, CMD_TIMEOUT);
                 logger.info(String.format("Command %s executed successfully on 2nd attempt (after db upgrade)", listPackagesCommand));
             } else {
                 logger.error(String.format("Error executing \"%s\": %s; No upgrade command has been provided for this package manager", listPackagesCommand, e.getMessage()));
