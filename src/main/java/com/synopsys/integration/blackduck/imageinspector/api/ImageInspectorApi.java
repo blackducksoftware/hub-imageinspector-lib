@@ -121,7 +121,7 @@ public class ImageInspectorApi {
         final String imageTag = imageMetadata.getTagName();
         /// end parse manifest
         final File targetImageFileSystemRootDir = imageInspector.extractDockerLayers(workingDir, imageRepo, imageTag, layerTars, tarfileMetadata);
-        final OperatingSystemEnum currentOs = os.deriveCurrentOs(currentLinuxDistro);
+        final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
         OperatingSystemEnum inspectorOs = null;
         ImageInfoDerived imageInfoDerived;
         try {

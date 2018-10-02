@@ -66,7 +66,7 @@ public class ImageInspectorApiTest {
     @Test
     public void testOnWrongOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
         assertNotNull(imageInspectorApi);
-        Mockito.when(os.deriveCurrentOs(Mockito.any(String.class))).thenReturn(null);
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(null);
         try {
             imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, null, null);
             fail("Expected WrongInspectorOsException");
@@ -79,7 +79,7 @@ public class ImageInspectorApiTest {
     @Test
     public void testOnRightOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
         assertNotNull(imageInspectorApi);
-        Mockito.when(os.deriveCurrentOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.ALPINE);
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.ALPINE);
         final BdioGenerator mockExtractor = Mockito.mock(BdioGenerator.class);
         // Mockito.when(mockExtractor.getPackageManagerEnum()).thenReturn(PackageManagerEnum.APK);
         final SimpleBdioDocument mockedBdioDocument = new SimpleBdioDocument();
