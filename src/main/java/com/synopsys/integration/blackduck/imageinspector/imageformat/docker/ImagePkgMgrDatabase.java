@@ -21,38 +21,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
+package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
-import com.synopsys.integration.hub.bdio.graph.MutableDependencyGraph;
-import com.synopsys.integration.hub.bdio.model.Forge;
+import com.synopsys.integration.util.Stringable;
 
-@Component
-public class NullExtractor extends Extractor {
+public class ImagePkgMgrDatabase extends Stringable {
 
-    @Override
-    @PostConstruct
-    public void init() {
-        final List<Forge> forges = new ArrayList<>();
-        forges.add(new Forge("/", "/", "unknown"));
-        initValues(PackageManagerEnum.APK, null, forges);
+    private final File extractedPackageManagerDirectory;
+    private final PackageManagerEnum packageManager;
+
+    public ImagePkgMgrDatabase(final File extractedPackageManagerDirectory, final PackageManagerEnum packageManager) {
+        this.extractedPackageManagerDirectory = extractedPackageManagerDirectory;
+        this.packageManager = packageManager;
     }
 
-    @Override
-    public void extractComponents(final MutableDependencyGraph dependencies, final String dockerImageRepo, final String dockerImageTag, final String architecture, final String[] packageList, final String preferredAliasNamespace) {
+    public File getExtractedPackageManagerDirectory() {
+        return extractedPackageManagerDirectory;
     }
 
-    @Override
-    public String deriveArchitecture(final File targetImageFileSystemRootDir) throws IOException {
-        return "unknown";
+    public PackageManagerEnum getPackageManager() {
+        return packageManager;
     }
 }

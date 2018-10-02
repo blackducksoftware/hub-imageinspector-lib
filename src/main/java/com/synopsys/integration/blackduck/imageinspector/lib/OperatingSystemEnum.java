@@ -24,34 +24,29 @@
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import org.apache.commons.lang3.StringUtils;
-
-import com.synopsys.integration.hub.bdio.model.Forge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public enum OperatingSystemEnum {
-    ALPINE(Forge.ALPINE),
-    CENTOS(Forge.CENTOS),
-    DEBIAN(Forge.DEBIAN),
-    FEDORA(Forge.FEDORA),
-    UBUNTU(Forge.UBUNTU),
-    REDHAT(Forge.REDHAT), // this may not be needed
-    RHEL(Forge.REDHAT);
+    ALPINE,
+    CENTOS,
+    DEBIAN,
+    FEDORA,
+    UBUNTU,
+    RHEL;
 
-    private final Forge forge;
-
-    private OperatingSystemEnum(final Forge forge) {
-        this.forge = forge;
-    }
-
-    public Forge getForge() {
-        return forge;
-    }
+    private static final Logger logger = LoggerFactory.getLogger(OperatingSystemEnum.class);
 
     public static OperatingSystemEnum determineOperatingSystem(String operatingSystemName) {
-        OperatingSystemEnum result = null;
+        if (operatingSystemName.equalsIgnoreCase("REDHAT")) {
+            // The suspicion is that we'll never encounter "REDHAT"
+            logger.warn("Encountered operating system name REDHAT (expected RHEL)");
+            return OperatingSystemEnum.RHEL;
+        }
         if (!StringUtils.isBlank(operatingSystemName)) {
             operatingSystemName = operatingSystemName.toUpperCase();
-            result = OperatingSystemEnum.valueOf(operatingSystemName);
+            return OperatingSystemEnum.valueOf(operatingSystemName);
         }
-        return result;
+        return null;
     }
 }

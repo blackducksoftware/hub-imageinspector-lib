@@ -39,12 +39,11 @@ import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.exception.IntegrationException;
 
-
 @Component
 public class Executor {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger logger = LoggerFactory.getLogger(Executor.class);
 
-    public String[] executeCommand(final String commandString, final Long timeoutMillisec) throws IntegrationException, UnsupportedEncodingException {
+    public static String[] executeCommand(final String commandString, final Long timeoutMillisec) throws IntegrationException, UnsupportedEncodingException {
         logger.debug(String.format("Executing: %s with timeout %s", commandString, timeoutMillisec));
         final CommandLine cmdLine = CommandLine.parse(commandString);
         final DefaultExecutor executor = new DefaultExecutor();

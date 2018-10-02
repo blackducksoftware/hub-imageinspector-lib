@@ -41,11 +41,11 @@ public class Names {
         return String.format("image_%s_v_%s", cleanImageName(imageName), imageTag);
     }
 
-    public static String getCodeLocationName(final String codelocationPrefix, final String imageName, final String imageTag, final String pkgMgrFilePath, final String pkgMgrName) {
+    public static String getCodeLocationName(final String codelocationPrefix, final String imageName, final String imageTag, final String pkgMgrName) {
         if (!StringUtils.isBlank(codelocationPrefix)) {
-            return String.format("%s_%s_%s_%s_%s", codelocationPrefix, cleanImageName(imageName), imageTag, slashesToUnderscore(pkgMgrFilePath), pkgMgrName);
+            return String.format("%s_%s_%s_%s", codelocationPrefix, cleanImageName(imageName), imageTag, pkgMgrName);
         }
-        return String.format("%s_%s_%s_%s", cleanImageName(imageName), imageTag, slashesToUnderscore(pkgMgrFilePath), pkgMgrName);
+        return String.format("%s_%s_%s", cleanImageName(imageName), imageTag, pkgMgrName);
     }
 
     private static String slashesToUnderscore(final String givenString) {

@@ -92,10 +92,13 @@ public class DockerTarParser {
     public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
         logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
         for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
+            if (packageManagerEnum == PackageManagerEnum.NULL) {
+                continue;
+            }
             final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
             if (packageManagerDirectory.exists()) {
                 logger.info(String.format("Found package Manager Dir: %s", packageManagerDirectory.getAbsolutePath()));
-                final ImagePkgMgr targetImagePkgMgr = new ImagePkgMgr(packageManagerDirectory, packageManagerEnum);
+                final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(packageManagerDirectory, packageManagerEnum);
                 final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
                 final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), targetImagePkgMgr, linuxDistroName);
                 return imagePkgMgrInfo;

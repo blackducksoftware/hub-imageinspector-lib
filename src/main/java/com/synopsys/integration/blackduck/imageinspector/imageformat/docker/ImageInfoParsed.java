@@ -28,10 +28,10 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 public class ImageInfoParsed {
     private final String fileSystemRootDirName;
-    private final ImagePkgMgr pkgMgr;
+    private final ImagePkgMgrDatabase pkgMgr;
     private final String linuxDistroName;
 
-    public ImageInfoParsed(final String fileSystemRootDirName, final ImagePkgMgr pkgMgr, final String linuxDistroName) {
+    public ImageInfoParsed(final String fileSystemRootDirName, final ImagePkgMgrDatabase pkgMgr, final String linuxDistroName) {
         this.fileSystemRootDirName = fileSystemRootDirName;
         this.pkgMgr = pkgMgr;
         this.linuxDistroName = linuxDistroName;
@@ -41,7 +41,7 @@ public class ImageInfoParsed {
         return fileSystemRootDirName;
     }
 
-    public ImagePkgMgr getPkgMgr() {
+    public ImagePkgMgrDatabase getPkgMgr() {
         return pkgMgr;
     }
 

@@ -29,7 +29,6 @@ import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 public class ImageInfoDerived {
     private final ImageInfoParsed imageInfoParsed;
-    private String architecture = null;
     private String imageDirName = null;
     private ManifestLayerMapping manifestLayerMapping = null;
     private String pkgMgrFilePath = null;
@@ -42,14 +41,6 @@ public class ImageInfoDerived {
 
     public ImageInfoDerived(final ImageInfoParsed imageInfoParsed) {
         this.imageInfoParsed = imageInfoParsed;
-    }
-
-    public String getArchitecture() {
-        return architecture;
-    }
-
-    public void setArchitecture(final String architecture) {
-        this.architecture = architecture;
     }
 
     public String getImageDirName() {

@@ -27,7 +27,6 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -35,35 +34,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component
 public class Os {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public OperatingSystemEnum deriveCurrentOs(final String currentLinuxDistro) throws IntegrationException {
-        OperatingSystemEnum osEnum = OperatingSystemEnum.determineOperatingSystem(currentLinuxDistro);
-        if (osEnum != null) {
-            logger.debug(String.format("Using given value for current OS: %s", osEnum.toString()));
-            return osEnum;
+    public OperatingSystemEnum deriveOs(final String linuxDistroName) throws IntegrationException {
+        final OperatingSystemEnum osEnum = OperatingSystemEnum.determineOperatingSystem(linuxDistroName);
+        if (osEnum == null) {
+            throw new IntegrationException(String.format("Unrecognized linux distro: %s", linuxDistroName));
         }
-        // TODO: The rest of this method can go away when docker exec mode goes away
-        final String systemPropertyOsValue = System.getProperty("os.name");
-        logger.debug(String.format("Deriving current OS; System.getProperty(\"os.name\") says: %s", systemPropertyOsValue));
-        if (!isLinuxUnix(systemPropertyOsValue)) {
-            throw new IntegrationException(String.format("System property OS value is '%s'; this appears to be a non-Linux/Unix system", systemPropertyOsValue));
-        }
-        final File rootDir = new File("/");
-        final LinuxFileSystem rootFileSys = new LinuxFileSystem(rootDir);
-        final Set<PackageManagerEnum> packageManagers = rootFileSys.getPackageManagers();
-        if (packageManagers.size() == 1) {
-            final PackageManagerEnum packageManager = packageManagers.iterator().next();
-            osEnum = packageManager.getInspectorOperatingSystem();
-            logger.debug(String.format("Current Operating System %s", osEnum.name()));
-            return osEnum;
-        }
-        throw new IntegrationException(String.format("Unable to determine current operating system; %d package managers found: %s", packageManagers.size(), packageManagers));
+        logger.debug(String.format("Running on OS: %s", osEnum.toString()));
+        return osEnum;
     }
 
     public void logMemory() {
@@ -109,12 +92,5 @@ public class Os {
             logger.warn(String.format("Error reading or parsing Linux distribution-identifying file: %s: %s", linuxDistroFile, e.getMessage()));
             return Optional.empty();
         }
-    }
-
-    private boolean isLinuxUnix(final String osName) {
-        if (osName == null) {
-            return false;
-        }
-        return osName.contains("nux") || osName.contains("nix") || osName.contains("aix");
     }
 }
