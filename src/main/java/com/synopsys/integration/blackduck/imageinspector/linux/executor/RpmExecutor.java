@@ -25,6 +25,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.annotation.PostConstruct;
 
@@ -34,10 +35,13 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 @Component
 public class RpmExecutor extends PkgMgrExecutor {
+    private static final String PACKAGE_FORMAT_STRING = "\\{ epoch: \"%{E}\", name: \"%{N}\", version: \"%{V}-%{R}\", arch: \"%{ARCH}\" \\}\\n";
+
     @Override
     @PostConstruct
     public void init() {
-        initValues("rpm --rebuilddb", "rpm -qa");
+        initValues("rpm --rebuilddb",
+                Arrays.asList("rpm", "-qa", "--qf", PACKAGE_FORMAT_STRING));
     }
 
     @Override

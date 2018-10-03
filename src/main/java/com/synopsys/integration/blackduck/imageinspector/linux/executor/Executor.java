@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -46,6 +47,20 @@ public class Executor {
     public static String[] executeCommand(final String commandString, final Long timeoutMillisec) throws IntegrationException, UnsupportedEncodingException {
         logger.debug(String.format("Executing: %s with timeout %s", commandString, timeoutMillisec));
         final CommandLine cmdLine = CommandLine.parse(commandString);
+        return executeCommandLine(commandString, timeoutMillisec, cmdLine);
+    }
+
+    public static String[] executeCommand(final List<String> commandParts, final Long timeoutMillisec) throws IntegrationException, UnsupportedEncodingException {
+        logger.debug(String.format("Executing: %s with timeout %s", commandParts.get(0), timeoutMillisec));
+        final CommandLine cmdLine = new CommandLine(commandParts.get(0));
+        for (int i = 1; i < commandParts.size(); i++) {
+            logger.debug(String.format("Adding arg to %s command line: %s", commandParts.get(0), commandParts.get(i)));
+            cmdLine.addArgument(commandParts.get(i), false);
+        }
+        return executeCommandLine(commandParts.get(0), timeoutMillisec, cmdLine);
+    }
+
+    private static String[] executeCommandLine(final String commandString, final Long timeoutMillisec, final CommandLine cmdLine) throws IntegrationException, UnsupportedEncodingException {
         final DefaultExecutor executor = new DefaultExecutor();
         executor.setExitValue(1);
         final ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutMillisec);

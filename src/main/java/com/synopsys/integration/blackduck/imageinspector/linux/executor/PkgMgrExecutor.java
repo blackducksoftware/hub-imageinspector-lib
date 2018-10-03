@@ -25,6 +25,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
@@ -40,13 +41,13 @@ public abstract class PkgMgrExecutor {
     private static final Long CMD_TIMEOUT = 120000L;
     private final ReentrantLock lock = new ReentrantLock();
     private String upgradeCommand;
-    private String listPackagesCommand;
+    private List<String> listPackagesCommandParts;
 
     public abstract void init();
 
-    void initValues(final String upgradeCommand, final String listPackagesCommand) {
+    void initValues(final String upgradeCommand, final List<String> listPackagesCommandParts) {
         this.upgradeCommand = upgradeCommand;
-        this.listPackagesCommand = listPackagesCommand;
+        this.listPackagesCommandParts = listPackagesCommandParts;
     }
 
     public String[] runPackageManager(final ImagePkgMgrDatabase imagePkgMgr) throws IntegrationException {
@@ -78,16 +79,16 @@ public abstract class PkgMgrExecutor {
         String[] results;
         logger.debug("Executing package manager");
         try {
-            results = Executor.executeCommand(listPackagesCommand, CMD_TIMEOUT);
-            logger.info(String.format("Command %s executed successfully", listPackagesCommand));
+            results = Executor.executeCommand(listPackagesCommandParts, CMD_TIMEOUT);
+            logger.info(String.format("Command %s executed successfully", listPackagesCommandParts));
         } catch (final Exception e) {
             if (!StringUtils.isBlank(upgradeCommand)) {
-                logger.warn(String.format("Error executing \"%s\": %s; Trying to upgrade package database by executing: %s", listPackagesCommand, e.getMessage(), upgradeCommand));
+                logger.warn(String.format("Error executing \"%s\": %s; Trying to upgrade package database by executing: %s", listPackagesCommandParts, e.getMessage(), upgradeCommand));
                 Executor.executeCommand(upgradeCommand, CMD_TIMEOUT);
-                results = Executor.executeCommand(listPackagesCommand, CMD_TIMEOUT);
-                logger.info(String.format("Command %s executed successfully on 2nd attempt (after db upgrade)", listPackagesCommand));
+                results = Executor.executeCommand(listPackagesCommandParts, CMD_TIMEOUT);
+                logger.info(String.format("Command %s executed successfully on 2nd attempt (after db upgrade)", listPackagesCommandParts));
             } else {
-                logger.error(String.format("Error executing \"%s\": %s; No upgrade command has been provided for this package manager", listPackagesCommand, e.getMessage()));
+                logger.error(String.format("Error executing \"%s\": %s; No upgrade command has been provided for this package manager", listPackagesCommandParts, e.getMessage()));
                 throw e;
             }
         }

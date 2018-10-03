@@ -5,10 +5,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
@@ -97,21 +101,11 @@ public class ExtractorComposedTest {
 
     @Test
     public void testRpm() throws IntegrationException, IOException, InterruptedException {
-
-        final String[] pkgMgrOutputLines = { "ncurses-base-5.9-14.20130511.el7_4.noarch",
-                "krb5-libs-1.15.1-19.el7.x86_64" };
-
-        final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(RpmExecutor.class);
-        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
-
-        final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ComponentExtractor componentExtractor = new RpmComponentExtractor(pkgMgrExecutor);
-
-        final File imagePkgMgrDir = new File("the code that uses this is mocked");
-        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.RPM);
-        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
-
-        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final String[] pkgMgrOutputLines = {
+                "{ epoch: \"(none)\", name: \"ncurses-base\", version: \"5.9-14.20130511.el7_4\", arch: \"noarch\" }",
+                "{ epoch: \"111\", name: \"krb5-libs\", version: \"1.15.1-19.el7\", arch: \"x86_64\" }"
+        };
+        final SimpleBdioDocument bdio = getBdioDocumentForRpmPackages(pkgMgrOutputLines);
 
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
@@ -122,14 +116,43 @@ public class ExtractorComposedTest {
             if ("ncurses-base".equals(comp.name)) {
                 foundComp1 = true;
                 assertEquals("ncurses-base/5.9-14.20130511.el7_4/noarch", comp.bdioExternalIdentifier.externalId);
+                assertEquals("5.9-14.20130511.el7_4", comp.version);
             }
-            if ("krb5-libs".equals(comp.name)) {
+            if ("111:krb5-libs".equals(comp.name)) {
                 foundComp2 = true;
-                assertEquals("krb5-libs/1.15.1-19.el7/x86_64", comp.bdioExternalIdentifier.externalId);
+                assertEquals("111:krb5-libs/1.15.1-19.el7/x86_64", comp.bdioExternalIdentifier.externalId);
+                assertEquals("1.15.1-19.el7", comp.version);
             }
         }
         assertTrue(foundComp1);
         assertTrue(foundComp2);
+    }
+
+    @Test
+    public void testRpmFromCentosMinusVimImage() throws IntegrationException, IOException, InterruptedException {
+        final List<String> lines = FileUtils.readLines(new File("src/test/resources/pkgMgrOutput/rpm/centos_minus_vim_plus_bacula.txt"), StandardCharsets.UTF_8);
+        final String[] pkgMgrOutputLines = lines.toArray(new String[0]);
+        final SimpleBdioDocument bdio = getBdioDocumentForRpmPackages(pkgMgrOutputLines);
+        final String comp1Name = "cracklib";
+        final String comp1Version = "2.9.0-11.el7";
+        final String comp1Arch = "x86_64";
+        boolean foundComp1 = false;
+        boolean foundComp2 = false;
+        for (final BdioComponent comp : bdio.components) {
+            System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
+            assertEquals("@preferredAliasNamespace", comp.bdioExternalIdentifier.forge);
+            if (comp1Name.equals(comp.name)) {
+                foundComp1 = true;
+                assertEquals(String.format("%s/%s/%s", comp1Name, comp1Version, comp1Arch), comp.bdioExternalIdentifier.externalId);
+            }
+            if ("cracklib-dicts".equals(comp.name)) {
+                foundComp2 = true;
+                assertEquals("cracklib-dicts/2.9.0-11.el7/x86_64", comp.bdioExternalIdentifier.externalId);
+            }
+        }
+        assertTrue(String.format("component %s/%s/%s not found", comp1Name, comp1Version, comp1Arch), foundComp1);
+        assertTrue(foundComp2);
+        assertEquals(189, bdio.components.size());
     }
 
     @Test
@@ -142,5 +165,20 @@ public class ExtractorComposedTest {
         final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
 
         assertEquals(0, bdio.components.size());
+    }
+
+    private SimpleBdioDocument getBdioDocumentForRpmPackages(final String[] pkgMgrOutputLines) throws IntegrationException, IOException, InterruptedException {
+        final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(RpmExecutor.class);
+        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
+
+        final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
+        final ComponentExtractor componentExtractor = new RpmComponentExtractor(pkgMgrExecutor, new Gson());
+
+        final File imagePkgMgrDir = new File("the code that uses this is mocked");
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.RPM);
+        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
+
+        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        return bdio;
     }
 }

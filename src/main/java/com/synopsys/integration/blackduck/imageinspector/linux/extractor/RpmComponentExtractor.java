@@ -6,17 +6,21 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.output.RpmPackage;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class RpmComponentExtractor implements ComponentExtractor {
+    private static final String NO_VALUE = "(none)";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private static final String PATTERN_FOR_VALID_PACKAGE_LINE = ".+-.+-.+\\..*";
     private final PkgMgrExecutor pkgMgrExecutor;
+    private final Gson gson;
 
-    public RpmComponentExtractor(final PkgMgrExecutor pkgMgrExecutor) {
+    public RpmComponentExtractor(final PkgMgrExecutor pkgMgrExecutor, final Gson gson) {
         this.pkgMgrExecutor = pkgMgrExecutor;
+        this.gson = gson;
     }
 
     @Override
@@ -26,23 +30,27 @@ public class RpmComponentExtractor implements ComponentExtractor {
         final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
         for (final String packageLine : packageList) {
             if (valid(packageLine)) {
-                // Expected format: name-versionpart1-versionpart2.arch
-                final int lastDotIndex = packageLine.lastIndexOf('.');
-                final String archFromPkgMgrOutput = packageLine.substring(lastDotIndex + 1);
-                final int lastDashIndex = packageLine.lastIndexOf('-');
-                final String nameVersion = packageLine.substring(0, lastDashIndex);
-                final int secondToLastDashIndex = nameVersion.lastIndexOf('-');
-                final String versionRelease = packageLine.substring(secondToLastDashIndex + 1, lastDotIndex);
-                final String artifact = packageLine.substring(0, secondToLastDashIndex);
-                final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, artifact, versionRelease, archFromPkgMgrOutput);
+                final RpmPackage rpmPackage = gson.fromJson(packageLine, RpmPackage.class);
+                String packageName = rpmPackage.getName();
+                if (!NO_VALUE.equals(rpmPackage.getEpoch())) {
+                    packageName = String.format("%s:%s", rpmPackage.getEpoch(), rpmPackage.getName());
+                }
+                String arch = "";
+                if (!NO_VALUE.equals(rpmPackage.getArch())) {
+                    arch = rpmPackage.getArch();
+                }
+                final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, packageName, rpmPackage.getVersion(), arch);
                 logger.debug(String.format("Adding externalId %s to components list", externalId));
-                components.add(new ComponentDetails(artifact, versionRelease, externalId, archFromPkgMgrOutput, linuxDistroName));
+                components.add(new ComponentDetails(packageName, rpmPackage.getVersion(), externalId, arch, linuxDistroName));
             }
         }
         return components;
     }
 
     private boolean valid(final String packageLine) {
-        return packageLine.matches(PATTERN_FOR_VALID_PACKAGE_LINE);
+        if (packageLine.startsWith("{") && packageLine.endsWith("}") && packageLine.contains("epoch:") && packageLine.contains("name:") && packageLine.contains("version:") && packageLine.contains("arch:")) {
+            return true;
+        }
+        return false;
     }
 }

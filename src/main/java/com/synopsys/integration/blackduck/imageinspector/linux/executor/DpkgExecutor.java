@@ -25,6 +25,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.annotation.PostConstruct;
 
@@ -37,7 +38,7 @@ public class DpkgExecutor extends PkgMgrExecutor {
     @Override
     @PostConstruct
     public void init() {
-        initValues(null, "dpkg -l");
+        initValues(null, Arrays.asList("dpkg", "-l"));
     }
 
     @Override
