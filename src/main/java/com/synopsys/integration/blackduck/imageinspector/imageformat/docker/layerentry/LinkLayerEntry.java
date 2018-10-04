@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
@@ -48,7 +49,8 @@ public class LinkLayerEntry implements LayerEntry {
     }
 
     @Override
-    public void process() {
+    public Optional<File> process() {
+        final Optional<File> otherFileToDeleteNone = Optional.empty();
         final String fileSystemEntryName = layerEntry.getName();
         logger.trace(String.format("Processing link: %s", fileSystemEntryName));
         final Path layerOutputDirPath = layerOutputDir.toPath();
@@ -57,7 +59,7 @@ public class LinkLayerEntry implements LayerEntry {
             startLink = Paths.get(layerOutputDir.getAbsolutePath(), fileSystemEntryName);
         } catch (final InvalidPathException e) {
             logger.warn(String.format("Error extracting symbolic link %s: Error creating Path object: %s", fileSystemEntryName, e.getMessage()));
-            return;
+            return otherFileToDeleteNone;
         }
         Path endLink = null;
         logger.trace("Getting link name from layer entry");
@@ -77,11 +79,7 @@ public class LinkLayerEntry implements LayerEntry {
             logger.trace(String.format("normalizing %s", endLink.toString()));
             endLink = endLink.normalize();
             logger.trace(String.format("endLink: %s", endLink.toString()));
-            try {
-                Files.delete(startLink); // remove lower layer's version if exists
-            } catch (final IOException e) {
-                // expected (most of the time)
-            }
+            deleteIfExists(startLink);
             try {
                 Files.createSymbolicLink(startLink, endLink);
             } catch (final IOException e) {
@@ -102,6 +100,7 @@ public class LinkLayerEntry implements LayerEntry {
             if (!targetFile.exists()) {
                 logger.warn(String.format("Attempting to create a link to %s, but it does not exist", targetFile));
             }
+            deleteIfExists(startLink);
             try {
                 Files.createLink(startLink, endLink);
             } catch (final IOException e) {
@@ -109,7 +108,15 @@ public class LinkLayerEntry implements LayerEntry {
                         e.getMessage()));
             }
         }
+        return otherFileToDeleteNone;
+    }
 
+    private void deleteIfExists(final Path pathToDelete) {
+        try {
+            Files.delete(pathToDelete); // remove lower layer's version if exists
+        } catch (final IOException e) {
+            // expected (most of the time)
+        }
     }
 
     @Override

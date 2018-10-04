@@ -26,6 +26,9 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -47,8 +50,9 @@ public class DockerLayerTar {
         this.layerTar = layerTar;
     }
 
-    public void extractToDir(final File layerOutputDir) throws IOException {
+    public List<File> extractToDir(final File layerOutputDir) throws IOException {
         logger.debug(String.format("layerTar: %s", layerTar.getAbsolutePath()));
+        final List<File> filesToRemove = new ArrayList<>();
         final TarArchiveInputStream layerInputStream = new TarArchiveInputStream(new FileInputStream(layerTar), "UTF-8");
         try {
             layerOutputDir.mkdirs();
@@ -57,7 +61,11 @@ public class DockerLayerTar {
             while (null != (layerEntry = layerInputStream.getNextTarEntry())) {
                 try {
                     final LayerEntry layerEntryHandler = LayerEntries.createLayerEntry(layerInputStream, layerEntry, layerOutputDir);
-                    layerEntryHandler.process();
+                    final Optional<File> otherFileToRemove = layerEntryHandler.process();
+                    if (otherFileToRemove.isPresent()) {
+                        logger.debug(String.format("File/directory marked for removal: %s", otherFileToRemove.get().getAbsolutePath()));
+                        filesToRemove.add(otherFileToRemove.get());
+                    }
                 } catch (final Exception e) {
                     logger.error(String.format("Error extracting files from layer tar: %s", e.toString()));
                 }
@@ -65,6 +73,7 @@ public class DockerLayerTar {
         } finally {
             IOUtils.closeQuietly(layerInputStream);
         }
+        return filesToRemove;
     }
 
     @Override

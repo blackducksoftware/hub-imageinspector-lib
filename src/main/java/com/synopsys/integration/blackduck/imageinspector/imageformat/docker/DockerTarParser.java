@@ -34,6 +34,7 @@ import java.util.Optional;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,7 +194,16 @@ public class DockerTarParser {
         logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), Names.getTargetImageFileSystemRootDirName(imageName, imageTag)));
         final File targetImageFileSystemRoot = new File(imageFilesDir, Names.getTargetImageFileSystemRootDirName(imageName, imageTag));
         final DockerLayerTar dockerLayerTar = new DockerLayerTar(layerTar);
-        dockerLayerTar.extractToDir(targetImageFileSystemRoot);
+        final List<File> filesToRemove = dockerLayerTar.extractToDir(targetImageFileSystemRoot);
+        for (final File fileToRemove : filesToRemove) {
+            if (fileToRemove.isDirectory()) {
+                logger.debug(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));
+                FileUtils.deleteDirectory(fileToRemove);
+            } else {
+                logger.debug(String.format("Removing file marked for deletion: %s", fileToRemove.getAbsolutePath()));
+                FileUtils.deleteQuietly(fileToRemove);
+            }
+        }
         return targetImageFileSystemRoot;
     }
 

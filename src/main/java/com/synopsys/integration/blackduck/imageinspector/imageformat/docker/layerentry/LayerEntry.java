@@ -23,6 +23,9 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
+import java.io.File;
+import java.util.Optional;
+
 public interface LayerEntry {
-    void process();
+    Optional<File> process();
 }

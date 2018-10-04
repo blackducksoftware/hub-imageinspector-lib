@@ -35,9 +35,13 @@ public class LayerEntries {
 
     public static LayerEntry createLayerEntry(final TarArchiveInputStream layerInputStream, final TarArchiveEntry layerEntry, final File layerOutputDir) {
         final String fileSystemEntryName = layerEntry.getName();
-        logger.trace(String.format("Processing layerEntry: %s", fileSystemEntryName));
-        if ((fileSystemEntryName.startsWith(".wh.")) || (fileSystemEntryName.contains("/.wh."))) {
-            return new WhiteOutLayerEntry(layerEntry, layerOutputDir);
+        logger.trace(String.format("Processing layerEntry: name: %s", fileSystemEntryName));
+        // plnk and opq whiteout files are found in directories we should omit from the container file system
+        if (fileSystemEntryName.equals(".wh..wh..plnk") || fileSystemEntryName.endsWith("/.wh..wh..plnk") ||
+                fileSystemEntryName.equals(".wh..wh..opq") || fileSystemEntryName.endsWith("/.wh..wh..opq")) {
+            return new WhiteOutOmittedDirLayerEntry(layerEntry, layerOutputDir);
+        } else if (fileSystemEntryName.startsWith(".wh.") || fileSystemEntryName.contains("/.wh.")) {
+            return new WhiteOutFileLayerEntry(layerEntry, layerOutputDir);
         } else if (layerEntry.isSymbolicLink() || layerEntry.isLink()) {
             return new LinkLayerEntry(layerEntry, layerOutputDir);
         } else {

@@ -75,9 +75,8 @@ public class DockerTarParserTest {
             if (file.getAbsolutePath().endsWith("var/lib/rpm/Name")) {
                 System.out.println(file.getAbsolutePath());
                 varLibRpmNameFound = true;
-                final Executor e = new Executor();
                 final String cmd = String.format("strings %s", file.getAbsolutePath());
-                final String[] cmdOutput = e.executeCommand(cmd, 30000L);
+                final String[] cmdOutput = Executor.executeCommand(cmd, 30000L);
                 final String stringsOutput = Arrays.asList(cmdOutput).stream().collect(Collectors.joining("\n"));
                 assertTrue(stringsOutput.contains("bacula-console"));
                 assertTrue(stringsOutput.contains("bacula-client"));

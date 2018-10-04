@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -50,7 +51,8 @@ public class FileDirLayerEntry implements LayerEntry {
     }
 
     @Override
-    public void process() {
+    public Optional<File> process() {
+        final Optional<File> otherFileToDeleteNone = Optional.empty();
         final String fileSystemEntryName = layerEntry.getName();
         logger.trace(String.format("Processing file/dir: %s", fileSystemEntryName));
 
@@ -66,13 +68,13 @@ public class FileDirLayerEntry implements LayerEntry {
                 outputFileStream = new FileOutputStream(outputFile);
             } catch (final FileNotFoundException e1) {
                 logger.error(String.format("Error creating output stream for %s", outputFile.getAbsolutePath()), e1);
-                return;
+                return otherFileToDeleteNone;
             }
             try {
                 IOUtils.copy(layerInputStream, outputFileStream);
             } catch (final IOException e) {
                 logger.error(String.format("Error copying file %s to %s: %s", fileSystemEntryName, outputFile.getAbsolutePath(), e.getMessage()));
-                return;
+                return otherFileToDeleteNone;
             } finally {
                 if (outputFileStream != null) {
                     try {
@@ -88,7 +90,7 @@ public class FileDirLayerEntry implements LayerEntry {
                 logger.trace(String.format("mkdir of %s didn't succeed, but it might have already existed", outputFile.getAbsolutePath()));
             }
         }
-
+        return otherFileToDeleteNone;
     }
 
     @Override
