@@ -93,14 +93,14 @@ public class ImageInspectorTest {
         Mockito.when(bdioGeneratorFactory.createExtractor(imageFilesDir, pkgMgr)).thenReturn(bdioGenerator);
 
         final File imageTarFile = new File("test/image.tar");
-        final ImageInfoParsed imageInfo = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgrDatabase, imageName);
+        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgrDatabase, imageName);
 
         final ImageInspector imageInspector = new ImageInspector();
         imageInspector.setBdioGeneratorFactory(bdioGeneratorFactory);
         final String tempDirPath = TestUtils.createTempDirectory().getAbsolutePath();
 
         final DockerTarParser tarParser = Mockito.mock(DockerTarParser.class);
-        Mockito.when(tarParser.collectPkgMgrInfo(Mockito.any(File.class))).thenReturn(imageInfo);
+        Mockito.when(tarParser.collectPkgMgrInfo(Mockito.any(File.class))).thenReturn(imageInfoParsed);
         imageInspector.setTarParser(tarParser);
         final List<ManifestLayerMapping> mappings = new ArrayList<>();
         final List<String> layerIds = new ArrayList<>();
@@ -108,7 +108,7 @@ public class ImageInspectorTest {
         final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, layerIds);
         mappings.add(mapping);
 
-        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageName, tagName, mappings, "testProjectName", "testProjectVersion", imageTarFile, imageFilesDir, "");
+        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageInfoParsed, imageName, tagName, mappings, "testProjectName", "testProjectVersion", imageTarFile, imageFilesDir, "");
         final File bdioFile = imageInspector.writeBdioFile(new File(tempDirPath), imageInfoDerived);
         final File file1 = new File(String.format("src/test/resources/%s_imageDir_testProjectName_testProjectVersion_bdio.jsonld", imageName));
         final File file2 = bdioFile;

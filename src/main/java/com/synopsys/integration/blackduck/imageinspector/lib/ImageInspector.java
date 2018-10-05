@@ -81,9 +81,9 @@ public class ImageInspector {
         return tarParser.getLayerMappings(workingDir, tarFileName, dockerImageName, dockerTagName);
     }
 
-    public ImageInfoDerived generateBdioFromImageFilesDir(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File dockerTar,
+    public ImageInfoDerived generateBdioFromImageFilesDir(final ImageInfoParsed imageInfoParsed, final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName,
+            final String versionName, final File dockerTar,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
-        final ImageInfoParsed imageInfoParsed = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
         final BdioGenerator bdioGenerator = bdioGeneratorFactory.createExtractor(targetImageFileSystemRootDir, imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
 
