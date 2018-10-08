@@ -81,9 +81,14 @@ public class ImageInspector {
         return tarParser.getLayerMappings(workingDir, tarFileName, dockerImageName, dockerTagName);
     }
 
-    public ImageInfoDerived generateBdioFromImageFilesDir(final ImageInfoParsed imageInfoParsed, final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName,
+    public ImageInfoDerived generateBdioFromImageFilesDir(ImageInfoParsed imageInfoParsed, final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName,
             final String versionName, final File dockerTar,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
+        // TODO will not need this null check + imageInfoParsed assignment once Exec mode is removed
+        if (imageInfoParsed == null) {
+            imageInfoParsed = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
+        }
+        ////
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
         final BdioGenerator bdioGenerator = bdioGeneratorFactory.createExtractor(targetImageFileSystemRootDir, imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
 
