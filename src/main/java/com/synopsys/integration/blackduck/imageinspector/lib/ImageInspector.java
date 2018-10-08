@@ -82,7 +82,7 @@ public class ImageInspector {
     }
 
     public ImageInfoDerived generateBdioFromImageFilesDir(ImageInfoParsed imageInfoParsed, final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName,
-            final String versionName, final File dockerTar,
+            final String versionName,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         // TODO will not need this null check + imageInfoParsed assignment once Exec mode is removed
         if (imageInfoParsed == null) {
@@ -99,7 +99,7 @@ public class ImageInspector {
         return imageInfoDerived;
     }
 
-    public ImageInfoDerived generateEmptyBdio(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File dockerTar,
+    public ImageInfoDerived generateEmptyBdio(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null, null);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);

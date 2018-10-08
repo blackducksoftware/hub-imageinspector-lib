@@ -133,10 +133,10 @@ public class ImageInspectorApi {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
                 throw new WrongInspectorOsException(dockerTarfile.getAbsolutePath(), neededInspectorOs, msg);
             }
-            imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageInfoParsed, imageRepo, imageTag, tarfileMetadata, blackDuckProjectName, blackDuckProjectVersion, dockerTarfile, targetImageFileSystemRootDir,
+            imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageInfoParsed, imageRepo, imageTag, tarfileMetadata, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
                     codeLocationPrefix);
         } catch (final PkgMgrDataNotFoundException e) {
-            imageInfoDerived = imageInspector.generateEmptyBdio(imageRepo, imageTag, tarfileMetadata, blackDuckProjectName, blackDuckProjectVersion, dockerTarfile, targetImageFileSystemRootDir,
+            imageInfoDerived = imageInspector.generateEmptyBdio(imageRepo, imageTag, tarfileMetadata, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
                     codeLocationPrefix);
         }
         createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);

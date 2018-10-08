@@ -92,7 +92,6 @@ public class ImageInspectorTest {
         final File imageFilesDir = new File("src/test/resources/imageDir");
         Mockito.when(bdioGeneratorFactory.createExtractor(imageFilesDir, pkgMgr)).thenReturn(bdioGenerator);
 
-        final File imageTarFile = new File("test/image.tar");
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgrDatabase, imageName);
 
         final ImageInspector imageInspector = new ImageInspector();
@@ -108,7 +107,7 @@ public class ImageInspectorTest {
         final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, layerIds);
         mappings.add(mapping);
 
-        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageInfoParsed, imageName, tagName, mappings, "testProjectName", "testProjectVersion", imageTarFile, imageFilesDir, "");
+        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageInfoParsed, imageName, tagName, mappings, "testProjectName", "testProjectVersion", imageFilesDir, "");
         final File bdioFile = imageInspector.writeBdioFile(new File(tempDirPath), imageInfoDerived);
         final File file1 = new File(String.format("src/test/resources/%s_imageDir_testProjectName_testProjectVersion_bdio.jsonld", imageName));
         final File file2 = bdioFile;
