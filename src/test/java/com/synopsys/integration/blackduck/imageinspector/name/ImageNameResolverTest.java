@@ -1,7 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.name;
 
 import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.assertFalse;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,4 +67,10 @@ public class ImageNameResolverTest {
         assertEquals("latest", resolver.getNewImageTag().get());
     }
 
+    @Test
+    public void testWithSha() {
+        final ImageNameResolver resolver = new ImageNameResolver("solsson/kafka-prometheus-jmx-exporter@sha256:a23062396cd5af1acdf76512632c20ea6be76885dfc20cd9ff40fb23846557e8");
+        assertEquals("solsson/kafka-prometheus-jmx-exporter", resolver.getNewImageRepo().get());
+        assertEquals("@sha256:a23062396cd5af1acdf76512632c20ea6be76885dfc20cd9ff40fb23846557e8", resolver.getNewImageTag().get());
+    }
 }

@@ -34,7 +34,9 @@ public class Names {
     private static final Logger logger = LoggerFactory.getLogger(Names.class);
 
     public static String getImageTarFilename(final String imageName, final String tagName) {
-        return String.format("%s_%s.tar", cleanImageName(imageName), tagName);
+        String filename = String.format("%s_%s.tar", cleanImageName(imageName), cleanImageTag(tagName));
+        logger.trace(String.format("Derived tar filename %s for image: %s, tag: %s", filename, imageName, tagName));
+        return filename;
     }
 
     public static String getTargetImageFileSystemRootDirName(final String imageName, final String imageTag) {
@@ -81,7 +83,11 @@ public class Names {
     }
 
     private static String cleanImageName(final String imageName) {
-        return colonsToUnderscores(slashesToUnderscore(imageName));
+        return atSignsToUnderscores(colonsToUnderscores(slashesToUnderscore(imageName)));
+    }
+
+    private static String cleanImageTag(final String imageTag) {
+        return colonsToUnderscores(atSignsToUnderscores(imageTag));
     }
 
     private static String cleanblackDuckProjectName(final String blackDuckProjectName) {
@@ -103,8 +109,18 @@ public class Names {
         }
     }
 
-    private static String colonsToUnderscores(final String imageName) {
-        return imageName.replaceAll(":", "_");
+    private static String colonsToUnderscores(final String name) {
+        if (StringUtils.isBlank(name)) {
+            return "";
+        }
+        return name.replaceAll(":", "_");
+    }
+
+    private static String atSignsToUnderscores(final String name) {
+        if (StringUtils.isBlank(name)) {
+            return "";
+        }
+        return name.replaceAll("@", "_");
     }
 
     private static String generateFilename(final String cleanImageName, final String cleanPkgMgrFilePath, final String cleanblackDuckProjectName, final String blackDuckVersionName) {
@@ -112,6 +128,9 @@ public class Names {
     }
 
     private static String cleanPath(final String path) {
+        if (StringUtils.isBlank(path)) {
+            return "";
+        }
         return slashesToUnderscore(path);
     }
 }

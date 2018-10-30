@@ -26,13 +26,23 @@ package com.synopsys.integration.blackduck.imageinspector.name;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImageNameResolver {
+    private static final String SHA256_SEPARATOR = "@sha256:";
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private Optional<String> newImageRepo = Optional.empty();
     private Optional<String> newImageTag = Optional.empty();
 
     public ImageNameResolver(final String givenImageName) {
         if (StringUtils.isNotBlank(givenImageName)) {
+            final int atShaIndex = givenImageName.lastIndexOf(SHA256_SEPARATOR);
+            logger.trace(String.format("atShaIndex: %d", atShaIndex));
+            if (atShaIndex >= 0) {
+                newImageRepo = Optional.of(givenImageName);
+                return;
+            }
             newImageTag = Optional.of("latest");
             final int tagColonIndex = findColonBeforeTag(givenImageName);
             if (tagColonIndex < 0) {
@@ -44,6 +54,14 @@ public class ImageNameResolver {
                 }
             }
         }
+    }
+
+    public Optional<String> getNewImageRepo() {
+        return newImageRepo;
+    }
+
+    public Optional<String> getNewImageTag() {
+        return newImageTag;
     }
 
     private int findColonBeforeTag(final String givenImageName) {
@@ -63,13 +81,4 @@ public class ImageNameResolver {
         }
         return lastColonIndex;
     }
-
-    public Optional<String> getNewImageRepo() {
-        return newImageRepo;
-    }
-
-    public Optional<String> getNewImageTag() {
-        return newImageTag;
-    }
-
 }
