@@ -81,7 +81,7 @@ public class Os {
                 line = line.trim();
                 if (line.startsWith(linePrefix)) {
                     final String[] parts = line.split("=");
-                    final String distroName = parts[1].replaceAll("\"", "");
+                    final String distroName = parts[1].replaceAll("\"", "").toLowerCase();
                     logger.info(String.format("Found target image Linux distro name '%s' in file %s", distroName, linuxDistroFile.getAbsolutePath()));
                     return Optional.of(distroName);
                 }
