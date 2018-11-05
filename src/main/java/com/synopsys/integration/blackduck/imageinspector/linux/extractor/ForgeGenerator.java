@@ -23,16 +23,50 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.synopsys.integration.hub.bdio.model.Forge;
 
 public class ForgeGenerator {
+
+    // For cases where the KB name does not match the Linux distro ID found in os-release/lsb-release,
+    // this table provides the mapping.
+    // If the KB name matches the Linux distro ID found in os-release/lsb-release, there is
+    // no need to add the distro to this table.
+    // Linux distro names are mapped to lowercase before being looked up in this table.
+    private static final Map<String, String> linuxDistroNameToKbForgeNameMapping = new HashMap<>();
+    static {
+        linuxDistroNameToKbForgeNameMapping.put("rhel", "redhat");
+        linuxDistroNameToKbForgeNameMapping.put("sles", "opensuse");
+    }
+
     public static Forge createProjectForge(final String linuxDistroName) {
-        return new Forge("/", "/", linuxDistroName);
+        return createForge(linuxDistroName, false);
     }
 
     public static Forge createComponentForge(final String linuxDistroName) {
-        final String preferredNamespaceForgeId = String.format("@%s", linuxDistroName);
-        final Forge preferredNamespaceForge = new Forge("/", "/", preferredNamespaceForgeId);
+        return createForge(linuxDistroName, true);
+    }
+
+    private static Forge createForge(final String linuxDistroName, boolean doPreferredAliasNamespace) {
+        if (StringUtils.isBlank(linuxDistroName)) {
+            return new Forge("/", "/", "");
+        }
+        final String linuxDistroNameLowerCase = linuxDistroName == null ? "" : linuxDistroName.toLowerCase();
+        String kbName = linuxDistroNameLowerCase;
+        if (linuxDistroNameToKbForgeNameMapping.containsKey(linuxDistroNameLowerCase)) {
+            kbName = linuxDistroNameToKbForgeNameMapping.get(linuxDistroNameLowerCase);
+        }
+        String forgeId;
+        if (doPreferredAliasNamespace) {
+            forgeId = String.format("@%s", kbName);
+        } else {
+            forgeId = kbName;
+        }
+        final Forge preferredNamespaceForge = new Forge("/", "/", forgeId);
         return preferredNamespaceForge;
     }
 }
