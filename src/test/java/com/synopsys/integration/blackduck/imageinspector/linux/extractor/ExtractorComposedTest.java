@@ -47,7 +47,7 @@ public class ExtractorComposedTest {
         boolean foundComp2 = false;
         for (final BdioComponent comp : bdio.components) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            assertEquals("@preferredAliasNamespace", comp.bdioExternalIdentifier.forge);
+            assertEquals("@preferredaliasnamespace", comp.bdioExternalIdentifier.forge);
             if ("alpine-baselayout".equals(comp.name)) {
                 foundComp1 = true;
                 assertEquals("alpine-baselayout/3.1.0-r0/x86_64", comp.bdioExternalIdentifier.externalId);
@@ -85,7 +85,7 @@ public class ExtractorComposedTest {
         boolean foundComp2 = false;
         for (final BdioComponent comp : bdio.components) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            assertEquals("@preferredAliasNamespace", comp.bdioExternalIdentifier.forge);
+            assertEquals("@preferredaliasnamespace", comp.bdioExternalIdentifier.forge);
             if ("libstdc++6".equals(comp.name)) {
                 foundComp1 = true;
                 assertEquals("libstdc++6/8-20180414-1ubuntu2/amd64", comp.bdioExternalIdentifier.externalId);
@@ -112,7 +112,7 @@ public class ExtractorComposedTest {
         boolean foundComp2 = false;
         for (final BdioComponent comp : bdio.components) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            assertEquals("@preferredAliasNamespace", comp.bdioExternalIdentifier.forge);
+            assertEquals("@preferredaliasnamespace", comp.bdioExternalIdentifier.forge);
             if ("ncurses-base".equals(comp.name)) {
                 foundComp1 = true;
                 assertEquals("ncurses-base/5.9-14.20130511.el7_4/noarch", comp.bdioExternalIdentifier.externalId);
@@ -140,7 +140,7 @@ public class ExtractorComposedTest {
         boolean foundComp2 = false;
         for (final BdioComponent comp : bdio.components) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            assertEquals("@preferredAliasNamespace", comp.bdioExternalIdentifier.forge);
+            assertEquals("@preferredaliasnamespace", comp.bdioExternalIdentifier.forge);
             if (comp1Name.equals(comp.name)) {
                 foundComp1 = true;
                 assertEquals(String.format("%s/%s/%s", comp1Name, comp1Version, comp1Arch), comp.bdioExternalIdentifier.externalId);
