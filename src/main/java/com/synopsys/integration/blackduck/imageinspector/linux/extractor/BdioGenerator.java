@@ -52,12 +52,12 @@ public class BdioGenerator {
         this.imagePkgMgrDatabase = imagePkgMgrDatabase;
     }
 
-    public final SimpleBdioDocument extract(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName,
+    public final SimpleBdioDocument extract(final String codeLocationName, final String projectName,
             final String projectVersion,
             final String linuxDistroName)
             throws IntegrationException, IOException, InterruptedException {
 
-        final SimpleBdioDocument bdioDocument = extractBdio(dockerImageRepo, dockerImageTag, codeLocationName, projectName, projectVersion, linuxDistroName);
+        final SimpleBdioDocument bdioDocument = extractBdio(codeLocationName, projectName, projectVersion, linuxDistroName);
         return bdioDocument;
     }
 
@@ -65,7 +65,7 @@ public class BdioGenerator {
         new SimpleBdioFactory().writeSimpleBdioDocument(bdioWriter, bdioDocument);
     }
 
-    private SimpleBdioDocument extractBdio(final String dockerImageRepo, final String dockerImageTag, final String codeLocationName, final String projectName,
+    private SimpleBdioDocument extractBdio(final String codeLocationName, final String projectName,
             final String version,
             final String linuxDistroName)
             throws IntegrationException, IOException, InterruptedException {
@@ -73,7 +73,7 @@ public class BdioGenerator {
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, version);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
 
-        final List<ComponentDetails> comps = componentExtractor.extractComponents(dockerImageRepo, dockerImageTag, imagePkgMgrDatabase, linuxDistroName);
+        final List<ComponentDetails> comps = componentExtractor.extractComponents(imagePkgMgrDatabase, linuxDistroName);
         final MutableDependencyGraph dependencies = generateDependencies(comps);
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 

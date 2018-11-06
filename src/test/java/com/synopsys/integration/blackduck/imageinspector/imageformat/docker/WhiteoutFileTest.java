@@ -19,8 +19,10 @@ import org.junit.Test;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.name.Names;
 
 public class WhiteoutFileTest {
+    private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private static final String IMAGE_NAME = "blackducksoftware/centos_minus_vim_plus_bacula";
     private static final String IMAGE_TAG = "1.0";
     private static final String LAYER_ID = "layerId1";
@@ -60,7 +62,9 @@ public class WhiteoutFileTest {
         final ManifestLayerMapping layerMapping = new ManifestLayerMapping(IMAGE_NAME, IMAGE_TAG, layerIds);
         layerMappings.add(layerMapping);
 
-        final File targetImageFileSystemRootDir = tarParser.extractDockerLayers(workingDirectory, "testImageName", "1.0", layerTars, layerMappings);
+        final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+        final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
+        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMappings);
         final File opaqueDir = new File(targetImageFileSystemRootDir, "opaque");
         assertFalse("Whited-out opaque dir was created", opaqueDir.exists());
     }

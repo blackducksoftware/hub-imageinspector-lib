@@ -97,7 +97,7 @@ public class ImageInspector {
         final BdioGenerator bdioGenerator = bdioGeneratorFactory.createExtractor(targetImageFileSystemRootDir, imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
 
         final String extractedLinuxDistroName = imageInfoDerived.getImageInfoParsed().getLinuxDistroName();
-        final SimpleBdioDocument bdioDocument = bdioGenerator.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(),
+        final SimpleBdioDocument bdioDocument = bdioGenerator.extract(imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), extractedLinuxDistroName);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
@@ -108,7 +108,7 @@ public class ImageInspector {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null, null);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
         final BdioGenerator bdioGenerator = bdioGeneratorFactory.createExtractor(null, PackageManagerEnum.NULL);
-        final SimpleBdioDocument bdioDocument = bdioGenerator.extract(dockerImageRepo, dockerImageTag, imageInfoDerived.getCodeLocationName(), imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), null);
+        final SimpleBdioDocument bdioDocument = bdioGenerator.extract(imageInfoDerived.getCodeLocationName(), imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), null);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }

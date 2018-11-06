@@ -44,7 +44,7 @@ public class DpkgComponentExtractor implements ComponentExtractor {
     }
 
     @Override
-    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
+    public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
             throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
         final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);

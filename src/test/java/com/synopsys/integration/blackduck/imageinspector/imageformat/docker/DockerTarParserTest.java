@@ -36,11 +36,13 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
+import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.test.annotation.IntegrationTest;
 
 @Category(IntegrationTest.class)
 public class DockerTarParserTest {
+    private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private final static int DPKG_STATUS_FILE_SIZE = 98016;
 
     private static final String IMAGE_NAME = "blackducksoftware/centos_minus_vim_plus_bacula";
@@ -53,6 +55,7 @@ public class DockerTarParserTest {
     public void testExtractFullImage() throws IntegrationException, IOException {
         final File dockerTar = new File("build/images/test/centos_minus_vim_plus_bacula.tar");
         final File workingDirectory = TestUtils.createTempDirectory();
+        final File tarExtractionDirectory = new File(workingDirectory, DockerTarParser.TAR_EXTRACTION_DIRECTORY);
         System.out.println("workingDirectory: ${workingDirectory.getAbsolutePath()}");
 
         final DockerTarParser tarParser = new DockerTarParser();
@@ -63,8 +66,10 @@ public class DockerTarParserTest {
         final List<ManifestLayerMapping> layerMappings = tarParser.getLayerMappings(workingDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
         assertEquals(1, layerMappings.size());
         assertEquals(2, layerMappings.get(0).getLayers().size());
-        final File imageFilesDir = tarParser.extractDockerLayers(workingDirectory, "imageName", "imageTag", layerTars, layerMappings);
-        final ImageInfoParsed tarExtractionResults = tarParser.collectPkgMgrInfo(imageFilesDir);
+        final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+        final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
+        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMappings);
+        final ImageInfoParsed tarExtractionResults = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
         assertEquals("/var/lib/rpm", tarExtractionResults.getPkgMgr().getPackageManager().getDirectory());
 
         boolean varLibRpmNameFound = false;
@@ -118,7 +123,9 @@ public class DockerTarParserTest {
         final ManifestLayerMapping layerMapping = new ManifestLayerMapping(IMAGE_NAME, IMAGE_TAG, layerIds);
         layerMappings.add(layerMapping);
 
-        final File targetImageFileSystemRootDir = tarParser.extractDockerLayers(workingDirectory, "blackducksoftware_centos_minus_vim_plus_bacula", "1.0", layerTars, layerMappings);
+        final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+        final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
+        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMappings);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));

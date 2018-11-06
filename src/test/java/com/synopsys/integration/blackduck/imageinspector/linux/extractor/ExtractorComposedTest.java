@@ -41,7 +41,7 @@ public class ExtractorComposedTest {
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
         final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
 
-        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final SimpleBdioDocument bdio = extractorComposed.extract("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
         boolean foundComp2 = false;
@@ -78,7 +78,7 @@ public class ExtractorComposedTest {
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.DPKG);
         final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
 
-        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final SimpleBdioDocument bdio = extractorComposed.extract("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
 
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
@@ -162,7 +162,7 @@ public class ExtractorComposedTest {
         final ComponentExtractor componentExtractor = new NullComponentExtractor();
         final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, null);
 
-        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final SimpleBdioDocument bdio = extractorComposed.extract( "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
 
         assertEquals(0, bdio.components.size());
     }
@@ -178,7 +178,7 @@ public class ExtractorComposedTest {
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.RPM);
         final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
 
-        final SimpleBdioDocument bdio = extractorComposed.extract("dockerImageRepo", "dockerImageTag", "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final SimpleBdioDocument bdio = extractorComposed.extract("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
         return bdio;
     }
 }

@@ -31,7 +31,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Imag
 public class NullComponentExtractor implements ComponentExtractor {
 
     @Override
-    public List<ComponentDetails> extractComponents(final String dockerImageRepo, final String dockerImageTag, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName) {
+    public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName) {
         return new ArrayList<>();
     }
 }
