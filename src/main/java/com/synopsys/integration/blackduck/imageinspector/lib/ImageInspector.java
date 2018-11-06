@@ -65,12 +65,16 @@ public class ImageInspector {
         this.tarParser = tarParser;
     }
 
+    public File getTarExtractionDirectory(final File workingDirectory) {
+        return tarParser.getTarExtractionDirectory(workingDirectory);
+    }
+
     public List<File> extractLayerTars(final File workingDir, final File dockerTar) throws IOException {
         return tarParser.extractLayerTars(workingDir, dockerTar);
     }
 
-    public File extractDockerLayers(final File workingDir, final String imageName, final String imageTag, final List<File> layerTars, final List<ManifestLayerMapping> layerMappings) throws IOException {
-        return tarParser.extractDockerLayers(workingDir, imageName, imageTag, layerTars, layerMappings);
+    public void extractDockerLayers(final File containerFileSystemRootDir, final List<File> layerTars, final List<ManifestLayerMapping> layerMappings) throws IOException {
+        tarParser.extractDockerLayers(containerFileSystemRootDir, layerTars, layerMappings);
     }
 
     public ImageInfoParsed detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {

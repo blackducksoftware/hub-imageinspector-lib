@@ -54,7 +54,6 @@ import com.synopsys.integration.exception.IntegrationException;
 @Component
 public class DockerTarParser {
     static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
-    private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -71,23 +70,18 @@ public class DockerTarParser {
         this.manifestFactory = manifestFactory;
     }
 
-    public File extractDockerLayers(final File workingDirectory, final String imageName, final String imageTag, final List<File> layerTars, final List<ManifestLayerMapping> manifestLayerMappings) throws IOException {
-        logger.debug(String.format("working dir: %s", workingDirectory));
-        final File tarExtractionDirectory = getTarExtractionDirectory(workingDirectory);
-        final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
-        File targetImageFileSystemRootDir = null;
+    public void extractDockerLayers(final File targetImageFileSystemRootDir, final List<File> layerTars, final List<ManifestLayerMapping> manifestLayerMappings) throws IOException {
         for (final ManifestLayerMapping manifestLayerMapping : manifestLayerMappings) {
             for (final String layer : manifestLayerMapping.getLayers()) {
                 logger.trace(String.format("Looking for tar for layer: %s", layer));
                 final File layerTar = getLayerTar(layerTars, layer);
                 if (layerTar != null) {
-                    targetImageFileSystemRootDir = extractLayerTarToDir(imageName, imageTag, targetImageFileSystemParentDir, layerTar, manifestLayerMapping);
+                    extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
                 } else {
                     logger.error(String.format("Could not find the tar for layer %s", layer));
                 }
             }
         }
-        return targetImageFileSystemRootDir;
     }
 
     public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
@@ -186,13 +180,12 @@ public class DockerTarParser {
         return Optional.empty();
     }
 
-    private File getTarExtractionDirectory(final File workingDirectory) {
+    public File getTarExtractionDirectory(final File workingDirectory) {
         return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
     }
 
-    private File extractLayerTarToDir(final String imageName, final String imageTag, final File imageFilesDir, final File layerTar, final ManifestLayerMapping mapping) throws IOException {
-        logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), Names.getTargetImageFileSystemRootDirName(imageName, imageTag)));
-        final File targetImageFileSystemRoot = new File(imageFilesDir, Names.getTargetImageFileSystemRootDirName(imageName, imageTag));
+    private File extractLayerTarToDir(final File targetImageFileSystemRoot, final File layerTar) throws IOException {
+        logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), targetImageFileSystemRoot.getAbsolutePath()));
         final DockerLayerTar dockerLayerTar = new DockerLayerTar(layerTar);
         final List<File> filesToRemove = dockerLayerTar.extractToDir(targetImageFileSystemRoot);
         for (final File fileToRemove : filesToRemove) {

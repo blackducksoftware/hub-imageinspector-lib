@@ -44,11 +44,13 @@ import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
+import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 @Component
 public class ImageInspectorApi {
+    private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -110,7 +112,7 @@ public class ImageInspectorApi {
             final String currentLinuxDistro, final File tempDir, final boolean cleanupWorkingDir)
             throws IOException, IntegrationException, WrongInspectorOsException, InterruptedException, CompressorException {
         final File workingDir = new File(tempDir, "working");
-        logger.debug(String.format("imageInspector: %s", imageInspector));
+        logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
         final List<ManifestLayerMapping> tarfileMetadata = imageInspector.getLayerMappings(workingDir, dockerTarfile.getName(), givenImageRepo, givenImageTag);
         if (tarfileMetadata.size() != 1) {
@@ -120,7 +122,10 @@ public class ImageInspectorApi {
         final ManifestLayerMapping imageMetadata = tarfileMetadata.get(0);
         final String imageRepo = imageMetadata.getImageName();
         final String imageTag = imageMetadata.getTagName();
-        final File targetImageFileSystemRootDir = imageInspector.extractDockerLayers(workingDir, imageRepo, imageTag, layerTars, tarfileMetadata);
+        final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
+        final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+        final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
+        imageInspector.extractDockerLayers(targetImageFileSystemRootDir, layerTars, tarfileMetadata);
         cleanUpLayerTars(cleanupWorkingDir, layerTars);
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
         OperatingSystemEnum inspectorOs = null;
