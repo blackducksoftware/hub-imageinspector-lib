@@ -32,10 +32,13 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
+import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.test.annotation.IntegrationTest;
@@ -67,8 +70,9 @@ public class DockerTarParserTest {
         assertEquals(2, layerMapping.getLayers().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMapping);
-        final ImageInfoParsed tarExtractionResults = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
+        final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
+        tarParser.extractDockerLayers(componentExtractorFactory, OperatingSystemEnum.CENTOS, targetImageFileSystemRootDir, layerTars, layerMapping);
+        final ImageInfoParsed tarExtractionResults = tarParser.parseImageInfo(targetImageFileSystemRootDir);
         assertEquals("/var/lib/rpm", tarExtractionResults.getPkgMgr().getPackageManager().getDirectory());
 
         boolean varLibRpmNameFound = false;
@@ -96,11 +100,11 @@ public class DockerTarParserTest {
     }
 
     @Test
-    public void testExtractDockerLayerTarSimple() throws IOException {
+    public void testExtractDockerLayerTarSimple() throws WrongInspectorOsException, IOException {
         doLayerTest("simple");
     }
 
-    private void doLayerTest(final String testFileDir) throws IOException {
+    private void doLayerTest(final String testFileDir) throws WrongInspectorOsException, IOException {
         final File workingDirectory = TestUtils.createTempDirectory();
         final File tarExtractionDirectory = new File(workingDirectory, DockerTarParser.TAR_EXTRACTION_DIRECTORY);
         final File layerDir = new File(tarExtractionDirectory, String.format("ubuntu_latest.tar/%s", LAYER_ID));
@@ -122,7 +126,7 @@ public class DockerTarParserTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMapping);
+        tarParser.extractDockerLayers(new ComponentExtractorFactory(), OperatingSystemEnum.UBUNTU, targetImageFileSystemRootDir, layerTars, layerMapping);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));

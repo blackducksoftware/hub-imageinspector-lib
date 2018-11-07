@@ -71,7 +71,7 @@ public class ImageInspectorApiTest {
             imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, null, null);
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
-            System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs().name()));
+            System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
             assertEquals(OperatingSystemEnum.ALPINE.name(), e.getcorrectInspectorOs().name());
         }
     }

@@ -27,44 +27,34 @@ import com.synopsys.integration.exception.IntegrationException;
 
 public class WrongInspectorOsException extends IntegrationException {
     private static final long serialVersionUID = -1109859596321015457L;
-    private final String dockerTarfilePath;
     private final ImageInspectorOsEnum correctInspectorOs;
 
-    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs) {
+    public WrongInspectorOsException(final ImageInspectorOsEnum correctInspectorOs) {
         super();
-        this.dockerTarfilePath = dockerTarfilePath;
         this.correctInspectorOs = correctInspectorOs;
     }
 
-    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs, final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
+    public WrongInspectorOsException(final ImageInspectorOsEnum correctInspectorOs, final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.dockerTarfilePath = dockerTarfilePath;
         this.correctInspectorOs = correctInspectorOs;
     }
 
-    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs, final String message, final Throwable cause) {
+    public WrongInspectorOsException(final ImageInspectorOsEnum correctInspectorOs, final String message, final Throwable cause) {
         super(message, cause);
-        this.dockerTarfilePath = dockerTarfilePath;
         this.correctInspectorOs = correctInspectorOs;
     }
 
-    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs, final String message) {
+    public WrongInspectorOsException(final ImageInspectorOsEnum correctInspectorOs, final String message) {
         super(message);
-        this.dockerTarfilePath = dockerTarfilePath;
         this.correctInspectorOs = correctInspectorOs;
     }
 
-    public WrongInspectorOsException(final String dockerTarfilePath, final ImageInspectorOsEnum correctInspectorOs, final Throwable cause) {
+    public WrongInspectorOsException(final ImageInspectorOsEnum correctInspectorOs, final Throwable cause) {
         super(cause);
-        this.dockerTarfilePath = dockerTarfilePath;
         this.correctInspectorOs = correctInspectorOs;
     }
 
     public ImageInspectorOsEnum getcorrectInspectorOs() {
         return correctInspectorOs;
-    }
-
-    public String getDockerTarfilePath() {
-        return dockerTarfilePath;
     }
 }

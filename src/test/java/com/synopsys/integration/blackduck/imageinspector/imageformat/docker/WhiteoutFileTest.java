@@ -17,8 +17,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
+import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 
 public class WhiteoutFileTest {
@@ -36,11 +39,11 @@ public class WhiteoutFileTest {
     }
 
     @Test
-    public void testExtractDockerLayerTarWhiteoutOpaqueDir() throws IOException {
+    public void testExtractDockerLayerTarWhiteoutOpaqueDir() throws WrongInspectorOsException, IOException {
         doLayerTest("whiteout");
     }
 
-    private void doLayerTest(final String testFileDir) throws IOException {
+    private void doLayerTest(final String testFileDir) throws WrongInspectorOsException, IOException {
         final File workingDirectory = TestUtils.createTempDirectory();
         final File tarExtractionDirectory = new File(workingDirectory, DockerTarParser.TAR_EXTRACTION_DIRECTORY);
         final File layerDir = new File(tarExtractionDirectory, String.format("ubuntu_latest.tar/%s", LAYER_ID));
@@ -62,7 +65,7 @@ public class WhiteoutFileTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMapping);
+        tarParser.extractDockerLayers(new ComponentExtractorFactory(), OperatingSystemEnum.UBUNTU, targetImageFileSystemRootDir, layerTars, layerMapping);
         final File opaqueDir = new File(targetImageFileSystemRootDir, "opaque");
         assertFalse("Whited-out opaque dir was created", opaqueDir.exists());
     }

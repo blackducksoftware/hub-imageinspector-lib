@@ -61,11 +61,13 @@ public class ImageInspectorApi {
     @Autowired
     private Os os;
 
-    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
-            final boolean cleanupWorkingDir, final String containerFileSystemOutputPath,
+    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion,
+            final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
+            final boolean cleanupWorkingDir,
+            final String containerFileSystemOutputPath,
             final String currentLinuxDistro)
             throws IntegrationException {
-        logger.info("getBdio()");
+        logger.info("getBdio()::docker");
         os.logMemory();
         final BdioGenerator bdioGenerator = new BdioGenerator(new SimpleBdioFactory());
         return getBdioDocument(bdioGenerator, dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, cleanupWorkingDir, containerFileSystemOutputPath,
@@ -123,18 +125,18 @@ public class ImageInspectorApi {
         final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
-        imageInspector.extractDockerLayers(targetImageFileSystemRootDir, layerTars, imageMetadata);
-        cleanUpLayerTars(cleanupWorkingDir, layerTars);
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
+        imageInspector.extractDockerLayers(currentOs, targetImageFileSystemRootDir, layerTars, imageMetadata);
+        cleanUpLayerTars(cleanupWorkingDir, layerTars);
         OperatingSystemEnum inspectorOs = null;
         ImageInfoDerived imageInfoDerived;
         try {
-            final ImageInfoParsed imageInfoParsed = imageInspector.detectInspectorOperatingSystem(targetImageFileSystemRootDir);
+            final ImageInfoParsed imageInfoParsed = imageInspector.parseImageInfo(targetImageFileSystemRootDir);
             inspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
             if (!inspectorOs.equals(currentOs)) {
-                final ImageInspectorOsEnum neededInspectorOs = getImageInspectorOsEnum(inspectorOs);
+                final ImageInspectorOsEnum neededInspectorOs = ImageInspectorOsEnum.getImageInspectorOsEnum(inspectorOs);
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
-                throw new WrongInspectorOsException(dockerTarfile.getAbsolutePath(), neededInspectorOs, msg);
+                throw new WrongInspectorOsException(neededInspectorOs, msg);
             }
             imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageRepo, imageTag, imageMetadata, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
                     codeLocationPrefix);
@@ -179,19 +181,6 @@ public class ImageInspectorApi {
 
         FileOperations.logFreeDiskSpace(temp);
         return temp;
-    }
-
-    private ImageInspectorOsEnum getImageInspectorOsEnum(final OperatingSystemEnum osEnum) throws IntegrationException {
-        switch (osEnum) {
-        case UBUNTU:
-            return ImageInspectorOsEnum.UBUNTU;
-        case CENTOS:
-            return ImageInspectorOsEnum.CENTOS;
-        case ALPINE:
-            return ImageInspectorOsEnum.ALPINE;
-        default:
-            throw new IntegrationException("");
-        }
     }
 
 }

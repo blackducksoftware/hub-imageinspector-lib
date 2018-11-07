@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
@@ -49,7 +50,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Compone
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.BdioWriter;
-import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 @Component
@@ -78,12 +78,12 @@ public class ImageInspector {
         return tarParser.extractLayerTars(workingDir, dockerTar);
     }
 
-    public void extractDockerLayers(final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws IOException {
-        tarParser.extractDockerLayers(containerFileSystemRootDir, layerTars, layerMapping);
+    public void extractDockerLayers(final OperatingSystemEnum currentOs, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws WrongInspectorOsException, IOException {
+        tarParser.extractDockerLayers(componentExtractorFactory, currentOs, containerFileSystemRootDir, layerTars, layerMapping);
     }
 
-    public ImageInfoParsed detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
-        return tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
+    public ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
+        return tarParser.parseImageInfo(targetImageFileSystemRootDir);
     }
 
     public ManifestLayerMapping getLayerMapping(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
@@ -95,16 +95,12 @@ public class ImageInspector {
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         // TODO will not need this null check + imageInfoParsed assignment once Exec mode is removed
         if (imageInfoParsed == null) {
-            imageInfoParsed = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
+            imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystemRootDir);
         }
         ////
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mapping, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-        /// TODO extract to method:
-        //final File pkgMgrDatabaseDir = new File(targetImageFileSystemRootDir, imageInfoParsed.getPkgMgr().getPackageManager().getDirectory());
-        //final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(pkgMgrDatabaseDir, imageInfoParsed.getPkgMgr().getPackageManager());
-        final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoDerived.getImageInfoParsed().getFileSystemRootDir(), imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
-        final List<ComponentDetails> comps = componentExtractor.extractComponents(imageInfoDerived.getImageInfoParsed().getPkgMgr(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName());
-        ////
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
+        final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getFileSystemRootDir(), imageInfoParsed.getPkgMgr().getPackageManager());
+        final List<ComponentDetails> comps = componentExtractor.extractComponents(imageInfoParsed.getPkgMgr(), imageInfoParsed.getLinuxDistroName());
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), comps);
         imageInfoDerived.setBdioDocument(bdioDocument);
@@ -114,7 +110,7 @@ public class ImageInspector {
     public ImageInfoDerived generateEmptyBdio(final BdioGenerator bdioGenerator, final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName, final String versionName,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, null, null);
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mapping, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
         final List<ComponentDetails> comps = new ArrayList<>(0);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(), imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), null, comps);
         imageInfoDerived.setBdioDocument(bdioDocument);
@@ -130,12 +126,11 @@ public class ImageInspector {
         return bdioOutputFile;
     }
 
-    private ImageInfoDerived deriveImageInfo(final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName, final String versionName, final File targetImageFileSystemRootDir,
+    private ImageInfoDerived deriveImageInfo(final ManifestLayerMapping mapping, final String projectName, final String versionName,
             final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
         final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
-        // TODO remove: imageInfoDerived.setImageDirName(Names.getTargetImageFileSystemRootDirName(dockerImageRepo, dockerImageTag));
         imageInfoDerived.setManifestLayerMapping(mapping);
         if (imagePkgMgr != null) {
             imageInfoDerived.setPkgMgrFilePath(determinePkgMgrFilePath(imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageInfoParsed().getFileSystemRootDir().getName()));

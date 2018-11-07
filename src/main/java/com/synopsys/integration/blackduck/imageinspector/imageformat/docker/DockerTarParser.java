@@ -41,14 +41,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
+import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
+import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
+import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.name.Names;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component
@@ -56,6 +63,7 @@ public class DockerTarParser {
     static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Gson gson = new Gson();
 
     private ManifestFactory manifestFactory;
     private Os os;
@@ -70,19 +78,20 @@ public class DockerTarParser {
         this.manifestFactory = manifestFactory;
     }
 
-    public void extractDockerLayers(final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException {
+    public void extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws WrongInspectorOsException, IOException {
         for (final String layer : manifestLayerMapping.getLayers()) {
             logger.trace(String.format("Looking for tar for layer: %s", layer));
             final File layerTar = getLayerTar(layerTars, layer);
             if (layerTar != null) {
                 extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
+                logComponentsPresentAfterAddingThisLayer(componentExtractorFactory, currentOs,  targetImageFileSystemRootDir);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layer));
             }
         }
     }
 
-    public ImageInfoParsed collectPkgMgrInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
+    public ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
         logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
         for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
             if (packageManagerEnum == PackageManagerEnum.NULL) {
@@ -148,6 +157,48 @@ public class DockerTarParser {
         return mapping;
     }
 
+    public File getTarExtractionDirectory(final File workingDirectory) {
+        return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
+    }
+
+    private void logComponentsPresentAfterAddingThisLayer(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final File targetImageFileSystemRootDir) throws WrongInspectorOsException {
+        logger.info("Logging components present (so far) after adding this layer");
+        if (currentOs == null) {
+            logger.info("Current (running on) OS not provided; cannot determine components present after adding this layer");
+            return;
+        }
+        OperatingSystemEnum inspectorOs = null;
+        ImageInfoDerived imageInfoDerived;
+        try {
+            final ImageInfoParsed imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
+            inspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
+            if (!inspectorOs.equals(currentOs)) {
+                ImageInspectorOsEnum neededInspectorOs = null;
+                try {
+                    neededInspectorOs = ImageInspectorOsEnum.getImageInspectorOsEnum(inspectorOs);
+                } catch (IntegrationException e) {
+                    logger.warn(String.format("Unable to convert OS %s into an inspector OS", inspectorOs.toString()));
+                }
+                final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
+                throw new WrongInspectorOsException(neededInspectorOs, msg);
+            }
+            final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getFileSystemRootDir(), imageInfoParsed.getPkgMgr().getPackageManager());
+            final List<ComponentDetails> comps;
+            try {
+                comps = componentExtractor.extractComponents(imageInfoParsed.getPkgMgr(), imageInfoParsed.getLinuxDistroName());
+            } catch (IntegrationException e) {
+                logger.warn(String.format("Unable to log components present after this layer: %s", e.getMessage()));
+                return;
+            }
+            logger.info(String.format("Found %d components in file system after adding this layer:", comps.size()));
+            for (ComponentDetails comp : comps) {
+                logger.info(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
+            }
+        } catch (final PkgMgrDataNotFoundException e) {
+            logger.warn(String.format("Unable to log components present after this layer: The file system is not yet populated with the linux distro and package manager files: %s", e.getMessage()));
+        }
+    }
+
     private Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {
         final LinuxFileSystem extractedFileSys = new LinuxFileSystem(targetImageFileSystemRootDir);
         final Optional<File> etcDir = extractedFileSys.getEtcDir();
@@ -172,10 +223,6 @@ public class DockerTarParser {
             }
         }
         return Optional.empty();
-    }
-
-    public File getTarExtractionDirectory(final File workingDirectory) {
-        return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
     }
 
     private File extractLayerTarToDir(final File targetImageFileSystemRoot, final File layerTar) throws IOException {

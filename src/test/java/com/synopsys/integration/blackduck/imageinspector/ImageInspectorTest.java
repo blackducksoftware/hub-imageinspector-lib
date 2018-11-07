@@ -95,7 +95,7 @@ public class ImageInspectorTest {
         final String tempDirPath = TestUtils.createTempDirectory().getAbsolutePath();
 
         final DockerTarParser tarParser = Mockito.mock(DockerTarParser.class);
-        Mockito.when(tarParser.collectPkgMgrInfo(Mockito.any(File.class))).thenReturn(imageInfoParsed);
+        Mockito.when(tarParser.parseImageInfo(Mockito.any(File.class))).thenReturn(imageInfoParsed);
         ComponentExtractorFactory componentExtractorFactory = Mockito.mock(ComponentExtractorFactory.class);
         Mockito.when(componentExtractorFactory.createComponentExtractor(Mockito.any(Gson.class), Mockito.any(File.class), Mockito.any(PackageManagerEnum.class))).thenReturn(componentExtractor);
         imageInspector.setTarParser(tarParser);
