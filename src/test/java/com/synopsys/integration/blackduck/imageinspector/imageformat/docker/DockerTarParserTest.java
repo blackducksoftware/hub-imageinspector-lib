@@ -63,12 +63,11 @@ public class DockerTarParserTest {
         tarParser.setOs(new Os());
 
         final List<File> layerTars = tarParser.extractLayerTars(workingDirectory, dockerTar);
-        final List<ManifestLayerMapping> layerMappings = tarParser.getLayerMappings(workingDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
-        assertEquals(1, layerMappings.size());
-        assertEquals(2, layerMappings.get(0).getLayers().size());
+        final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(workingDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
+        assertEquals(2, layerMapping.getLayers().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMappings);
+        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMapping);
         final ImageInfoParsed tarExtractionResults = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
         assertEquals("/var/lib/rpm", tarExtractionResults.getPkgMgr().getPackageManager().getDirectory());
 
@@ -117,15 +116,13 @@ public class DockerTarParserTest {
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new HardwiredManifestFactory());
 
-        final List<ManifestLayerMapping> layerMappings = new ArrayList<>();
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);
         final ManifestLayerMapping layerMapping = new ManifestLayerMapping(IMAGE_NAME, IMAGE_TAG, layerIds);
-        layerMappings.add(layerMapping);
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMappings);
+        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMapping);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));

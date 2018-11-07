@@ -70,16 +70,14 @@ public class DockerTarParser {
         this.manifestFactory = manifestFactory;
     }
 
-    public void extractDockerLayers(final File targetImageFileSystemRootDir, final List<File> layerTars, final List<ManifestLayerMapping> manifestLayerMappings) throws IOException {
-        for (final ManifestLayerMapping manifestLayerMapping : manifestLayerMappings) {
-            for (final String layer : manifestLayerMapping.getLayers()) {
-                logger.trace(String.format("Looking for tar for layer: %s", layer));
-                final File layerTar = getLayerTar(layerTars, layer);
-                if (layerTar != null) {
-                    extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
-                } else {
-                    logger.error(String.format("Could not find the tar for layer %s", layer));
-                }
+    public void extractDockerLayers(final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException {
+        for (final String layer : manifestLayerMapping.getLayers()) {
+            logger.trace(String.format("Looking for tar for layer: %s", layer));
+            final File layerTar = getLayerTar(layerTars, layer);
+            if (layerTar != null) {
+                extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
+            } else {
+                logger.error(String.format("Could not find the tar for layer %s", layer));
             }
         }
     }
@@ -135,23 +133,19 @@ public class DockerTarParser {
         return untaredFiles;
     }
 
-    public List<ManifestLayerMapping> getLayerMappings(final File workingDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
+    public ManifestLayerMapping getLayerMapping(final File workingDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
         logger.debug(String.format("working dir: %s", workingDirectory));
         final Manifest manifest = manifestFactory.createManifest(getTarExtractionDirectory(workingDirectory), tarFileName);
-        List<ManifestLayerMapping> mappings;
+        ManifestLayerMapping mapping;
         try {
-            mappings = manifest.getLayerMappings(dockerImageName, dockerTagName);
+            mapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
         } catch (final Exception e) {
             final String msg = String.format("Could not parse the image manifest file : %s", e.getMessage());
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        if (mappings.size() == 0) {
-            final String msg = String.format("Could not find image %s:%s in tar file %s", dockerImageName, dockerTagName, tarFileName);
-            throw new IntegrationException(msg);
-        }
-        return mappings;
+        return mapping;
     }
 
     private Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {

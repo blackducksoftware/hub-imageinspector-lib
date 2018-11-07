@@ -56,15 +56,13 @@ public class WhiteoutFileTest {
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new HardwiredManifestFactory());
 
-        final List<ManifestLayerMapping> layerMappings = new ArrayList<>();
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);
         final ManifestLayerMapping layerMapping = new ManifestLayerMapping(IMAGE_NAME, IMAGE_TAG, layerIds);
-        layerMappings.add(layerMapping);
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMappings);
+        tarParser.extractDockerLayers(targetImageFileSystemRootDir, layerTars, layerMapping);
         final File opaqueDir = new File(targetImageFileSystemRootDir, "opaque");
         assertFalse("Whited-out opaque dir was created", opaqueDir.exists());
     }

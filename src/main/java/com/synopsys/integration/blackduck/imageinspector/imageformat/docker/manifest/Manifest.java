@@ -59,7 +59,7 @@ public class Manifest {
         this.manifestLayerMappingFactory = manifestLayerMappingFactory;
     }
 
-    public List<ManifestLayerMapping> getLayerMappings(final String targetImageName, final String targetTagName) throws IntegrationException, IOException {
+    public ManifestLayerMapping getLayerMapping(final String targetImageName, final String targetTagName) throws IntegrationException, IOException {
         logger.debug(String.format("getLayerMappings(): targetImageName: %s; targetTagName: %s", targetImageName, targetTagName));
         final List<ManifestLayerMapping> mappings = new ArrayList<>();
         final List<ImageInfo> images = getManifestContents();
@@ -74,9 +74,9 @@ public class Manifest {
             logger.debug(String.format("foundRepoTag: %s", foundRepoTag));
             final ImageNameResolver resolver = new ImageNameResolver(foundRepoTag);
             logger.debug(String.format("translated repoTag to: repo: %s, tag: %s", resolver.getNewImageRepo().get(), resolver.getNewImageTag().get()));
-            addMapping(mappings, image, resolver.getNewImageRepo().get(), resolver.getNewImageTag().get());
+            return createMapping(image, resolver.getNewImageRepo().get(), resolver.getNewImageTag().get());
         }
-        return mappings;
+        throw new IntegrationException(String.format("Layer mapping for repo:tag %s:%s not found in manifest.json", targetImageName, targetTagName));
     }
 
     private String findRepoTag(final int numImages, final ImageInfo image, final String targetImageName, final String targetTagName) throws IntegrationException {
@@ -104,20 +104,14 @@ public class Manifest {
         return image.repoTags.get(0);
     }
 
-    private void addMapping(final List<ManifestLayerMapping> mappings, final ImageInfo image, final String imageName, final String tagName) {
+    private ManifestLayerMapping createMapping(final ImageInfo image, final String imageName, final String tagName) {
         final List<String> layerIds = new ArrayList<>();
         for (final String layer : image.layers) {
             layerIds.add(layer.substring(0, layer.indexOf('/')));
         }
         final ManifestLayerMapping mapping = manifestLayerMappingFactory.createManifestLayerMapping(imageName, tagName, layerIds);
-        addMapping(mappings, mapping);
-    }
-
-    private void addMapping(final List<ManifestLayerMapping> mappings, final ManifestLayerMapping mapping) {
-        logger.debug("Adding layer mapping");
-        logger.debug(String.format("Image %s, Tag %s", mapping.getImageName(), mapping.getTagName()));
-        logger.debug(String.format("Layers %s", mapping.getLayers()));
-        mappings.add(mapping);
+        logger.debug(String.format("Found layer mapping: Image %s, Tag %s, Layers: %s", mapping.getImageName(), mapping.getTagName(), mapping.getLayers()));
+        return mapping;
     }
 
     private String deriveSpecifiedRepoTag(final String dockerImageName, final String dockerTagName) {

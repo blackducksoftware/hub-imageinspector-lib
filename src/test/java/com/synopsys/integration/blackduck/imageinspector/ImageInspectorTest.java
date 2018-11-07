@@ -20,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.api.AppConfig;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
@@ -34,6 +35,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrEx
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ApkComponentExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgComponentExtractor;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
@@ -47,9 +49,6 @@ public class ImageInspectorTest {
 
     @MockBean
     private ApkExecutor apkExecutor;
-
-    @MockBean
-    private BdioGeneratorFactory bdioGeneratorFactory;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -85,28 +84,29 @@ public class ImageInspectorTest {
             throws FileNotFoundException, IOException, IntegrationException, InterruptedException {
 
         final PackageManagerEnum pkgMgr = imagePkgMgrDatabase.getPackageManager();
-        final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
-
         final File imageFilesDir = new File("src/test/resources/imageDir");
-        Mockito.when(bdioGeneratorFactory.createBdioGenerator(imageFilesDir, pkgMgr)).thenReturn(bdioGenerator);
+        final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
+        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
 
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgrDatabase, imageName);
 
         final ImageInspector imageInspector = new ImageInspector();
-        imageInspector.setBdioGeneratorFactory(bdioGeneratorFactory);
+
         final String tempDirPath = TestUtils.createTempDirectory().getAbsolutePath();
 
         final DockerTarParser tarParser = Mockito.mock(DockerTarParser.class);
         Mockito.when(tarParser.collectPkgMgrInfo(Mockito.any(File.class))).thenReturn(imageInfoParsed);
+        ComponentExtractorFactory componentExtractorFactory = Mockito.mock(ComponentExtractorFactory.class);
+        Mockito.when(componentExtractorFactory.createComponentExtractor(Mockito.any(Gson.class), Mockito.any(File.class), Mockito.any(PackageManagerEnum.class))).thenReturn(componentExtractor);
         imageInspector.setTarParser(tarParser);
+        imageInspector.setComponentExtractorFactory(componentExtractorFactory);
         final List<ManifestLayerMapping> mappings = new ArrayList<>();
         final List<String> layerIds = new ArrayList<>();
         layerIds.add("testLayerId");
         final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, layerIds);
         mappings.add(mapping);
 
-        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(imageInfoParsed, imageName, tagName, mappings, "testProjectName", "testProjectVersion", imageFilesDir, "");
+        final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageName, tagName, mapping, "testProjectName", "testProjectVersion", imageFilesDir, "");
         final File bdioFile = imageInspector.writeBdioFile(new File(tempDirPath), imageInfoDerived);
         final File file1 = new File(String.format("src/test/resources/%s_imageDir_testProjectName_testProjectVersion_bdio.jsonld", imageName));
         final File file2 = bdioFile;

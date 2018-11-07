@@ -58,6 +58,7 @@ public class ImageInspector {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private DockerTarParser tarParser;
     private ComponentExtractorFactory componentExtractorFactory;
+    private final Gson gson = new Gson();
 
     @Autowired
     public void setComponentExtractorFactory(final ComponentExtractorFactory componentExtractorFactory) {
@@ -69,8 +70,6 @@ public class ImageInspector {
         this.tarParser = tarParser;
     }
 
-    private SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-
     public File getTarExtractionDirectory(final File workingDirectory) {
         return tarParser.getTarExtractionDirectory(workingDirectory);
     }
@@ -79,19 +78,19 @@ public class ImageInspector {
         return tarParser.extractLayerTars(workingDir, dockerTar);
     }
 
-    public void extractDockerLayers(final File containerFileSystemRootDir, final List<File> layerTars, final List<ManifestLayerMapping> layerMappings) throws IOException {
-        tarParser.extractDockerLayers(containerFileSystemRootDir, layerTars, layerMappings);
+    public void extractDockerLayers(final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws IOException {
+        tarParser.extractDockerLayers(containerFileSystemRootDir, layerTars, layerMapping);
     }
 
     public ImageInfoParsed detectInspectorOperatingSystem(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
         return tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
     }
 
-    public List<ManifestLayerMapping> getLayerMappings(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
-        return tarParser.getLayerMappings(workingDir, tarFileName, dockerImageName, dockerTagName);
+    public ManifestLayerMapping getLayerMapping(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
+        return tarParser.getLayerMapping(workingDir, tarFileName, dockerImageName, dockerTagName);
     }
 
-    public ImageInfoDerived generateBdioFromImageFilesDir(ImageInfoParsed imageInfoParsed, final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName,
+    public ImageInfoDerived generateBdioFromImageFilesDir(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName,
             final String versionName,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         // TODO will not need this null check + imageInfoParsed assignment once Exec mode is removed
@@ -99,12 +98,11 @@ public class ImageInspector {
             imageInfoParsed = tarParser.collectPkgMgrInfo(targetImageFileSystemRootDir);
         }
         ////
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mapping, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
         final String extractedLinuxDistroName = imageInfoDerived.getImageInfoParsed().getLinuxDistroName();
         final File pkgMgrDatabaseDir = new File(targetImageFileSystemRootDir, imageInfoParsed.getPkgMgr().getPackageManager().getDirectory());
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(pkgMgrDatabaseDir, imageInfoParsed.getPkgMgr().getPackageManager());
-        final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(targetImageFileSystemRootDir, imageInfoParsed.getPkgMgr().getPackageManager());
+        final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, targetImageFileSystemRootDir, imageInfoParsed.getPkgMgr().getPackageManager());
         final List<ComponentDetails> comps = componentExtractor.extractComponents(imagePkgMgrDatabase, extractedLinuxDistroName);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), extractedLinuxDistroName, comps);
@@ -112,11 +110,10 @@ public class ImageInspector {
         return imageInfoDerived;
     }
 
-    public ImageInfoDerived generateEmptyBdio(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName,
+    public ImageInfoDerived generateEmptyBdio(final BdioGenerator bdioGenerator, final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName, final String versionName,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null, null);
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mapping, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
         final List<ComponentDetails> comps = new ArrayList<>(0);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(), imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), null, comps);
         imageInfoDerived.setBdioDocument(bdioDocument);
@@ -132,13 +129,13 @@ public class ImageInspector {
         return bdioOutputFile;
     }
 
-    private ImageInfoDerived deriveImageInfo(final String dockerImageRepo, final String dockerImageTag, final List<ManifestLayerMapping> mappings, final String projectName, final String versionName, final File targetImageFileSystemRootDir,
-            final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) throws IntegrationException, IOException {
+    private ImageInfoDerived deriveImageInfo(final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName, final String versionName, final File targetImageFileSystemRootDir,
+            final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
         final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
         imageInfoDerived.setImageDirName(Names.getTargetImageFileSystemRootDirName(dockerImageRepo, dockerImageTag));
-        imageInfoDerived.setManifestLayerMapping(findManifestLayerMapping(mappings, imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageDirName()));
+        imageInfoDerived.setManifestLayerMapping(mapping);
         if (imagePkgMgr != null) {
             imageInfoDerived.setPkgMgrFilePath(determinePkgMgrFilePath(imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageDirName()));
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
@@ -160,22 +157,9 @@ public class ImageInspector {
         return pkgMgrFilePath;
     }
 
-    private ManifestLayerMapping findManifestLayerMapping(final List<ManifestLayerMapping> layerMappings, final ImageInfoParsed imageInfo, final String imageDirectoryName) throws IntegrationException {
-        ManifestLayerMapping manifestMapping = null;
-        for (final ManifestLayerMapping mapping : layerMappings) {
-            if (StringUtils.compare(imageDirectoryName, imageInfo.getFileSystemRootDirName()) == 0) {
-                manifestMapping = mapping;
-            }
-        }
-        if (manifestMapping == null) {
-            throw new IntegrationException(String.format("Mapping for %s not found in target image manifest file", imageInfo.getFileSystemRootDirName()));
-        }
-        return manifestMapping;
-    }
-
     private void writeBdioToFile(final SimpleBdioDocument bdioDocument, final File bdioOutputFile) throws IOException, FileNotFoundException {
         try (FileOutputStream bdioOutputStream = new FileOutputStream(bdioOutputFile)) {
-            try (BdioWriter bdioWriter = new BdioWriter(new Gson(), bdioOutputStream)) {
+            try (BdioWriter bdioWriter = new BdioWriter(gson, bdioOutputStream)) {
                 BdioGenerator.writeBdio(bdioWriter, bdioDocument);
             }
         }

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -36,25 +37,24 @@ public class ExtractorComposedTest {
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
         final ComponentExtractor componentExtractor = new ApkComponentExtractor(pkgMgrExecutor, new File("src/test/resources/testApkFileSystem"));
-
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
-        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
-
-        final SimpleBdioDocument bdio = extractorComposed.extract("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "alpine");
+        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
+        final SimpleBdioDocument bdio = bdioGenerator.generateBdioDocument("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
         boolean foundComp2 = false;
-        for (final BdioComponent comp : bdio.components) {
-            System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            assertEquals("@preferredaliasnamespace", comp.bdioExternalIdentifier.forge);
-            if ("alpine-baselayout".equals(comp.name)) {
+        for (final BdioComponent bdioComp : bdio.components) {
+            System.out.printf("name: %s, version: %s, externalId: %s\n", bdioComp.name, bdioComp.version, bdioComp.bdioExternalIdentifier.externalId);
+            assertEquals("@alpine", bdioComp.bdioExternalIdentifier.forge);
+            if ("alpine-baselayout".equals(bdioComp.name)) {
                 foundComp1 = true;
-                assertEquals("alpine-baselayout/3.1.0-r0/x86_64", comp.bdioExternalIdentifier.externalId);
+                assertEquals("alpine-baselayout/3.1.0-r0/x86_64", bdioComp.bdioExternalIdentifier.externalId);
             }
-            if ("musl-utils".equals(comp.name)) {
+            if ("musl-utils".equals(bdioComp.name)) {
                 foundComp2 = true;
-                assertEquals("musl-utils/1.1.19-r10/x86_64", comp.bdioExternalIdentifier.externalId);
+                assertEquals("musl-utils/1.1.19-r10/x86_64", bdioComp.bdioExternalIdentifier.externalId);
             }
         }
         assertTrue(foundComp1);
@@ -76,16 +76,16 @@ public class ExtractorComposedTest {
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.DPKG);
-        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
-
-        final SimpleBdioDocument bdio = extractorComposed.extract("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "ubuntu");
+        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
+        final SimpleBdioDocument bdio = bdioGenerator.generateBdioDocument("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
 
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
         boolean foundComp2 = false;
         for (final BdioComponent comp : bdio.components) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            assertEquals("@preferredaliasnamespace", comp.bdioExternalIdentifier.forge);
+            assertEquals("@ubuntu", comp.bdioExternalIdentifier.forge);
             if ("libstdc++6".equals(comp.name)) {
                 foundComp1 = true;
                 assertEquals("libstdc++6/8-20180414-1ubuntu2/amd64", comp.bdioExternalIdentifier.externalId);
@@ -112,7 +112,7 @@ public class ExtractorComposedTest {
         boolean foundComp2 = false;
         for (final BdioComponent comp : bdio.components) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            assertEquals("@preferredaliasnamespace", comp.bdioExternalIdentifier.forge);
+            assertEquals("@centos", comp.bdioExternalIdentifier.forge);
             if ("ncurses-base".equals(comp.name)) {
                 foundComp1 = true;
                 assertEquals("ncurses-base/5.9-14.20130511.el7_4/noarch", comp.bdioExternalIdentifier.externalId);
@@ -140,7 +140,7 @@ public class ExtractorComposedTest {
         boolean foundComp2 = false;
         for (final BdioComponent comp : bdio.components) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            assertEquals("@preferredaliasnamespace", comp.bdioExternalIdentifier.forge);
+            assertEquals("@centos", comp.bdioExternalIdentifier.forge);
             if (comp1Name.equals(comp.name)) {
                 foundComp1 = true;
                 assertEquals(String.format("%s/%s/%s", comp1Name, comp1Version, comp1Arch), comp.bdioExternalIdentifier.externalId);
@@ -160,9 +160,9 @@ public class ExtractorComposedTest {
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
         final ComponentExtractor componentExtractor = new NullComponentExtractor();
-        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, null);
-
-        final SimpleBdioDocument bdio = extractorComposed.extract( "codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
+        List<ComponentDetails>  comps = new ArrayList<>(0);
+        final SimpleBdioDocument bdio = bdioGenerator.generateBdioDocument("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
 
         assertEquals(0, bdio.components.size());
     }
@@ -176,9 +176,9 @@ public class ExtractorComposedTest {
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.RPM);
-        final BdioGenerator extractorComposed = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
-
-        final SimpleBdioDocument bdio = extractorComposed.extract("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace");
+        List<ComponentDetails> comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "centos");
+        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
+        final SimpleBdioDocument bdio = bdioGenerator.generateBdioDocument("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
         return bdio;
     }
 }
