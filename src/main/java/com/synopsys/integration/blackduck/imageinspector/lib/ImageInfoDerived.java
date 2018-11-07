@@ -29,7 +29,6 @@ import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 public class ImageInfoDerived {
     private final ImageInfoParsed imageInfoParsed;
-    private String imageDirName = null;
     private ManifestLayerMapping manifestLayerMapping = null;
     private String pkgMgrFilePath = null;
 
@@ -41,14 +40,6 @@ public class ImageInfoDerived {
 
     public ImageInfoDerived(final ImageInfoParsed imageInfoParsed) {
         this.imageInfoParsed = imageInfoParsed;
-    }
-
-    public String getImageDirName() {
-        return imageDirName;
-    }
-
-    public void setImageDirName(final String imageDirName) {
-        this.imageDirName = imageDirName;
     }
 
     public ManifestLayerMapping getManifestLayerMapping() {

@@ -88,7 +88,7 @@ public class ImageInspectorTest {
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
 
-        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgrDatabase, imageName);
+        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(new File(String.format("image_%s_v_%s", imageName, tagName)), imagePkgMgrDatabase, imageName);
 
         final ImageInspector imageInspector = new ImageInspector();
 

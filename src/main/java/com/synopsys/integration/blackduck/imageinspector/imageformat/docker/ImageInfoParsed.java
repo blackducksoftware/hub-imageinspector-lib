@@ -23,22 +23,24 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
+import java.io.File;
+
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 public class ImageInfoParsed {
-    private final String fileSystemRootDirName;
+    private final File fileSystemRootDir;
     private final ImagePkgMgrDatabase pkgMgr;
     private final String linuxDistroName;
 
-    public ImageInfoParsed(final String fileSystemRootDirName, final ImagePkgMgrDatabase pkgMgr, final String linuxDistroName) {
-        this.fileSystemRootDirName = fileSystemRootDirName;
+    public ImageInfoParsed(final File fileSystemRootDir, final ImagePkgMgrDatabase pkgMgr, final String linuxDistroName) {
+        this.fileSystemRootDir = fileSystemRootDir;
         this.pkgMgr = pkgMgr;
         this.linuxDistroName = linuxDistroName;
     }
 
-    public String getFileSystemRootDirName() {
-        return fileSystemRootDirName;
+    public File getFileSystemRootDir() {
+        return fileSystemRootDir;
     }
 
     public ImagePkgMgrDatabase getPkgMgr() {

@@ -99,20 +99,21 @@ public class ImageInspector {
         }
         ////
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mapping, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-        final String extractedLinuxDistroName = imageInfoDerived.getImageInfoParsed().getLinuxDistroName();
-        final File pkgMgrDatabaseDir = new File(targetImageFileSystemRootDir, imageInfoParsed.getPkgMgr().getPackageManager().getDirectory());
-        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(pkgMgrDatabaseDir, imageInfoParsed.getPkgMgr().getPackageManager());
-        final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, targetImageFileSystemRootDir, imageInfoParsed.getPkgMgr().getPackageManager());
-        final List<ComponentDetails> comps = componentExtractor.extractComponents(imagePkgMgrDatabase, extractedLinuxDistroName);
+        /// TODO extract to method:
+        //final File pkgMgrDatabaseDir = new File(targetImageFileSystemRootDir, imageInfoParsed.getPkgMgr().getPackageManager().getDirectory());
+        //final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(pkgMgrDatabaseDir, imageInfoParsed.getPkgMgr().getPackageManager());
+        final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoDerived.getImageInfoParsed().getFileSystemRootDir(), imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
+        final List<ComponentDetails> comps = componentExtractor.extractComponents(imageInfoDerived.getImageInfoParsed().getPkgMgr(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName());
+        ////
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
-                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), extractedLinuxDistroName, comps);
+                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), comps);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
 
     public ImageInfoDerived generateEmptyBdio(final BdioGenerator bdioGenerator, final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName, final String versionName,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
-        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null, null);
+        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, null, null);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mapping, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
         final List<ComponentDetails> comps = new ArrayList<>(0);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(), imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), null, comps);
@@ -134,10 +135,10 @@ public class ImageInspector {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
         final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
-        imageInfoDerived.setImageDirName(Names.getTargetImageFileSystemRootDirName(dockerImageRepo, dockerImageTag));
+        // TODO remove: imageInfoDerived.setImageDirName(Names.getTargetImageFileSystemRootDirName(dockerImageRepo, dockerImageTag));
         imageInfoDerived.setManifestLayerMapping(mapping);
         if (imagePkgMgr != null) {
-            imageInfoDerived.setPkgMgrFilePath(determinePkgMgrFilePath(imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageDirName()));
+            imageInfoDerived.setPkgMgrFilePath(determinePkgMgrFilePath(imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageInfoParsed().getFileSystemRootDir().getName()));
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
                     imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager().toString()));
         } else {
