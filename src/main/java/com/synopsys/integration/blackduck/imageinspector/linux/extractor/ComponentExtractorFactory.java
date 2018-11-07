@@ -17,19 +17,28 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecu
 public class ComponentExtractorFactory {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
     private ApkExecutor apkExecutor;
 
-    @Autowired
     private DpkgExecutor dpkgExecutor;
 
-    @Autowired
     private RpmExecutor rpmExecutor;
 
     @Autowired
-    private Gson gson;
+    public void setApkExecutor(final ApkExecutor apkExecutor) {
+        this.apkExecutor = apkExecutor;
+    }
 
-    public ComponentExtractor createComponentExtractor(final File imageFileSystem, final PackageManagerEnum packageManagerEnum) {
+    @Autowired
+    public void setDpkgExecutor(final DpkgExecutor dpkgExecutor) {
+        this.dpkgExecutor = dpkgExecutor;
+    }
+
+    @Autowired
+    public void setRpmExecutor(final RpmExecutor rpmExecutor) {
+        this.rpmExecutor = rpmExecutor;
+    }
+
+    public ComponentExtractor createComponentExtractor(final Gson gson, final File imageFileSystem, final PackageManagerEnum packageManagerEnum) {
         logger.debug("createComponentExtractor()");
         if (packageManagerEnum == PackageManagerEnum.APK) {
             return new ApkComponentExtractor(apkExecutor, imageFileSystem);
