@@ -33,7 +33,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExec
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ApkComponentExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGeneratorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgComponentExtractor;
 import com.synopsys.integration.exception.IntegrationException;
@@ -90,7 +89,7 @@ public class ImageInspectorTest {
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory, componentExtractor, imagePkgMgrDatabase);
 
         final File imageFilesDir = new File("src/test/resources/imageDir");
-        Mockito.when(bdioGeneratorFactory.createExtractor(imageFilesDir, pkgMgr)).thenReturn(bdioGenerator);
+        Mockito.when(bdioGeneratorFactory.createBdioGenerator(imageFilesDir, pkgMgr)).thenReturn(bdioGenerator);
 
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(String.format("image_%s_v_%s", imageName, tagName), imagePkgMgrDatabase, imageName);
 

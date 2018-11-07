@@ -29,8 +29,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
-import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.BdioWriter;
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.graph.MutableDependencyGraph;
@@ -42,43 +40,29 @@ import com.synopsys.integration.hub.bdio.model.externalid.ExternalId;
 public class BdioGenerator {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final ComponentExtractor componentExtractor;
     private final SimpleBdioFactory simpleBdioFactory;
-    private final ImagePkgMgrDatabase imagePkgMgrDatabase;
 
-    public BdioGenerator(final SimpleBdioFactory simpleBdioFactory, final ComponentExtractor componentExtractor, final ImagePkgMgrDatabase imagePkgMgrDatabase) {
-        this.componentExtractor = componentExtractor;
+    public BdioGenerator(final SimpleBdioFactory simpleBdioFactory) {
         this.simpleBdioFactory = simpleBdioFactory;
-        this.imagePkgMgrDatabase = imagePkgMgrDatabase;
     }
 
-    public final SimpleBdioDocument extract(final String codeLocationName, final String projectName,
+    public final SimpleBdioDocument generateBdioDocument(final String codeLocationName, final String projectName,
             final String projectVersion,
-            final String linuxDistroName)
-            throws IntegrationException, IOException, InterruptedException {
+            final String linuxDistroName, List<ComponentDetails> comps) {
 
-        final SimpleBdioDocument bdioDocument = extractBdio(codeLocationName, projectName, projectVersion, linuxDistroName);
+        final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
+        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, projectVersion);
+        final SimpleBdioDocument bdioDocument1 = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
+        final MutableDependencyGraph dependencies = generateDependencies(comps);
+        logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
+
+        simpleBdioFactory.populateComponents(bdioDocument1, projectExternalId, dependencies);
+        final SimpleBdioDocument bdioDocument = bdioDocument1;
         return bdioDocument;
     }
 
     public static final void writeBdio(final BdioWriter bdioWriter, final SimpleBdioDocument bdioDocument) {
         new SimpleBdioFactory().writeSimpleBdioDocument(bdioWriter, bdioDocument);
-    }
-
-    private SimpleBdioDocument extractBdio(final String codeLocationName, final String projectName,
-            final String version,
-            final String linuxDistroName)
-            throws IntegrationException, IOException, InterruptedException {
-        final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
-        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, version);
-        final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, version, projectExternalId);
-
-        final List<ComponentDetails> comps = componentExtractor.extractComponents(imagePkgMgrDatabase, linuxDistroName);
-        final MutableDependencyGraph dependencies = generateDependencies(comps);
-        logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
-
-        simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, dependencies);
-        return bdioDocument;
     }
 
     private MutableDependencyGraph generateDependencies(final List<ComponentDetails> comps) {

@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,10 +43,13 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Imag
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGeneratorFactory;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.BdioWriter;
+import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 @Component
@@ -53,17 +57,19 @@ public class ImageInspector {
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private DockerTarParser tarParser;
-    private BdioGeneratorFactory bdioGeneratorFactory;
+    private ComponentExtractorFactory componentExtractorFactory;
 
     @Autowired
-    public void setBdioGeneratorFactory(final BdioGeneratorFactory bdioGeneratorFactory) {
-        this.bdioGeneratorFactory = bdioGeneratorFactory;
+    public void setComponentExtractorFactory(final ComponentExtractorFactory componentExtractorFactory) {
+        this.componentExtractorFactory = componentExtractorFactory;
     }
 
     @Autowired
     public void setTarParser(final DockerTarParser tarParser) {
         this.tarParser = tarParser;
     }
+
+    private SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
 
     public File getTarExtractionDirectory(final File workingDirectory) {
         return tarParser.getTarExtractionDirectory(workingDirectory);
@@ -94,11 +100,14 @@ public class ImageInspector {
         }
         ////
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-        final BdioGenerator bdioGenerator = bdioGeneratorFactory.createExtractor(targetImageFileSystemRootDir, imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager());
-
+        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         final String extractedLinuxDistroName = imageInfoDerived.getImageInfoParsed().getLinuxDistroName();
-        final SimpleBdioDocument bdioDocument = bdioGenerator.extract(imageInfoDerived.getCodeLocationName(),
-                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), extractedLinuxDistroName);
+        final File pkgMgrDatabaseDir = new File(targetImageFileSystemRootDir, imageInfoParsed.getPkgMgr().getPackageManager().getDirectory());
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(pkgMgrDatabaseDir, imageInfoParsed.getPkgMgr().getPackageManager());
+        final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(targetImageFileSystemRootDir, imageInfoParsed.getPkgMgr().getPackageManager());
+        final List<ComponentDetails> comps = componentExtractor.extractComponents(imagePkgMgrDatabase, extractedLinuxDistroName);
+        final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
+                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), extractedLinuxDistroName, comps);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
@@ -107,13 +116,14 @@ public class ImageInspector {
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir.getName(), null, null);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(dockerImageRepo, dockerImageTag, mappings, projectName, versionName, targetImageFileSystemRootDir, codeLocationPrefix, imageInfoParsed);
-        final BdioGenerator bdioGenerator = bdioGeneratorFactory.createExtractor(null, PackageManagerEnum.NULL);
-        final SimpleBdioDocument bdioDocument = bdioGenerator.extract(imageInfoDerived.getCodeLocationName(), imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), null);
+        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
+        final List<ComponentDetails> comps = new ArrayList<>(0);
+        final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(), imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), null, comps);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
 
-    public File writeBdioFile(final File outputDirectory, final ImageInfoDerived imageInfoDerived) throws FileNotFoundException, IOException {
+    public File writeBdioFile(final File outputDirectory, final ImageInfoDerived imageInfoDerived) throws IOException {
         final String bdioFilename = Names.getBdioFilename(imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getPkgMgrFilePath(), imageInfoDerived.getFinalProjectName(),
                 imageInfoDerived.getFinalProjectVersionName());
         FileOperations.ensureDirExists(outputDirectory);
