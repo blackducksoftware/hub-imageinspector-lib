@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,6 +63,7 @@ import com.synopsys.integration.exception.IntegrationException;
 public class DockerTarParser {
     static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
+    private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final Gson gson = new Gson();
 
@@ -127,6 +129,7 @@ public class DockerTarParser {
                     }
                     final OutputStream outputFileStream = new FileOutputStream(outputFile);
                     try {
+                        logger.trace(String.format("Untarring %s", outputFile.getAbsolutePath()));
                         IOUtils.copy(tarArchiveInputStream, outputFileStream);
                         if (tarArchiveEntry.getName().contains(DOCKER_LAYER_TAR_FILENAME)) {
                             untaredFiles.add(outputFile);
@@ -134,12 +137,27 @@ public class DockerTarParser {
                     } finally {
                         outputFileStream.close();
                     }
+                    logLayerMetadata(outputFile);
                 }
             }
         } finally {
             IOUtils.closeQuietly(tarArchiveInputStream);
         }
         return untaredFiles;
+    }
+
+    private void logLayerMetadata(final File outputFile) {
+        if (outputFile == null) {
+            logger.warn(String.format("Unable to log contents of %s: outputFile is null", DOCKER_LAYER_METADATA_FILENAME));
+            return;
+        }
+        try {
+            if (DOCKER_LAYER_METADATA_FILENAME.equals(outputFile.getName()) && outputFile.exists()) {
+                logger.info(String.format("%s: %s", outputFile.getAbsolutePath(), FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8)));
+            }
+        } catch (IOException e) {
+            logger.warn(String.format("Unable to log contents of %s: %s", outputFile.getAbsolutePath(), e.getMessage()));
+        }
     }
 
     public ManifestLayerMapping getLayerMapping(final File workingDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
