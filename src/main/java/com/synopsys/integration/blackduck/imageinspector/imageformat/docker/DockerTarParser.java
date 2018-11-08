@@ -86,6 +86,7 @@ public class DockerTarParser {
             final File layerTar = getLayerTar(layerTars, layer);
             if (layerTar != null) {
                 extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
+                logLayerMetadata(layerTar);
                 logComponentsPresentAfterAddingThisLayer(componentExtractorFactory, currentOs,  targetImageFileSystemRootDir);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layer));
@@ -137,7 +138,6 @@ public class DockerTarParser {
                     } finally {
                         outputFileStream.close();
                     }
-                    logLayerMetadata(outputFile);
                 }
             }
         } finally {
@@ -146,17 +146,15 @@ public class DockerTarParser {
         return untaredFiles;
     }
 
-    private void logLayerMetadata(final File outputFile) {
-        if (outputFile == null) {
-            logger.warn(String.format("Unable to log contents of %s: outputFile is null", DOCKER_LAYER_METADATA_FILENAME));
-            return;
-        }
+    private void logLayerMetadata(final File layerTarFile) {
+        File dir = layerTarFile.getParentFile();
+        File metadataFile = new File(dir, DOCKER_LAYER_METADATA_FILENAME);
         try {
-            if (DOCKER_LAYER_METADATA_FILENAME.equals(outputFile.getName()) && outputFile.exists()) {
-                logger.info(String.format("%s: %s", outputFile.getAbsolutePath(), FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8)));
+            if (metadataFile.exists()) {
+                logger.info(String.format("%s: %s", metadataFile.getAbsolutePath(), FileUtils.readFileToString(metadataFile, StandardCharsets.UTF_8)));
             }
         } catch (IOException e) {
-            logger.warn(String.format("Unable to log contents of %s: %s", outputFile.getAbsolutePath(), e.getMessage()));
+            logger.warn(String.format("Unable to log contents of %s: %s", metadataFile.getAbsolutePath(), e.getMessage()));
         }
     }
 

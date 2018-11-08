@@ -67,7 +67,7 @@ public class ImageInspectorApi {
             final String containerFileSystemOutputPath,
             final String currentLinuxDistro)
             throws IntegrationException {
-        logger.info("getBdio()::docker");
+        logger.info("getBdio()::");
         os.logMemory();
         final BdioGenerator bdioGenerator = new BdioGenerator(new SimpleBdioFactory());
         return getBdioDocument(bdioGenerator, dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, cleanupWorkingDir, containerFileSystemOutputPath,
