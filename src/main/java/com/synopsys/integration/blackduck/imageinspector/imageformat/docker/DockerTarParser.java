@@ -272,6 +272,8 @@ public class DockerTarParser {
             }
         } catch (final PkgMgrDataNotFoundException e) {
             logger.debug(String.format("Unable to log components present after this layer: The file system is not yet populated with the linux distro and package manager files: %s", e.getMessage()));
+        } catch (final Exception otherException) {
+            logger.debug("Unable to log components present after this layer");
         }
     }
 }
