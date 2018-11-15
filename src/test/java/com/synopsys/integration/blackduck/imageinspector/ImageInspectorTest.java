@@ -40,29 +40,13 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgCom
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { AppConfig.class })
 public class ImageInspectorTest {
-
-    @MockBean
-    private DpkgExecutor dpkgExecutor;
-
-    @MockBean
-    private ApkExecutor apkExecutor;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception {
-    }
 
     @Test
     public void testDpkg() throws IOException, IntegrationException, InterruptedException {
         final List<String> fileLines = FileUtils.readLines(new File("src/test/resources/ubuntu_dpkg_output_1.txt"), StandardCharsets.UTF_8);
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
-        final PkgMgrExecutor executor = dpkgExecutor;
+        final PkgMgrExecutor executor = Mockito.mock(DpkgExecutor.class);
         Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(packages);
 
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("src/test/resources/imageDir"), PackageManagerEnum.DPKG);
@@ -73,7 +57,7 @@ public class ImageInspectorTest {
     public void testApk() throws IOException, IntegrationException, InterruptedException {
         final List<String> fileLines = FileUtils.readLines(new File("src/test/resources/alpine_apk_output_1.txt"), StandardCharsets.UTF_8);
         final String[] packages = fileLines.toArray(new String[fileLines.size()]);
-        final PkgMgrExecutor executor = apkExecutor;
+        final PkgMgrExecutor executor = Mockito.mock(ApkExecutor.class);
         Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(packages);
         final File imageFileSystem = new File("src/test/resources/imageDir");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imageFileSystem, PackageManagerEnum.APK);
@@ -89,17 +73,13 @@ public class ImageInspectorTest {
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
 
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(new File(String.format("image_%s_v_%s", imageName, tagName)), imagePkgMgrDatabase, imageName);
-
-        final ImageInspector imageInspector = new ImageInspector();
-
         final String tempDirPath = TestUtils.createTempDirectory().getAbsolutePath();
 
         final DockerTarParser tarParser = Mockito.mock(DockerTarParser.class);
         Mockito.when(tarParser.parseImageInfo(Mockito.any(File.class))).thenReturn(imageInfoParsed);
         ComponentExtractorFactory componentExtractorFactory = Mockito.mock(ComponentExtractorFactory.class);
         Mockito.when(componentExtractorFactory.createComponentExtractor(Mockito.any(Gson.class), Mockito.any(File.class), Mockito.any(PackageManagerEnum.class))).thenReturn(componentExtractor);
-        imageInspector.setTarParser(tarParser);
-        imageInspector.setComponentExtractorFactory(componentExtractorFactory);
+        final ImageInspector imageInspector = new ImageInspector(tarParser, componentExtractorFactory);
         final List<ManifestLayerMapping> mappings = new ArrayList<>();
         final List<String> layerIds = new ArrayList<>();
         layerIds.add("testLayerId");

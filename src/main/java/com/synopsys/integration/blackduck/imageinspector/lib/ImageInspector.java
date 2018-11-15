@@ -56,18 +56,13 @@ import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 public class ImageInspector {
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private DockerTarParser tarParser;
-    private ComponentExtractorFactory componentExtractorFactory;
+    private final DockerTarParser tarParser;
+    private final ComponentExtractorFactory componentExtractorFactory;
     private final Gson gson = new Gson();
 
-    @Autowired
-    public void setComponentExtractorFactory(final ComponentExtractorFactory componentExtractorFactory) {
-        this.componentExtractorFactory = componentExtractorFactory;
-    }
-
-    @Autowired
-    public void setTarParser(final DockerTarParser tarParser) {
+    public ImageInspector(final DockerTarParser tarParser, final ComponentExtractorFactory componentExtractorFactory) {
         this.tarParser = tarParser;
+        this.componentExtractorFactory = componentExtractorFactory;
     }
 
     public File getTarExtractionDirectory(final File workingDirectory) {
@@ -126,6 +121,14 @@ public class ImageInspector {
         return bdioOutputFile;
     }
 
+    public void writeBdioToFile(final SimpleBdioDocument bdioDocument, final File bdioOutputFile) throws IOException, FileNotFoundException {
+        try (FileOutputStream bdioOutputStream = new FileOutputStream(bdioOutputFile)) {
+            try (BdioWriter bdioWriter = new BdioWriter(gson, bdioOutputStream)) {
+                BdioGenerator.writeBdio(bdioWriter, bdioDocument);
+            }
+        }
+    }
+
     private ImageInfoDerived deriveImageInfo(final ManifestLayerMapping mapping, final String projectName, final String versionName,
             final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
@@ -153,13 +156,6 @@ public class ImageInspector {
         return pkgMgrFilePath;
     }
 
-    private void writeBdioToFile(final SimpleBdioDocument bdioDocument, final File bdioOutputFile) throws IOException, FileNotFoundException {
-        try (FileOutputStream bdioOutputStream = new FileOutputStream(bdioOutputFile)) {
-            try (BdioWriter bdioWriter = new BdioWriter(gson, bdioOutputStream)) {
-                BdioGenerator.writeBdio(bdioWriter, bdioDocument);
-            }
-        }
-    }
 
     private String deriveBlackDuckProject(final String imageName, final String projectName) {
         String blackDuckProjectName;

@@ -59,17 +59,17 @@ public class ImageInspectorApi {
     private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
     private ImageInspector imageInspector;
-
-    @Autowired
     private Os os;
-
-    @Autowired
     private ComponentExtractorFactory componentExtractorFactory;
-
-    @Autowired
     private Gson gson;
+
+    public ImageInspectorApi(Gson gson, ImageInspector imageInspector, ComponentExtractorFactory componentExtractorFactory, Os os) {
+        this.gson = gson;
+        this.imageInspector = imageInspector;
+        this.componentExtractorFactory = componentExtractorFactory;
+        this.os = os;
+    }
 
     public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion,
             final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
@@ -85,11 +85,11 @@ public class ImageInspectorApi {
     }
 
     public void pkgListToBdioFile(final PackageManagerEnum pkgMgrType, String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String bdioOutputPath, final String blackDuckProjectName, final String blackDuckProjectVersion,
-        final String codeLocationPrefix,
+        final String codeLocationName,
         final boolean cleanupWorkingDir)
         throws IntegrationException {
-        logger.info(String.format("pkgListToBdioFile(): pkgMgrType: %s; pkgMgrListCmdOutput: %s, bdioOutputPath: %s; blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationPrefix: %s; cleanupWorkingDir: %b",
-            pkgMgrType, pkgMgrListCmdOutputLines, bdioOutputPath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix,
+        logger.info(String.format("pkgListToBdioFile(): pkgMgrType: %s; pkgMgrListCmdOutput: %s, bdioOutputPath: %s; blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationName: %s; cleanupWorkingDir: %b",
+            pkgMgrType, pkgMgrListCmdOutputLines, bdioOutputPath, blackDuckProjectName, blackDuckProjectVersion, codeLocationName,
             cleanupWorkingDir));
 
         if (pkgMgrType != PackageManagerEnum.DPKG) {
@@ -97,8 +97,17 @@ public class ImageInspectorApi {
         }
         ComponentExtractor extractor = (new ComponentExtractorFactory()).createComponentExtractor(gson, null, pkgMgrType);
         List<ComponentDetails> comps = extractor.extractComponentsFromPkgMgrOutput(linuxDistroName, pkgMgrListCmdOutputLines);
+        // TODO TEMP:
         for (ComponentDetails comp : comps) {
             logger.info(String.format("comp: %s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
+        }
+        final BdioGenerator bdioGenerator = new BdioGenerator(new SimpleBdioFactory());
+        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocument(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);
+        File bdioOutputFile = new File(bdioOutputPath);
+        try {
+            imageInspector.writeBdioToFile(bdioDoc, bdioOutputFile);
+        } catch (IOException e) {
+            throw new IntegrationException(String.format("Error writing to BDIO output file %s", bdioOutputPath), e);
         }
     }
 
