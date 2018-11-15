@@ -21,10 +21,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.lib;
+package com.synopsys.integration.blackduck.imageinspector.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 
 public enum PackageManagerEnum {
     DPKG("/var/lib/dpkg", OperatingSystemEnum.UBUNTU),

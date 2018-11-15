@@ -25,7 +25,7 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import java.io.File;
 
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.util.Stringable;
 
 public class ImagePkgMgrDatabase extends Stringable {

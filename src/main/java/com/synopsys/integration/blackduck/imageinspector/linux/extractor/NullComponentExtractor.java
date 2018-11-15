@@ -27,11 +27,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
+import com.synopsys.integration.exception.IntegrationException;
 
 public class NullComponentExtractor implements ComponentExtractor {
 
     @Override
     public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] packageList) throws IntegrationException {
         return new ArrayList<>();
     }
 }

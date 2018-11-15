@@ -46,8 +46,15 @@ public class DpkgComponentExtractor implements ComponentExtractor {
     @Override
     public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
             throws IntegrationException {
-        final List<ComponentDetails> components = new ArrayList<>();
+
         final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
+        final List<ComponentDetails> components = extractComponentsFromPkgMgrOutput(linuxDistroName, packageList);
+        return components;
+    }
+
+    @Override
+    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] packageList) {
+        final List<ComponentDetails> components = new ArrayList<>();
         boolean startOfComponents = false;
         for (final String packageLine : packageList) {
 

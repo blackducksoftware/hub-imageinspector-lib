@@ -51,7 +51,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;

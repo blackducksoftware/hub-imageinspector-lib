@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;

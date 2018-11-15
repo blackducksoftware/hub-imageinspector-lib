@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
@@ -45,6 +46,9 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
@@ -61,6 +65,12 @@ public class ImageInspectorApi {
     @Autowired
     private Os os;
 
+    @Autowired
+    private ComponentExtractorFactory componentExtractorFactory;
+
+    @Autowired
+    private Gson gson;
+
     public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion,
             final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
             final boolean cleanupWorkingDir,
@@ -72,6 +82,24 @@ public class ImageInspectorApi {
         final BdioGenerator bdioGenerator = new BdioGenerator(new SimpleBdioFactory());
         return getBdioDocument(bdioGenerator, dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, cleanupWorkingDir, containerFileSystemOutputPath,
                 currentLinuxDistro);
+    }
+
+    public void pkgListToBdioFile(final PackageManagerEnum pkgMgrType, String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String bdioOutputPath, final String blackDuckProjectName, final String blackDuckProjectVersion,
+        final String codeLocationPrefix,
+        final boolean cleanupWorkingDir)
+        throws IntegrationException {
+        logger.info(String.format("pkgListToBdioFile(): pkgMgrType: %s; pkgMgrListCmdOutput: %s, bdioOutputPath: %s; blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationPrefix: %s; cleanupWorkingDir: %b",
+            pkgMgrType, pkgMgrListCmdOutputLines, bdioOutputPath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix,
+            cleanupWorkingDir));
+
+        if (pkgMgrType != PackageManagerEnum.DPKG) {
+            throw new UnsupportedOperationException("The pkgListToBdioFile() currently only supports DPKG");
+        }
+        ComponentExtractor extractor = (new ComponentExtractorFactory()).createComponentExtractor(gson, null, pkgMgrType);
+        List<ComponentDetails> comps = extractor.extractComponentsFromPkgMgrOutput(linuxDistroName, pkgMgrListCmdOutputLines);
+        for (ComponentDetails comp : comps) {
+            logger.info(String.format("comp: %s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
+        }
     }
 
     private SimpleBdioDocument getBdioDocument(final BdioGenerator bdioGenerator, final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix, final String givenImageRepo,

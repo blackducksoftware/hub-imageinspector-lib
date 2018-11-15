@@ -33,4 +33,6 @@ public interface ComponentExtractor {
 
     List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
             throws IntegrationException;
+
+    List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] packageList) throws IntegrationException;
 }

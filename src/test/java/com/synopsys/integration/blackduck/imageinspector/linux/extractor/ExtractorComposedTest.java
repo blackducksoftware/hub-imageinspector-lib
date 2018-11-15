@@ -15,7 +15,7 @@ import org.mockito.Mockito;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.lib.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
