@@ -23,7 +23,6 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -69,7 +68,7 @@ public class BdioGenerator {
         final MutableDependencyGraph dependencies = simpleBdioFactory.createMutableDependencyGraph();
         for (final ComponentDetails comp : comps) {
             final Forge forge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
-            logger.debug(String.format("Generating component with forge: %s", forge.getName()));
+            logger.debug(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), forge.getName()));
             addDependency(dependencies, comp.getName(), comp.getVersion(), comp.getArchitecture(), forge);
         }
         return dependencies;

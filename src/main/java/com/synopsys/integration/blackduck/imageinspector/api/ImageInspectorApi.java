@@ -25,6 +25,8 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -84,23 +86,33 @@ public class ImageInspectorApi {
                 currentLinuxDistro);
     }
 
+//    private String[] pkgListToBdio(final PackageManagerEnum pkgMgrType, String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationName) throws IntegrationException {
+//        logger.info("*** pkgListToBdio() String[] to String[]");
+//        return new String[0];
+//    }
+//
+//    private void pkgListToBdio(final PackageManagerEnum pkgMgrType, String linuxDistroName, final String pkgMgrListCmdOutputPath, final String bdioOutputPath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationName) throws IntegrationException {
+//        logger.info("*** pkgListToBdio() file to file");
+//        File pkgMgrListCmdOutputFile = new File(pkgMgrListCmdOutputPath);
+//        String[] pkgMgrListCmdOutputLines = FileUtils.readLines(pkgMgrListCmdOutputFile, StandardCharsets.UTF_8).toArray();
+//        String[] bdioLines = pkgListToBdio(pkgMgrType,  linuxDistroName, pkgMgrListCmdOutputLines, blackDuckProjectName, blackDuckProjectVersion, codeLocationName);
+//
+//        File bdioOutputFile = new File(bdioOutputPath);
+//        FileUtils.writeLines(bdioOutputFile, Arrays.asList(bdioLines));
+//    }
+
     public void pkgListToBdioFile(final PackageManagerEnum pkgMgrType, String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String bdioOutputPath, final String blackDuckProjectName, final String blackDuckProjectVersion,
-        final String codeLocationName,
-        final boolean cleanupWorkingDir)
+        final String codeLocationName)
         throws IntegrationException {
-        logger.info(String.format("pkgListToBdioFile(): pkgMgrType: %s; pkgMgrListCmdOutput: %s, bdioOutputPath: %s; blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationName: %s; cleanupWorkingDir: %b",
-            pkgMgrType, pkgMgrListCmdOutputLines, bdioOutputPath, blackDuckProjectName, blackDuckProjectVersion, codeLocationName,
-            cleanupWorkingDir));
+        logger.info(String.format("pkgListToBdioFile(): pkgMgrType: %s; pkgMgrListCmdOutput: %s, bdioOutputPath: %s; blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationName: %s",
+            pkgMgrType, pkgMgrListCmdOutputLines, bdioOutputPath, blackDuckProjectName, blackDuckProjectVersion, codeLocationName));
 
         if (pkgMgrType != PackageManagerEnum.DPKG) {
             throw new UnsupportedOperationException("The pkgListToBdioFile() currently only supports DPKG");
         }
         ComponentExtractor extractor = (new ComponentExtractorFactory()).createComponentExtractor(gson, null, pkgMgrType);
         List<ComponentDetails> comps = extractor.extractComponentsFromPkgMgrOutput(linuxDistroName, pkgMgrListCmdOutputLines);
-        // TODO TEMP:
-        for (ComponentDetails comp : comps) {
-            logger.info(String.format("comp: %s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
-        }
+        logger.info(String.format("Extracted %d components from given package manager output", comps.size()));
         final BdioGenerator bdioGenerator = new BdioGenerator(new SimpleBdioFactory());
         SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocument(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);
         File bdioOutputFile = new File(bdioOutputPath);

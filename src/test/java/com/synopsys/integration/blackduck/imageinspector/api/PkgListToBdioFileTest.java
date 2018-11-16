@@ -30,10 +30,10 @@ public class PkgListToBdioFileTest {
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/dpkg/ubuntu_dpkg_output.txt";
         String bdioOutputFilePath = "test/output/bdioFromDpkgOutput.jsonld";
         String[] pkgMgrListCmdOutputLines = FileUtils.readFileToString(new File(pkgMgrOutputFilePath), StandardCharsets.UTF_8).split("\n");
-        api.pkgListToBdioFile(PackageManagerEnum.DPKG, "ubuntu", pkgMgrListCmdOutputLines, bdioOutputFilePath, "test-blackDuckProjectName", "test-blackDuckProjectVersion",
-            "test-codeLocationName",
-            true);
         File bdioFile = new File(bdioOutputFilePath);
+        FileUtils.deleteQuietly(bdioFile);
+        api.pkgListToBdioFile(PackageManagerEnum.DPKG, "ubuntu", pkgMgrListCmdOutputLines, bdioOutputFilePath, "test-blackDuckProjectName", "test-blackDuckProjectVersion",
+            "test-codeLocationName");
         System.out.printf("bdioFile: %s\n", bdioFile.getAbsolutePath());
         SimpleBdioDocument bdioDoc = toBdioDocument(bdioFile);
         assertEquals("test-blackDuckProjectName", bdioDoc.project.name);
