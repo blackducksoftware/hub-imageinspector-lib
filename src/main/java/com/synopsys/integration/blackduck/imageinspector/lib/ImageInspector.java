@@ -23,6 +23,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
+import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -112,20 +113,25 @@ public class ImageInspector {
         return imageInfoDerived;
     }
 
-    public File writeBdioFile(final File outputDirectory, final ImageInfoDerived imageInfoDerived) throws IOException {
+    public File writeBdioFile(BdioGenerator bdioGenerator, final File outputDirectory, final ImageInfoDerived imageInfoDerived) throws IOException {
         final String bdioFilename = Names.getBdioFilename(imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getPkgMgrFilePath(), imageInfoDerived.getFinalProjectName(),
                 imageInfoDerived.getFinalProjectVersionName());
         FileOperations.ensureDirExists(outputDirectory);
         final File bdioOutputFile = new File(outputDirectory, bdioFilename);
-        writeBdioToFile(imageInfoDerived.getBdioDocument(), bdioOutputFile);
+        writeBdioToFile(bdioGenerator, imageInfoDerived.getBdioDocument(), bdioOutputFile);
         return bdioOutputFile;
     }
 
-    public void writeBdioToFile(final SimpleBdioDocument bdioDocument, final File bdioOutputFile) throws IOException, FileNotFoundException {
-        try (FileOutputStream bdioOutputStream = new FileOutputStream(bdioOutputFile)) {
-            try (BdioWriter bdioWriter = new BdioWriter(gson, bdioOutputStream)) {
-                BdioGenerator.writeBdio(bdioWriter, bdioDocument);
-            }
+    public void writeBdioToFile(BdioGenerator bdioGenerator, final SimpleBdioDocument bdioDocument, final File bdioOutputFile) throws IOException, FileNotFoundException {
+        bdioGenerator.writeBdio(bdioOutputFile, bdioDocument);
+    }
+
+    public String[] getBdioAsStringArray(BdioGenerator bdioGenerator, final SimpleBdioDocument bdioDocument) throws IOException {
+        try (final CharArrayWriter charArrayWriter = new CharArrayWriter()) {
+            bdioGenerator.writeBdio(charArrayWriter, bdioDocument);
+            final String bdioString = charArrayWriter.toString();
+            final String[] bdioLines = bdioString.split("\n");
+            return bdioLines;
         }
     }
 

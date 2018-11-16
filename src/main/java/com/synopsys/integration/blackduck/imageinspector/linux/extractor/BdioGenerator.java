@@ -23,6 +23,9 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -60,8 +63,14 @@ public class BdioGenerator {
         return bdioDocument;
     }
 
-    public static final void writeBdio(final BdioWriter bdioWriter, final SimpleBdioDocument bdioDocument) {
-        new SimpleBdioFactory().writeSimpleBdioDocument(bdioWriter, bdioDocument);
+    public final void writeBdio(final File bdioFile, final SimpleBdioDocument bdioDocument) throws IOException {
+        simpleBdioFactory.writeSimpleBdioDocumentToFile(bdioFile, bdioDocument);
+    }
+
+    public final void writeBdio(final Writer writer, final SimpleBdioDocument bdioDocument) throws IOException {
+        try (final BdioWriter bdioWriter = simpleBdioFactory.createBdioWriter(writer)) {
+            simpleBdioFactory.writeSimpleBdioDocument(bdioWriter, bdioDocument);
+        }
     }
 
     private MutableDependencyGraph generateDependencies(final List<ComponentDetails> comps) {

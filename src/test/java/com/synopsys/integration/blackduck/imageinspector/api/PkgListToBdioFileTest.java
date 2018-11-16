@@ -28,11 +28,12 @@ public class PkgListToBdioFileTest {
     public void testPkgListToBdioFile() throws IOException, IntegrationException {
         ImageInspectorApi api = new ImageInspectorApi(gson, new ImageInspector(new DockerTarParser(), new ComponentExtractorFactory()), new ComponentExtractorFactory(), new Os());
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/dpkg/ubuntu_dpkg_output.txt";
+        File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         String bdioOutputFilePath = "test/output/bdioFromDpkgOutput.jsonld";
-        String[] pkgMgrListCmdOutputLines = FileUtils.readFileToString(new File(pkgMgrOutputFilePath), StandardCharsets.UTF_8).split("\n");
+        //String[] pkgMgrListCmdOutputLines = FileUtils.readFileToString(new File(pkgMgrOutputFilePath), StandardCharsets.UTF_8).split("\n");
         File bdioFile = new File(bdioOutputFilePath);
         FileUtils.deleteQuietly(bdioFile);
-        api.pkgListToBdioFile(PackageManagerEnum.DPKG, "ubuntu", pkgMgrListCmdOutputLines, bdioOutputFilePath, "test-blackDuckProjectName", "test-blackDuckProjectVersion",
+        api.pkgListToBdio(PackageManagerEnum.DPKG, "ubuntu", pkgMgrOutputFile.getAbsolutePath(), bdioFile.getAbsolutePath(), "test-blackDuckProjectName", "test-blackDuckProjectVersion",
             "test-codeLocationName");
         System.out.printf("bdioFile: %s\n", bdioFile.getAbsolutePath());
         SimpleBdioDocument bdioDoc = toBdioDocument(bdioFile);

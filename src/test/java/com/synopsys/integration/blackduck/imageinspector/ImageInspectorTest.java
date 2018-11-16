@@ -87,7 +87,7 @@ public class ImageInspectorTest {
         mappings.add(mapping);
 
         final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageName, tagName, mapping, "testProjectName", "testProjectVersion", imageFilesDir, "");
-        final File bdioFile = imageInspector.writeBdioFile(new File(tempDirPath), imageInfoDerived);
+        final File bdioFile = imageInspector.writeBdioFile(bdioGenerator, new File(tempDirPath), imageInfoDerived);
         final File file1 = new File(String.format("src/test/resources/%s_imageDir_testProjectName_testProjectVersion_bdio.jsonld", imageName));
         final File file2 = bdioFile;
         System.out.println(String.format("Comparing %s %s", file2.getAbsolutePath(), file1.getAbsolutePath()));
