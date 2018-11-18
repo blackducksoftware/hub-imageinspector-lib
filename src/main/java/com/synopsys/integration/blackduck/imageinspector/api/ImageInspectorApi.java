@@ -26,7 +26,6 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -105,16 +103,14 @@ public class ImageInspectorApi {
         }
     }
 
-    // TODO what ensures that we're writing UTF-8 to the char array / string array (underneath)?
-
     public String[] pkgListToBdio(final PackageManagerEnum pkgMgrType, String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationName) throws IntegrationException {
         logger.info(String.format("pkgListToBdio(): pkgMgrType: %s; linuxDistroName: %s; pkgMgrListCmdOutputLines: %s, blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationName: %s",
             pkgMgrType, linuxDistroName, pkgMgrListCmdOutputLines, blackDuckProjectName, blackDuckProjectVersion, codeLocationName));
 
-        if (pkgMgrType != PackageManagerEnum.DPKG) {
+        if (pkgMgrType != PackageManagerEnum.DPKG && pkgMgrType != PackageManagerEnum.RPM) {
             throw new UnsupportedOperationException("The pkgListToBdioFile() currently only supports DPKG");
         }
-        ComponentExtractor extractor = (new ComponentExtractorFactory()).createComponentExtractor(gson, null, pkgMgrType);
+        ComponentExtractor extractor = componentExtractorFactory.createComponentExtractor(gson, null, pkgMgrType);
         List<ComponentDetails> comps = extractor.extractComponentsFromPkgMgrOutput(linuxDistroName, pkgMgrListCmdOutputLines);
         logger.info(String.format("Extracted %d components from given package manager output", comps.size()));
         final BdioGenerator bdioGenerator = new BdioGenerator(new SimpleBdioFactory());
