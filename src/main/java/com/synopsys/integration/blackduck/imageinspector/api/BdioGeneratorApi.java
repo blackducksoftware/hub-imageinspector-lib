@@ -114,7 +114,7 @@ public class BdioGeneratorApi {
      * Convert packages (in the form of "apk info -v" command output that has been saved to a file) to a BDIO file (JSON)
      * that can be uploaded to Black Duck. This method accepts packages from the APK package manager.
      *
-     * @param architecture  The contents of the /etc/apk/arch file
+     * @param architecture  The output of "apk --print-arch", or contents of the /etc/apk/arch file
      * @param linuxDistroName   The value of the ID field from /etc/os-release
      * @param pkgMgrListCmdOutputPath   The path of the file that contains the output of the command "apk info -v"
      * @param bdioOutputPath    The path to the output file to which this method will write the generated BDIO (JSON)
@@ -131,7 +131,7 @@ public class BdioGeneratorApi {
      * Convert packages (in the form of "apk info -v" command output, provided as an array of Strings) to BDIO (JSON)
      * that can be uploaded to Black Duck. This method accepts packages from the APK package manager.
      *
-     * @param architecture  The contents of the /etc/apk/arch file
+     * @param architecture  The output of "apk --print-arch", or contents of the /etc/apk/arch file
      * @param linuxDistroName   The value of the ID field from /etc/os-release
      * @param pkgMgrListCmdOutputLines  The output of apk info -v
      * @param blackDuckProjectName  The Black Duck project for which the BDIO should be generated
