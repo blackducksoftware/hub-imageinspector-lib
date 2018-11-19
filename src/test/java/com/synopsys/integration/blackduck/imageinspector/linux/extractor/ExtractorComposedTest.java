@@ -36,7 +36,7 @@ public class ExtractorComposedTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ComponentExtractor componentExtractor = new ApkComponentExtractor(pkgMgrExecutor, new File("src/test/resources/testApkFileSystem"));
+        final ComponentExtractor componentExtractor = new ApkComponentExtractor(pkgMgrExecutor, new File("src/test/resources/testApkFileSystem"), null);
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
         List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "alpine");

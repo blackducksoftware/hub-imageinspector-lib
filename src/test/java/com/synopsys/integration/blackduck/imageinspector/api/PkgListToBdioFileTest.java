@@ -60,13 +60,29 @@ public class PkgListToBdioFileTest {
         verifyBdioDocCentosMinusVimPlusBacula(bdioDoc);
     }
 
-    private SimpleBdioDocument testPkgListToBdioLines(final String pkgMgrOutputFilePath, final String linuxDistroName, final PackageManagerEnum pmgMgr) throws IOException, IntegrationException {
+    @Test
+    public void testPkgListToBdioLinesAlpine() throws IntegrationException, IOException {
+        String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/apk/alpine_apk_output.txt";
+        String linuxDistroName = "alpine";
+        PackageManagerEnum pkgMgrType = PackageManagerEnum.APK;
+
+        SimpleBdioDocument bdioDoc = testPkgListToBdioLines(pkgMgrOutputFilePath, linuxDistroName, pkgMgrType);
+        verifyBdioDocAlpine(bdioDoc);
+    }
+
+    private SimpleBdioDocument testPkgListToBdioLines(final String pkgMgrOutputFilePath, final String linuxDistroName, final PackageManagerEnum pkgMgrType) throws IOException, IntegrationException {
         BdioGeneratorApi api = new BdioGeneratorApi(gson, new ComponentExtractorFactory(), new BdioGenerator(new SimpleBdioFactory()));
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         List<String> pkgMgrOutputLinesList = FileUtils.readLines(pkgMgrOutputFile, StandardCharsets.UTF_8);
         String[] pkgMgrOutputLines = pkgMgrOutputLinesList.toArray(new String[pkgMgrOutputLinesList.size()]);
-        String[] bdioLines = api.pkgListToBdio(pmgMgr, linuxDistroName, pkgMgrOutputLines, "test-blackDuckProjectName", "test-blackDuckProjectVersion",
-            "test-codeLocationName");
+        String[] bdioLines;
+        if (pkgMgrType == PackageManagerEnum.APK) {
+            bdioLines = api.pkgListToBdioApk("x86_64", linuxDistroName, pkgMgrOutputLines, "test-blackDuckProjectName", "test-blackDuckProjectVersion",
+                "test-codeLocationName");
+        } else {
+            bdioLines = api.pkgListToBdio(pkgMgrType, linuxDistroName, pkgMgrOutputLines, "test-blackDuckProjectName", "test-blackDuckProjectVersion",
+                "test-codeLocationName");
+        }
         SimpleBdioDocument bdioDoc = toBdioDocument(bdioLines);
         return bdioDoc;
     }
@@ -94,9 +110,17 @@ public class PkgListToBdioFileTest {
         assertEquals("systemd-sysv", bdioDoc.components.get(0).name);
         assertEquals("219-57.el7_5.3", bdioDoc.components.get(0).version);
         assertEquals("systemd-sysv/219-57.el7_5.3/x86_64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
-        for (BdioComponent comp : bdioDoc.components) {
-            System.out.printf("\n", comp.name, comp.version, comp.bdioExternalIdentifier);
-        }
+    }
+
+    private void verifyBdioDocAlpine(final SimpleBdioDocument bdioDoc) {
+        assertEquals("test-blackDuckProjectName", bdioDoc.project.name);
+        assertEquals("test-blackDuckProjectVersion", bdioDoc.project.version);
+        assertEquals("Project", bdioDoc.project.type);
+        assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
+        assertEquals(95, bdioDoc.components.size());
+        assertEquals("pcsc-lite-libs", bdioDoc.components.get(0).name);
+        assertEquals("1.8.22-r0", bdioDoc.components.get(0).version);
+        assertEquals("pcsc-lite-libs/1.8.22-r0/x86_64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
     }
 
     private SimpleBdioDocument toBdioDocument(final String[] bdioLines) throws IOException {

@@ -61,10 +61,10 @@ public class ComponentExtractorFactory {
         this.rpmExecutor = rpmExecutor;
     }
 
-    public ComponentExtractor createComponentExtractor(final Gson gson, final File imageFileSystem, final PackageManagerEnum packageManagerEnum) {
+    public ComponentExtractor createComponentExtractor(final Gson gson, final File imageFileSystem, final String architecture, final PackageManagerEnum packageManagerEnum) {
         logger.debug("createComponentExtractor()");
         if (packageManagerEnum == PackageManagerEnum.APK) {
-            return new ApkComponentExtractor(apkExecutor, imageFileSystem);
+            return new ApkComponentExtractor(apkExecutor, imageFileSystem, architecture);
         } else if (packageManagerEnum == PackageManagerEnum.DPKG) {
             return new DpkgComponentExtractor(dpkgExecutor);
         } else if (packageManagerEnum == PackageManagerEnum.RPM) {

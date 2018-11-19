@@ -258,7 +258,7 @@ public class DockerTarParser {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
                 throw new WrongInspectorOsException(neededInspectorOs, msg);
             }
-            final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getFileSystemRootDir(), imageInfoParsed.getPkgMgr().getPackageManager());
+            final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getPkgMgr().getPackageManager());
             final List<ComponentDetails> comps;
             try {
                 comps = componentExtractor.extractComponents(imageInfoParsed.getPkgMgr(), imageInfoParsed.getLinuxDistroName());

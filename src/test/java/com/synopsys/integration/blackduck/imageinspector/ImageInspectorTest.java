@@ -61,7 +61,7 @@ public class ImageInspectorTest {
         Mockito.when(executor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(packages);
         final File imageFileSystem = new File("src/test/resources/imageDir");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imageFileSystem, PackageManagerEnum.APK);
-        doTest("alpine", "1.0", imagePkgMgrDatabase, new ApkComponentExtractor(executor, imageFileSystem));
+        doTest("alpine", "1.0", imagePkgMgrDatabase, new ApkComponentExtractor(executor, imageFileSystem, null));
     }
 
     private void doTest(final String imageName, final String tagName, final ImagePkgMgrDatabase imagePkgMgrDatabase, final ComponentExtractor componentExtractor)
@@ -78,7 +78,7 @@ public class ImageInspectorTest {
         final DockerTarParser tarParser = Mockito.mock(DockerTarParser.class);
         Mockito.when(tarParser.parseImageInfo(Mockito.any(File.class))).thenReturn(imageInfoParsed);
         ComponentExtractorFactory componentExtractorFactory = Mockito.mock(ComponentExtractorFactory.class);
-        Mockito.when(componentExtractorFactory.createComponentExtractor(Mockito.any(Gson.class), Mockito.any(File.class), Mockito.any(PackageManagerEnum.class))).thenReturn(componentExtractor);
+        Mockito.when(componentExtractorFactory.createComponentExtractor(Mockito.any(Gson.class), Mockito.any(File.class), Mockito.anyString(), Mockito.any(PackageManagerEnum.class))).thenReturn(componentExtractor);
         final ImageInspector imageInspector = new ImageInspector(tarParser, componentExtractorFactory);
         final List<ManifestLayerMapping> mappings = new ArrayList<>();
         final List<String> layerIds = new ArrayList<>();

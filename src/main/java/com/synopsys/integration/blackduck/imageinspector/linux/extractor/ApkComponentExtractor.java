@@ -48,9 +48,10 @@ public class ApkComponentExtractor implements ComponentExtractor {
     private final File imageFileSystem;
     private String architecture;
 
-    public ApkComponentExtractor(final PkgMgrExecutor pkgMgrExecutor, final File imageFileSystem) {
+    public ApkComponentExtractor(final PkgMgrExecutor pkgMgrExecutor, final File imageFileSystem, final String architecture) {
         this.pkgMgrExecutor = pkgMgrExecutor;
         this.imageFileSystem = imageFileSystem;
+        this.architecture = architecture;
     }
 
     @Override
