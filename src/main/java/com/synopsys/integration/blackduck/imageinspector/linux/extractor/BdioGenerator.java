@@ -47,6 +47,10 @@ public class BdioGenerator {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final SimpleBdioFactory simpleBdioFactory;
 
+    public BdioGenerator() {
+        this.simpleBdioFactory = new SimpleBdioFactory();
+    }
+
     public BdioGenerator(final SimpleBdioFactory simpleBdioFactory) {
         this.simpleBdioFactory = simpleBdioFactory;
     }
