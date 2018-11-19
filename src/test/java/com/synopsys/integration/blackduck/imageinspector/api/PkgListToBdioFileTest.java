@@ -19,7 +19,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Compone
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.BdioReader;
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
-import com.synopsys.integration.hub.bdio.model.BdioComponent;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 public class PkgListToBdioFileTest {
@@ -58,6 +57,21 @@ public class PkgListToBdioFileTest {
 
         SimpleBdioDocument bdioDoc = testPkgListToBdioLines(pkgMgrOutputFilePath, linuxDistroName, pmgMgr);
         verifyBdioDocCentosMinusVimPlusBacula(bdioDoc);
+    }
+
+    @Test
+    public void testPkgListToBdioFileAlpine() throws IOException, IntegrationException {
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new ComponentExtractorFactory(), new BdioGenerator(new SimpleBdioFactory()));
+        String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/apk/alpine_apk_output.txt";
+        File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
+        String bdioOutputFilePath = "test/output/bdioFromApkOutput.jsonld";
+        File bdioFile = new File(bdioOutputFilePath);
+        FileUtils.deleteQuietly(bdioFile);
+        api.pkgListToBdioApk("x86_64", "alpine", pkgMgrOutputFile.getAbsolutePath(), bdioFile.getAbsolutePath(), "test-blackDuckProjectName", "test-blackDuckProjectVersion",
+            "test-codeLocationName");
+        System.out.printf("bdioFile: %s\n", bdioFile.getAbsolutePath());
+        SimpleBdioDocument bdioDoc = toBdioDocument(bdioFile);
+        verifyBdioDocAlpine(bdioDoc);
     }
 
     @Test
