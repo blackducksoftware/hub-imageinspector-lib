@@ -66,6 +66,24 @@ public class ImageInspectorApi {
         this.os = os;
     }
 
+    /**
+     * Get a BDIO object representing the packages found in the docker image in the given tarfile. If the tarfile contains
+     * more than one image, givenImageRepo and givenImageTag are used to select an image. If containerFileSystemOutputPath
+     * is provided, this method will also write the container filesystem (reconstructed as part of the processing
+     * required to read the image's packages) to that file as a .tar.gz file.
+     *
+     * @param dockerTarfilePath Required. The path to the docker image tarfile (produced using the "docker save" command).
+     * @param blackDuckProjectName Optional. The Black Duck project name.
+     * @param blackDuckProjectVersion Optional. The Black Duck project version.
+     * @param codeLocationPrefix Optional. A String to be pre-pended to the generated code location name.
+     * @param givenImageRepo Optional. The image repo name. Required only if the given tarfile contains multiple images.
+     * @param givenImageTag Optional. The image repo tag.  Required only if the given tarfile contains multiple images.
+     * @param cleanupWorkingDir If false, files will be left behind that might be useful for troubleshooting. Should usually be set to true.
+     * @param containerFileSystemOutputPath Optional. The path to which the re-constructed container filesystem will be written as a .tar.gz file.
+     * @param currentLinuxDistro Optional. The name of the Linux distro (from the ID field of /etc/os-release or /etc/lsb-release) of the machine on which this code is running.
+     * @return The generated BDIO object representing the componets (packages) read from the images's package manager database.
+     * @throws IntegrationException
+     */
     public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion,
             final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
             final boolean cleanupWorkingDir,
