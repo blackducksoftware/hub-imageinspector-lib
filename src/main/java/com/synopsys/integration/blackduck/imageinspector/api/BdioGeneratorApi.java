@@ -44,6 +44,15 @@ import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
 @Component
 public class BdioGeneratorApi {
+    // These must either match the KB's forge name, or be mapped to it in Forge.java
+    public static final String LINUX_DISTRO_NAME_UBUNTU = "ubuntu";
+    public static final String LINUX_DISTRO_NAME_DEBIAN = "debian";
+    public static final String LINUX_DISTRO_NAME_CENTOS = "centos";
+    public static final String LINUX_DISTRO_NAME_FEDORA = "fedora";
+    public static final String LINUX_DISTRO_NAME_REDHAT = "redhat";
+    public static final String LINUX_DISTRO_NAME_OPENSUSE = "opensuse";
+    public static final String LINUX_DISTRO_NAME_ALPINE = "alpine";
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private ComponentExtractorFactory componentExtractorFactory;
     private Gson gson;

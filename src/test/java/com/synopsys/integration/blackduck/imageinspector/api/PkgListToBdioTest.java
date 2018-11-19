@@ -21,7 +21,7 @@ import com.synopsys.integration.hub.bdio.BdioReader;
 import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
-public class PkgListToBdioFileTest {
+public class PkgListToBdioTest {
     private Gson gson = new Gson();
 
     @Test
@@ -32,7 +32,7 @@ public class PkgListToBdioFileTest {
         String bdioOutputFilePath = "test/output/bdioFromDpkgOutput.jsonld";
         File bdioFile = new File(bdioOutputFilePath);
         FileUtils.deleteQuietly(bdioFile);
-        api.pkgListToBdio(PackageManagerEnum.DPKG, "ubuntu", pkgMgrOutputFile.getAbsolutePath(), bdioFile.getAbsolutePath(), "test-blackDuckProjectName", "test-blackDuckProjectVersion",
+        api.pkgListToBdio(PackageManagerEnum.DPKG, BdioGeneratorApi.LINUX_DISTRO_NAME_UBUNTU, pkgMgrOutputFile.getAbsolutePath(), bdioFile.getAbsolutePath(), "test-blackDuckProjectName", "test-blackDuckProjectVersion",
             "test-codeLocationName");
         System.out.printf("bdioFile: %s\n", bdioFile.getAbsolutePath());
         SimpleBdioDocument bdioDoc = toBdioDocument(bdioFile);
@@ -42,20 +42,14 @@ public class PkgListToBdioFileTest {
     @Test
     public void testPkgListToBdioLinesUbuntu() throws IntegrationException, IOException {
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/dpkg/ubuntu_dpkg_output.txt";
-        String linuxDistroName = "ubuntu";
-        PackageManagerEnum pmgMgr = PackageManagerEnum.DPKG;
-
-        SimpleBdioDocument bdioDoc = testPkgListToBdioLines(pkgMgrOutputFilePath, linuxDistroName, pmgMgr);
+        SimpleBdioDocument bdioDoc = testPkgListToBdioLines(pkgMgrOutputFilePath, BdioGeneratorApi.LINUX_DISTRO_NAME_UBUNTU, PackageManagerEnum.DPKG);
         verifyBdioDocUbuntu(bdioDoc);
     }
 
     @Test
     public void testPkgListToBdioLinesCentos() throws IntegrationException, IOException {
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/rpm/centos_minus_vim_plus_bacula.txt";
-        String linuxDistroName = "centos";
-        PackageManagerEnum pmgMgr = PackageManagerEnum.RPM;
-
-        SimpleBdioDocument bdioDoc = testPkgListToBdioLines(pkgMgrOutputFilePath, linuxDistroName, pmgMgr);
+        SimpleBdioDocument bdioDoc = testPkgListToBdioLines(pkgMgrOutputFilePath, BdioGeneratorApi.LINUX_DISTRO_NAME_CENTOS, PackageManagerEnum.RPM);
         verifyBdioDocCentosMinusVimPlusBacula(bdioDoc);
     }
 
@@ -67,7 +61,7 @@ public class PkgListToBdioFileTest {
         String bdioOutputFilePath = "test/output/bdioFromApkOutput.jsonld";
         File bdioFile = new File(bdioOutputFilePath);
         FileUtils.deleteQuietly(bdioFile);
-        api.pkgListToBdioApk("x86_64", "alpine", pkgMgrOutputFile.getAbsolutePath(), bdioFile.getAbsolutePath(), "test-blackDuckProjectName", "test-blackDuckProjectVersion",
+        api.pkgListToBdioApk("x86_64", BdioGeneratorApi.LINUX_DISTRO_NAME_ALPINE, pkgMgrOutputFile.getAbsolutePath(), bdioFile.getAbsolutePath(), "test-blackDuckProjectName", "test-blackDuckProjectVersion",
             "test-codeLocationName");
         System.out.printf("bdioFile: %s\n", bdioFile.getAbsolutePath());
         SimpleBdioDocument bdioDoc = toBdioDocument(bdioFile);
@@ -77,10 +71,7 @@ public class PkgListToBdioFileTest {
     @Test
     public void testPkgListToBdioLinesAlpine() throws IntegrationException, IOException {
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/apk/alpine_apk_output.txt";
-        String linuxDistroName = "alpine";
-        PackageManagerEnum pkgMgrType = PackageManagerEnum.APK;
-
-        SimpleBdioDocument bdioDoc = testPkgListToBdioLines(pkgMgrOutputFilePath, linuxDistroName, pkgMgrType);
+        SimpleBdioDocument bdioDoc = testPkgListToBdioLines(pkgMgrOutputFilePath, BdioGeneratorApi.LINUX_DISTRO_NAME_ALPINE, PackageManagerEnum.APK);
         verifyBdioDocAlpine(bdioDoc);
     }
 
