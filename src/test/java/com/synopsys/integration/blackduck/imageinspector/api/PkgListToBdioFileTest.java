@@ -14,12 +14,11 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
-import com.synopsys.integration.blackduck.imageinspector.linux.Os;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.hub.bdio.BdioReader;
+import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
 import com.synopsys.integration.hub.bdio.model.BdioComponent;
 import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
 
@@ -28,11 +27,10 @@ public class PkgListToBdioFileTest {
 
     @Test
     public void testPkgListToBdioFileUbuntu() throws IOException, IntegrationException {
-        ImageInspectorApi api = new ImageInspectorApi(gson, new ImageInspector(new DockerTarParser(), new ComponentExtractorFactory()), new ComponentExtractorFactory(), new Os());
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new ComponentExtractorFactory(), new BdioGenerator(new SimpleBdioFactory()));
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/dpkg/ubuntu_dpkg_output.txt";
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         String bdioOutputFilePath = "test/output/bdioFromDpkgOutput.jsonld";
-        //String[] pkgMgrListCmdOutputLines = FileUtils.readFileToString(new File(pkgMgrOutputFilePath), StandardCharsets.UTF_8).split("\n");
         File bdioFile = new File(bdioOutputFilePath);
         FileUtils.deleteQuietly(bdioFile);
         api.pkgListToBdio(PackageManagerEnum.DPKG, "ubuntu", pkgMgrOutputFile.getAbsolutePath(), bdioFile.getAbsolutePath(), "test-blackDuckProjectName", "test-blackDuckProjectVersion",
@@ -63,7 +61,7 @@ public class PkgListToBdioFileTest {
     }
 
     private SimpleBdioDocument testPkgListToBdioLines(final String pkgMgrOutputFilePath, final String linuxDistroName, final PackageManagerEnum pmgMgr) throws IOException, IntegrationException {
-        ImageInspectorApi api = new ImageInspectorApi(gson, new ImageInspector(new DockerTarParser(), new ComponentExtractorFactory()), new ComponentExtractorFactory(), new Os());
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new ComponentExtractorFactory(), new BdioGenerator(new SimpleBdioFactory()));
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         List<String> pkgMgrOutputLinesList = FileUtils.readLines(pkgMgrOutputFile, StandardCharsets.UTF_8);
         String[] pkgMgrOutputLines = pkgMgrOutputLinesList.toArray(new String[pkgMgrOutputLinesList.size()]);

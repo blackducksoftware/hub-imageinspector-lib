@@ -126,15 +126,6 @@ public class ImageInspector {
         bdioGenerator.writeBdio(bdioOutputFile, bdioDocument);
     }
 
-    public String[] getBdioAsStringArray(BdioGenerator bdioGenerator, final SimpleBdioDocument bdioDocument) throws IOException {
-        try (final CharArrayWriter charArrayWriter = new CharArrayWriter()) {
-            bdioGenerator.writeBdio(charArrayWriter, bdioDocument);
-            final String bdioString = charArrayWriter.toString();
-            final String[] bdioLines = bdioString.split("\n");
-            return bdioLines;
-        }
-    }
-
     private ImageInfoDerived deriveImageInfo(final ManifestLayerMapping mapping, final String projectName, final String versionName,
             final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) {
         logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
