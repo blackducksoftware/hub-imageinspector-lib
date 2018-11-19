@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.gson.Gson;
@@ -73,6 +74,22 @@ public class PkgListToBdioTest {
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/apk/alpine_apk_output.txt";
         SimpleBdioDocument bdioDoc = testPkgListToBdioLines(pkgMgrOutputFilePath, BdioGeneratorApi.LINUX_DISTRO_NAME_ALPINE, PackageManagerEnum.APK);
         verifyBdioDocAlpine(bdioDoc);
+    }
+
+    @Test
+    public void testPkgListToBdioLinesAlpineUsingNonApkMethod() throws IntegrationException, IOException {
+        String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/apk/alpine_apk_output.txt";
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new ComponentExtractorFactory(), new BdioGenerator(new SimpleBdioFactory()));
+        File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
+        List<String> pkgMgrOutputLinesList = FileUtils.readLines(pkgMgrOutputFile, StandardCharsets.UTF_8);
+        String[] pkgMgrOutputLines = pkgMgrOutputLinesList.toArray(new String[pkgMgrOutputLinesList.size()]);
+        try {
+            api.pkgListToBdio(PackageManagerEnum.APK, BdioGeneratorApi.LINUX_DISTRO_NAME_ALPINE, pkgMgrOutputLines, "test-blackDuckProjectName", "test-blackDuckProjectVersion",
+                "test-codeLocationName");
+            Assert.fail("Expected UnsupportedOperationException");
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
     }
 
     private SimpleBdioDocument testPkgListToBdioLines(final String pkgMgrOutputFilePath, final String linuxDistroName, final PackageManagerEnum pkgMgrType) throws IOException, IntegrationException {
