@@ -40,6 +40,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
+import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
@@ -148,6 +149,17 @@ public class ImageInspectorApi {
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
         imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, imageMetadata);
+        // TODO TEMP
+        logger.info(String.format("*** layer dump:"));
+        for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
+            logger.info(String.format("*** Layer ID %s has %d components", layer.getLayerDotTarDirname(), layer.getComponents().size()));
+        }
+        if (imageComponentHierarchy.getFinalComponents() == null) {
+            logger.info(String.format("*** Final image components list NOT SET"));
+        } else {
+            logger.info(String.format("*** Final image components list has %d components", imageComponentHierarchy.getFinalComponents().size()));
+        }
+        logger.info(String.format("*** ==========="));
         // TODO of the remaining code in this method: Some might no longer be necessary?
         // I think we've determined the layer mapping, OS, pkg mgr, everything in ImageInfoDerived?
         // Why is ImageInfoDerived being created later?

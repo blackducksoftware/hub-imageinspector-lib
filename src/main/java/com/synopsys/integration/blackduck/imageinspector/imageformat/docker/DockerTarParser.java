@@ -51,6 +51,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
+import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
@@ -94,7 +95,7 @@ public class DockerTarParser {
                 // TODO we'll have to build ImageComponentHierarchy as we do this, calling the
                 // TODO extractor like this method does (replace this method):
                 // TODO if layer is missing info we need: leave those details empty
-                logComponentsPresentAfterAddingThisLayer(componentExtractorFactory, currentOs,  targetImageFileSystemRootDir);
+                logComponentsPresentAfterAddingThisLayer(componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layer);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layer));
             }
@@ -265,7 +266,7 @@ public class DockerTarParser {
         }
     }
 
-    private void logComponentsPresentAfterAddingThisLayer(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final File targetImageFileSystemRootDir) throws WrongInspectorOsException {
+    private void logComponentsPresentAfterAddingThisLayer(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, String layerId) throws WrongInspectorOsException {
         if (!logger.isDebugEnabled()) {
             return;
         }
@@ -301,6 +302,8 @@ public class DockerTarParser {
             for (ComponentDetails comp : comps) {
                 logger.debug(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }
+            LayerDetails layer = new LayerDetails(layerId, "unknown", comps);
+            imageComponentHierarchy.addLayer(layer);
         } catch (final PkgMgrDataNotFoundException e) {
             logger.debug(String.format("Unable to log components present after this layer: The file system is not yet populated with the linux distro and package manager files: %s", e.getMessage()));
         } catch (final Exception otherException) {
