@@ -104,15 +104,14 @@ task createAlpineDir(type: Exec) {
     commandLine "mkdir", "-p", "build/images/test/alpine/tarExtraction/alpine.tar"
 }
 
-task unTarAlpine(type: Exec, dependsOn: [buildAlpineTestDockerTarfile, createAlpineDir]) {
+task buildTestTarfiles(dependsOn: [buildTestDockerTarfile, buildAlpineTestDockerTarfile]) {}
+
+task unTarAlpine(type: Exec, dependsOn: [buildTestTarfiles, createAlpineDir]) {
     workingDir "build/images/test/alpine/tarExtraction/alpine.tar"
     commandLine "tar", "xvf", "../../../alpine.tar"
 }
 
-
-task buildTestTarfiles(dependsOn: [buildTestDockerTarfile, buildAlpineTestDockerTarfile]) {}
-
-testIntegration.dependsOn buildTestTarfiles
+testIntegration.dependsOn unTarAlpine
 
 // End of stuff for integration tests
 ////////////////////////////////////////////////

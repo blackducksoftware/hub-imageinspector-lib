@@ -73,7 +73,7 @@ public class DockerTarParserTest {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
-        tarParser.extractDockerLayers(componentExtractorFactory, OperatingSystemEnum.CENTOS, targetImageFileSystemRootDir, layerTars, layerMapping);
+        tarParser.extractDockerLayers(componentExtractorFactory, OperatingSystemEnum.CENTOS, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
         final ImageInfoParsed tarExtractionResults = tarParser.parseImageInfo(targetImageFileSystemRootDir);
         assertEquals("/var/lib/rpm", tarExtractionResults.getPkgMgr().getPackageManager().getDirectory());
 
@@ -128,7 +128,7 @@ public class DockerTarParserTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractDockerLayers(new ComponentExtractorFactory(), OperatingSystemEnum.UBUNTU, targetImageFileSystemRootDir, layerTars, layerMapping);
+        tarParser.extractDockerLayers(new ComponentExtractorFactory(), OperatingSystemEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));

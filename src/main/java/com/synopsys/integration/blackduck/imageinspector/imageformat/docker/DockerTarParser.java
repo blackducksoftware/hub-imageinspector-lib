@@ -81,10 +81,10 @@ public class DockerTarParser {
         this.manifestFactory = manifestFactory;
     }
 
-    // TODO this should create and return a ImageComponentHierarchy object.
+    // TODO this should help populate the ImageComponentHierarchy object.
     // Move the collection of the final
     // comps here as well (from ImageInspector line 100)
-    public ImageComponentHierarchy extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws WrongInspectorOsException, IOException {
+    public void extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws WrongInspectorOsException, IOException {
         for (final String layer : manifestLayerMapping.getLayers()) {
             logger.trace(String.format("Looking for tar for layer: %s", layer));
             final File layerTar = getLayerTar(layerTars, layer);
@@ -99,7 +99,6 @@ public class DockerTarParser {
                 logger.error(String.format("Could not find the tar for layer %s", layer));
             }
         }
-        return new ImageComponentHierarchy(null, null);
     }
 
     public ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {

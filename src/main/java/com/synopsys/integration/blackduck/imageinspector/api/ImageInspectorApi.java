@@ -140,13 +140,14 @@ public class ImageInspectorApi {
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
         final ManifestLayerMapping imageMetadata = imageInspector.getLayerMapping(workingDir, dockerTarfile.getName(), givenImageRepo, givenImageTag);
+        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(workingDir, dockerTarfile.getName(), imageMetadata);
         final String imageRepo = imageMetadata.getImageName();
         final String imageTag = imageMetadata.getTagName();
         final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
-        ImageComponentHierarchy imageComponentHierarchy = imageInspector.extractDockerLayers(currentOs, targetImageFileSystemRootDir, layerTars, imageMetadata);
+        imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, imageMetadata);
         // TODO of the remaining code in this method: Some might no longer be necessary?
         // I think we've determined the layer mapping, OS, pkg mgr, everything in ImageInfoDerived?
         // Why is ImageInfoDerived being created later?

@@ -74,8 +74,8 @@ public class ImageInspector {
         return tarParser.extractLayerTars(workingDir, dockerTar);
     }
 
-    public ImageComponentHierarchy extractDockerLayers(final OperatingSystemEnum currentOs, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws WrongInspectorOsException, IOException {
-        return tarParser.extractDockerLayers(componentExtractorFactory, currentOs, containerFileSystemRootDir, layerTars, layerMapping);
+    public void extractDockerLayers(final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws WrongInspectorOsException, IOException {
+        tarParser.extractDockerLayers(componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
     }
 
     public ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
@@ -84,6 +84,10 @@ public class ImageInspector {
 
     public ManifestLayerMapping getLayerMapping(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
         return tarParser.getLayerMapping(workingDir, tarFileName, dockerImageName, dockerTagName);
+    }
+
+    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File workingDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
+        return tarParser.createInitialImageComponentHierarchy(workingDirectory, tarFileName, manifestLayerMapping);
     }
 
     public ImageInfoDerived generateBdioFromImageFilesDir(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName,
