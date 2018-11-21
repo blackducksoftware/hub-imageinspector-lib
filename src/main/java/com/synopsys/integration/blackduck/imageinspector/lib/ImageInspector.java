@@ -74,8 +74,8 @@ public class ImageInspector {
         return tarParser.extractLayerTars(workingDir, dockerTar);
     }
 
-    public void extractDockerLayers(final OperatingSystemEnum currentOs, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws WrongInspectorOsException, IOException {
-        tarParser.extractDockerLayers(componentExtractorFactory, currentOs, containerFileSystemRootDir, layerTars, layerMapping);
+    public ImageComponentHierarchy extractDockerLayers(final OperatingSystemEnum currentOs, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws WrongInspectorOsException, IOException {
+        return tarParser.extractDockerLayers(componentExtractorFactory, currentOs, containerFileSystemRootDir, layerTars, layerMapping);
     }
 
     public ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
@@ -97,6 +97,8 @@ public class ImageInspector {
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
         final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getPkgMgr().getPackageManager());
         final List<ComponentDetails> comps = componentExtractor.extractComponents(imageInfoParsed.getPkgMgr(), imageInfoParsed.getLinuxDistroName());
+        // TODO this is the final comps list; add to ImageComponentHierarchy
+        // TODO Better yet, have tarParser do it so it's already there by the time we get here
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), comps);
         imageInfoDerived.setBdioDocument(bdioDocument);

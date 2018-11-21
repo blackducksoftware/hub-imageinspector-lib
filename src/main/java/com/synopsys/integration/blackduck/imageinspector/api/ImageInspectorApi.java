@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
@@ -145,7 +146,10 @@ public class ImageInspectorApi {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
-        imageInspector.extractDockerLayers(currentOs, targetImageFileSystemRootDir, layerTars, imageMetadata);
+        ImageComponentHierarchy imageComponentHierarchy = imageInspector.extractDockerLayers(currentOs, targetImageFileSystemRootDir, layerTars, imageMetadata);
+        // TODO of the remaining code in this method: Some might no longer be necessary?
+        // I think we've determined the layer mapping, OS, pkg mgr, everything in ImageInfoDerived?
+        // Why is ImageInfoDerived being created later?
         cleanUpLayerTars(cleanupWorkingDir, layerTars);
         OperatingSystemEnum inspectorOs = null;
         ImageInfoDerived imageInfoDerived;

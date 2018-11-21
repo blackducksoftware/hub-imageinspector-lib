@@ -31,8 +31,8 @@ import org.springframework.stereotype.Component;
 public class AutowiredManifestLayerMappingFactory implements ManifestLayerMappingFactory {
 
     @Override
-    public ManifestLayerMapping createManifestLayerMapping(final String imageName, final String tagName, final List<String> layers) {
-        final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, layers);
+    public ManifestLayerMapping createManifestLayerMapping(final String imageName, final String tagName, final String config, final List<String> layers) {
+        final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, config, layers);
         return mapping;
     }
 

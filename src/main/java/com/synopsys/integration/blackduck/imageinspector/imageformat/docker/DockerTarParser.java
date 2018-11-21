@@ -49,6 +49,7 @@ import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsExc
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
@@ -80,18 +81,25 @@ public class DockerTarParser {
         this.manifestFactory = manifestFactory;
     }
 
-    public void extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws WrongInspectorOsException, IOException {
+    // TODO this should create and return a ImageComponentHierarchy object.
+    // Move the collection of the final
+    // comps here as well (from ImageInspector line 100)
+    public ImageComponentHierarchy extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws WrongInspectorOsException, IOException {
         for (final String layer : manifestLayerMapping.getLayers()) {
             logger.trace(String.format("Looking for tar for layer: %s", layer));
             final File layerTar = getLayerTar(layerTars, layer);
             if (layerTar != null) {
                 extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
                 logLayerMetadata(layerTar);
+                // TODO we'll have to build ImageComponentHierarchy as we do this, calling the
+                // TODO extractor like this method does (replace this method):
+                // TODO if layer is missing info we need: leave those details empty
                 logComponentsPresentAfterAddingThisLayer(componentExtractorFactory, currentOs,  targetImageFileSystemRootDir);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layer));
             }
         }
+        return new ImageComponentHierarchy(null, null);
     }
 
     public ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
@@ -159,6 +167,30 @@ public class DockerTarParser {
             throw new IntegrationException(msg, e);
         }
         return mapping;
+    }
+
+    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File workingDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
+        String manifestFileContents = null;
+        String configFileContents = null;
+        File tarExtractionDirectory = getTarExtractionDirectory(workingDirectory);
+        File tarContentsDirectory = new File(tarExtractionDirectory, tarFileName);
+        for (File f : tarContentsDirectory.listFiles()) {
+            logger.info(String.format("File %s", f.getName()));
+            if ("manifest.json".equals(f.getName())) {
+                try {
+                    manifestFileContents = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new IntegrationException(String.format("Error reading manifest file %s", f.getAbsolutePath()));
+                }
+            } else if (f.getName().equals(manifestLayerMapping.getConfig())) {
+                try {
+                    configFileContents = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new IntegrationException(String.format("Error reading config file %s", f.getAbsolutePath()));
+                }
+            }
+        }
+        return new ImageComponentHierarchy(manifestFileContents, configFileContents);
     }
 
     public File getTarExtractionDirectory(final File workingDirectory) {

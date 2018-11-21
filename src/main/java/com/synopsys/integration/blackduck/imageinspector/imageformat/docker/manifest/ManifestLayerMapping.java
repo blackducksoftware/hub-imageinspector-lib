@@ -28,14 +28,18 @@ import java.util.List;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
-public class ManifestLayerMapping {
+import com.synopsys.integration.util.Stringable;
+
+public class ManifestLayerMapping extends Stringable {
     private final String imageName;
     private final String tagName;
+    private final String config;
     private final List<String> layers;
 
-    public ManifestLayerMapping(final String imageName, final String tagName, final List<String> layers) {
+    public ManifestLayerMapping(final String imageName, final String tagName, final String config, final List<String> layers) {
         this.imageName = imageName;
         this.tagName = tagName;
+        this.config = config;
         this.layers = layers;
     }
 
@@ -47,12 +51,11 @@ public class ManifestLayerMapping {
         return tagName;
     }
 
-    public List<String> getLayers() {
-        return layers;
+    public String getConfig() {
+        return config;
     }
 
-    @Override
-    public String toString() {
-        return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE);
+    public List<String> getLayers() {
+        return layers;
     }
 }

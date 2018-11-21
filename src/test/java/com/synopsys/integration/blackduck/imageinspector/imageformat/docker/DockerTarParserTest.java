@@ -33,8 +33,10 @@ import org.junit.experimental.categories.Category;
 
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.AutowiredManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
@@ -122,7 +124,7 @@ public class DockerTarParserTest {
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);
-        final ManifestLayerMapping layerMapping = new ManifestLayerMapping(IMAGE_NAME, IMAGE_TAG, layerIds);
+        final ManifestLayerMapping layerMapping = new ManifestLayerMapping(IMAGE_NAME, IMAGE_TAG, "test config filename", layerIds);
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
@@ -133,5 +135,22 @@ public class DockerTarParserTest {
         assertTrue(dpkgStatusFile.exists());
 
         assertEquals(DPKG_STATUS_FILE_SIZE, FileUtils.sizeOf(dpkgStatusFile));
+    }
+
+    // TODO also need to test a multi-image tarfile
+
+    @Test
+    public void testCreateInitialImageComponentHierarchy() throws IntegrationException {
+        File workingDir = new File("build/images/test/alpine");
+        String tarFilename = "alpine.tar";
+
+        final DockerTarParser tarParser = new DockerTarParser();
+        tarParser.setManifestFactory(new AutowiredManifestFactory());
+        ManifestLayerMapping mapping = tarParser.getLayerMapping(workingDir, tarFilename, "alpine", "latest");
+        ImageComponentHierarchy h = tarParser.createInitialImageComponentHierarchy(workingDir, tarFilename, mapping);
+        System.out.printf("Image config file contents: %s\n", h.getImageConfigFileContents());
+        System.out.printf("Manifest file contents: %s\n", h.getManifestFileContents());
+        assertTrue(h.getImageConfigFileContents().contains("architecture"));
+        assertTrue(h.getManifestFileContents().contains("Config"));
     }
 }

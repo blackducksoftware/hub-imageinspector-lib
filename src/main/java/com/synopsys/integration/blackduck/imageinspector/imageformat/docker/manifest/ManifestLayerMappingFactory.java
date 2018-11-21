@@ -26,5 +26,5 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.man
 import java.util.List;
 
 public interface ManifestLayerMappingFactory {
-    ManifestLayerMapping createManifestLayerMapping(final String imageName, final String tagName, final List<String> layers);
+    ManifestLayerMapping createManifestLayerMapping(final String imageName, final String tagName, final String config, final List<String> layers);
 }

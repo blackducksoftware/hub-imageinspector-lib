@@ -109,7 +109,7 @@ public class Manifest {
         for (final String layer : image.layers) {
             layerIds.add(layer.substring(0, layer.indexOf('/')));
         }
-        final ManifestLayerMapping mapping = manifestLayerMappingFactory.createManifestLayerMapping(imageName, tagName, layerIds);
+        final ManifestLayerMapping mapping = manifestLayerMappingFactory.createManifestLayerMapping(imageName, tagName, image.config, layerIds);
         logger.debug(String.format("Found layer mapping: Image %s, Tag %s, Layers: %s", mapping.getImageName(), mapping.getTagName(), mapping.getLayers()));
         return mapping;
     }
