@@ -140,15 +140,15 @@ public class ImageInspectorApi {
         final File workingDir = new File(tempDir, "working");
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
-        final ManifestLayerMapping imageMetadata = imageInspector.getLayerMapping(workingDir, dockerTarfile.getName(), givenImageRepo, givenImageTag);
-        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(workingDir, dockerTarfile.getName(), imageMetadata);
-        final String imageRepo = imageMetadata.getImageName();
-        final String imageTag = imageMetadata.getTagName();
+        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(workingDir, dockerTarfile.getName(), givenImageRepo, givenImageTag);
+        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(workingDir, dockerTarfile.getName(), manifestLayerMapping);
+        final String imageRepo = manifestLayerMapping.getImageName();
+        final String imageTag = manifestLayerMapping.getTagName();
         final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
-        imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, imageMetadata);
+        imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
         // TODO TEMP
         logger.info(String.format("*** layer dump:"));
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
@@ -181,10 +181,10 @@ public class ImageInspectorApi {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
                 throw new WrongInspectorOsException(neededInspectorOs, msg);
             }
-            imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageRepo, imageTag, imageMetadata, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
+            imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageRepo, imageTag, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
                     codeLocationPrefix);
         } catch (final PkgMgrDataNotFoundException e) {
-            imageInfoDerived = imageInspector.generateEmptyBdio(bdioGenerator, imageRepo, imageTag, imageMetadata, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
+            imageInfoDerived = imageInspector.generateEmptyBdio(bdioGenerator, imageRepo, imageTag, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
                     codeLocationPrefix);
         }
         createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);
