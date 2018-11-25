@@ -136,7 +136,7 @@ public class ImageInspectorApi {
             final String givenImageTag,
             final String containerFileSystemOutputPath,
             final String currentLinuxDistro, final File tempDir, final boolean cleanupWorkingDir)
-            throws IOException, IntegrationException, WrongInspectorOsException, InterruptedException, CompressorException {
+            throws IOException, IntegrationException, InterruptedException, CompressorException {
         final File workingDir = new File(tempDir, "working");
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
@@ -152,7 +152,13 @@ public class ImageInspectorApi {
         // TODO TEMP
         logger.info(String.format("*** layer dump:"));
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
-            logger.info(String.format("*** Layer ID %s has %d components", layer.getLayerDotTarDirname(), layer.getComponents().size()));
+            if (layer == null) {
+                logger.info("Layer is null");
+            } else if (layer.getComponents() == null) {
+                logger.info(String.format("layer id %s has no componenents", layer.getLayerDotTarDirname()));
+            } else {
+                logger.info(String.format("*** Layer ID %s has %d components; layer metadata file contents: %s", layer.getLayerDotTarDirname(), layer.getComponents().size(), layer.getLayerMetadataFileContents()));
+            }
         }
         if (imageComponentHierarchy.getFinalComponents() == null) {
             logger.info(String.format("*** Final image components list NOT SET"));
@@ -160,6 +166,7 @@ public class ImageInspectorApi {
             logger.info(String.format("*** Final image components list has %d components", imageComponentHierarchy.getFinalComponents().size()));
         }
         logger.info(String.format("*** ==========="));
+        /////////////////////////////
         // TODO of the remaining code in this method: Some might no longer be necessary?
         // I think we've determined the layer mapping, OS, pkg mgr, everything in ImageInfoDerived?
         // Why is ImageInfoDerived being created later?
