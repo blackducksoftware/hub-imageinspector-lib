@@ -95,7 +95,7 @@ public class DockerTarParser {
                 // TODO we'll have to build ImageComponentHierarchy as we do this, calling the
                 // TODO extractor like this method does (replace this method):
                 // TODO if layer is missing info we need: leave those details empty
-                logComponentsPresentAfterAddingThisLayer(componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layer);
+                addLayersComponents(componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layer);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layer));
             }
@@ -266,17 +266,13 @@ public class DockerTarParser {
         }
     }
 
-    private void logComponentsPresentAfterAddingThisLayer(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, String layerId) throws WrongInspectorOsException {
-        if (!logger.isDebugEnabled()) {
-            return;
-        }
-        logger.debug("Logging components present (so far) after adding this layer");
+    private void addLayersComponents(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, String layerId) throws WrongInspectorOsException {
+        logger.debug("Getting components present (so far) after adding this layer");
         if (currentOs == null) {
             logger.debug("Current (running on) OS not provided; cannot determine components present after adding this layer");
             return;
         }
-        OperatingSystemEnum inspectorOs = null;
-        ImageInfoDerived imageInfoDerived;
+        OperatingSystemEnum inspectorOs;
         try {
             final ImageInfoParsed imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
             inspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
