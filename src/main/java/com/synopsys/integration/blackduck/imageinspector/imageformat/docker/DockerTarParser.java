@@ -82,20 +82,15 @@ public class DockerTarParser {
         this.manifestFactory = manifestFactory;
     }
 
-    // TODO this should help populate the ImageComponentHierarchy object.
-    // Move the collection of the final
-    // comps here as well (from ImageInspector line 100)
-    public void extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
+    public ImageInfoParsed extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
+        ImageInfoParsed imageInfoParsed = null;
         for (final String layer : manifestLayerMapping.getLayers()) {
             logger.trace(String.format("Looking for tar for layer: %s", layer));
             final File layerTar = getLayerTar(layerTars, layer);
             if (layerTar != null) {
                 extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
                 String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-                // TODO we'll have to build ImageComponentHierarchy as we do this, calling the
-                // TODO extractor like this method does (replace this method):
-                // TODO if layer is missing info we need: leave those details empty
-                addPostLayerComponents(componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layer, layerMetadataFileContents);
+                imageInfoParsed = addPostLayerComponents(componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layer, layerMetadataFileContents);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layer));
             }
@@ -105,6 +100,7 @@ public class DockerTarParser {
         if (numLayers > 0) {
             imageComponentHierarchy.setFinalComponents(layers.get(numLayers - 1).getComponents());
         }
+        return imageInfoParsed;
     }
 
     public ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
@@ -271,15 +267,16 @@ public class DockerTarParser {
         return layerMetadataFileContents;
     }
 
-    private void addPostLayerComponents(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, String layerId, final String layerMetadataFileContents) throws WrongInspectorOsException {
+    private ImageInfoParsed addPostLayerComponents(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, String layerId, final String layerMetadataFileContents) throws WrongInspectorOsException {
         logger.debug("Getting components present (so far) after adding this layer");
         if (currentOs == null) {
             logger.debug("Current (running on) OS not provided; cannot determine components present after adding this layer");
-            return;
+            return null;
         }
-        OperatingSystemEnum inspectorOs;
+        ImageInfoParsed imageInfoParsed = null;
+            OperatingSystemEnum inspectorOs;
         try {
-            final ImageInfoParsed imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
+            imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
             inspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
             if (!inspectorOs.equals(currentOs)) {
                 ImageInspectorOsEnum neededInspectorOs = null;
@@ -297,7 +294,7 @@ public class DockerTarParser {
                 comps = componentExtractor.extractComponents(imageInfoParsed.getPkgMgr(), imageInfoParsed.getLinuxDistroName());
             } catch (IntegrationException e) {
                 logger.debug(String.format("Unable to log components present after this layer: %s", e.getMessage()));
-                return;
+                return imageInfoParsed;
             }
             logger.debug(String.format("Found %d components in file system after adding this layer:", comps.size()));
             for (ComponentDetails comp : comps) {
@@ -317,5 +314,6 @@ public class DockerTarParser {
             LayerDetails layer = new LayerDetails(layerId, layerMetadataFileContents, null);
             imageComponentHierarchy.addLayer(layer);
         }
+        return imageInfoParsed;
     }
 }

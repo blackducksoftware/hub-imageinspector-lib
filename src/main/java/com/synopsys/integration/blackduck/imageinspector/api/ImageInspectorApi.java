@@ -148,7 +148,7 @@ public class ImageInspectorApi {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
-        imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
+        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
         // TODO TEMP
         logger.info(String.format("*** layer dump:"));
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
@@ -167,24 +167,21 @@ public class ImageInspectorApi {
         }
         logger.info(String.format("*** ==========="));
         /////////////////////////////
-        // TODO of the remaining code in this method: Some might no longer be necessary?
-        // I think we've determined the layer mapping, OS, pkg mgr, everything in ImageInfoDerived?
-        // Why is ImageInfoDerived being created later?
         cleanUpLayerTars(cleanupWorkingDir, layerTars);
         OperatingSystemEnum inspectorOs = null;
         ImageInfoDerived imageInfoDerived;
         try {
-            final ImageInfoParsed imageInfoParsed = imageInspector.parseImageInfo(targetImageFileSystemRootDir);
+            // TODO shouldn't need this anymore
             inspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
             if (!inspectorOs.equals(currentOs)) {
                 final ImageInspectorOsEnum neededInspectorOs = ImageInspectorOsEnum.getImageInspectorOsEnum(inspectorOs);
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
                 throw new WrongInspectorOsException(neededInspectorOs, msg);
             }
-            imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageRepo, imageTag, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
+            imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageComponentHierarchy, imageRepo, imageTag, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
                     codeLocationPrefix);
         } catch (final PkgMgrDataNotFoundException e) {
-            imageInfoDerived = imageInspector.generateEmptyBdio(bdioGenerator, imageRepo, imageTag, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
+            imageInfoDerived = imageInspector.generateEmptyBdio(bdioGenerator, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
                     codeLocationPrefix);
         }
         createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);

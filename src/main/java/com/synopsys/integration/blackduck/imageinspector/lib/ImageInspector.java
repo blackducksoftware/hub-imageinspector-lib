@@ -43,7 +43,6 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
@@ -70,13 +69,9 @@ public class ImageInspector {
         return tarParser.extractLayerTars(workingDir, dockerTar);
     }
 
-    public void extractDockerLayers(final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws IOException,
+    public ImageInfoParsed extractDockerLayers(final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws IOException,
                                                                                                                                                                                                                                                        WrongInspectorOsException {
-        tarParser.extractDockerLayers(componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
-    }
-
-    public ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws IntegrationException, IOException {
-        return tarParser.parseImageInfo(targetImageFileSystemRootDir);
+        return tarParser.extractDockerLayers(componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
     }
 
     public ManifestLayerMapping getLayerMapping(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
@@ -87,27 +82,18 @@ public class ImageInspector {
         return tarParser.createInitialImageComponentHierarchy(workingDirectory, tarFileName, manifestLayerMapping);
     }
 
-    public ImageInfoDerived generateBdioFromImageFilesDir(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName,
+    public ImageInfoDerived generateBdioFromImageFilesDir(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final ImageComponentHierarchy imageComponentHierarchy, final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName,
             final String versionName,
-            final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
-        // TODO will not need this null check + imageInfoParsed assignment once Exec mode is removed
-        if (imageInfoParsed == null) {
-            imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystemRootDir);
-        }
-        ////
+            final String codeLocationPrefix) {
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
-        final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getPkgMgr().getPackageManager());
-        final List<ComponentDetails> comps = componentExtractor.extractComponents(imageInfoParsed.getPkgMgr(), imageInfoParsed.getLinuxDistroName());
-        // TODO this is the final comps list; add to ImageComponentHierarchy
-        // TODO Better yet, have tarParser do it so it's already there by the time we get here
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
-                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), comps);
+                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy.getFinalComponents());
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
 
-    public ImageInfoDerived generateEmptyBdio(final BdioGenerator bdioGenerator, final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName, final String versionName,
-            final File targetImageFileSystemRootDir, final String codeLocationPrefix) throws IOException, IntegrationException, InterruptedException {
+    public ImageInfoDerived generateEmptyBdio(final BdioGenerator bdioGenerator, final ManifestLayerMapping mapping, final String projectName, final String versionName,
+            final File targetImageFileSystemRootDir, final String codeLocationPrefix) {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, null, null);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
         final List<ComponentDetails> comps = new ArrayList<>(0);
