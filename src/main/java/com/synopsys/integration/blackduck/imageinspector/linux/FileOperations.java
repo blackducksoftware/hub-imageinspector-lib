@@ -31,14 +31,8 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,78 +40,11 @@ public class FileOperations {
 
     private static final Logger logger = LoggerFactory.getLogger(FileOperations.class);
 
-    // TODO When docker exec mode goes away, this method can go away
-    public static List<File> findDirsWithName(final int maxDepth, final File dirFile, final String targetName, final List<String> rootLevelDirsToSkip) {
-        final List<File> results = new ArrayList<>();
-        logger.trace(String.format("Looking in %s for Dir %s", dirFile.getAbsolutePath(), targetName));
-        final List<File> dirsFoundWithGivenName = findDirsWithGivenName(maxDepth, 0, dirFile, targetName, rootLevelDirsToSkip);
-        logger.trace("Processing the list...");
-        for (final File dirFound : dirsFoundWithGivenName) {
-            logger.trace(String.format("Match: %s", dirFound.getAbsolutePath()));
-            results.add(dirFound);
-        }
-        logger.trace("Done processing the list");
-        return results;
-    }
-
-    public static List<File> findFilesWithExt(final File dirFile, final String fileExtension) {
-        final List<File> results = new ArrayList<>();
-        logger.trace(String.format("Looking in %s for files with extension %s", dirFile.getAbsolutePath(), fileExtension));
-        final IOFileFilter fileFilter = new WildcardFileFilter("*." + fileExtension);
-        final IOFileFilter dirFilter = TrueFileFilter.INSTANCE;
-        final Iterator<File> iter = FileUtils.iterateFilesAndDirs(dirFile, fileFilter, dirFilter);
-        while (iter.hasNext()) {
-            final File f = iter.next();
-            if (f.isFile()) {
-                logger.trace(String.format("Match: %s", f.getAbsolutePath()));
-                results.add(f);
-            }
-        }
-        return results;
-    }
-
-    public static void copyFile(final File fileToCopy, final File destination) throws IOException {
-        ensureDirExists(destination);
-        final String filename = fileToCopy.getName();
-        logger.debug(String.format("Copying %s to %s", fileToCopy.getAbsolutePath(), destination.getAbsolutePath()));
-        final Path destPath = destination.toPath().resolve(filename);
-        Files.copy(fileToCopy.toPath(), destPath);
-    }
-
     public static void moveFile(final File fileToMove, final File destination) throws IOException {
         final String filename = fileToMove.getName();
         logger.debug(String.format("Moving %s to %s", fileToMove.getAbsolutePath(), destination.getAbsolutePath()));
         final Path destPath = destination.toPath().resolve(filename);
         Files.move(fileToMove.toPath(), destPath, StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    public static void copyDirContentsToDir(final String fromDirPath, final String toDirPath, final boolean createIfNecessary) throws IOException {
-        final File srcDir = new File(fromDirPath);
-        final File destDir = new File(toDirPath);
-        if (createIfNecessary && !destDir.exists()) {
-            destDir.mkdirs();
-        }
-        FileUtils.copyDirectory(srcDir, destDir);
-    }
-
-    public static void removeFileOrDirQuietly(final String fileOrDirPath) {
-        try {
-            removeFileOrDir(fileOrDirPath);
-        } catch (final IOException e) {
-            logger.warn(String.format("Error removing file or directory %s: ", fileOrDirPath, e.getMessage()));
-        }
-    }
-
-    public static void removeFileOrDir(final String fileOrDirPath) throws IOException {
-        logger.info(String.format("Removing file or dir: %s", fileOrDirPath));
-        final File fileOrDir = new File(fileOrDirPath);
-        if (fileOrDir.exists()) {
-            if (fileOrDir.isDirectory()) {
-                FileUtils.deleteDirectory(fileOrDir);
-            } else {
-                FileUtils.deleteQuietly(fileOrDir);
-            }
-        }
     }
 
     public static void deleteFilesOnly(final File file) {
@@ -155,22 +82,6 @@ public class FileOperations {
         }
     }
 
-    public static File purgeDir(final String dirPath) {
-        logger.trace(String.format("Purging/recreating dir: %s", dirPath));
-        final File dir = new File(dirPath);
-        try {
-            FileUtils.deleteDirectory(dir);
-            dir.mkdirs();
-        } catch (final IOException e) {
-            logger.warn(String.format("Error purging dir: %s", dir.getAbsolutePath()));
-        }
-        logger.trace(String.format("dirPath %s: exists: %b; isDirectory: %b", dirPath, dir.exists(), dir.isDirectory()));
-        if (dir.listFiles() != null) {
-            logger.trace(String.format("dirPath %s: # files: %d", dirPath, dir.listFiles().length));
-        }
-        return dir;
-    }
-
     public static void deleteDirPersistently(final File dir) {
         for (int i = 0; i < 10; i++) {
             logger.debug(String.format("Attempt #%d to delete dir %s", i, dir.getAbsolutePath()));
@@ -194,36 +105,5 @@ public class FileOperations {
 
     public static void logFreeDiskSpace(final File dir) {
         logger.debug(String.format("Disk: free: %d", dir.getFreeSpace()));
-    }
-
-    private static List<File> findDirsWithGivenName(final int maxDepth, final int currentDepth, final File currentDir, final String targetName, final List<String> rootLevelDirsToSkip) {
-        final List<File> filesMatchingTargetName = new ArrayList<>();
-        logger.trace(String.format("findFiles() processing dir %s", currentDir.getAbsolutePath()));
-        if (currentDepth > maxDepth) {
-            logger.trace("Hit max depth; pruning tree here");
-            return filesMatchingTargetName;
-        }
-        if (currentDepth == 1 && rootLevelDirsToSkip != null) {
-            for (final String dirToSkip : rootLevelDirsToSkip) {
-                if (dirToSkip.equals(currentDir.getName())) {
-                    logger.trace(String.format("dir %s is in the skip list; skipping it", currentDir.getAbsolutePath()));
-                    return filesMatchingTargetName;
-                }
-            }
-        }
-        try {
-            for (final File fileWithinDir : currentDir.listFiles()) {
-                if (fileWithinDir.isDirectory()) {
-                    if (targetName.equals(fileWithinDir.getName())) {
-                        filesMatchingTargetName.add(fileWithinDir);
-                    }
-                    final List<File> subDirsMatchingFiles = findDirsWithGivenName(maxDepth, currentDepth + 1, fileWithinDir, targetName, rootLevelDirsToSkip);
-                    filesMatchingTargetName.addAll(subDirsMatchingFiles);
-                }
-            }
-        } catch (final Throwable e) {
-            logger.debug("Error reading contents of dir; skipping it");
-        }
-        return filesMatchingTargetName;
     }
 }

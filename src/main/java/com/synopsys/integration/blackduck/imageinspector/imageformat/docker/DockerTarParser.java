@@ -300,7 +300,6 @@ public class DockerTarParser {
             for (ComponentDetails comp : comps) {
                 logger.debug(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }
-            // TODO set layerMetadataFileContents (here and in catch clauses if practical)
             LayerDetails layer = new LayerDetails(layerId, layerMetadataFileContents, comps);
             imageComponentHierarchy.addLayer(layer);
         } catch (final WrongInspectorOsException wrongOsException) {

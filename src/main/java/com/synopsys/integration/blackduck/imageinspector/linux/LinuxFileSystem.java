@@ -31,10 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -45,7 +43,6 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.util.Stringable;
 
 public class LinuxFileSystem extends Stringable {
@@ -67,27 +64,6 @@ public class LinuxFileSystem extends Stringable {
         } else {
             return Optional.empty();
         }
-    }
-
-    // TODO This method can go away when docker exec mode goes away
-    public Set<PackageManagerEnum> getPackageManagers() {
-        final Set<PackageManagerEnum> packageManagers = new HashSet<>();
-        logger.debug(String.format("Looking in root dir %s for lib dir", root.getAbsolutePath()));
-        final List<File> libDirs = FileOperations.findDirsWithName(LIB_MAX_DEPTH, root, "lib", ROOT_LEVEL_DIRS_TO_SKIP);
-        if (libDirs != null) {
-            for (final File libDir : libDirs) {
-                for (final File packageManagerDirectory : libDir.listFiles()) {
-                    logger.trace(String.format("Checking dir %s to see if it's a package manager dir", packageManagerDirectory.getAbsolutePath()));
-                    try {
-                        logger.trace(String.format("Found a lib dir: %s", packageManagerDirectory.getAbsolutePath()));
-                        packageManagers.add(PackageManagerEnum.getPackageManagerEnumByName(packageManagerDirectory.getName()));
-                    } catch (final IllegalArgumentException e) {
-                        logger.trace(String.format("%s is not a package manager", packageManagerDirectory.getName()));
-                    }
-                }
-            }
-        }
-        return packageManagers;
     }
 
     public void createTarGz(final File outputTarFile) throws CompressorException, IOException {

@@ -121,7 +121,7 @@ public class ImageInspectorApi {
         try {
             imageInfoDerived = inspectUsingGivenWorkingDir(bdioGenerator, dockerTarfile, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, containerFileSystemOutputPath, currentLinuxDistro,
                     tempDir, cleanupWorkingDir);
-        } catch (IOException | InterruptedException | CompressorException e) {
+        } catch (IOException | CompressorException e) {
             throw new IntegrationException(String.format("Error inspecting image: %s", e.getMessage()), e);
         } finally {
             if (cleanupWorkingDir) {
@@ -136,7 +136,7 @@ public class ImageInspectorApi {
             final String givenImageTag,
             final String containerFileSystemOutputPath,
             final String currentLinuxDistro, final File tempDir, final boolean cleanupWorkingDir)
-            throws IOException, IntegrationException, InterruptedException, CompressorException {
+            throws IOException, IntegrationException, CompressorException {
         final File workingDir = new File(tempDir, "working");
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
@@ -149,43 +149,33 @@ public class ImageInspectorApi {
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
         final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
-        // TODO TEMP
-        logger.info(String.format("*** layer dump:"));
+        logLayers(imageComponentHierarchy);
+        cleanUpLayerTars(cleanupWorkingDir, layerTars);
+        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageComponentHierarchy.getFinalComponents(), manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
+                    codeLocationPrefix);
+        createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);
+        return imageInfoDerived;
+    }
+
+    private void logLayers(final ImageComponentHierarchy imageComponentHierarchy) {
+        if (!logger.isDebugEnabled()) {
+            return;
+        }
+        logger.debug(String.format("*** layer dump:"));
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             if (layer == null) {
-                logger.info("Layer is null");
+                logger.debug("Layer is null");
             } else if (layer.getComponents() == null) {
-                logger.info(String.format("layer id %s has no componenents", layer.getLayerDotTarDirname()));
+                logger.debug(String.format("layer id %s has no componenents", layer.getLayerDotTarDirname()));
             } else {
-                logger.info(String.format("*** Layer ID %s has %d components; layer metadata file contents: %s", layer.getLayerDotTarDirname(), layer.getComponents().size(), layer.getLayerMetadataFileContents()));
+                logger.debug(String.format("*** Layer ID %s has %d components; layer metadata file contents: %s", layer.getLayerDotTarDirname(), layer.getComponents().size(), layer.getLayerMetadataFileContents()));
             }
         }
         if (imageComponentHierarchy.getFinalComponents() == null) {
-            logger.info(String.format("*** Final image components list NOT SET"));
+            logger.debug(String.format("Final image components list NOT SET"));
         } else {
-            logger.info(String.format("*** Final image components list has %d components", imageComponentHierarchy.getFinalComponents().size()));
+            logger.debug(String.format("Final image components list has %d components", imageComponentHierarchy.getFinalComponents().size()));
         }
-        logger.info(String.format("*** ==========="));
-        /////////////////////////////
-        cleanUpLayerTars(cleanupWorkingDir, layerTars);
-        OperatingSystemEnum inspectorOs = null;
-        ImageInfoDerived imageInfoDerived;
-        try {
-            // TODO shouldn't need this anymore
-            inspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
-            if (!inspectorOs.equals(currentOs)) {
-                final ImageInspectorOsEnum neededInspectorOs = ImageInspectorOsEnum.getImageInspectorOsEnum(inspectorOs);
-                final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
-                throw new WrongInspectorOsException(neededInspectorOs, msg);
-            }
-            imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageComponentHierarchy, imageRepo, imageTag, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
-                    codeLocationPrefix);
-        } catch (final PkgMgrDataNotFoundException e) {
-            imageInfoDerived = imageInspector.generateEmptyBdio(bdioGenerator, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion, targetImageFileSystemRootDir,
-                    codeLocationPrefix);
-        }
-        createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);
-        return imageInfoDerived;
     }
 
     private void cleanUpLayerTars(final boolean cleanupWorkingDir, final List<File> layerTars) {

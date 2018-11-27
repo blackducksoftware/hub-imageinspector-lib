@@ -82,12 +82,12 @@ public class ImageInspector {
         return tarParser.createInitialImageComponentHierarchy(workingDirectory, tarFileName, manifestLayerMapping);
     }
 
-    public ImageInfoDerived generateBdioFromImageFilesDir(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final ImageComponentHierarchy imageComponentHierarchy, final String dockerImageRepo, final String dockerImageTag, final ManifestLayerMapping mapping, final String projectName,
+    public ImageInfoDerived generateBdioFromImageFilesDir(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final List<ComponentDetails> components, final ManifestLayerMapping mapping, final String projectName,
             final String versionName,
             final String codeLocationPrefix) {
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
-                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy.getFinalComponents());
+                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), components);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
