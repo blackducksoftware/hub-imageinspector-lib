@@ -18,9 +18,9 @@ import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.hub.bdio.BdioReader;
-import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
-import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.bdio.BdioReader;
+import com.synopsys.integration.bdio.SimpleBdioFactory;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 
 public class PkgListToBdioTest {
     private Gson gson = new Gson();
@@ -115,12 +115,12 @@ public class PkgListToBdioTest {
         assertEquals("Project", bdioDoc.project.type);
         assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
         assertEquals(665, bdioDoc.components.size());
-        assertEquals("cmake-data", bdioDoc.components.get(0).name);
-        assertEquals("3.10.2-1ubuntu2", bdioDoc.components.get(0).version);
-        assertEquals("cmake-data/3.10.2-1ubuntu2/all", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
-        assertEquals("passwd", bdioDoc.components.get(100).name);
-        assertEquals("1:4.5-1ubuntu1", bdioDoc.components.get(100).version);
-        assertEquals("passwd/1:4.5-1ubuntu1/amd64", bdioDoc.components.get(100).bdioExternalIdentifier.externalId);
+        assertEquals("libboost-fiber1.65.1", bdioDoc.components.get(0).name);
+        assertEquals("1.65.1+dfsg-0ubuntu5", bdioDoc.components.get(0).version);
+        assertEquals("libboost-fiber1.65.1/1.65.1+dfsg-0ubuntu5/amd64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
+        assertEquals("jblas", bdioDoc.components.get(100).name);
+        assertEquals("1.2.4-1", bdioDoc.components.get(100).version);
+        assertEquals("jblas/1.2.4-1/amd64", bdioDoc.components.get(100).bdioExternalIdentifier.externalId);
     }
 
     private void verifyBdioDocCentosMinusVimPlusBacula(final SimpleBdioDocument bdioDoc) {
@@ -129,9 +129,9 @@ public class PkgListToBdioTest {
         assertEquals("Project", bdioDoc.project.type);
         assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
         assertEquals(189, bdioDoc.components.size());
-        assertEquals("systemd-sysv", bdioDoc.components.get(0).name);
-        assertEquals("219-57.el7_5.3", bdioDoc.components.get(0).version);
-        assertEquals("systemd-sysv/219-57.el7_5.3/x86_64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
+        assertEquals("perl-Sys-MemInfo", bdioDoc.components.get(0).name);
+        assertEquals("0.91-7.el7", bdioDoc.components.get(0).version);
+        assertEquals("perl-Sys-MemInfo/0.91-7.el7/x86_64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
     }
 
     private void verifyBdioDocAlpine(final SimpleBdioDocument bdioDoc) {
@@ -140,9 +140,9 @@ public class PkgListToBdioTest {
         assertEquals("Project", bdioDoc.project.type);
         assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
         assertEquals(95, bdioDoc.components.size());
-        assertEquals("pcsc-lite-libs", bdioDoc.components.get(0).name);
-        assertEquals("1.8.22-r0", bdioDoc.components.get(0).version);
-        assertEquals("pcsc-lite-libs/1.8.22-r0/x86_64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
+        assertEquals("boost-python", bdioDoc.components.get(0).name);
+        assertEquals("1.62.0-r5", bdioDoc.components.get(0).version);
+        assertEquals("boost-python/1.62.0-r5/x86_64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
     }
 
     private SimpleBdioDocument toBdioDocument(final String[] bdioLines) throws IOException {

@@ -24,8 +24,8 @@ import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.hub.bdio.model.BdioProject;
-import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.bdio.model.BdioProject;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.test.annotation.IntegrationTest;
 
 // TODO why does this fail?

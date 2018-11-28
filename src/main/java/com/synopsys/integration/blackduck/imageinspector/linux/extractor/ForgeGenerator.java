@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.synopsys.integration.hub.bdio.model.Forge;
+import com.synopsys.integration.bdio.model.Forge;
 
 public class ForgeGenerator {
 
@@ -53,7 +53,7 @@ public class ForgeGenerator {
 
     private static Forge createForge(final String linuxDistroName, boolean doPreferredAliasNamespace) {
         if (StringUtils.isBlank(linuxDistroName)) {
-            return new Forge("/", "/", "");
+            return new Forge("/", "/", "none");
         }
         final String linuxDistroNameLowerCase = linuxDistroName == null ? "" : linuxDistroName.toLowerCase();
         String kbName = linuxDistroNameLowerCase;

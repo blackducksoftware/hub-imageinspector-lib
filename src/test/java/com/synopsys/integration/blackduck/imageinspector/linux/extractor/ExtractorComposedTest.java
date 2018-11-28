@@ -21,9 +21,9 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExec
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
-import com.synopsys.integration.hub.bdio.model.BdioComponent;
-import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.bdio.SimpleBdioFactory;
+import com.synopsys.integration.bdio.model.BdioComponent;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 
 public class ExtractorComposedTest {
 

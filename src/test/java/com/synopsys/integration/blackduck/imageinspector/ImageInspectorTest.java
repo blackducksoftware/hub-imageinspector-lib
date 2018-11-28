@@ -28,7 +28,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Compone
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgComponentExtractor;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
+import com.synopsys.integration.bdio.SimpleBdioFactory;
 
 // TODO re-do
 @Ignore

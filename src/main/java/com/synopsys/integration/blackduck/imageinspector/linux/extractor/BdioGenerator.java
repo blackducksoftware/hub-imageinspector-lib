@@ -33,13 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.synopsys.integration.hub.bdio.BdioWriter;
-import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
-import com.synopsys.integration.hub.bdio.graph.MutableDependencyGraph;
-import com.synopsys.integration.hub.bdio.model.Forge;
-import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.hub.bdio.model.dependency.Dependency;
-import com.synopsys.integration.hub.bdio.model.externalid.ExternalId;
+import com.synopsys.integration.bdio.BdioWriter;
+import com.synopsys.integration.bdio.SimpleBdioFactory;
+import com.synopsys.integration.bdio.graph.MutableDependencyGraph;
+import com.synopsys.integration.bdio.model.Forge;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.bdio.model.dependency.Dependency;
+import com.synopsys.integration.bdio.model.externalid.ExternalId;
 
 @Component
 public class BdioGenerator {

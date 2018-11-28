@@ -48,8 +48,8 @@ import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.hub.bdio.SimpleBdioFactory;
-import com.synopsys.integration.hub.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.bdio.SimpleBdioFactory;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 
 @Component
 public class ImageInspectorApi {
