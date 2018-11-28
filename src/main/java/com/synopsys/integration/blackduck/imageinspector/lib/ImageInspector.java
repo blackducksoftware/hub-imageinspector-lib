@@ -24,7 +24,6 @@
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +34,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
@@ -82,9 +81,12 @@ public class ImageInspector {
         return tarParser.createInitialImageComponentHierarchy(workingDirectory, tarFileName, manifestLayerMapping);
     }
 
-    public ImageInfoDerived generateBdioFromImageFilesDir(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final List<ComponentDetails> components, final ManifestLayerMapping mapping, final String projectName,
+    public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final List<ComponentDetails> components, final ManifestLayerMapping mapping, final String projectName,
             final String versionName,
             final String codeLocationPrefix) {
+        if (imageInfoParsed.getPkgMgr().getPackageManager() == PackageManagerEnum.NULL) {
+            return generateEmptyBdio(bdioGenerator, mapping, projectName, versionName, imageInfoParsed.getFileSystemRootDir(), codeLocationPrefix);
+        }
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
                 imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), components);
@@ -92,7 +94,7 @@ public class ImageInspector {
         return imageInfoDerived;
     }
 
-    public ImageInfoDerived generateEmptyBdio(final BdioGenerator bdioGenerator, final ManifestLayerMapping mapping, final String projectName, final String versionName,
+    private ImageInfoDerived generateEmptyBdio(final BdioGenerator bdioGenerator, final ManifestLayerMapping mapping, final String projectName, final String versionName,
             final File targetImageFileSystemRootDir, final String codeLocationPrefix) {
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, null, null);
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
@@ -102,22 +104,9 @@ public class ImageInspector {
         return imageInfoDerived;
     }
 
-    public File writeBdioFile(BdioGenerator bdioGenerator, final File outputDirectory, final ImageInfoDerived imageInfoDerived) throws IOException {
-        final String bdioFilename = Names.getBdioFilename(imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getPkgMgrFilePath(), imageInfoDerived.getFinalProjectName(),
-                imageInfoDerived.getFinalProjectVersionName());
-        FileOperations.ensureDirExists(outputDirectory);
-        final File bdioOutputFile = new File(outputDirectory, bdioFilename);
-        writeBdioToFile(bdioGenerator, imageInfoDerived.getBdioDocument(), bdioOutputFile);
-        return bdioOutputFile;
-    }
-
-    public void writeBdioToFile(BdioGenerator bdioGenerator, final SimpleBdioDocument bdioDocument, final File bdioOutputFile) throws IOException, FileNotFoundException {
-        bdioGenerator.writeBdio(bdioOutputFile, bdioDocument);
-    }
-
     private ImageInfoDerived deriveImageInfo(final ManifestLayerMapping mapping, final String projectName, final String versionName,
             final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) {
-        logger.debug(String.format("generateBdioFromImageFilesDir(): projectName: %s, versionName: %s", projectName, versionName));
+        logger.debug(String.format("generateBdioFromGivenComponents(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
         final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
         imageInfoDerived.setManifestLayerMapping(mapping);

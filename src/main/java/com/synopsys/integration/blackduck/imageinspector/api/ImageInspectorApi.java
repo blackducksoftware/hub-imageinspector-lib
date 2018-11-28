@@ -151,7 +151,7 @@ public class ImageInspectorApi {
         final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
         logLayers(imageComponentHierarchy);
         cleanUpLayerTars(cleanupWorkingDir, layerTars);
-        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromImageFilesDir(bdioGenerator, imageInfoParsed, imageComponentHierarchy.getFinalComponents(), manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
+        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy.getFinalComponents(), manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
                     codeLocationPrefix);
         createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);
         return imageInfoDerived;
