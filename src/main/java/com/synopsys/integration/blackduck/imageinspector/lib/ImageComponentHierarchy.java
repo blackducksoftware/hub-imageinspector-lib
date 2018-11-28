@@ -34,16 +34,11 @@ public class ImageComponentHierarchy {
     private final List<LayerDetails> layers;
     private List<ComponentDetails> finalComponents;
 
-    public ImageComponentHierarchy(final String manifestFileContents, final String imageConfigFileContents, final List<LayerDetails> layers) {
-        this.manifestFileContents = manifestFileContents;
-        this.imageConfigFileContents = imageConfigFileContents;
-        this.layers = layers;
-    }
-
     public ImageComponentHierarchy(final String manifestFileContents, final String imageConfigFileContents) {
         this.manifestFileContents = manifestFileContents;
         this.imageConfigFileContents = imageConfigFileContents;
         this.layers = new ArrayList<>();
+        this.finalComponents = new ArrayList<>();
     }
 
     public void addLayer(final LayerDetails layer) {
@@ -63,6 +58,9 @@ public class ImageComponentHierarchy {
     }
 
     public void setFinalComponents(final List<ComponentDetails> finalComponents) {
+        if (finalComponents == null) {
+            return;
+        }
         this.finalComponents = finalComponents;
     }
 

@@ -61,12 +61,11 @@ public class BdioGenerator {
 
         final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, projectVersion);
-        final SimpleBdioDocument bdioDocument1 = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
+        final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
         final MutableDependencyGraph dependencies = generateDependencies(comps);
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 
-        simpleBdioFactory.populateComponents(bdioDocument1, projectExternalId, dependencies);
-        final SimpleBdioDocument bdioDocument = bdioDocument1;
+        simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, dependencies);
         return bdioDocument;
     }
 

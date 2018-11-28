@@ -25,7 +25,6 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -82,24 +81,11 @@ public class ImageInspector {
     }
 
     public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final List<ComponentDetails> components, final ManifestLayerMapping mapping, final String projectName,
-            final String versionName,
-            final String codeLocationPrefix) {
-        if (imageInfoParsed.getPkgMgr().getPackageManager() == PackageManagerEnum.NULL) {
-            return generateEmptyBdio(bdioGenerator, mapping, projectName, versionName, imageInfoParsed.getFileSystemRootDir(), codeLocationPrefix);
-        }
+        final String versionName,
+        final String codeLocationPrefix) {
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
-                imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), components);
-        imageInfoDerived.setBdioDocument(bdioDocument);
-        return imageInfoDerived;
-    }
-
-    private ImageInfoDerived generateEmptyBdio(final BdioGenerator bdioGenerator, final ManifestLayerMapping mapping, final String projectName, final String versionName,
-            final File targetImageFileSystemRootDir, final String codeLocationPrefix) {
-        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, null, null);
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
-        final List<ComponentDetails> comps = new ArrayList<>(0);
-        final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(), imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), null, comps);
+            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), components);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
@@ -110,7 +96,7 @@ public class ImageInspector {
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
         final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
         imageInfoDerived.setManifestLayerMapping(mapping);
-        if (imagePkgMgr != null) {
+        if (imagePkgMgr != null && imagePkgMgr.getPackageManager() != PackageManagerEnum.NULL) {
             imageInfoDerived.setPkgMgrFilePath(determinePkgMgrFilePath(imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageInfoParsed().getFileSystemRootDir().getName()));
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
                     imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager().toString()));

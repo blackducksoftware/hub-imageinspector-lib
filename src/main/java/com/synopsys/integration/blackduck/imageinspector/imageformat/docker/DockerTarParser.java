@@ -98,7 +98,8 @@ public class DockerTarParser {
         List<LayerDetails> layers = imageComponentHierarchy.getLayers();
         int numLayers = layers.size();
         if (numLayers > 0) {
-            imageComponentHierarchy.setFinalComponents(layers.get(numLayers - 1).getComponents());
+            LayerDetails topLayer = layers.get(numLayers - 1);
+            imageComponentHierarchy.setFinalComponents(topLayer.getComponents());
         }
         if (imageInfoParsed == null) {
             imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), null);
