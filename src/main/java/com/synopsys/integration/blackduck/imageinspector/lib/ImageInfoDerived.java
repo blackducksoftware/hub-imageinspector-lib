@@ -36,6 +36,7 @@ public class ImageInfoDerived {
     private String finalProjectName = null;
     private String finalProjectVersionName = null;
 
+    private ImageComponentHierarchy imageComponentHierarchy = null;
     private SimpleBdioDocument bdioDocument = null;
 
     public ImageInfoDerived(final ImageInfoParsed imageInfoParsed) {
@@ -94,4 +95,11 @@ public class ImageInfoDerived {
         this.bdioDocument = bdioDocument;
     }
 
+    public void setImageComponentHierarchy(final ImageComponentHierarchy imageComponentHierarchy) {
+        this.imageComponentHierarchy = imageComponentHierarchy;
+    }
+
+    public ImageComponentHierarchy getImageComponentHierarchy() {
+        return imageComponentHierarchy;
+    }
 }
