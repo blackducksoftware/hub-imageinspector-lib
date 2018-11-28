@@ -305,11 +305,11 @@ public class DockerTarParser {
         } catch (final WrongInspectorOsException wrongOsException) {
             throw wrongOsException;
         } catch (final PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
-            logger.debug(String.format("Unable to log components present after this layer: The file system is not yet populated with the linux distro and package manager files: %s", pkgMgrDataNotFoundException.getMessage()));
+            logger.debug(String.format("Unable to collect components present after this layer: The file system is not yet populated with the linux distro and package manager files: %s", pkgMgrDataNotFoundException.getMessage()));
             LayerDetails layer = new LayerDetails(layerId, layerMetadataFileContents, null);
             imageComponentHierarchy.addLayer(layer);
         } catch (final Exception otherException) {
-            logger.debug("Unable to log components present after this layer");
+            logger.debug("Unable to collect components present after this layer");
             LayerDetails layer = new LayerDetails(layerId, layerMetadataFileContents, null);
             imageComponentHierarchy.addLayer(layer);
         }

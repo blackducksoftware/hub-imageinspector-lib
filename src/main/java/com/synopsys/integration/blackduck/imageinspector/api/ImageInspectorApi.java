@@ -161,7 +161,7 @@ public class ImageInspectorApi {
         if (!logger.isDebugEnabled()) {
             return;
         }
-        logger.debug(String.format("*** layer dump:"));
+        logger.debug(String.format("layer dump:"));
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             if (layer == null) {
                 logger.debug("Layer is null");
