@@ -84,8 +84,9 @@ public class ImageInspector {
         final String codeLocationPrefix) {
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
         imageInfoDerived.setImageComponentHierarchy(imageComponentHierarchy);
-        final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocument(imageInfoDerived.getCodeLocationName(),
-            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy.getFinalComponents());
+        // TODO unhardcode the booleans:
+        final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(imageInfoDerived.getCodeLocationName(),
+            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy, true, true);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }

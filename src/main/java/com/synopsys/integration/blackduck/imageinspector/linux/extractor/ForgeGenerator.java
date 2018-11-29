@@ -47,6 +47,10 @@ public class ForgeGenerator {
         return createForge(linuxDistroName, false);
     }
 
+    public static Forge createLayerForge() {
+        return createForge("none", false);
+    }
+
     public static Forge createComponentForge(final String linuxDistroName) {
         return createForge(linuxDistroName, true);
     }

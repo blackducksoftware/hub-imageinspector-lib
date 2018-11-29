@@ -41,7 +41,7 @@ public class ExtractorComposedTest {
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
         List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "alpine");
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
-        final SimpleBdioDocument bdio = bdioGenerator.generateBdioDocument("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
+        final SimpleBdioDocument bdio = bdioGenerator.generateSingleLevelBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
         boolean foundComp2 = false;
@@ -78,7 +78,7 @@ public class ExtractorComposedTest {
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.DPKG);
         List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "ubuntu");
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
-        final SimpleBdioDocument bdio = bdioGenerator.generateBdioDocument("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
+        final SimpleBdioDocument bdio = bdioGenerator.generateSingleLevelBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
 
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
@@ -162,7 +162,7 @@ public class ExtractorComposedTest {
         final ComponentExtractor componentExtractor = new NullComponentExtractor();
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         List<ComponentDetails>  comps = new ArrayList<>(0);
-        final SimpleBdioDocument bdio = bdioGenerator.generateBdioDocument("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
+        final SimpleBdioDocument bdio = bdioGenerator.generateSingleLevelBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
 
         assertEquals(0, bdio.components.size());
     }
@@ -178,7 +178,7 @@ public class ExtractorComposedTest {
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.RPM);
         List<ComponentDetails> comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "centos");
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
-        final SimpleBdioDocument bdio = bdioGenerator.generateBdioDocument("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
+        final SimpleBdioDocument bdio = bdioGenerator.generateSingleLevelBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
         return bdio;
     }
 }
