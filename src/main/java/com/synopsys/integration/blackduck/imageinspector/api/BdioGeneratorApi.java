@@ -171,7 +171,7 @@ public class BdioGeneratorApi {
         ComponentExtractor extractor = componentExtractorFactory.createComponentExtractor(gson, null, architecture, pkgMgrType);
         List<ComponentDetails> comps = extractor.extractComponentsFromPkgMgrOutput(linuxDistroName, pkgMgrListCmdOutputLines);
         logger.info(String.format("Extracted %d components from given package manager output", comps.size()));
-        SimpleBdioDocument bdioDoc = bdioGenerator.generateSingleLevelBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);
+        SimpleBdioDocument bdioDoc = bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);
         try {
             return bdioGenerator.getBdioAsStringArray(bdioDoc);
         } catch (IOException e) {

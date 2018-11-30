@@ -81,12 +81,13 @@ public class ImageInspector {
 
     public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final ImageComponentHierarchy imageComponentHierarchy, final ManifestLayerMapping mapping, final String projectName,
         final String versionName,
-        final String codeLocationPrefix) {
+        final String codeLocationPrefix,
+        final boolean organizeComponentsByLayer,
+        final boolean includeRemovedComponents) {
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
         imageInfoDerived.setImageComponentHierarchy(imageComponentHierarchy);
-        // TODO unhardcode the booleans:
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(imageInfoDerived.getCodeLocationName(),
-            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy, true, true);
+            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy, organizeComponentsByLayer, includeRemovedComponents);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }

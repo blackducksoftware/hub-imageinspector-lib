@@ -68,7 +68,7 @@ public class ImageInspectorApiTest {
         assertNotNull(imageInspectorApi);
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(null);
         try {
-            imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, null, null);
+            imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null);
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));

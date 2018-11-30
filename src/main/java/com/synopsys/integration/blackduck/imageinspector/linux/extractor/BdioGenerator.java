@@ -60,30 +60,30 @@ public class BdioGenerator {
     public final SimpleBdioDocument generateBdioDocumentFromImageComponentHierarchy(final String codeLocationName, final String projectName,
         final String projectVersion,
         final String linuxDistroName, ImageComponentHierarchy imageComponentHierarchy,
-        final boolean showComponentsByLayer,
+        final boolean organizeComponentsByLayer,
         final boolean includeRemovedComponents) {
 
-        if (showComponentsByLayer && includeRemovedComponents) {
-            return generateTwoLevelBdioDocumentFromHierarchy(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy);
-        } else if (showComponentsByLayer && !includeRemovedComponents) {
+        if (organizeComponentsByLayer && includeRemovedComponents) {
+            return generateLayeredBdioDocumentFromHierarchy(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy);
+        } else if (organizeComponentsByLayer && !includeRemovedComponents) {
             // TODO
-            throw new UnsupportedOperationException("showComponentsByLayer && !includeRemovedComponents is not yet supported");
-        } else if (!showComponentsByLayer && includeRemovedComponents) {
+            throw new UnsupportedOperationException("organizeComponentsByLayer && !includeRemovedComponents is not yet supported");
+        } else if (!organizeComponentsByLayer && includeRemovedComponents) {
             // TODO
-            throw new UnsupportedOperationException("!showComponentsByLayer && includeRemovedComponents is not yet supported");
+            throw new UnsupportedOperationException("!organizeComponentsByLayer && includeRemovedComponents is not yet supported");
         } else {
-            return generateSingleLevelBdioDocumentFromComponents(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy.getFinalComponents());
+            return generateFlatBdioDocumentFromComponents(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy.getFinalComponents());
         }
     }
 
-    public final SimpleBdioDocument generateSingleLevelBdioDocumentFromComponents(final String codeLocationName, final String projectName,
+    public final SimpleBdioDocument generateFlatBdioDocumentFromComponents(final String codeLocationName, final String projectName,
             final String projectVersion,
             final String linuxDistroName, List<ComponentDetails> comps) {
 
         final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, projectVersion);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
-        final MutableDependencyGraph dependencies = generateSingleLevelDependenciesFromComponents(comps);
+        final MutableDependencyGraph dependencies = generateFlatDependenciesFromComponents(comps);
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 
         simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, dependencies);
@@ -109,7 +109,7 @@ public class BdioGenerator {
         }
     }
 
-    private final SimpleBdioDocument generateTwoLevelBdioDocumentFromHierarchy(final String codeLocationName, final String projectName,
+    private final SimpleBdioDocument generateLayeredBdioDocumentFromHierarchy(final String codeLocationName, final String projectName,
         final String projectVersion,
         final String linuxDistroName, final ImageComponentHierarchy imageComponentHierarchy) {
 
@@ -117,14 +117,14 @@ public class BdioGenerator {
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, projectVersion);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
         // TODO This line is the only line that's different in this method, the rest is duplicated; eliminate the duplication
-        final MutableDependencyGraph dependencies = generateTwoLevelDependenciesFromHierarchy(imageComponentHierarchy);
+        final MutableDependencyGraph dependencies = generateLayeredDependenciesFromHierarchy(imageComponentHierarchy);
         logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
 
         simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, dependencies);
         return bdioDocument;
     }
 
-    private MutableDependencyGraph generateTwoLevelDependenciesFromHierarchy(final ImageComponentHierarchy imageComponentHierarchy) {
+    private MutableDependencyGraph generateLayeredDependenciesFromHierarchy(final ImageComponentHierarchy imageComponentHierarchy) {
         // TODO look for a way to reduce duplicated code in this method
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
@@ -140,7 +140,7 @@ public class BdioGenerator {
         return graph;
     }
 
-    private MutableDependencyGraph generateSingleLevelDependenciesFromComponents(final List<ComponentDetails> comps) {
+    private MutableDependencyGraph generateFlatDependenciesFromComponents(final List<ComponentDetails> comps) {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (final ComponentDetails comp : comps) {
             final Forge forge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
