@@ -64,7 +64,8 @@ public class BdioGenerator {
         final boolean includeRemovedComponents) {
 
         if (organizeComponentsByLayer && includeRemovedComponents) {
-            return generateLayeredBdioDocumentFromHierarchy(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy);
+            final MutableDependencyGraph graph = generateLayeredDependenciesFromHierarchy(imageComponentHierarchy);
+            return generateLayeredBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
         } else if (organizeComponentsByLayer && !includeRemovedComponents) {
             // TODO
             throw new UnsupportedOperationException("organizeComponentsByLayer && !includeRemovedComponents is not yet supported");
@@ -79,15 +80,8 @@ public class BdioGenerator {
     public final SimpleBdioDocument generateFlatBdioDocumentFromComponents(final String codeLocationName, final String projectName,
             final String projectVersion,
             final String linuxDistroName, List<ComponentDetails> comps) {
-
-        final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
-        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, projectVersion);
-        final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
-        final MutableDependencyGraph dependencies = generateFlatDependenciesFromComponents(comps);
-        logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
-
-        simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, dependencies);
-        return bdioDocument;
+        final MutableDependencyGraph graph = generateFlatDependenciesFromComponents(comps);
+        return generateLayeredBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
     }
 
     public final void writeBdio(final File bdioFile, final SimpleBdioDocument bdioDocument) throws IOException {
@@ -109,43 +103,40 @@ public class BdioGenerator {
         }
     }
 
-    private final SimpleBdioDocument generateLayeredBdioDocumentFromHierarchy(final String codeLocationName, final String projectName,
+    private final SimpleBdioDocument generateLayeredBdioDocumentFromGraph(final String codeLocationName, final String projectName,
         final String projectVersion,
-        final String linuxDistroName, final ImageComponentHierarchy imageComponentHierarchy) {
+        final String linuxDistroName, final MutableDependencyGraph graph) {
 
         final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, projectVersion);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
-        // TODO This line is the only line that's different in this method, the rest is duplicated; eliminate the duplication
-        final MutableDependencyGraph dependencies = generateLayeredDependenciesFromHierarchy(imageComponentHierarchy);
-        logger.info(String.format("Found %s potential components", dependencies.getRootDependencies().size()));
-
-        simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, dependencies);
+        logger.info(String.format("Found %s potential components", graph.getRootDependencies().size()));
+        simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, graph);
         return bdioDocument;
     }
 
     private MutableDependencyGraph generateLayeredDependenciesFromHierarchy(final ImageComponentHierarchy imageComponentHierarchy) {
-        // TODO look for a way to reduce duplicated code in this method
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             final Forge layerForge = ForgeGenerator.createLayerForge();
             Dependency layerDependency = addDependency(graph, layer.getLayerDotTarDirname(), "none", "none", layerForge, null);
             for (final ComponentDetails comp : layer.getComponents()) {
-                final Forge componentForge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
-                logger.debug(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge.getName()));
-                addDependency(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge, layerDependency);
+                addDependency(graph, layerDependency, comp);
             }
         }
-
         return graph;
+    }
+
+    private void addDependency(final MutableDependencyGraph graph, final Dependency parent, final ComponentDetails comp) {
+        final Forge componentForge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
+        logger.debug(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge.getName()));
+        addDependency(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge, parent);
     }
 
     private MutableDependencyGraph generateFlatDependenciesFromComponents(final List<ComponentDetails> comps) {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (final ComponentDetails comp : comps) {
-            final Forge forge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
-            logger.debug(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), forge.getName()));
-            addDependency(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), forge, null);
+            addDependency(graph, null, comp);
         }
         return graph;
     }
