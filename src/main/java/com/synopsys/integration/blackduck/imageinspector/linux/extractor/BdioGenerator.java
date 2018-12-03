@@ -119,18 +119,12 @@ public class BdioGenerator {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             final Forge layerForge = ForgeGenerator.createLayerForge();
-            Dependency layerDependency = addDependency(graph, layer.getLayerDotTarDirname(), "none", "none", layerForge, null);
+            Dependency layerDependency = addDependencyWithGivenForge(graph, layer.getLayerDotTarDirname(), "none", "none", layerForge, null);
             for (final ComponentDetails comp : layer.getComponents()) {
                 addDependency(graph, layerDependency, comp);
             }
         }
         return graph;
-    }
-
-    private void addDependency(final MutableDependencyGraph graph, final Dependency parent, final ComponentDetails comp) {
-        final Forge componentForge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
-        logger.debug(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge.getName()));
-        addDependency(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge, parent);
     }
 
     private MutableDependencyGraph generateFlatDependenciesFromComponents(final List<ComponentDetails> comps) {
@@ -141,7 +135,13 @@ public class BdioGenerator {
         return graph;
     }
 
-    private Dependency addDependency(final MutableDependencyGraph graph, final String name, final String version, final String arch, final Forge forge, Dependency parent) {
+    private void addDependency(final MutableDependencyGraph graph, final Dependency parent, final ComponentDetails comp) {
+        final Forge componentForge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
+        logger.debug(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge.getName()));
+        addDependencyWithGivenForge(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge, parent);
+    }
+
+    private Dependency addDependencyWithGivenForge(final MutableDependencyGraph graph, final String name, final String version, final String arch, final Forge forge, Dependency parent) {
         final ExternalId extId = simpleBdioFactory.createArchitectureExternalId(forge, name, version, arch);
         final Dependency dep = simpleBdioFactory.createDependency(name, version, extId); // createDependencyNode(forge, name, version, arch);
         logger.trace(String.format("adding %s as child to dependency node tree; dataId: %s", dep.name, dep.externalId.createBdioId()));
