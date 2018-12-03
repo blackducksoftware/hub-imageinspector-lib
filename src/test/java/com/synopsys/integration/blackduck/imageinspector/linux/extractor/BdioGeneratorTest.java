@@ -19,7 +19,7 @@ public class BdioGeneratorTest {
     @Test
     public void testFlatExcludeRemoved() {
         BdioGenerator bdioGenerator = new BdioGenerator();
-        ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchyExcludeRemovedComponents();
+        ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchy();
         SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, false, false);
 
         int componentCount = 0;
@@ -40,7 +40,7 @@ public class BdioGeneratorTest {
     @Test
     public void testFlatIncludeRemoved() {
         BdioGenerator bdioGenerator = new BdioGenerator();
-        ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchyExcludeRemovedComponents();
+        ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchy();
         SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, false, false);
 
         int componentCount = 0;
@@ -60,7 +60,7 @@ public class BdioGeneratorTest {
     @Test
     public void testHierarchicalIncludeRemoved() {
         BdioGenerator bdioGenerator = new BdioGenerator();
-        ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchyIncludeRemovedComponents();
+        ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchy();
         SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, true, true);
 
         int layerCount = 0;
@@ -83,12 +83,10 @@ public class BdioGeneratorTest {
         assertEquals(6, compCount);
     }
 
-
-    @Ignore
     @Test
     public void testHierarchicalExcludeRemoved() {
         BdioGenerator bdioGenerator = new BdioGenerator();
-        ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchyIncludeRemovedComponents();
+        ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchy();
         SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, true, false);
 
         int layerCount = 0;
@@ -111,17 +109,7 @@ public class BdioGeneratorTest {
         assertEquals(4, compCount);
     }
 
-    private ImageComponentHierarchy createImageComponentHierarchyIncludeRemovedComponents() {
-        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy("manifestFileContents", "imageConfigFileContents");
-        final List<ComponentDetails> allComponents = new ArrayList<>();
-        addLayer1(imageComponentHierarchy, allComponents);
-        addLayer2(imageComponentHierarchy, allComponents);
-
-        imageComponentHierarchy.setFinalComponents(allComponents);
-        return imageComponentHierarchy;
-    }
-
-    private ImageComponentHierarchy createImageComponentHierarchyExcludeRemovedComponents() {
+    private ImageComponentHierarchy createImageComponentHierarchy() {
         ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy("manifestFileContents", "imageConfigFileContents");
         final List<ComponentDetails> allComponents = new ArrayList<>();
         addLayer1(imageComponentHierarchy, allComponents);

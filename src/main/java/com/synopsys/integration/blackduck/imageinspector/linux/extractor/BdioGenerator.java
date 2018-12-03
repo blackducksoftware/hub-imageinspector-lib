@@ -63,24 +63,23 @@ public class BdioGenerator {
         final boolean organizeComponentsByLayer,
         final boolean includeRemovedComponents) {
 
-        if (organizeComponentsByLayer && includeRemovedComponents) {
-            final MutableDependencyGraph graph = generateLayeredDependenciesFromHierarchy(imageComponentHierarchy);
+        if (organizeComponentsByLayer) {
+            final MutableDependencyGraph graph = generateLayeredGraphFromHierarchy(imageComponentHierarchy, includeRemovedComponents);
             return generateLayeredBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
-        } else if (organizeComponentsByLayer && !includeRemovedComponents) {
-            // TODO
-            throw new UnsupportedOperationException("organizeComponentsByLayer && !includeRemovedComponents is not yet supported");
-        } else if (!organizeComponentsByLayer && includeRemovedComponents) {
-            // TODO
-            throw new UnsupportedOperationException("!organizeComponentsByLayer && includeRemovedComponents is not yet supported");
         } else {
-            return generateFlatBdioDocumentFromComponents(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy.getFinalComponents());
+            if (includeRemovedComponents) {
+                // TODO
+                throw new UnsupportedOperationException("!organizeComponentsByLayer && includeRemovedComponents is not yet supported");
+            } else {
+                return generateFlatBdioDocumentFromComponents(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy.getFinalComponents());
+            }
         }
     }
 
     public final SimpleBdioDocument generateFlatBdioDocumentFromComponents(final String codeLocationName, final String projectName,
             final String projectVersion,
             final String linuxDistroName, List<ComponentDetails> comps) {
-        final MutableDependencyGraph graph = generateFlatDependenciesFromComponents(comps);
+        final MutableDependencyGraph graph = generateFlatGraphFromComponents(comps);
         return generateLayeredBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
     }
 
@@ -115,19 +114,30 @@ public class BdioGenerator {
         return bdioDocument;
     }
 
-    private MutableDependencyGraph generateLayeredDependenciesFromHierarchy(final ImageComponentHierarchy imageComponentHierarchy) {
+    private MutableDependencyGraph generateLayeredGraphFromHierarchy(final ImageComponentHierarchy imageComponentHierarchy, final boolean includeRemovedComponents) {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             final Forge layerForge = ForgeGenerator.createLayerForge();
             Dependency layerDependency = addDependencyWithGivenForge(graph, layer.getLayerDotTarDirname(), "none", "none", layerForge, null);
             for (final ComponentDetails comp : layer.getComponents()) {
-                addDependency(graph, layerDependency, comp);
+                if (imageComponentHierarchy.getFinalComponents().contains(comp)) {
+                    logger.debug(String.format("layer comp %s:%s is in final components list; including it in this layer", comp.getName(), comp.getVersion()));
+                    addDependency(graph, layerDependency, comp);
+                } else {
+                    logger.debug(String.format("layer comp %s:%s is not in final component list", comp.getName(), comp.getVersion()));
+                    if (includeRemovedComponents) {
+                        logger.debug(String.format("\tIncluding it in this layer"));
+                        addDependency(graph, layerDependency, comp);
+                    } else {
+                        logger.debug(String.format("\tExcluding it from this layer"));
+                    }
+                }
             }
         }
         return graph;
     }
 
-    private MutableDependencyGraph generateFlatDependenciesFromComponents(final List<ComponentDetails> comps) {
+    private MutableDependencyGraph generateFlatGraphFromComponents(final List<ComponentDetails> comps) {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (final ComponentDetails comp : comps) {
             addDependency(graph, null, comp);
