@@ -65,11 +65,11 @@ public class BdioGenerator {
 
         if (organizeComponentsByLayer) {
             final MutableDependencyGraph graph = generateLayeredGraphFromHierarchy(imageComponentHierarchy, includeRemovedComponents);
-            return generateLayeredBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
+            return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
         } else {
             if (includeRemovedComponents) {
-                // TODO
-                throw new UnsupportedOperationException("!organizeComponentsByLayer && includeRemovedComponents is not yet supported");
+                final MutableDependencyGraph graph =  generateFlatGraphFromAllComponentsAllLayers(imageComponentHierarchy);
+                return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
             } else {
                 return generateFlatBdioDocumentFromComponents(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy.getFinalComponents());
             }
@@ -80,7 +80,7 @@ public class BdioGenerator {
             final String projectVersion,
             final String linuxDistroName, List<ComponentDetails> comps) {
         final MutableDependencyGraph graph = generateFlatGraphFromComponents(comps);
-        return generateLayeredBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
+        return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
     }
 
     public final void writeBdio(final File bdioFile, final SimpleBdioDocument bdioDocument) throws IOException {
@@ -102,7 +102,7 @@ public class BdioGenerator {
         }
     }
 
-    private final SimpleBdioDocument generateLayeredBdioDocumentFromGraph(final String codeLocationName, final String projectName,
+    private final SimpleBdioDocument generateBdioDocumentFromGraph(final String codeLocationName, final String projectName,
         final String projectVersion,
         final String linuxDistroName, final MutableDependencyGraph graph) {
 
@@ -141,6 +141,16 @@ public class BdioGenerator {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (final ComponentDetails comp : comps) {
             addDependency(graph, null, comp);
+        }
+        return graph;
+    }
+
+    private MutableDependencyGraph generateFlatGraphFromAllComponentsAllLayers(final ImageComponentHierarchy imageComponentHierarchy) {
+        final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
+        for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
+            for (final ComponentDetails comp : layer.getComponents()) {
+                addDependency(graph, null, comp);
+            }
         }
         return graph;
     }

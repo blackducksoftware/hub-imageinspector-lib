@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.synopsys.integration.bdio.model.BdioComponent;
@@ -36,12 +35,11 @@ public class BdioGeneratorTest {
         assertEquals(0, componentChildCount);
     }
 
-    @Ignore
     @Test
     public void testFlatIncludeRemoved() {
         BdioGenerator bdioGenerator = new BdioGenerator();
         ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchy();
-        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, false, false);
+        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, false, true);
 
         int componentCount = 0;
         int componentChildCount = 0;
