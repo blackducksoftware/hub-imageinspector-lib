@@ -182,7 +182,7 @@ public class ImageInspectorApi {
             } else if (layer.getComponents() == null) {
                 logger.debug(String.format("layer id %s has no componenents", layer.getLayerDotTarDirname()));
             } else {
-                logger.debug(String.format("*** Layer ID %s has %d components; layer metadata file contents: %s", layer.getLayerDotTarDirname(), layer.getComponents().size(), layer.getLayerMetadataFileContents()));
+                logger.debug(String.format("Layer ID %s has %d components; layer metadata file contents: %s", layer.getLayerDotTarDirname(), layer.getComponents().size(), layer.getLayerMetadataFileContents()));
             }
         }
         if (imageComponentHierarchy.getFinalComponents() == null) {

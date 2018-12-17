@@ -1,38 +1,28 @@
 package com.synopsys.integration.blackduck.imageinspector.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
-import java.io.IOException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.apache.commons.compress.compressors.CompressorException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import com.synopsys.integration.bdio.model.BdioProject;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.bdio.model.BdioProject;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.test.annotation.IntegrationTest;
+import java.io.IOException;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.junit.jupiter.api.Disabled;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 // TODO why does this fail?
-@Ignore
-@Category(IntegrationTest.class)
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { AppConfig.class })
+@Disabled
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration(classes = { AppConfig.class })
 public class ImageInspectorApiTest {
 
     private static final String CODE_LOCATION_PREFIX = "testCodeLocationPrefix";
@@ -55,15 +45,8 @@ public class ImageInspectorApiTest {
     @MockBean
     private Os os;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception {
-    }
-
-    @Test
+    // TODO
+    //@Test
     public void testOnWrongOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
         assertNotNull(imageInspectorApi);
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(null);
@@ -76,7 +59,8 @@ public class ImageInspectorApiTest {
         }
     }
 
-    @Test
+    // TODO
+    //@Test
     public void testOnRightOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
         assertNotNull(imageInspectorApi);
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.ALPINE);
