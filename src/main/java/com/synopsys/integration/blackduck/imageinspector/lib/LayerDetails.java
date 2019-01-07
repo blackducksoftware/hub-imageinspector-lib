@@ -1,7 +1,7 @@
 /**
  * hub-imageinspector-lib
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2019 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -28,17 +28,19 @@ import java.util.List;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
 
 public class LayerDetails {
+    private final int layerIndex;
     private final String layerDotTarDirname;
     private final String layerMetadataFileContents;
     private final List<ComponentDetails> components;
 
-    public LayerDetails(final String layerDotTarDirname, final String layerMetadataFileContents, final List<ComponentDetails> components) {
+    public LayerDetails(final int layerIndex, final String layerDotTarDirname, final String layerMetadataFileContents, final List<ComponentDetails> components) {
+        this.layerIndex = layerIndex;
         this.layerDotTarDirname = layerDotTarDirname;
         this.layerMetadataFileContents = layerMetadataFileContents;
         this.components = components;
     }
 
-    public String getLayerDotTarDirname() {
+    private String getLayerDotTarDirname() {
         return layerDotTarDirname;
     }
 
@@ -48,5 +50,9 @@ public class LayerDetails {
 
     public List<ComponentDetails> getComponents() {
         return components;
+    }
+
+    public String getLayerIndexedName() {
+        return String.format("Layer%02d_%s", layerIndex, getLayerDotTarDirname());
     }
 }

@@ -68,16 +68,19 @@ public class BdioGeneratorTest {
         }
         assertEquals(2, layerCount);
         System.out.printf("====\n");
+        layerCount = 0;
         int compCount = 0;
         for (BdioComponent bdioComp : bdioDoc.components) {
-            if (bdioComp.name.startsWith("layer")) {
+            if (bdioComp.name.startsWith("Layer")) {
                 System.out.printf("\t%s/%s\n", bdioComp.name, bdioComp.version);
+                layerCount++;
             }
             for (BdioRelationship rel : bdioComp.relationships) {
                 System.out.printf("\t\t%s: %s\n", rel.relationshipType, rel.related);
                 compCount++;
             }
         }
+        assertEquals(2, layerCount);
         assertEquals(6, compCount);
     }
 
@@ -123,7 +126,7 @@ public class BdioGeneratorTest {
         components.add(new ComponentDetails("comp1a", "version1a", "comp1aExternalId", "arch", "ubuntu"));
         components.add(new ComponentDetails("comp2a", "version2a", "comp2aExternalId", "arch", "ubuntu"));
         allComponents.addAll(components);
-        LayerDetails layer2 = new LayerDetails("layer2", "layerMetadataFileContents", components);
+        LayerDetails layer2 = new LayerDetails(1, "layer2", "layerMetadataFileContents", components);
         imageComponentHierarchy.addLayer(layer2);
         return components;
     }
@@ -134,7 +137,7 @@ public class BdioGeneratorTest {
         components.add(new ComponentDetails("comp1", "version1", "comp1ExternalId", "arch", "ubuntu"));
         components.add(new ComponentDetails("comp2", "version2", "comp2ExternalId", "arch", "ubuntu"));
         allComponents.addAll(components);
-        LayerDetails layer1 = new LayerDetails("layer1", "layerMetadataFileContents", components);
+        LayerDetails layer1 = new LayerDetails(0, "layer1", "layerMetadataFileContents", components);
         imageComponentHierarchy.addLayer(layer1);
         return components;
     }

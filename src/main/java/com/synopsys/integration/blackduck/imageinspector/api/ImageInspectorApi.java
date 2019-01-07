@@ -1,7 +1,7 @@
 /**
  * hub-imageinspector-lib
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2019 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -180,9 +180,9 @@ public class ImageInspectorApi {
             if (layer == null) {
                 logger.debug("Layer is null");
             } else if (layer.getComponents() == null) {
-                logger.debug(String.format("layer id %s has no componenents", layer.getLayerDotTarDirname()));
+                logger.debug(String.format("layer id %s has no componenents", layer.getLayerIndexedName()));
             } else {
-                logger.debug(String.format("Layer ID %s has %d components; layer metadata file contents: %s", layer.getLayerDotTarDirname(), layer.getComponents().size(), layer.getLayerMetadataFileContents()));
+                logger.debug(String.format("Layer ID %s has %d components; layer metadata file contents: %s", layer.getLayerIndexedName(), layer.getComponents().size(), layer.getLayerMetadataFileContents()));
             }
         }
         if (imageComponentHierarchy.getFinalComponents() == null) {

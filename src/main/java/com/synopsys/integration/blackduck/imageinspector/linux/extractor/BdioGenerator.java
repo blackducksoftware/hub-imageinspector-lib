@@ -1,7 +1,7 @@
 /**
  * hub-imageinspector-lib
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2019 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -118,7 +118,7 @@ public class BdioGenerator {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             final Forge layerForge = ForgeGenerator.createLayerForge();
-            Dependency layerDependency = addDependencyWithGivenForge(graph, layer.getLayerDotTarDirname(), "none", "none", layerForge, null);
+            Dependency layerDependency = addDependencyWithGivenForge(graph, layer.getLayerIndexedName(), "none", "none", layerForge, null);
             for (final ComponentDetails comp : layer.getComponents()) {
                 if (imageComponentHierarchy.getFinalComponents().contains(comp)) {
                     logger.debug(String.format("layer comp %s:%s is in final components list; including it in this layer", comp.getName(), comp.getVersion()));

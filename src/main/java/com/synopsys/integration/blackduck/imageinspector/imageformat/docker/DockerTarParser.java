@@ -1,7 +1,7 @@
 /**
  * hub-imageinspector-lib
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2019 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -84,16 +84,18 @@ public class DockerTarParser {
 
     public ImageInfoParsed extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
+        int layerIndex = 0;
         for (final String layer : manifestLayerMapping.getLayers()) {
             logger.trace(String.format("Looking for tar for layer: %s", layer));
             final File layerTar = getLayerTar(layerTars, layer);
             if (layerTar != null) {
                 extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
                 String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-                imageInfoParsed = addPostLayerComponents(componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layer, layerMetadataFileContents);
+                imageInfoParsed = addPostLayerComponents(layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layer, layerMetadataFileContents);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layer));
             }
+            layerIndex++;
         }
         List<LayerDetails> layers = imageComponentHierarchy.getLayers();
         int numLayers = layers.size();
@@ -271,7 +273,7 @@ public class DockerTarParser {
         return layerMetadataFileContents;
     }
 
-    private ImageInfoParsed addPostLayerComponents(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, String layerId, final String layerMetadataFileContents) throws WrongInspectorOsException {
+    private ImageInfoParsed addPostLayerComponents(final int layerIndex, final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, String layerId, final String layerMetadataFileContents) throws WrongInspectorOsException {
         logger.debug("Getting components present (so far) after adding this layer");
         if (currentOs == null) {
             logger.debug("Current (running on) OS not provided; cannot determine components present after adding this layer");
@@ -304,17 +306,17 @@ public class DockerTarParser {
             for (ComponentDetails comp : comps) {
                 logger.debug(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }
-            LayerDetails layer = new LayerDetails(layerId, layerMetadataFileContents, comps);
+            LayerDetails layer = new LayerDetails(layerIndex, layerId, layerMetadataFileContents, comps);
             imageComponentHierarchy.addLayer(layer);
         } catch (final WrongInspectorOsException wrongOsException) {
             throw wrongOsException;
         } catch (final PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
             logger.debug(String.format("Unable to collect components present after this layer: The file system is not yet populated with the linux distro and package manager files: %s", pkgMgrDataNotFoundException.getMessage()));
-            LayerDetails layer = new LayerDetails(layerId, layerMetadataFileContents, null);
+            LayerDetails layer = new LayerDetails(layerIndex, layerId, layerMetadataFileContents, null);
             imageComponentHierarchy.addLayer(layer);
         } catch (final Exception otherException) {
             logger.debug("Unable to collect components present after this layer");
-            LayerDetails layer = new LayerDetails(layerId, layerMetadataFileContents, null);
+            LayerDetails layer = new LayerDetails(layerIndex, layerId, layerMetadataFileContents, null);
             imageComponentHierarchy.addLayer(layer);
         }
         return imageInfoParsed;
