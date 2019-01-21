@@ -26,22 +26,19 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
+import org.apache.commons.lang3.StringUtils;
 
 public class LayerDetails {
     private final int layerIndex;
-    private final String layerDotTarDirname;
+    private final String layerExternalId;
     private final String layerMetadataFileContents;
     private final List<ComponentDetails> components;
 
-    public LayerDetails(final int layerIndex, final String layerDotTarDirname, final String layerMetadataFileContents, final List<ComponentDetails> components) {
+    public LayerDetails(final int layerIndex, final String layerExternalId, final String layerMetadataFileContents, final List<ComponentDetails> components) {
         this.layerIndex = layerIndex;
-        this.layerDotTarDirname = layerDotTarDirname;
+        this.layerExternalId = layerExternalId;
         this.layerMetadataFileContents = layerMetadataFileContents;
         this.components = components;
-    }
-
-    private String getLayerDotTarDirname() {
-        return layerDotTarDirname;
     }
 
     public String getLayerMetadataFileContents() {
@@ -53,6 +50,10 @@ public class LayerDetails {
     }
 
     public String getLayerIndexedName() {
-        return String.format("Layer%02d_%s", layerIndex, getLayerDotTarDirname());
+        if (StringUtils.isBlank(layerExternalId)) {
+            return String.format("Layer%02d", layerIndex);
+        } else {
+            return String.format("Layer%02d_%s", layerIndex, layerExternalId.replaceAll(":", "_"));
+        }
     }
 }

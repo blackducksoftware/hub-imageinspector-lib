@@ -23,6 +23,26 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
+import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
+import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
+import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
+import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
+import com.synopsys.integration.blackduck.imageinspector.linux.Os;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
+import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,7 +52,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
@@ -42,24 +61,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
-import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
-import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
-import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
-import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
-import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
-import com.synopsys.integration.exception.IntegrationException;
-
 
 @Component
 public class DockerTarParser {
@@ -67,8 +68,6 @@ public class DockerTarParser {
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Gson gson = new Gson();
-
     private ManifestFactory manifestFactory;
     private Os os;
 
@@ -82,18 +81,18 @@ public class DockerTarParser {
         this.manifestFactory = manifestFactory;
     }
 
-    public ImageInfoParsed extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
+    public ImageInfoParsed extractDockerLayers(final Gson gson, final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
-        for (final String layer : manifestLayerMapping.getLayers()) {
-            logger.trace(String.format("Looking for tar for layer: %s", layer));
-            final File layerTar = getLayerTar(layerTars, layer);
+        for (final String layerDotTarDirname : manifestLayerMapping.getLayers()) {
+            logger.trace(String.format("Looking for tar for layer: %s", layerDotTarDirname));
+            final File layerTar = getLayerTar(layerTars, layerDotTarDirname);
             if (layerTar != null) {
                 extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
                 String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-                imageInfoParsed = addPostLayerComponents(layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layer, layerMetadataFileContents);
+                imageInfoParsed = addPostLayerComponents(gson, layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layerMetadataFileContents, manifestLayerMapping.getLayerExternalId(layerIndex));
             } else {
-                logger.error(String.format("Could not find the tar for layer %s", layer));
+                logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
             }
             layerIndex++;
         }
@@ -161,19 +160,47 @@ public class DockerTarParser {
         return untaredFiles;
     }
 
-    public ManifestLayerMapping getLayerMapping(final File workingDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
+    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File workingDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
         logger.debug(String.format("working dir: %s", workingDirectory));
-        final Manifest manifest = manifestFactory.createManifest(getTarExtractionDirectory(workingDirectory), tarFileName);
-        ManifestLayerMapping mapping;
+        final File tarExtractionDirectoryParent = getTarExtractionDirectory(workingDirectory);
+        final File tarExtractionDirectory = new File(tarExtractionDirectoryParent, tarFileName);
+        final Manifest manifest = manifestFactory.createManifest(tarExtractionDirectoryParent, tarFileName);
+        ManifestLayerMapping partialMapping;
         try {
-            mapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
+            partialMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
         } catch (final Exception e) {
             final String msg = String.format("Could not parse the image manifest file : %s", e.getMessage());
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        return mapping;
+        final List<String> layerIds = getLayerIdsFromImageConfigFile(gsonBuilder, tarExtractionDirectory, partialMapping.getConfig());
+        if (layerIds == null) {
+            return partialMapping;
+        }
+        return new ManifestLayerMapping(partialMapping, layerIds);
+    }
+
+    private List<String> getLayerIdsFromImageConfigFile(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String imageConfigFileName) {
+        try {
+            final File imageConfigFile = new File(tarExtractionDirectory, imageConfigFileName);
+            final String imageConfigFileContents = FileUtils
+                .readFileToString(imageConfigFile, StandardCharsets.UTF_8);
+            logger.debug(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
+            JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(imageConfigFileContents, JsonObject.class);
+            JsonObject rootFsJsonObj = imageConfigJsonObj.getAsJsonObject("rootfs");
+            JsonArray layerIdsJsonArray = rootFsJsonObj.getAsJsonArray("diff_ids");
+            final int numLayers = layerIdsJsonArray.size();
+            final List<String> layerIds = new ArrayList<>(numLayers);
+            for (int i=0; i < numLayers; i++) {
+                logger.debug(String.format("layer ID: %s", layerIdsJsonArray.get(i).getAsString()));
+                layerIds.add(layerIdsJsonArray.get(i).getAsString());
+            }
+            return layerIds;
+        } catch (Exception e) {
+            logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
+        }
+        return null;
     }
 
     public ImageComponentHierarchy createInitialImageComponentHierarchy(final File workingDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
@@ -273,7 +300,7 @@ public class DockerTarParser {
         return layerMetadataFileContents;
     }
 
-    private ImageInfoParsed addPostLayerComponents(final int layerIndex, final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, String layerId, final String layerMetadataFileContents) throws WrongInspectorOsException {
+    private ImageInfoParsed addPostLayerComponents(final Gson gson, final int layerIndex, final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents, final String layerExternalId) throws WrongInspectorOsException {
         logger.debug("Getting components present (so far) after adding this layer");
         if (currentOs == null) {
             logger.debug("Current (running on) OS not provided; cannot determine components present after adding this layer");
@@ -306,17 +333,17 @@ public class DockerTarParser {
             for (ComponentDetails comp : comps) {
                 logger.debug(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }
-            LayerDetails layer = new LayerDetails(layerIndex, layerId, layerMetadataFileContents, comps);
+            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, comps);
             imageComponentHierarchy.addLayer(layer);
         } catch (final WrongInspectorOsException wrongOsException) {
             throw wrongOsException;
         } catch (final PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
             logger.debug(String.format("Unable to collect components present after this layer: The file system is not yet populated with the linux distro and package manager files: %s", pkgMgrDataNotFoundException.getMessage()));
-            LayerDetails layer = new LayerDetails(layerIndex, layerId, layerMetadataFileContents, null);
+            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, null);
             imageComponentHierarchy.addLayer(layer);
         } catch (final Exception otherException) {
             logger.debug("Unable to collect components present after this layer");
-            LayerDetails layer = new LayerDetails(layerIndex, layerId, layerMetadataFileContents, null);
+            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, null);
             imageComponentHierarchy.addLayer(layer);
         }
         return imageInfoParsed;

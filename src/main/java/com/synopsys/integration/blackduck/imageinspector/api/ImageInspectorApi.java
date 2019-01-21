@@ -23,18 +23,10 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.api;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.compress.compressors.CompressorException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.synopsys.integration.bdio.SimpleBdioFactory;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
@@ -48,8 +40,16 @@ import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.bdio.SimpleBdioFactory;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ImageInspectorApi {
@@ -154,7 +154,7 @@ public class ImageInspectorApi {
         final File workingDir = new File(tempDir, "working");
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
-        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(workingDir, dockerTarfile.getName(), givenImageRepo, givenImageTag);
+        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(new GsonBuilder(), workingDir, dockerTarfile.getName(), givenImageRepo, givenImageTag);
         final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(workingDir, dockerTarfile.getName(), manifestLayerMapping);
         final String imageRepo = manifestLayerMapping.getImageName();
         final String imageTag = manifestLayerMapping.getTagName();
@@ -162,7 +162,7 @@ public class ImageInspectorApi {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
-        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
+        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(new Gson(), currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
         logLayers(imageComponentHierarchy);
         cleanUpLayerTars(cleanupWorkingDir, layerTars);
         ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,

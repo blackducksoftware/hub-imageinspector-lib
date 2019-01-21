@@ -23,24 +23,30 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest;
 
-import java.util.List;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 import com.synopsys.integration.util.Stringable;
+import java.util.List;
 
 public class ManifestLayerMapping extends Stringable {
     private final String imageName;
     private final String tagName;
     private final String config;
     private final List<String> layers;
+    private final List<String> layerExternalIds;
 
     public ManifestLayerMapping(final String imageName, final String tagName, final String config, final List<String> layers) {
         this.imageName = imageName;
         this.tagName = tagName;
         this.config = config;
         this.layers = layers;
+        this.layerExternalIds = null;
+    }
+
+    public ManifestLayerMapping(final ManifestLayerMapping partialManafestLayerMapping, final List<String> layerExternalIds) {
+            this.imageName = partialManafestLayerMapping.getImageName();
+        this.tagName = partialManafestLayerMapping.getTagName();
+        this.config = partialManafestLayerMapping.getConfig();
+        this.layers = partialManafestLayerMapping.getLayers();
+        this.layerExternalIds = layerExternalIds;
     }
 
     public String getImageName() {
@@ -57,5 +63,12 @@ public class ManifestLayerMapping extends Stringable {
 
     public List<String> getLayers() {
         return layers;
+    }
+
+    public String getLayerExternalId(final int layerIndex) {
+        if ((layerExternalIds == null) || (layerExternalIds.size() < layerIndex+1)) {
+            return null;
+        }
+        return layerExternalIds.get(layerIndex);
     }
 }

@@ -23,16 +23,9 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
@@ -43,7 +36,13 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGen
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ImageInspector {
@@ -66,13 +65,13 @@ public class ImageInspector {
         return tarParser.extractLayerTars(workingDir, dockerTar);
     }
 
-    public ImageInfoParsed extractDockerLayers(final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws IOException,
+    public ImageInfoParsed extractDockerLayers(final Gson gson, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws IOException,
                                                                                                                                                                                                                                                        WrongInspectorOsException {
-        return tarParser.extractDockerLayers(componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
+        return tarParser.extractDockerLayers(gson, componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
     }
 
-    public ManifestLayerMapping getLayerMapping(final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
-        return tarParser.getLayerMapping(workingDir, tarFileName, dockerImageName, dockerTagName);
+    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
+        return tarParser.getLayerMapping(gsonBuilder, workingDir, tarFileName, dockerImageName, dockerTagName);
     }
 
     public ImageComponentHierarchy createInitialImageComponentHierarchy(final File workingDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
