@@ -16,7 +16,7 @@ plugins {
 }
 apply plugin: "io.spring.dependency-management"
 
-version = '8.1.2'
+version = '8.1.3-SNAPSHOT'
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencyManagement {
@@ -53,8 +53,8 @@ sonarqube {
 // For integration tests: Build image tarfiles
 
 apply plugin: 'com.bmuschko.docker-remote-api'
-import com.bmuschko.gradle.docker.tasks.image.Dockerfile
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile 
 
 task removeTestImage(type: Exec) {
     ignoreExitValue true

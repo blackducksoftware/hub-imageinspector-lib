@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
 public class AutowiredManifestFactory implements ManifestFactory {
 
     public AutowiredManifestFactory() {
-        System.out.println("AutowiredManifestFactory()");
     }
 
     @Override
