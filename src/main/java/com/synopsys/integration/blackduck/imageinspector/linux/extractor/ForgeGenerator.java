@@ -48,7 +48,7 @@ public class ForgeGenerator {
     }
 
     public static Forge createLayerForge() {
-        return createForge("none", false);
+        return new Forge("/", "/", "DOCKER_INSPECTOR");
     }
 
     public static Forge createComponentForge(final String linuxDistroName) {
