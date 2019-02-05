@@ -29,7 +29,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Imag
 import com.synopsys.integration.exception.IntegrationException;
 
 public interface ComponentExtractor {
-    static final String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";
+    String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";
 
     List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
             throws IntegrationException;

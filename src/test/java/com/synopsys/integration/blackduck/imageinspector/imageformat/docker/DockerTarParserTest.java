@@ -83,7 +83,7 @@ public class DockerTarParserTest {
             if (file.getAbsolutePath().endsWith("var/lib/rpm/Name")) {
                 System.out.println(file.getAbsolutePath());
                 varLibRpmNameFound = true;
-                final String cmd = String.format("strings %s", file.getAbsolutePath());
+                final List<String> cmd = Arrays.asList("strings", file.getAbsolutePath());
                 final String[] cmdOutput = Executor.executeCommand(cmd, 30000L);
                 final String stringsOutput = Arrays.asList(cmdOutput).stream().collect(Collectors.joining("\n"));
                 assertTrue(stringsOutput.contains("bacula-console"));
@@ -134,8 +134,6 @@ public class DockerTarParserTest {
 
         assertEquals(DPKG_STATUS_FILE_SIZE, FileUtils.sizeOf(dpkgStatusFile));
     }
-
-    // TODO also need to test a multi-image tarfile
 
     @Test
     public void testCreateInitialImageComponentHierarchy() throws IntegrationException {

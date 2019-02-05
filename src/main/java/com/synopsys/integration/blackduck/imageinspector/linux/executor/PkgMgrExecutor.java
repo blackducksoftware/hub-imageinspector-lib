@@ -23,29 +23,26 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
+import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
-import com.synopsys.integration.exception.IntegrationException;
 
 public abstract class PkgMgrExecutor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private static final Long CMD_TIMEOUT = 120000L;
     private final ReentrantLock lock = new ReentrantLock();
-    private String upgradeCommand;
+    private List<String> upgradeCommand;
     private List<String> listPackagesCommandParts;
 
     public abstract void init();
 
-    void initValues(final String upgradeCommand, final List<String> listPackagesCommandParts) {
+    void initValues(final List<String> upgradeCommand, final List<String> listPackagesCommandParts) {
         this.upgradeCommand = upgradeCommand;
         this.listPackagesCommandParts = listPackagesCommandParts;
     }
@@ -82,7 +79,7 @@ public abstract class PkgMgrExecutor {
             results = Executor.executeCommand(listPackagesCommandParts, CMD_TIMEOUT);
             logger.info(String.format("Command %s executed successfully", listPackagesCommandParts));
         } catch (final Exception e) {
-            if (!StringUtils.isBlank(upgradeCommand)) {
+            if (upgradeCommand != null) {
                 logger.warn(String.format("Error executing \"%s\": %s; Trying to upgrade package database by executing: %s", listPackagesCommandParts, e.getMessage(), upgradeCommand));
                 Executor.executeCommand(upgradeCommand, CMD_TIMEOUT);
                 results = Executor.executeCommand(listPackagesCommandParts, CMD_TIMEOUT);

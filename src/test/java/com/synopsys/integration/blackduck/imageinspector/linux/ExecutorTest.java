@@ -35,15 +35,4 @@ public class ExecutorTest {
         assertEquals(1, results.length);
         assertEquals(ARG, results[0]);
     }
-
-    // TODO: This fails, proving (I think) that we need to use the cmdParts versions for complex quoted strings
-    // @Test
-    // public void testUsingString() throws UnsupportedEncodingException, IntegrationException {
-    // final String cmdLine = String.format("%s '%s'", "echo", ARG);
-    // System.out.printf("cmdLine: %s\n", cmdLine);
-    // final String[] results = Executor.executeCommand(cmdLine, 10000L);
-    // assertEquals(1, results.length);
-    // assertEquals(ARG, results[0]);
-    // }
-
 }

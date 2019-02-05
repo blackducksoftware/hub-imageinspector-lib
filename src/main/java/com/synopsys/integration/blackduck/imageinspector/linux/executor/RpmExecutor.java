@@ -40,7 +40,7 @@ public class RpmExecutor extends PkgMgrExecutor {
     @Override
     @PostConstruct
     public void init() {
-        initValues("rpm --rebuilddb",
+        initValues(Arrays.asList("rpm",  "--rebuilddb"),
                 Arrays.asList("rpm", "-qa", "--qf", PACKAGE_FORMAT_STRING));
     }
 

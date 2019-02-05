@@ -44,12 +44,6 @@ import com.synopsys.integration.exception.IntegrationException;
 public class Executor {
     private static final Logger logger = LoggerFactory.getLogger(Executor.class);
 
-    public static String[] executeCommand(final String commandString, final Long timeoutMillisec) throws IntegrationException, UnsupportedEncodingException {
-        logger.debug(String.format("Executing: %s with timeout %s", commandString, timeoutMillisec));
-        final CommandLine cmdLine = CommandLine.parse(commandString);
-        return executeCommandLine(commandString, timeoutMillisec, cmdLine);
-    }
-
     public static String[] executeCommand(final List<String> commandParts, final Long timeoutMillisec) throws IntegrationException, UnsupportedEncodingException {
         logger.debug(String.format("Executing: %s with timeout %s", commandParts.get(0), timeoutMillisec));
         final CommandLine cmdLine = new CommandLine(commandParts.get(0));
