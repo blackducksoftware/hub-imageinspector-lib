@@ -23,29 +23,24 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.stereotype.Component;
-
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.RpmComponentExtractor;
+import java.io.File;
+import javax.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
 
 @Component
 public class RpmExecutor extends PkgMgrExecutor {
-    private static final String PACKAGE_FORMAT_STRING = "\\{ epoch: \"%{E}\", name: \"%{N}\", version: \"%{V}-%{R}\", arch: \"%{ARCH}\" \\}\\n";
 
     @Override
     @PostConstruct
     public void init() {
-        initValues(Arrays.asList("rpm",  "--rebuilddb"),
-                Arrays.asList("rpm", "-qa", "--qf", PACKAGE_FORMAT_STRING));
+        initValues(RpmComponentExtractor.UPGRADE_DATABASE_COMMAND,
+            RpmComponentExtractor.LIST_COMPONENTS_COMMAND);
     }
 
     @Override
-    protected void initPkgMgrDir(final File packageManagerDirectory) throws IOException {
+    protected void initPkgMgrDir(final File packageManagerDirectory) {
         FileOperations.deleteFilesOnly(packageManagerDirectory);
     }
 }

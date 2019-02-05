@@ -23,22 +23,19 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgComponentExtractor;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-
 import javax.annotation.PostConstruct;
-
 import org.springframework.stereotype.Component;
-
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 @Component
 public class DpkgExecutor extends PkgMgrExecutor {
     @Override
     @PostConstruct
     public void init() {
-        initValues(null, Arrays.asList("dpkg", "-l"));
+        initValues(DpkgComponentExtractor.UPGRADE_DATABASE_COMMAND, DpkgComponentExtractor.LIST_COMPONENTS_COMMAND);
     }
 
     @Override

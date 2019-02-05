@@ -23,25 +23,26 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
+import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
-import com.synopsys.integration.exception.IntegrationException;
-
 public class ApkComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    public static final List<String> UPGRADE_DATABASE_COMMAND = null;
+    public static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("apk", "info", "-v");
     private static final String ARCH_FILENAME = "arch";
     private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
     private final PkgMgrExecutor pkgMgrExecutor;

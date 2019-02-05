@@ -23,27 +23,22 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.stereotype.Component;
-
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ApkComponentExtractor;
+import java.io.File;
+import javax.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ApkExecutor extends PkgMgrExecutor {
     @Override
     @PostConstruct
     public void init() {
-        // TODO: The info cmd is tightly coupled with extractor code that interpret the output; belongs there
-        initValues(null, Arrays.asList("apk", "info", "-v"));
+        initValues(ApkComponentExtractor.UPGRADE_DATABASE_COMMAND, ApkComponentExtractor.LIST_COMPONENTS_COMMAND);
     }
 
     @Override
-    protected void initPkgMgrDir(final File packageManagerDirectory) throws IOException {
+    protected void initPkgMgrDir(final File packageManagerDirectory) {
         FileOperations.deleteFilesOnly(packageManagerDirectory);
     }
 }
