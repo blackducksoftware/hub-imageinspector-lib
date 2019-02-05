@@ -18,10 +18,11 @@ import com.synopsys.integration.exception.IntegrationException;
 import java.io.IOException;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-
+@Tag("integration")
 public class ImageInspectorApiTest {
 
     private static final String CODE_LOCATION_PREFIX = "testCodeLocationPrefix";
