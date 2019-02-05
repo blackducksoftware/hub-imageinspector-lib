@@ -19,8 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.AutowiredManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
@@ -63,7 +62,7 @@ public class DockerTarParserTest {
         System.out.println("workingDirectory: ${workingDirectory.getAbsolutePath()}");
 
         final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new HardwiredManifestFactory());
+        tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setOs(new Os());
 
         final List<File> layerTars = tarParser.extractLayerTars(workingDirectory, dockerTar);
@@ -119,7 +118,7 @@ public class DockerTarParserTest {
         layerTars.add(dockerTar);
 
         final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new HardwiredManifestFactory());
+        tarParser.setManifestFactory(new ManifestFactory());
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);
@@ -144,7 +143,7 @@ public class DockerTarParserTest {
         String tarFilename = "alpine.tar";
 
         final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new AutowiredManifestFactory());
+        tarParser.setManifestFactory(new ManifestFactory());
         ManifestLayerMapping mapping = tarParser.getLayerMapping(new GsonBuilder(), workingDir, tarFilename, "alpine", "latest");
         ImageComponentHierarchy h = tarParser.createInitialImageComponentHierarchy(workingDir, tarFilename, mapping);
         System.out.printf("Image config file contents: %s\n", h.getImageConfigFileContents());

@@ -25,6 +25,19 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.man
 
 import java.io.File;
 
-public interface ManifestFactory {
-    Manifest createManifest(final File tarExtractionDirectory, final String dockerTarFileName);
+import org.springframework.stereotype.Component;
+
+@Component
+public class ManifestFactory {
+
+    public ManifestFactory() {
+    }
+
+    public Manifest createManifest(final File tarExtractionDirectory, final String dockerTarFileName) {
+        final Manifest manifest = new Manifest(tarExtractionDirectory, dockerTarFileName);
+        final ManifestLayerMappingFactory factory = new ManifestLayerMappingFactory();
+        manifest.setManifestLayerMappingFactory(factory);
+        return manifest;
+    }
+
 }

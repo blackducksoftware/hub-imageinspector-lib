@@ -35,7 +35,7 @@ public enum ImageInspectorOsEnum {
 
     private final OperatingSystemEnum rawOs;
 
-    private ImageInspectorOsEnum(final OperatingSystemEnum rawOs) {
+    ImageInspectorOsEnum(final OperatingSystemEnum rawOs) {
         this.rawOs = rawOs;
     }
 

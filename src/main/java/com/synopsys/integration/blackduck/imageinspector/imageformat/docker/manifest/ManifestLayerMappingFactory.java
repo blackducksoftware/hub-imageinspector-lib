@@ -25,6 +25,14 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.man
 
 import java.util.List;
 
-public interface ManifestLayerMappingFactory {
-    ManifestLayerMapping createManifestLayerMapping(final String imageName, final String tagName, final String config, final List<String> layers);
+import org.springframework.stereotype.Component;
+
+@Component
+public class ManifestLayerMappingFactory {
+
+    public ManifestLayerMapping createManifestLayerMapping(final String imageName, final String tagName, final String config, final List<String> layers) {
+        final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, config, layers);
+        return mapping;
+    }
+
 }

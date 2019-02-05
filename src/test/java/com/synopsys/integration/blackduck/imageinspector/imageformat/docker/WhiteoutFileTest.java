@@ -7,7 +7,7 @@ import static org.junit.Assert.assertFalse;
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.HardwiredManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
@@ -57,7 +57,7 @@ public class WhiteoutFileTest {
         layerTars.add(dockerTar);
 
         final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new HardwiredManifestFactory());
+        tarParser.setManifestFactory(new ManifestFactory());
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);

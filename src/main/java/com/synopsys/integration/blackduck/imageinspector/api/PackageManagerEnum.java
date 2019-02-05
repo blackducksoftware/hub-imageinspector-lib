@@ -38,7 +38,7 @@ public enum PackageManagerEnum {
     private final String directory;
     private final OperatingSystemEnum inspectorOperatingSystem;
 
-    private PackageManagerEnum(final String directory, final OperatingSystemEnum inspectorOperatingSystem) {
+    PackageManagerEnum(final String directory, final OperatingSystemEnum inspectorOperatingSystem) {
         this.directory = directory;
         this.inspectorOperatingSystem = inspectorOperatingSystem;
     }

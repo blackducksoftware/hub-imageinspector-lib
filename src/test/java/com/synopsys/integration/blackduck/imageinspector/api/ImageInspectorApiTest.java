@@ -2,27 +2,26 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.synopsys.integration.bdio.model.BdioProject;
+import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.IOException;
 import org.apache.commons.compress.compressors.CompressorException;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
-// TODO why does this fail?
-@Disabled
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(classes = { AppConfig.class })
+
 public class ImageInspectorApiTest {
 
     private static final String CODE_LOCATION_PREFIX = "testCodeLocationPrefix";
@@ -39,19 +38,29 @@ public class ImageInspectorApiTest {
     private static final String IMAGE_REPO = "alpine";
     private static final String IMAGE_TAG = "latest";
 
-    @Autowired
-    private ImageInspectorApi imageInspectorApi;
 
-    @MockBean
-    private Os os;
+    private static Os os;
+    private static ImageInspectorApi imageInspectorApi;
+    private static ApkExecutor apkExecutor;
 
-    // TODO
-    //@Test
+    @BeforeAll
+    public static void setup() {
+        os = Mockito.mock(Os.class);
+        final DockerTarParser dockerTarParser = new DockerTarParser();
+        dockerTarParser.setManifestFactory(new ManifestFactory());
+        dockerTarParser.setOs(os);
+        final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
+        apkExecutor = Mockito.mock(ApkExecutor.class);
+        componentExtractorFactory.setApkExecutor(apkExecutor);
+        final ImageInspector imageInspector = new ImageInspector(dockerTarParser, componentExtractorFactory);
+        imageInspectorApi = new ImageInspectorApi(imageInspector, os);
+    }
+
+    @Test
     public void testOnWrongOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
-        assertNotNull(imageInspectorApi);
-        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(null);
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.CENTOS);
         try {
-            imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null);
+            imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, "CENTOS");
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
@@ -59,32 +68,26 @@ public class ImageInspectorApiTest {
         }
     }
 
-    // TODO
-    //@Test
+    @Test
     public void testOnRightOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
-        assertNotNull(imageInspectorApi);
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.ALPINE);
-        final BdioGenerator mockExtractor = Mockito.mock(BdioGenerator.class);
-        // Mockito.when(mockExtractor.getPackageManagerEnum()).thenReturn(PackageManagerEnum.APK);
-        final SimpleBdioDocument mockedBdioDocument = new SimpleBdioDocument();
-        mockedBdioDocument.project = new BdioProject();
-        mockedBdioDocument.project.id = MOCKED_PROJECT_ID;
-        // Mockito.when(mockExtractor.extract(Mockito.anyString(), Mockito.anyString(), Mockito.any(ImagePkgMgrDatabase.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        // .thenReturn(mockedBdioDocument);
-        // Mockito.when(extractorManager.getExtractors()).thenReturn(mockExtractors);
-        final ImageInfoDerived imageInfo = null; // imageInspectorApi.inspect(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, CODE_LOCATION_PREFIX, null, null, false, false, null, null);
-        assertEquals(String.format("%s_alpine_latest_lib_apk_APK", CODE_LOCATION_PREFIX), imageInfo.getCodeLocationName());
-        assertEquals(PROJECT, imageInfo.getFinalProjectName());
-        assertEquals(PROJECT_VERSION, imageInfo.getFinalProjectVersionName());
-        assertEquals(String.format("image_%s_v_%s", IMAGE_REPO, IMAGE_TAG), imageInfo.getImageInfoParsed().getFileSystemRootDir().getName());
-        assertEquals("/lib/apk", imageInfo.getImageInfoParsed().getPkgMgr().getPackageManager().getDirectory());
-        assertEquals("apk", imageInfo.getImageInfoParsed().getPkgMgr().getExtractedPackageManagerDirectory().getName());
-        assertEquals(IMAGE_TAG, imageInfo.getManifestLayerMapping().getTagName());
-        assertEquals(IMAGE_REPO, imageInfo.getManifestLayerMapping().getImageName());
-        assertEquals("8a6f655225cc4cf354cc4a21178983b10f835b82e12d300f328d9d5c59b2d872", imageInfo.getManifestLayerMapping().getLayers().get(0));
-        assertEquals("lib/apk", imageInfo.getPkgMgrFilePath());
-
-        final SimpleBdioDocument returnedBdioDocument = imageInfo.getBdioDocument();
-        assertEquals(MOCKED_PROJECT_ID, returnedBdioDocument.project.id);
+        String[] apkPackages = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
+        Mockito.when(apkExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkPackages);
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, "ALPINE");
+        System.out.printf("bdioDocument: %s\n", bdioDocument);
+        assertEquals(PROJECT, bdioDocument.project.name);
+        assertEquals(PROJECT_VERSION, bdioDocument.project.version);
+        assertEquals(apkPackages.length, bdioDocument.components.size());
+        for (BdioComponent comp : bdioDocument.components) {
+            System.out.printf("comp: %s:%s:%s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
+            if (comp.name.equals("boost-unit_test_framework")) {
+                assertEquals("1.62.0-r5", comp.version);
+                assertEquals("boost-unit_test_framework/1.62.0-r5/x86_64", comp.bdioExternalIdentifier.externalId);
+            } else {
+                assertEquals("ca-certificates", comp.name);
+                assertEquals("20171114-r0", comp.version);
+                assertEquals("ca-certificates/20171114-r0/x86_64", comp.bdioExternalIdentifier.externalId);
+            }
+        }
     }
 }
