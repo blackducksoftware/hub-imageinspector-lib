@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.name;
+package com.synopsys.integration.blackduck.imageinspector.api.name;
 
 import static org.junit.Assert.assertEquals;
 

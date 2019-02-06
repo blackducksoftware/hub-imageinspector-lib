@@ -118,6 +118,7 @@ public class BdioGenerator {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             Dependency layerDependency = addLayerDependency(graph, layer.getLayerIndexedName());
+            logger.debug(String.format("Created layer node: %s", layerDependency.name));
             for (final ComponentDetails comp : layer.getComponents()) {
                 if (imageComponentHierarchy.getFinalComponents().contains(comp)) {
                     logger.debug(String.format("layer comp %s:%s is in final components list; including it in this layer", comp.getName(), comp.getVersion()));

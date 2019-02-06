@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.name;
+package com.synopsys.integration.blackduck.imageinspector.api.name;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,7 +6,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.synopsys.integration.blackduck.imageinspector.name.ImageNameResolver;
+import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 
 public class ImageNameResolverTest {
 

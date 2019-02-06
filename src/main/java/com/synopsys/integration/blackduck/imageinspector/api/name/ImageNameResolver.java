@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.name;
+package com.synopsys.integration.blackduck.imageinspector.api.name;
 
 import java.util.Optional;
 
@@ -46,6 +46,14 @@ public class ImageNameResolver {
         }
     }
 
+    public Optional<String> getNewImageRepo() {
+        return newImageRepo;
+    }
+
+    public Optional<String> getNewImageTag() {
+        return newImageTag;
+    }
+
     private int findColonBeforeTag(final String givenImageName) {
         final int lastColonIndex = givenImageName.lastIndexOf(':');
         if (lastColonIndex < 0) {
@@ -63,13 +71,4 @@ public class ImageNameResolver {
         }
         return lastColonIndex;
     }
-
-    public Optional<String> getNewImageRepo() {
-        return newImageRepo;
-    }
-
-    public Optional<String> getNewImageTag() {
-        return newImageTag;
-    }
-
 }

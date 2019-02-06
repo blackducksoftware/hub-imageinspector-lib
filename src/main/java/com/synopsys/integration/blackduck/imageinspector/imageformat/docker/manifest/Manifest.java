@@ -41,7 +41,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.synopsys.integration.blackduck.imageinspector.name.ImageNameResolver;
+import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 
 public class Manifest {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
