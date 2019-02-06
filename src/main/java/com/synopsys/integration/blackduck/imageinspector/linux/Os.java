@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component

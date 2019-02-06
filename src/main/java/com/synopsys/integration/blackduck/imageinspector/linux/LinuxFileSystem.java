@@ -23,6 +23,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux;
 
+import com.synopsys.integration.util.Stringable;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,25 +31,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarConstants;
-import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.util.Stringable;
-
 public class LinuxFileSystem extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private static final int LIB_MAX_DEPTH = 3;
-    private static final List<String> ROOT_LEVEL_DIRS_TO_SKIP = Arrays.asList("Users", "proc", "dev", "sys", "tmp", "home");
 
     private final File root;
 
@@ -66,7 +59,7 @@ public class LinuxFileSystem extends Stringable {
         }
     }
 
-    public void createTarGz(final File outputTarFile) throws CompressorException, IOException {
+    public void createTarGz(final File outputTarFile) throws IOException {
         outputTarFile.getParentFile().mkdirs();
         FileOperations.logFileOwnerGroupPerms(outputTarFile.getParentFile());
         FileOutputStream fOut = null;

@@ -22,7 +22,7 @@ import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsExc
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;

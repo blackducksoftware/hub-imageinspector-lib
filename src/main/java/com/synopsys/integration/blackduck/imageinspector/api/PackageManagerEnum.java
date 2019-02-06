@@ -26,8 +26,6 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
-
 public enum PackageManagerEnum {
     DPKG("/var/lib/dpkg", OperatingSystemEnum.UBUNTU),
     RPM("/var/lib/rpm", OperatingSystemEnum.CENTOS),

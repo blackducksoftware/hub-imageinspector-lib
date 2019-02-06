@@ -26,6 +26,7 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
@@ -122,7 +123,7 @@ public class ImageInspector {
     private String deriveBlackDuckProject(final String imageName, final String projectName) {
         String blackDuckProjectName;
         if (StringUtils.isBlank(projectName)) {
-            blackDuckProjectName = Names.getblackDuckProjectNameFromImageName(imageName);
+            blackDuckProjectName = Names.getBlackDuckProjectNameFromImageName(imageName);
         } else {
             logger.debug("Using project from config property");
             blackDuckProjectName = projectName;

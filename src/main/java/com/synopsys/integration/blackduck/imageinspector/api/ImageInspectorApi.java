@@ -33,7 +33,6 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHiera
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;

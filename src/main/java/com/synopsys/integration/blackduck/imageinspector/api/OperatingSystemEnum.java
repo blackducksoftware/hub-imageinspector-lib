@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.lib;
+package com.synopsys.integration.blackduck.imageinspector.api;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

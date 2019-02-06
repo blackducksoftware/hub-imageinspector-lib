@@ -25,7 +25,6 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.synopsys.integration.blackduck.imageinspector.lib.OperatingSystemEnum;
 import com.synopsys.integration.exception.IntegrationException;
 
 public enum ImageInspectorOsEnum {

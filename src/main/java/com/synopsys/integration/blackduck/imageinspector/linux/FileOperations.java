@@ -57,12 +57,6 @@ public class FileOperations {
         }
     }
 
-    public static void ensureDirExists(final File dir) {
-        logger.debug(String.format("Creating %s (if it does not exist)", dir.getAbsolutePath()));
-        final boolean mkdirsResult = dir.mkdirs();
-        logger.debug(String.format("\tmkdirs result: %b", mkdirsResult));
-    }
-
     public static void logFileOwnerGroupPerms(final File file) {
         logger.debug(String.format("Current process owner: %s", System.getProperty("user.name")));
         if (!file.exists()) {
