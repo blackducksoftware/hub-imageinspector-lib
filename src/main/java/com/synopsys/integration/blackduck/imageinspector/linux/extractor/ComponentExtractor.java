@@ -25,7 +25,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import java.util.List;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.exception.IntegrationException;
 
 public interface ComponentExtractor {

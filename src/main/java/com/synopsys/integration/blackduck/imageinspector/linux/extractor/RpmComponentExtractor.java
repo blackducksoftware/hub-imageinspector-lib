@@ -24,7 +24,7 @@
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.output.RpmPackage;
 import com.synopsys.integration.exception.IntegrationException;
