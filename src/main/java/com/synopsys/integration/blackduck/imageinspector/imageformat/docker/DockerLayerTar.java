@@ -23,34 +23,24 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntries;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntry;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntries;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntry;
-
 public class DockerLayerTar {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(DockerLayerTar.class);
 
-    private final File layerTar;
-
-    public DockerLayerTar(final File layerTar) {
-        this.layerTar = layerTar;
-    }
-
-    public List<File> extractToDir(final File layerOutputDir) throws IOException {
+    public static List<File> extractLayerTarToDir(final File layerTar, final File layerOutputDir) throws IOException {
         logger.debug(String.format("layerTar: %s", layerTar.getAbsolutePath()));
         final List<File> filesToRemove = new ArrayList<>();
         final TarArchiveInputStream layerInputStream = new TarArchiveInputStream(new FileInputStream(layerTar), "UTF-8");
@@ -74,10 +64,5 @@ public class DockerLayerTar {
             IOUtils.closeQuietly(layerInputStream);
         }
         return filesToRemove;
-    }
-
-    @Override
-    public String toString() {
-        return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE);
     }
 }

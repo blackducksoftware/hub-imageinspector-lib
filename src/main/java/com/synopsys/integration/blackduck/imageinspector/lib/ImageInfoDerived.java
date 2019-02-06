@@ -23,7 +23,6 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 
@@ -32,12 +31,9 @@ import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 public class ImageInfoDerived {
     private final ImageInfoParsed imageInfoParsed;
     private ManifestLayerMapping manifestLayerMapping = null;
-
     private String codeLocationName = null;
     private String finalProjectName = null;
     private String finalProjectVersionName = null;
-
-    private ImageComponentHierarchy imageComponentHierarchy = null;
     private SimpleBdioDocument bdioDocument = null;
 
     public ImageInfoDerived(final ImageInfoParsed imageInfoParsed) {
@@ -86,13 +82,5 @@ public class ImageInfoDerived {
 
     public void setBdioDocument(final SimpleBdioDocument bdioDocument) {
         this.bdioDocument = bdioDocument;
-    }
-
-    public void setImageComponentHierarchy(final ImageComponentHierarchy imageComponentHierarchy) {
-        this.imageComponentHierarchy = imageComponentHierarchy;
-    }
-
-    public ImageComponentHierarchy getImageComponentHierarchy() {
-        return imageComponentHierarchy;
     }
 }

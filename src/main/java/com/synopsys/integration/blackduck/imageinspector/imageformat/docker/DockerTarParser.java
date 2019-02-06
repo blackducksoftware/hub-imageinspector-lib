@@ -35,6 +35,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
@@ -231,8 +232,7 @@ public class DockerTarParser {
 
     private File extractLayerTarToDir(final File targetImageFileSystemRoot, final File layerTar) throws IOException {
         logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), targetImageFileSystemRoot.getAbsolutePath()));
-        final DockerLayerTar dockerLayerTar = new DockerLayerTar(layerTar);
-        final List<File> filesToRemove = dockerLayerTar.extractToDir(targetImageFileSystemRoot);
+        final List<File> filesToRemove = DockerLayerTar.extractLayerTarToDir(layerTar, targetImageFileSystemRoot);
         for (final File fileToRemove : filesToRemove) {
             if (fileToRemove.isDirectory()) {
                 logger.debug(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));
