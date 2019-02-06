@@ -77,10 +77,9 @@ public class DockerTarParserTest {
         assertEquals("/var/lib/rpm", tarExtractionResults.getPkgMgr().getPackageManager().getDirectory());
 
         boolean varLibRpmNameFound = false;
-        int numFilesFound = 0;
         final Collection<File> files = FileUtils.listFiles(workingDirectory, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+        int numFilesFound = files.size();
         for (final File file : files) {
-            numFilesFound++;
             if (file.getAbsolutePath().endsWith("var/lib/rpm/Name")) {
                 System.out.println(file.getAbsolutePath());
                 varLibRpmNameFound = true;
@@ -96,7 +95,7 @@ public class DockerTarParserTest {
 
         // MacOS file system does not preserve case which throws off the count
         System.out.printf("Extracted %d files\n", numFilesFound);
-        assertTrue(numFilesFound > 18000);
+        assertTrue(numFilesFound > 10000);
         assertTrue(numFilesFound < 19000);
     }
 
