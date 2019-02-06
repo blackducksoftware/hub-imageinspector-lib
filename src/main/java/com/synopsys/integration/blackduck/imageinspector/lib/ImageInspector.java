@@ -47,6 +47,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ImageInspector {
+    public static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
+    public static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final DockerTarParser tarParser;
@@ -59,11 +61,11 @@ public class ImageInspector {
     }
 
     public File getTarExtractionDirectory(final File workingDirectory) {
-        return tarParser.getTarExtractionDirectory(workingDirectory);
+        return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
     }
 
-    public List<File> extractLayerTars(final File workingDir, final File dockerTar) throws IOException {
-        return tarParser.extractLayerTars(workingDir, dockerTar);
+    public List<File> extractLayerTars(final File tarExtractionDirectory, final File dockerTar) throws IOException {
+        return tarParser.extractLayerTars(tarExtractionDirectory, dockerTar);
     }
 
     public ImageInfoParsed extractDockerLayers(final Gson gson, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping layerMapping) throws IOException,
@@ -71,12 +73,12 @@ public class ImageInspector {
         return tarParser.extractDockerLayers(gson, componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
     }
 
-    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File workingDir, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
-        return tarParser.getLayerMapping(gsonBuilder, workingDir, tarFileName, dockerImageName, dockerTagName);
+    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
+        return tarParser.getLayerMapping(gsonBuilder, tarExtractionDirectory, tarFileName, dockerImageName, dockerTagName);
     }
 
-    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File workingDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
-        return tarParser.createInitialImageComponentHierarchy(workingDirectory, tarFileName, manifestLayerMapping);
+    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File workingDirectory, final File tarExtractionDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
+        return tarParser.createInitialImageComponentHierarchy(tarExtractionDirectory, tarFileName, manifestLayerMapping);
     }
 
     public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final ImageComponentHierarchy imageComponentHierarchy, final ManifestLayerMapping mapping, final String projectName,
@@ -99,11 +101,9 @@ public class ImageInspector {
         final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
         imageInfoDerived.setManifestLayerMapping(mapping);
         if (imagePkgMgr != null && imagePkgMgr.getPackageManager() != PackageManagerEnum.NULL) {
-            imageInfoDerived.setPkgMgrFilePath(determinePkgMgrFilePath(imageInfoDerived.getImageInfoParsed(), imageInfoDerived.getImageInfoParsed().getFileSystemRootDir().getName()));
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
                     imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager().toString()));
         } else {
-            imageInfoDerived.setPkgMgrFilePath(NO_PKG_MGR_FOUND);
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
                     NO_PKG_MGR_FOUND));
         }
@@ -112,13 +112,6 @@ public class ImageInspector {
         logger.info(String.format("Black Duck project: %s, version: %s; Code location : %s", imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getCodeLocationName()));
         return imageInfoDerived;
     }
-
-    private String determinePkgMgrFilePath(final ImageInfoParsed imageInfo, final String imageDirectoryName) {
-        String pkgMgrFilePath = imageInfo.getPkgMgr().getExtractedPackageManagerDirectory().getAbsolutePath();
-        pkgMgrFilePath = pkgMgrFilePath.substring(pkgMgrFilePath.indexOf(imageDirectoryName) + imageDirectoryName.length() + 1);
-        return pkgMgrFilePath;
-    }
-
 
     private String deriveBlackDuckProject(final String imageName, final String projectName) {
         String blackDuckProjectName;

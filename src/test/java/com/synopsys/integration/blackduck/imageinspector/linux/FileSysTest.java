@@ -11,8 +11,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
-
 public class FileSysTest {
 
     @BeforeClass
@@ -29,7 +27,7 @@ public class FileSysTest {
         final File outputTarFile = new File("test/containerFileSystem.tar.gz");
         outputTarFile.delete();
         assertFalse(outputTarFile.exists());
-        fSys.createTarGz(outputTarFile);
+        fSys.writeToTarGz(outputTarFile);
         assertTrue(outputTarFile.exists());
     }
 

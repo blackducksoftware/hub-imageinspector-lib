@@ -64,7 +64,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DockerTarParser {
-    static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -81,56 +80,8 @@ public class DockerTarParser {
         this.manifestFactory = manifestFactory;
     }
 
-    public ImageInfoParsed extractDockerLayers(final Gson gson, final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
-        ImageInfoParsed imageInfoParsed = null;
-        int layerIndex = 0;
-        for (final String layerDotTarDirname : manifestLayerMapping.getLayers()) {
-            logger.trace(String.format("Looking for tar for layer: %s", layerDotTarDirname));
-            final File layerTar = getLayerTar(layerTars, layerDotTarDirname);
-            if (layerTar != null) {
-                extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
-                String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-                imageInfoParsed = addPostLayerComponents(gson, layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layerMetadataFileContents, manifestLayerMapping.getLayerExternalId(layerIndex));
-            } else {
-                logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
-            }
-            layerIndex++;
-        }
-        List<LayerDetails> layers = imageComponentHierarchy.getLayers();
-        int numLayers = layers.size();
-        if (numLayers > 0) {
-            LayerDetails topLayer = layers.get(numLayers - 1);
-            imageComponentHierarchy.setFinalComponents(topLayer.getComponents());
-        }
-        if (imageInfoParsed == null) {
-            imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), null);
-        }
-        return imageInfoParsed;
-    }
-
-    public ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
-        logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
-        for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
-            if (packageManagerEnum == PackageManagerEnum.NULL) {
-                continue;
-            }
-            final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
-            if (packageManagerDirectory.exists()) {
-                logger.info(String.format("Found package Manager Dir: %s", packageManagerDirectory.getAbsolutePath()));
-                final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(packageManagerDirectory, packageManagerEnum);
-                final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
-                final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir, targetImagePkgMgr, linuxDistroName);
-                return imagePkgMgrInfo;
-            } else {
-                logger.debug(String.format("Package manager dir %s does not exist", packageManagerDirectory.getAbsolutePath()));
-            }
-        }
-        throw new PkgMgrDataNotFoundException("No package manager files found in this Docker image.");
-    }
-
-    public List<File> extractLayerTars(final File workingDirectory, final File dockerTar) throws IOException {
-        logger.debug(String.format("working dir: %s", workingDirectory));
-        final File tarExtractionDirectory = getTarExtractionDirectory(workingDirectory);
+    public List<File> extractLayerTars(final File tarExtractionDirectory, final File dockerTar) throws IOException {
+        logger.debug(String.format("tarExtractionDirectory: %s", tarExtractionDirectory));
         final List<File> untaredFiles = new ArrayList<>();
         final File outputDir = new File(tarExtractionDirectory, dockerTar.getName());
         final TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(dockerTar));
@@ -160,12 +111,38 @@ public class DockerTarParser {
         return untaredFiles;
     }
 
-    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File workingDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
+    public ImageInfoParsed extractDockerLayers(final Gson gson, final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
+        ImageInfoParsed imageInfoParsed = null;
+        int layerIndex = 0;
+        for (final String layerDotTarDirname : manifestLayerMapping.getLayers()) {
+            logger.trace(String.format("Looking for tar for layer: %s", layerDotTarDirname));
+            final File layerTar = getLayerTar(layerTars, layerDotTarDirname);
+            if (layerTar != null) {
+                extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
+                String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
+                imageInfoParsed = addPostLayerComponents(gson, layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layerMetadataFileContents, manifestLayerMapping.getLayerExternalId(layerIndex));
+            } else {
+                logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
+            }
+            layerIndex++;
+        }
+        List<LayerDetails> layers = imageComponentHierarchy.getLayers();
+        int numLayers = layers.size();
+        if (numLayers > 0) {
+            LayerDetails topLayer = layers.get(numLayers - 1);
+            imageComponentHierarchy.setFinalComponents(topLayer.getComponents());
+        }
+        if (imageInfoParsed == null) {
+            imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), null);
+        }
+        return imageInfoParsed;
+    }
+
+    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
-        logger.debug(String.format("working dir: %s", workingDirectory));
-        final File tarExtractionDirectoryParent = getTarExtractionDirectory(workingDirectory);
-        final File tarExtractionDirectory = new File(tarExtractionDirectoryParent, tarFileName);
-        final Manifest manifest = manifestFactory.createManifest(tarExtractionDirectoryParent, tarFileName);
+        logger.debug(String.format("tarExtractionDirectory: %s", tarExtractionDirectory));
+        final File tarExtractionSubDirectory = new File(tarExtractionDirectory, tarFileName);
+        final Manifest manifest = manifestFactory.createManifest(tarExtractionDirectory, tarFileName);
         ManifestLayerMapping partialMapping;
         try {
             partialMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
@@ -174,11 +151,34 @@ public class DockerTarParser {
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        final List<String> layerIds = getLayerIdsFromImageConfigFile(gsonBuilder, tarExtractionDirectory, partialMapping.getConfig());
+        final List<String> layerIds = getLayerIdsFromImageConfigFile(gsonBuilder, tarExtractionSubDirectory, partialMapping.getConfig());
         if (layerIds == null) {
             return partialMapping;
         }
         return new ManifestLayerMapping(partialMapping, layerIds);
+    }
+
+    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File tarExtractionDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
+        String manifestFileContents = null;
+        String configFileContents = null;
+        File tarContentsDirectory = new File(tarExtractionDirectory, tarFileName);
+        for (File f : tarContentsDirectory.listFiles()) {
+            logger.info(String.format("File %s", f.getName()));
+            if ("manifest.json".equals(f.getName())) {
+                try {
+                    manifestFileContents = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new IntegrationException(String.format("Error reading manifest file %s", f.getAbsolutePath()));
+                }
+            } else if (f.getName().equals(manifestLayerMapping.getConfig())) {
+                try {
+                    configFileContents = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new IntegrationException(String.format("Error reading config file %s", f.getAbsolutePath()));
+                }
+            }
+        }
+        return new ImageComponentHierarchy(manifestFileContents, configFileContents);
     }
 
     private List<String> getLayerIdsFromImageConfigFile(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String imageConfigFileName) {
@@ -201,34 +201,6 @@ public class DockerTarParser {
             logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
         }
         return null;
-    }
-
-    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File workingDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
-        String manifestFileContents = null;
-        String configFileContents = null;
-        File tarExtractionDirectory = getTarExtractionDirectory(workingDirectory);
-        File tarContentsDirectory = new File(tarExtractionDirectory, tarFileName);
-        for (File f : tarContentsDirectory.listFiles()) {
-            logger.info(String.format("File %s", f.getName()));
-            if ("manifest.json".equals(f.getName())) {
-                try {
-                    manifestFileContents = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    throw new IntegrationException(String.format("Error reading manifest file %s", f.getAbsolutePath()));
-                }
-            } else if (f.getName().equals(manifestLayerMapping.getConfig())) {
-                try {
-                    configFileContents = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    throw new IntegrationException(String.format("Error reading config file %s", f.getAbsolutePath()));
-                }
-            }
-        }
-        return new ImageComponentHierarchy(manifestFileContents, configFileContents);
-    }
-
-    public File getTarExtractionDirectory(final File workingDirectory) {
-        return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
     }
 
     private Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {
@@ -347,5 +319,26 @@ public class DockerTarParser {
             imageComponentHierarchy.addLayer(layer);
         }
         return imageInfoParsed;
+    }
+
+
+    ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
+        logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
+        for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
+            if (packageManagerEnum == PackageManagerEnum.NULL) {
+                continue;
+            }
+            final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
+            if (packageManagerDirectory.exists()) {
+                logger.info(String.format("Found package Manager Dir: %s", packageManagerDirectory.getAbsolutePath()));
+                final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(packageManagerDirectory, packageManagerEnum);
+                final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
+                final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir, targetImagePkgMgr, linuxDistroName);
+                return imagePkgMgrInfo;
+            } else {
+                logger.debug(String.format("Package manager dir %s does not exist", packageManagerDirectory.getAbsolutePath()));
+            }
+        }
+        throw new PkgMgrDataNotFoundException("No package manager files found in this Docker image.");
     }
 }

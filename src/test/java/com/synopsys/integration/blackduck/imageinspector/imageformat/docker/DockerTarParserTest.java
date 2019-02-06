@@ -18,15 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
+import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
+import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
-import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
-import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
@@ -58,15 +59,15 @@ public class DockerTarParserTest {
     public void testExtractFullImage() throws IntegrationException, IOException {
         final File dockerTar = new File("build/images/test/centos_minus_vim_plus_bacula.tar");
         final File workingDirectory = TestUtils.createTempDirectory();
-        final File tarExtractionDirectory = new File(workingDirectory, DockerTarParser.TAR_EXTRACTION_DIRECTORY);
+        final File tarExtractionDirectory = new File(workingDirectory, ImageInspector.TAR_EXTRACTION_DIRECTORY);
         System.out.println("workingDirectory: ${workingDirectory.getAbsolutePath()}");
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setOs(new Os());
 
-        final List<File> layerTars = tarParser.extractLayerTars(workingDirectory, dockerTar);
-        final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), workingDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
+        final List<File> layerTars = tarParser.extractLayerTars(tarExtractionDirectory, dockerTar);
+        final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
         assertEquals(2, layerMapping.getLayers().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
@@ -106,7 +107,7 @@ public class DockerTarParserTest {
 
     private void doLayerTest(final String testFileDir) throws WrongInspectorOsException, IOException {
         final File workingDirectory = TestUtils.createTempDirectory();
-        final File tarExtractionDirectory = new File(workingDirectory, DockerTarParser.TAR_EXTRACTION_DIRECTORY);
+        final File tarExtractionDirectory = new File(workingDirectory, ImageInspector.TAR_EXTRACTION_DIRECTORY);
         final File layerDir = new File(tarExtractionDirectory, String.format("ubuntu_latest.tar/%s", LAYER_ID));
         layerDir.mkdirs();
         final Path layerDirPath = Paths.get(layerDir.getAbsolutePath());
@@ -138,12 +139,13 @@ public class DockerTarParserTest {
     @Test
     public void testCreateInitialImageComponentHierarchy() throws IntegrationException {
         File workingDir = new File("build/images/test/alpine");
+        final File tarExtractionDirectory = new File(workingDir, ImageInspector.TAR_EXTRACTION_DIRECTORY);
         String tarFilename = "alpine.tar";
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
-        ManifestLayerMapping mapping = tarParser.getLayerMapping(new GsonBuilder(), workingDir, tarFilename, "alpine", "latest");
-        ImageComponentHierarchy h = tarParser.createInitialImageComponentHierarchy(workingDir, tarFilename, mapping);
+        ManifestLayerMapping mapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, tarFilename, "alpine", "latest");
+        ImageComponentHierarchy h = tarParser.createInitialImageComponentHierarchy(tarExtractionDirectory, tarFilename, mapping);
         System.out.printf("Image config file contents: %s\n", h.getImageConfigFileContents());
         System.out.printf("Manifest file contents: %s\n", h.getManifestFileContents());
         assertTrue(h.getImageConfigFileContents().contains("architecture"));

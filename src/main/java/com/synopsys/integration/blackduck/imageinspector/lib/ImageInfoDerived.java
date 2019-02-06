@@ -27,10 +27,11 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Imag
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 
+// Comprehensive info about an image, including
+// the harder-to-derive bits
 public class ImageInfoDerived {
     private final ImageInfoParsed imageInfoParsed;
     private ManifestLayerMapping manifestLayerMapping = null;
-    private String pkgMgrFilePath = null;
 
     private String codeLocationName = null;
     private String finalProjectName = null;
@@ -49,14 +50,6 @@ public class ImageInfoDerived {
 
     public void setManifestLayerMapping(final ManifestLayerMapping manifestLayerMapping) {
         this.manifestLayerMapping = manifestLayerMapping;
-    }
-
-    public String getPkgMgrFilePath() {
-        return pkgMgrFilePath;
-    }
-
-    public void setPkgMgrFilePath(final String pkgMgrFilePath) {
-        this.pkgMgrFilePath = pkgMgrFilePath;
     }
 
     public ImageInfoParsed getImageInfoParsed() {

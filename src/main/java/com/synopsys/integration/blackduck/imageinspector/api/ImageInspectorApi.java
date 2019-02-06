@@ -53,7 +53,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImageInspectorApi {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
 
     private ImageInspector imageInspector;
     private Os os;
@@ -151,14 +150,15 @@ public class ImageInspectorApi {
         final boolean cleanupWorkingDir)
             throws IOException, IntegrationException, CompressorException {
         final File workingDir = new File(tempDir, "working");
+        final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
-        final List<File> layerTars = imageInspector.extractLayerTars(workingDir, dockerTarfile);
-        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(new GsonBuilder(), workingDir, dockerTarfile.getName(), givenImageRepo, givenImageTag);
-        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(workingDir, dockerTarfile.getName(), manifestLayerMapping);
+        final List<File> layerTars = imageInspector.extractLayerTars(tarExtractionDirectory, dockerTarfile);
+        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, dockerTarfile.getName(), givenImageRepo, givenImageTag);
+        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(workingDir, tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
         final String imageRepo = manifestLayerMapping.getImageName();
         final String imageTag = manifestLayerMapping.getTagName();
-        final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
-        final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+
+        final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
         final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(new Gson(), currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
@@ -207,7 +207,7 @@ public class ImageInspectorApi {
             final File containerFileSystemTarFile = new File(containerFileSystemOutputPath);
             logger.debug(String.format("Creating container filesystem tarfile %s from %s into %s", containerFileSystemTarFile.getAbsolutePath(), targetImageFileSystemRootDir.getAbsolutePath(), outputDirectory.getAbsolutePath()));
             final LinuxFileSystem containerFileSys = new LinuxFileSystem(targetImageFileSystemRootDir);
-            containerFileSys.createTarGz(containerFileSystemTarFile);
+            containerFileSys.writeToTarGz(containerFileSystemTarFile);
         }
     }
 

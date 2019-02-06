@@ -59,7 +59,7 @@ public class LinuxFileSystem extends Stringable {
         }
     }
 
-    public void createTarGz(final File outputTarFile) throws IOException {
+    public void writeToTarGz(final File outputTarFile) throws IOException {
         outputTarFile.getParentFile().mkdirs();
         FileOperations.logFileOwnerGroupPerms(outputTarFile.getParentFile());
         FileOutputStream fOut = null;
