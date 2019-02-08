@@ -53,7 +53,7 @@ public class ForgeGenerator {
 
     private static Forge createForge(final String linuxDistroName, boolean doPreferredAliasNamespace) {
         if (StringUtils.isBlank(linuxDistroName)) {
-            return new Forge("/", "/", "");
+            return new Forge("/", "/", "none");
         }
         final String linuxDistroNameLowerCase = linuxDistroName == null ? "" : linuxDistroName.toLowerCase();
         String kbName = linuxDistroNameLowerCase;

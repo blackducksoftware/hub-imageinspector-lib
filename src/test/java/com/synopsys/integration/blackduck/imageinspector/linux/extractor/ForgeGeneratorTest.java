@@ -1,7 +1,8 @@
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 public class ForgeGeneratorTest {
 
@@ -16,6 +17,6 @@ public class ForgeGeneratorTest {
         assertEquals("@opensuse", ForgeGenerator.createComponentForge("SLES").getName());
         assertEquals("@redhat", ForgeGenerator.createComponentForge("RHEL").getName());
         assertEquals("@redhat", ForgeGenerator.createComponentForge("rhel").getName());
-        assertEquals("", ForgeGenerator.createComponentForge(null).getName());
+        assertEquals("none", ForgeGenerator.createComponentForge(null).getName());
     }
 }
