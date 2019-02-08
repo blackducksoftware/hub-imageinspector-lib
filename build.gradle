@@ -11,9 +11,6 @@ buildscript {
     }
 }
 
-plugins {
-    id 'org.sonarqube' version '2.6.1'
-}
 apply plugin: "io.spring.dependency-management"
 
 version = '8.2.1-SNAPSHOT'
@@ -42,13 +39,6 @@ repositories {
 	mavenCentral()
 }
 
-sonarqube {
-    properties {
-        property 'sonar.projectName', 'Integrations - Hub Image Inspector Library'
-        property 'sonar.projectKey', 'com.blackducksoftware:int:hub-imageinspector-lib'
-        property 'sonar.verbose', false
-   }
-}
 ////////////////////////////////////////////////
 // For integration tests: Build image tarfiles
 
