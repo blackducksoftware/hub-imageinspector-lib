@@ -24,21 +24,12 @@ import org.mockito.Mockito;
 @Tag("integration")
 public class ImageInspectorApiTest {
 
-    private static final String CODE_LOCATION_PREFIX = "testCodeLocationPrefix";
-
     private static final String PROJECT_VERSION = "unitTest1";
 
     private static final String PROJECT = "SB001";
 
-    private static final String TEST_ARCH = "testArch";
-
     private static final String IMAGE_TARFILE = "build/images/test/alpine.tar";
-
-    private static final String MOCKED_PROJECT_ID = "mockedProjectId";
-    private static final String IMAGE_REPO = "alpine";
-    private static final String IMAGE_TAG = "latest";
-
-
+    
     private static Os os;
     private static ImageInspectorApi imageInspectorApi;
     private static ApkExecutor apkExecutor;
