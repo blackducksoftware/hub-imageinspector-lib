@@ -21,6 +21,7 @@ notifications:
 
 script:
 - "./gradlew clean build coveralls"
+###- "./gradlew clean build jacocoTestReport coveralls sonarqube"
 
 after_success:
 - bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)
