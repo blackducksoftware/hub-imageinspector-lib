@@ -144,7 +144,13 @@ public class DockerTarParserTest {
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
+        ImageConfigParser imageConfigParser = new ImageConfigParser();
+        imageConfigParser.setGsonBuilder(new GsonBuilder());
+        tarParser.setImageConfigParser(imageConfigParser);
         ManifestLayerMapping mapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, tarFilename, "alpine", "latest");
+        assertEquals("alpine", mapping.getImageName());
+        assertEquals("latest", mapping.getTagName());
+        assertTrue(mapping.getLayerExternalId(0).startsWith("sha256:"));
         ImageComponentHierarchy h = tarParser.createInitialImageComponentHierarchy(tarExtractionDirectory, tarFilename, mapping);
         System.out.printf("Image config file contents: %s\n", h.getImageConfigFileContents());
         System.out.printf("Manifest file contents: %s\n", h.getManifestFileContents());

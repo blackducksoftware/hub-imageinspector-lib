@@ -25,8 +25,6 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
@@ -72,6 +70,7 @@ public class DockerTarParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private ManifestFactory manifestFactory;
     private Os os;
+    private ImageConfigParser imageConfigParser;
 
     @Autowired
     public void setOs(final Os os) {
@@ -81,6 +80,11 @@ public class DockerTarParser {
     @Autowired
     public void setManifestFactory(final ManifestFactory manifestFactory) {
         this.manifestFactory = manifestFactory;
+    }
+
+    @Autowired
+    public void setImageConfigParser(final ImageConfigParser imageConfigParser) {
+        this.imageConfigParser = imageConfigParser;
     }
 
     public List<File> extractLayerTars(final File tarExtractionDirectory, final File dockerTar) throws IOException {
@@ -167,19 +171,19 @@ public class DockerTarParser {
         String manifestFileContents = null;
         String configFileContents = null;
         File tarContentsDirectory = new File(tarExtractionDirectory, tarFileName);
-        for (File f : tarContentsDirectory.listFiles()) {
-            logger.info(String.format("File %s", f.getName()));
-            if ("manifest.json".equals(f.getName())) {
+        for (File tarFileContentsFile : tarContentsDirectory.listFiles()) {
+            logger.info(String.format("File %s", tarFileContentsFile.getName()));
+            if ("manifest.json".equals(tarFileContentsFile.getName())) {
                 try {
-                    manifestFileContents = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+                    manifestFileContents = FileUtils.readFileToString(tarFileContentsFile, StandardCharsets.UTF_8);
                 } catch (IOException e) {
-                    throw new IntegrationException(String.format("Error reading manifest file %s", f.getAbsolutePath()));
+                    throw new IntegrationException(String.format("Error reading manifest file %s", tarFileContentsFile.getAbsolutePath()));
                 }
-            } else if (f.getName().equals(manifestLayerMapping.getConfig())) {
+            } else if (tarFileContentsFile.getName().equals(manifestLayerMapping.getConfig())) {
                 try {
-                    configFileContents = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+                    configFileContents = FileUtils.readFileToString(tarFileContentsFile, StandardCharsets.UTF_8);
                 } catch (IOException e) {
-                    throw new IntegrationException(String.format("Error reading config file %s", f.getAbsolutePath()));
+                    throw new IntegrationException(String.format("Error reading config file %s", tarFileContentsFile.getAbsolutePath()));
                 }
             }
         }
@@ -192,15 +196,7 @@ public class DockerTarParser {
             final String imageConfigFileContents = FileUtils
                 .readFileToString(imageConfigFile, StandardCharsets.UTF_8);
             logger.debug(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(imageConfigFileContents, JsonObject.class);
-            JsonObject rootFsJsonObj = imageConfigJsonObj.getAsJsonObject("rootfs");
-            JsonArray layerIdsJsonArray = rootFsJsonObj.getAsJsonArray("diff_ids");
-            final int numLayers = layerIdsJsonArray.size();
-            final List<String> layerIds = new ArrayList<>(numLayers);
-            for (int i=0; i < numLayers; i++) {
-                logger.debug(String.format("layer ID: %s", layerIdsJsonArray.get(i).getAsString()));
-                layerIds.add(layerIdsJsonArray.get(i).getAsString());
-            }
+            List<String> layerIds = imageConfigParser.getLayerIdsFromImageConfigFile(imageConfigFileContents);
             return layerIds;
         } catch (Exception e) {
             logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
