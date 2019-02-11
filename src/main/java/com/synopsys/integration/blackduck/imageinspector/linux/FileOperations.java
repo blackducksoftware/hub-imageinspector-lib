@@ -58,6 +58,9 @@ public class FileOperations {
     }
 
     public static void logFileOwnerGroupPerms(final File file) {
+        if (!logger.isDebugEnabled()) {
+            return;
+        }
         logger.debug(String.format("Current process owner: %s", System.getProperty("user.name")));
         if (!file.exists()) {
             logger.debug(String.format("File %s does not exist", file.getAbsolutePath()));
