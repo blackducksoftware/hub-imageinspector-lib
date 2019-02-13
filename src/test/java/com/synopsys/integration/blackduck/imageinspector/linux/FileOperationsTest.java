@@ -9,8 +9,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-
 public class FileOperationsTest {
 
     @BeforeClass
@@ -31,7 +29,8 @@ public class FileOperationsTest {
         }
         final File destinationFile = new File(destinationDir, "fileToMove.txt");
         destinationFile.delete();
-        FileOperations.moveFile(fileToMove, destinationDir);
+        final FileOperations fileOperations = new FileOperations();
+        fileOperations.moveFile(fileToMove, destinationDir);
         assertTrue(destinationFile.exists());
     }
 }

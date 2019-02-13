@@ -35,19 +35,21 @@ import java.nio.file.attribute.PosixFilePermissions;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class FileOperations {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileOperations.class);
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public static void moveFile(final File fileToMove, final File destination) throws IOException {
+    public void moveFile(final File fileToMove, final File destination) throws IOException {
         final String filename = fileToMove.getName();
         logger.debug(String.format("Moving %s to %s", fileToMove.getAbsolutePath(), destination.getAbsolutePath()));
         final Path destPath = destination.toPath().resolve(filename);
         Files.move(fileToMove.toPath(), destPath, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    public static void deleteFilesOnly(final File file) {
+    public void deleteFilesOnly(final File file) {
         if (file.isDirectory()) {
             for (final File subFile : file.listFiles()) {
                 deleteFilesOnly(subFile);
@@ -57,7 +59,7 @@ public class FileOperations {
         }
     }
 
-    public static void logFileOwnerGroupPerms(final File file) {
+    public void logFileOwnerGroupPerms(final File file) {
         if (!logger.isDebugEnabled()) {
             return;
         }
@@ -79,7 +81,7 @@ public class FileOperations {
         }
     }
 
-    public static void deleteDirPersistently(final File dir) {
+    public void deleteDirPersistently(final File dir) {
         for (int i = 0; i < 10; i++) {
             logger.debug(String.format("Attempt #%d to delete dir %s", i, dir.getAbsolutePath()));
             try {
@@ -100,7 +102,7 @@ public class FileOperations {
         logger.warn(String.format("Unable to delete dir %s", dir.getAbsolutePath()));
     }
 
-    public static void logFreeDiskSpace(final File dir) {
+    public void logFreeDiskSpace(final File dir) {
         logger.debug(String.format("Disk: free: %d", dir.getFreeSpace()));
     }
 }

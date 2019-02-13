@@ -27,10 +27,15 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ApkComponentExtractor;
 import java.io.File;
 import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ApkExecutor extends PkgMgrExecutor {
+
+    @Autowired
+    private FileOperations fileOperations;
+
     @Override
     @PostConstruct
     public void init() {
@@ -39,6 +44,6 @@ public class ApkExecutor extends PkgMgrExecutor {
 
     @Override
     protected void initPkgMgrDir(final File packageManagerDirectory) {
-        FileOperations.deleteFilesOnly(packageManagerDirectory);
+        fileOperations.deleteFilesOnly(packageManagerDirectory);
     }
 }

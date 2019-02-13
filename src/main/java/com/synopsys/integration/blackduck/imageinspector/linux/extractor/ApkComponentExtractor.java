@@ -24,6 +24,7 @@
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
@@ -45,11 +46,13 @@ public class ApkComponentExtractor implements ComponentExtractor {
     public static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("apk", "info", "-v");
     private static final String ARCH_FILENAME = "arch";
     private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
+    private final FileOperations fileOperations;
     private final PkgMgrExecutor pkgMgrExecutor;
     private final File imageFileSystem;
     private String architecture;
 
-    public ApkComponentExtractor(final PkgMgrExecutor pkgMgrExecutor, final File imageFileSystem, final String architecture) {
+    public ApkComponentExtractor(final FileOperations fileOperations, final PkgMgrExecutor pkgMgrExecutor, final File imageFileSystem, final String architecture) {
+        this.fileOperations = fileOperations;
         this.pkgMgrExecutor = pkgMgrExecutor;
         this.imageFileSystem = imageFileSystem;
         this.architecture = architecture;
@@ -103,7 +106,7 @@ public class ApkComponentExtractor implements ComponentExtractor {
     private String getArchitecture() throws IntegrationException {
         if (architecture == null) {
             architecture = "";
-            final Optional<File> etc = new LinuxFileSystem(imageFileSystem).getEtcDir();
+            final Optional<File> etc = new LinuxFileSystem(imageFileSystem, fileOperations).getEtcDir();
             if (etc.isPresent()) {
                 final File apkDir = new File(etc.get(), ETC_SUBDIR_CONTAINING_ARCH);
                 if (apkDir.isDirectory()) {

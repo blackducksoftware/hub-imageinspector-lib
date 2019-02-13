@@ -26,6 +26,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
@@ -66,6 +67,7 @@ public class DockerTarParserTest {
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setOs(new Os());
+        tarParser.setFileOperations(new FileOperations());
 
         final List<File> layerTars = tarParser.extractLayerTars(tarExtractionDirectory, dockerTar);
         final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
@@ -120,6 +122,7 @@ public class DockerTarParserTest {
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setFileOperations(new FileOperations());
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);
@@ -144,6 +147,7 @@ public class DockerTarParserTest {
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setFileOperations(new FileOperations());
         ImageConfigParser imageConfigParser = new ImageConfigParser();
         imageConfigParser.setGsonBuilder(new GsonBuilder());
         tarParser.setImageConfigParser(imageConfigParser);

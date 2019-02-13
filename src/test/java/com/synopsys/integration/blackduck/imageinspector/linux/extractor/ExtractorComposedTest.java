@@ -3,6 +3,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -36,7 +37,7 @@ public class ExtractorComposedTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ComponentExtractor componentExtractor = new ApkComponentExtractor(pkgMgrExecutor, new File("src/test/resources/testApkFileSystem"), null);
+        final ComponentExtractor componentExtractor = new ApkComponentExtractor(new FileOperations(), pkgMgrExecutor, new File("src/test/resources/testApkFileSystem"), null);
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
         List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "alpine");

@@ -71,6 +71,7 @@ public class DockerTarParser {
     private ManifestFactory manifestFactory;
     private Os os;
     private ImageConfigParser imageConfigParser;
+    private FileOperations fileOperations;
 
     @Autowired
     public void setOs(final Os os) {
@@ -87,10 +88,15 @@ public class DockerTarParser {
         this.imageConfigParser = imageConfigParser;
     }
 
+    @Autowired
+    public void setFileOperations(final FileOperations fileOperations) {
+        this.fileOperations = fileOperations;
+    }
+
     public List<File> extractLayerTars(final File tarExtractionDirectory, final File dockerTar) throws IOException {
         logger.debug(String.format("tarExtractionDirectory: %s", tarExtractionDirectory));
-        FileOperations.logFileOwnerGroupPerms(dockerTar.getParentFile());
-        FileOperations.logFileOwnerGroupPerms(dockerTar);
+        fileOperations.logFileOwnerGroupPerms(dockerTar.getParentFile());
+        fileOperations.logFileOwnerGroupPerms(dockerTar);
         final List<File> untaredFiles = new ArrayList<>();
         final File outputDir = new File(tarExtractionDirectory, dockerTar.getName());
         final TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(dockerTar));
@@ -205,7 +211,7 @@ public class DockerTarParser {
     }
 
     private Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {
-        final LinuxFileSystem extractedFileSys = new LinuxFileSystem(targetImageFileSystemRootDir);
+        final LinuxFileSystem extractedFileSys = new LinuxFileSystem(targetImageFileSystemRootDir, fileOperations);
         final Optional<File> etcDir = extractedFileSys.getEtcDir();
         if (!etcDir.isPresent()) {
             return Optional.empty();

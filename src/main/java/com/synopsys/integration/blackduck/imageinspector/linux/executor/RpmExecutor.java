@@ -27,10 +27,14 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.RpmComponentExtractor;
 import java.io.File;
 import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RpmExecutor extends PkgMgrExecutor {
+
+    @Autowired
+    private FileOperations fileOperations;
 
     @Override
     @PostConstruct
@@ -41,6 +45,6 @@ public class RpmExecutor extends PkgMgrExecutor {
 
     @Override
     protected void initPkgMgrDir(final File packageManagerDirectory) {
-        FileOperations.deleteFilesOnly(packageManagerDirectory);
+        fileOperations.deleteFilesOnly(packageManagerDirectory);
     }
 }

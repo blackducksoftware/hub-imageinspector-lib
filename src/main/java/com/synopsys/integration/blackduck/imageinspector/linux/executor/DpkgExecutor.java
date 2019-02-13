@@ -28,10 +28,15 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.DpkgCom
 import java.io.File;
 import java.io.IOException;
 import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DpkgExecutor extends PkgMgrExecutor {
+
+    @Autowired
+    private FileOperations fileOperations;
+
     @Override
     @PostConstruct
     public void init() {
@@ -40,7 +45,7 @@ public class DpkgExecutor extends PkgMgrExecutor {
 
     @Override
     protected void initPkgMgrDir(final File packageManagerDirectory) throws IOException {
-        FileOperations.deleteFilesOnly(packageManagerDirectory);
+        fileOperations.deleteFilesOnly(packageManagerDirectory);
         final File statusFile = new File(packageManagerDirectory, "status");
         statusFile.createNewFile();
         final File updatesDir = new File(packageManagerDirectory, "updates");

@@ -27,17 +27,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.SimpleBdioFactory;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
+import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +48,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -57,6 +58,12 @@ public class ImageInspectorApi {
     private final GsonBuilder gsonBuilder = new GsonBuilder();
     private ImageInspector imageInspector;
     private Os os;
+    private FileOperations fileOperations;
+
+    @Autowired
+    public void setFileOperations(final FileOperations fileOperations) {
+        this.fileOperations = fileOperations;
+    }
 
     public ImageInspectorApi(ImageInspector imageInspector, Os os) {
         this.imageInspector = imageInspector;
@@ -136,7 +143,7 @@ public class ImageInspectorApi {
         } finally {
             if (cleanupWorkingDir) {
                 logger.info(String.format("Deleting working dir %s", tempDir.getAbsolutePath()));
-                FileOperations.deleteDirPersistently(tempDir);
+                fileOperations.deleteDirPersistently(tempDir);
             }
         }
         return imageInfoDerived;
@@ -207,7 +214,7 @@ public class ImageInspectorApi {
             final File outputDirectory = new File(containerFileSystemOutputPath);
             final File containerFileSystemTarFile = new File(containerFileSystemOutputPath);
             logger.debug(String.format("Creating container filesystem tarfile %s from %s into %s", containerFileSystemTarFile.getAbsolutePath(), targetImageFileSystemRootDir.getAbsolutePath(), outputDirectory.getAbsolutePath()));
-            final LinuxFileSystem containerFileSys = new LinuxFileSystem(targetImageFileSystemRootDir);
+            final LinuxFileSystem containerFileSys = new LinuxFileSystem(targetImageFileSystemRootDir, fileOperations);
             containerFileSys.writeToTarGz(containerFileSystemTarFile);
         }
     }
@@ -223,7 +230,7 @@ public class ImageInspectorApi {
             throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
         }
 
-        FileOperations.logFreeDiskSpace(temp);
+        fileOperations.logFreeDiskSpace(temp);
         return temp;
     }
 

@@ -23,7 +23,7 @@ public class FileSysTest {
 
     @Test
     public void test() throws CompressorException, IOException {
-        final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/imageDir"));
+        final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/imageDir"), new FileOperations());
         final File outputTarFile = new File("test/containerFileSystem.tar.gz");
         outputTarFile.delete();
         assertFalse(outputTarFile.exists());

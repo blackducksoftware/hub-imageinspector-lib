@@ -23,6 +23,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 
 import org.slf4j.Logger;
@@ -39,11 +40,9 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecu
 @Component
 public class ComponentExtractorFactory {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+    private FileOperations fileOperations;
     private ApkExecutor apkExecutor;
-
     private DpkgExecutor dpkgExecutor;
-
     private RpmExecutor rpmExecutor;
 
     @Autowired
@@ -61,10 +60,15 @@ public class ComponentExtractorFactory {
         this.rpmExecutor = rpmExecutor;
     }
 
+    @Autowired
+    public void setFileOperations(final FileOperations fileOperations) {
+        this.fileOperations = fileOperations;
+    }
+
     public ComponentExtractor createComponentExtractor(final Gson gson, final File imageFileSystem, final String architecture, final PackageManagerEnum packageManagerEnum) {
         logger.debug("createComponentExtractor()");
         if (packageManagerEnum == PackageManagerEnum.APK) {
-            return new ApkComponentExtractor(apkExecutor, imageFileSystem, architecture);
+            return new ApkComponentExtractor(fileOperations, apkExecutor, imageFileSystem, architecture);
         } else if (packageManagerEnum == PackageManagerEnum.DPKG) {
             return new DpkgComponentExtractor(dpkgExecutor);
         } else if (packageManagerEnum == PackageManagerEnum.RPM) {

@@ -10,6 +10,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Dock
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
@@ -40,11 +41,13 @@ public class ImageInspectorApiTest {
         final DockerTarParser dockerTarParser = new DockerTarParser();
         dockerTarParser.setManifestFactory(new ManifestFactory());
         dockerTarParser.setOs(os);
+        dockerTarParser.setFileOperations(new FileOperations());
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
         apkExecutor = Mockito.mock(ApkExecutor.class);
         componentExtractorFactory.setApkExecutor(apkExecutor);
         final ImageInspector imageInspector = new ImageInspector(dockerTarParser, componentExtractorFactory);
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
+        imageInspectorApi.setFileOperations(new FileOperations());
     }
 
     @Test

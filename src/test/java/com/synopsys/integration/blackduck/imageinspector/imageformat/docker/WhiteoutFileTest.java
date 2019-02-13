@@ -12,6 +12,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.mani
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import java.io.File;
@@ -59,6 +60,7 @@ public class WhiteoutFileTest {
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setFileOperations(new FileOperations());
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);

@@ -44,9 +44,11 @@ public class LinuxFileSystem extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final File root;
+    private final FileOperations fileOperations;
 
-    public LinuxFileSystem(final File root) {
+    public LinuxFileSystem(final File root, final FileOperations fileOperations) {
         this.root = root;
+        this.fileOperations = fileOperations;
     }
 
     public Optional<File> getEtcDir() {
@@ -61,7 +63,7 @@ public class LinuxFileSystem extends Stringable {
 
     public void writeToTarGz(final File outputTarFile) throws IOException {
         outputTarFile.getParentFile().mkdirs();
-        FileOperations.logFileOwnerGroupPerms(outputTarFile.getParentFile());
+        fileOperations.logFileOwnerGroupPerms(outputTarFile.getParentFile());
         FileOutputStream fOut = null;
         BufferedOutputStream bOut = null;
         GzipCompressorOutputStream gzOut = null;

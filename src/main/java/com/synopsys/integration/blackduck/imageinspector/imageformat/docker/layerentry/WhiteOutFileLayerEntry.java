@@ -26,7 +26,6 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.lay
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Optional;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
@@ -51,6 +50,10 @@ public class WhiteOutFileLayerEntry implements LayerEntry {
         logger.trace(String.format("Found white-out file %s", fileSystemEntryName));
 
         final int whiteOutMarkIndex = fileSystemEntryName.indexOf(".wh.");
+        if (whiteOutMarkIndex < 0) {
+            logger.warn(String.format("%s is not a valid WhiteOutFileLayerEntry; does not contain '.wh.'", fileSystemEntryName));
+            return otherFileToDeleteNone;
+        }
         final String beforeWhiteOutMark = fileSystemEntryName.substring(0, whiteOutMarkIndex);
         final String afterWhiteOutMark = fileSystemEntryName.substring(whiteOutMarkIndex + ".wh.".length());
 
