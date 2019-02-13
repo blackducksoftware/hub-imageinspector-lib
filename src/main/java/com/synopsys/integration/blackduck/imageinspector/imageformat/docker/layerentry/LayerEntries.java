@@ -46,7 +46,7 @@ public class LayerEntries {
         } else if (layerEntry.isSymbolicLink() || layerEntry.isLink()) {
             return new LinkLayerEntry(layerEntry, layerOutputDir);
         } else {
-            return new FileDirLayerEntry(layerInputStream, layerEntry, layerOutputDir);
+            return new FileDirLayerEntry(fileOperations, layerInputStream, layerEntry, layerOutputDir);
         }
     }
 }

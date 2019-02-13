@@ -25,6 +25,8 @@ package com.synopsys.integration.blackduck.imageinspector.linux;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -33,6 +35,7 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -106,7 +109,11 @@ public class FileOperations {
         logger.debug(String.format("Disk: free: %d", dir.getFreeSpace()));
     }
 
-    public void removeFile(File fileToRemove) throws IOException {
-        Files.delete(fileToRemove.toPath());
+    public void deleteFile(File fileToDelete) throws IOException {
+        Files.delete(fileToDelete.toPath());
+    }
+
+    public void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+        IOUtils.copy(inputStream, outputStream);
     }
 }

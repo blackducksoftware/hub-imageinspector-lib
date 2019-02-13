@@ -71,7 +71,7 @@ public class WhiteOutFileLayerEntry implements LayerEntry {
             }
         } else {
             try {
-                fileOperations.removeFile(fileToRemove);
+                fileOperations.deleteFile(fileToRemove);
                 logger.trace(String.format("File %s successfully removed", filePathToRemove));
             } catch (final Exception e) {
                 logger.warn(String.format("Error removing whited-out file %s", filePathToRemove));

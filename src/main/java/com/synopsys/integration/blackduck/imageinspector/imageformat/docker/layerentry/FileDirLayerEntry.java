@@ -23,16 +23,15 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
@@ -40,24 +39,26 @@ import org.slf4j.LoggerFactory;
 
 public class FileDirLayerEntry implements LayerEntry {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final FileOperations fileOperations;
     private final TarArchiveInputStream layerInputStream;
-    private final TarArchiveEntry layerEntry;
+    private final TarArchiveEntry archiveEntry;
     private final File layerOutputDir;
 
-    public FileDirLayerEntry(final TarArchiveInputStream layerInputStream, final TarArchiveEntry layerEntry, final File layerOutputDir) {
+    public FileDirLayerEntry(final FileOperations fileOperations, final TarArchiveInputStream layerInputStream, final TarArchiveEntry archiveEntry, final File layerOutputDir) {
+        this.fileOperations = fileOperations;
         this.layerInputStream = layerInputStream;
-        this.layerEntry = layerEntry;
+        this.archiveEntry = archiveEntry;
         this.layerOutputDir = layerOutputDir;
     }
 
     @Override
     public Optional<File> process() {
         final Optional<File> otherFileToDeleteNone = Optional.empty();
-        final String fileSystemEntryName = layerEntry.getName();
+        final String fileSystemEntryName = archiveEntry.getName();
         logger.trace(String.format("Processing file/dir: %s", fileSystemEntryName));
 
         final File outputFile = new File(layerOutputDir, fileSystemEntryName);
-        if (layerEntry.isFile()) {
+        if (archiveEntry.isFile()) {
             logger.trace(String.format("Processing file: %s", fileSystemEntryName));
             if (!outputFile.getParentFile().exists()) {
                 outputFile.getParentFile().mkdirs();
@@ -71,7 +72,7 @@ public class FileDirLayerEntry implements LayerEntry {
                 return otherFileToDeleteNone;
             }
             try {
-                IOUtils.copy(layerInputStream, outputFileStream);
+                fileOperations.copy(layerInputStream, outputFileStream);
             } catch (final IOException e) {
                 logger.error(String.format("Error copying file %s to %s: %s", fileSystemEntryName, outputFile.getAbsolutePath(), e.getMessage()));
                 return otherFileToDeleteNone;

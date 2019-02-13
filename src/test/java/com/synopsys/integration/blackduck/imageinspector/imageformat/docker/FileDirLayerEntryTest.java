@@ -2,18 +2,21 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.FileDirLayerEntry;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntry;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.WhiteOutFileLayerEntry;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Optional;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class WhiteOutFileLayerEntryTest {
+public class FileDirLayerEntryTest {
   private static FileOperations fileOperations;
 
   @BeforeAll
@@ -24,21 +27,13 @@ public class WhiteOutFileLayerEntryTest {
   @Test
   public void testValid() throws IOException {
     final TarArchiveEntry archiveEntry = Mockito.mock(TarArchiveEntry.class);
-    Mockito.when(archiveEntry.getName()).thenReturn(".wh.testWhitedOutFileName");
+    Mockito.when(archiveEntry.getName()).thenReturn("testFileName");
+    Mockito.when(archiveEntry.isFile()).thenReturn(true);
     final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = new WhiteOutFileLayerEntry(fileOperations, archiveEntry, layerOutputDir);
+    final TarArchiveInputStream layerInputStream = Mockito.mock(TarArchiveInputStream.class);
+    final LayerEntry layerEntry = new FileDirLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir);
     Optional<File> fileToRemove = layerEntry.process();
     assertEquals(Optional.empty(), fileToRemove);
-    Mockito.verify(fileOperations).deleteFile(new File("test/output/testWhitedOutFileName"));
-  }
-
-  @Test
-  public void testInvalid() {
-    final TarArchiveEntry archiveEntry = Mockito.mock(TarArchiveEntry.class);
-    Mockito.when(archiveEntry.getName()).thenReturn("testInvalidWhitedOutFileName");
-    final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = new WhiteOutFileLayerEntry(fileOperations, archiveEntry, layerOutputDir);
-    Optional<File> fileToRemove = layerEntry.process();
-    assertEquals(Optional.empty(), fileToRemove);
+    Mockito.verify(fileOperations).copy(Mockito.any(InputStream.class), Mockito.any(OutputStream.class));
   }
 }
