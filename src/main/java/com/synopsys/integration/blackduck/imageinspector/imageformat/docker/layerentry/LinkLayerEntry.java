@@ -23,14 +23,13 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -39,10 +38,12 @@ import org.slf4j.LoggerFactory;
 
 public class LinkLayerEntry implements LayerEntry {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final FileOperations fileOperations;
     private final TarArchiveEntry layerEntry;
     private final File layerOutputDir;
 
-    public LinkLayerEntry(final TarArchiveEntry layerEntry, final File layerOutputDir) {
+    public LinkLayerEntry(final FileOperations fileOperations, final TarArchiveEntry layerEntry, final File layerOutputDir) {
+        this.fileOperations = fileOperations;
         this.layerEntry = layerEntry;
         this.layerOutputDir = layerOutputDir;
 
@@ -79,9 +80,9 @@ public class LinkLayerEntry implements LayerEntry {
             logger.trace(String.format("normalizing %s", endLink.toString()));
             endLink = endLink.normalize();
             logger.trace(String.format("endLink: %s", endLink.toString()));
-            deleteIfExists(startLink);
+            fileOperations.deleteIfExists(startLink);
             try {
-                Files.createSymbolicLink(startLink, endLink);
+                fileOperations.createSymbolicLink(startLink, endLink);
             } catch (final IOException e) {
                 final String msg = String.format("Error creating symbolic link from %s to %s; " + "this will not affect the results unless it affects a file needed by the package manager; " + "Error: %s", startLink.toString(),
                         endLink.toString(), e.getMessage());
@@ -100,23 +101,15 @@ public class LinkLayerEntry implements LayerEntry {
             if (!targetFile.exists()) {
                 logger.warn(String.format("Attempting to create a link to %s, but it does not exist", targetFile));
             }
-            deleteIfExists(startLink);
+            fileOperations.deleteIfExists(startLink);
             try {
-                Files.createLink(startLink, endLink);
+                fileOperations.createLink(startLink, endLink);
             } catch (final IOException e) {
                 logger.warn(String.format("Error creating hard link from %s to %s; " + "this will not affect the results unless it affects a file needed by the package manager; " + "Error: %s", startLink.toString(), endLink.toString(),
                         e.getMessage()));
             }
         }
         return otherFileToDeleteNone;
-    }
-
-    private void deleteIfExists(final Path pathToDelete) {
-        try {
-            Files.delete(pathToDelete); // remove lower layer's version if exists
-        } catch (final IOException e) {
-            // expected (most of the time)
-        }
     }
 
     @Override

@@ -44,7 +44,7 @@ public class LayerEntries {
         } else if (fileSystemEntryName.startsWith(".wh.") || fileSystemEntryName.contains("/.wh.")) {
             return new WhiteOutFileLayerEntry(fileOperations, layerEntry, layerOutputDir);
         } else if (layerEntry.isSymbolicLink() || layerEntry.isLink()) {
-            return new LinkLayerEntry(layerEntry, layerOutputDir);
+            return new LinkLayerEntry(fileOperations, layerEntry, layerOutputDir);
         } else {
             return new FileDirLayerEntry(fileOperations, layerInputStream, layerEntry, layerOutputDir);
         }

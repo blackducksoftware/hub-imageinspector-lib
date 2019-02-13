@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
+package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

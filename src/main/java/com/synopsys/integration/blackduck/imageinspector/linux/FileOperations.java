@@ -116,4 +116,20 @@ public class FileOperations {
     public void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
         IOUtils.copy(inputStream, outputStream);
     }
+
+    public void deleteIfExists(final Path pathToDelete) {
+        try {
+            Files.delete(pathToDelete); // remove lower layer's version if exists
+        } catch (final IOException e) {
+            // expected (most of the time)
+        }
+    }
+
+    public void createSymbolicLink(final Path startLink, final Path endLink) throws IOException {
+        Files.createSymbolicLink(startLink, endLink);
+    }
+
+    public void createLink(final Path startLink, final Path endLink) throws IOException {
+        Files.createLink(startLink, endLink);
+    }
 }

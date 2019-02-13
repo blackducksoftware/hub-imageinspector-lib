@@ -1,19 +1,20 @@
-package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
+package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntry;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.WhiteOutOmittedDirLayerEntry;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Optional;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class WhiteOutOmittedDirLayerEntryTest {
+public class FileDirLayerEntryTest {
   private static FileOperations fileOperations;
 
   @BeforeAll
@@ -27,8 +28,10 @@ public class WhiteOutOmittedDirLayerEntryTest {
     Mockito.when(archiveEntry.getName()).thenReturn("testFileName");
     Mockito.when(archiveEntry.isFile()).thenReturn(true);
     final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = new WhiteOutOmittedDirLayerEntry(archiveEntry, layerOutputDir);
+    final TarArchiveInputStream layerInputStream = Mockito.mock(TarArchiveInputStream.class);
+    final LayerEntry layerEntry = new FileDirLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir);
     Optional<File> fileToRemove = layerEntry.process();
-    assertEquals("output", fileToRemove.get().getName());
+    assertEquals(Optional.empty(), fileToRemove);
+    Mockito.verify(fileOperations).copy(Mockito.any(InputStream.class), Mockito.any(OutputStream.class));
   }
 }
