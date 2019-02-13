@@ -2,8 +2,6 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.lay
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntry;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.WhiteOutFileLayerEntry;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.IOException;
