@@ -105,4 +105,8 @@ public class FileOperations {
     public void logFreeDiskSpace(final File dir) {
         logger.debug(String.format("Disk: free: %d", dir.getFreeSpace()));
     }
+
+    public void removeFile(File fileToRemove) throws IOException {
+        Files.delete(fileToRemove.toPath());
+    }
 }

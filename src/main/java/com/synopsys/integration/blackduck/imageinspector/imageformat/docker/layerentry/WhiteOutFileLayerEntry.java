@@ -23,8 +23,8 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
-import java.nio.file.Files;
 import java.util.Optional;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.io.FileUtils;
@@ -35,10 +35,12 @@ import org.slf4j.LoggerFactory;
 
 public class WhiteOutFileLayerEntry implements LayerEntry {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final FileOperations fileOperations;
     private final TarArchiveEntry layerEntry;
     private final File layerOutputDir;
 
-    public WhiteOutFileLayerEntry(final TarArchiveEntry layerEntry, final File layerOutputDir) {
+    public WhiteOutFileLayerEntry(final FileOperations fileOperations, final TarArchiveEntry layerEntry, final File layerOutputDir) {
+        this.fileOperations = fileOperations;
         this.layerEntry = layerEntry;
         this.layerOutputDir = layerOutputDir;
     }
@@ -69,7 +71,7 @@ public class WhiteOutFileLayerEntry implements LayerEntry {
             }
         } else {
             try {
-                Files.delete(fileToRemove.toPath());
+                fileOperations.removeFile(fileToRemove);
                 logger.trace(String.format("File %s successfully removed", filePathToRemove));
             } catch (final Exception e) {
                 logger.warn(String.format("Error removing whited-out file %s", filePathToRemove));

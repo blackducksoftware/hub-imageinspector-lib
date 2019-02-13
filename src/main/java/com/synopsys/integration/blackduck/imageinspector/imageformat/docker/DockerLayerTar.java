@@ -25,6 +25,7 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntries;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntry;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public class DockerLayerTar {
     private static final Logger logger = LoggerFactory.getLogger(DockerLayerTar.class);
 
-    public static List<File> extractLayerTarToDir(final File layerTar, final File layerOutputDir) throws IOException {
+    public static List<File> extractLayerTarToDir(final FileOperations fileOperations, final File layerTar, final File layerOutputDir) throws IOException {
         logger.debug(String.format("layerTar: %s", layerTar.getAbsolutePath()));
         final List<File> filesToRemove = new ArrayList<>();
         final TarArchiveInputStream layerInputStream = new TarArchiveInputStream(new FileInputStream(layerTar), "UTF-8");
@@ -50,7 +51,7 @@ public class DockerLayerTar {
             TarArchiveEntry layerEntry;
             while (null != (layerEntry = layerInputStream.getNextTarEntry())) {
                 try {
-                    final LayerEntry layerEntryHandler = LayerEntries.createLayerEntry(layerInputStream, layerEntry, layerOutputDir);
+                    final LayerEntry layerEntryHandler = LayerEntries.createLayerEntry(fileOperations, layerInputStream, layerEntry, layerOutputDir);
                     final Optional<File> otherFileToRemove = layerEntryHandler.process();
                     if (otherFileToRemove.isPresent()) {
                         logger.debug(String.format("File/directory marked for removal: %s", otherFileToRemove.get().getAbsolutePath()));

@@ -238,7 +238,7 @@ public class DockerTarParser {
 
     private File extractLayerTarToDir(final File targetImageFileSystemRoot, final File layerTar) throws IOException {
         logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), targetImageFileSystemRoot.getAbsolutePath()));
-        final List<File> filesToRemove = DockerLayerTar.extractLayerTarToDir(layerTar, targetImageFileSystemRoot);
+        final List<File> filesToRemove = DockerLayerTar.extractLayerTarToDir(fileOperations, layerTar, targetImageFileSystemRoot);
         for (final File fileToRemove : filesToRemove) {
             if (fileToRemove.isDirectory()) {
                 logger.debug(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));
