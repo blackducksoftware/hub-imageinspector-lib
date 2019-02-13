@@ -25,7 +25,6 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.synopsys.integration.bdio.SimpleBdioFactory;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
@@ -41,10 +40,8 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGen
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import org.apache.commons.compress.compressors.CompressorException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +51,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImageInspectorApi {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Gson gson = new Gson();
-    private final GsonBuilder gsonBuilder = new GsonBuilder();
+    private Gson gson;
+    private GsonBuilder gsonBuilder;
     private ImageInspector imageInspector;
     private Os os;
     private FileOperations fileOperations;
+    private BdioGenerator bdioGenerator;
+
+    @Autowired
+    public void setBdioGenerator(final BdioGenerator bdioGenerator) {
+        this.bdioGenerator = bdioGenerator;
+    }
+
+    @Autowired
+    public void setGson(final Gson gson) {
+        this.gson = gson;
+    }
+
+    @Autowired
+    public void setGsonBuilder(final GsonBuilder gsonBuilder) {
+        this.gsonBuilder = gsonBuilder;
+    }
 
     @Autowired
     public void setFileOperations(final FileOperations fileOperations) {
@@ -100,7 +113,6 @@ public class ImageInspectorApi {
             throws IntegrationException {
         logger.info("getBdio()::");
         os.logMemory();
-        final BdioGenerator bdioGenerator = new BdioGenerator(new SimpleBdioFactory());
         return getBdioDocument(bdioGenerator, dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, organizeComponentsByLayer, includeRemovedComponents, cleanupWorkingDir, containerFileSystemOutputPath,
                 currentLinuxDistro);
     }
@@ -130,7 +142,7 @@ public class ImageInspectorApi {
         final File dockerTarfile = new File(dockerTarfilePath);
         File tempDir;
         try {
-            tempDir = createTempDirectory();
+            tempDir = fileOperations.createTempDirectory();
         } catch (final IOException e) {
             throw new IntegrationException(String.format("Error creating temp dir: %s", e.getMessage()), e);
         }
@@ -203,7 +215,7 @@ public class ImageInspectorApi {
         if (cleanupWorkingDir) {
             for (final File layerTar : layerTars) {
                 logger.trace(String.format("Deleting %s", layerTar.getAbsolutePath()));
-                FileUtils.deleteQuietly(layerTar);
+                fileOperations.deleteQuietly(layerTar);
             }
         }
     }
@@ -219,19 +231,6 @@ public class ImageInspectorApi {
         }
     }
 
-    private File createTempDirectory() throws IOException {
-        final String suffix = String.format("_%s_%s", Thread.currentThread().getName(), Long.toString(new Date().getTime()));
-        final File temp = File.createTempFile("ImageInspectorApi_", suffix);
-        logger.info(String.format("Creating working dir %s", temp.getAbsolutePath()));
-        if (!temp.delete()) {
-            throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
-        }
-        if (!temp.mkdir()) {
-            throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
-        }
 
-        fileOperations.logFreeDiskSpace(temp);
-        return temp;
-    }
 
 }

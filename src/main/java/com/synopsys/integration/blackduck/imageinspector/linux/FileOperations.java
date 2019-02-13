@@ -34,6 +34,7 @@ import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
 
+import java.util.Date;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -131,5 +132,24 @@ public class FileOperations {
 
     public void createLink(final Path startLink, final Path endLink) throws IOException {
         Files.createLink(startLink, endLink);
+    }
+
+    public File createTempDirectory() throws IOException {
+        final String suffix = String.format("_%s_%s", Thread.currentThread().getName(), Long.toString(new Date().getTime()));
+        final File temp = File.createTempFile("ImageInspectorApi_", suffix);
+        logger.info(String.format("Creating working dir %s", temp.getAbsolutePath()));
+        if (!temp.delete()) {
+            throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
+        }
+        if (!temp.mkdir()) {
+            throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
+        }
+
+        logFreeDiskSpace(temp);
+        return temp;
+    }
+
+    public void deleteQuietly(final File file) {
+        FileUtils.deleteQuietly(file);
     }
 }
