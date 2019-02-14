@@ -38,15 +38,15 @@ public enum OperatingSystemEnum {
     private static final Logger logger = LoggerFactory.getLogger(OperatingSystemEnum.class);
 
     public static OperatingSystemEnum determineOperatingSystem(String operatingSystemName) {
-        if (operatingSystemName.equalsIgnoreCase("REDHAT")) {
+        if (StringUtils.isBlank(operatingSystemName)) {
+            return null;
+        } else if (operatingSystemName.equalsIgnoreCase("REDHAT")) {
             // The suspicion is that we'll never encounter "REDHAT"
             logger.warn("Encountered operating system name REDHAT (expected RHEL)");
             return OperatingSystemEnum.RHEL;
-        }
-        if (!StringUtils.isBlank(operatingSystemName)) {
+        } else {
             operatingSystemName = operatingSystemName.toUpperCase();
             return OperatingSystemEnum.valueOf(operatingSystemName);
         }
-        return null;
     }
 }

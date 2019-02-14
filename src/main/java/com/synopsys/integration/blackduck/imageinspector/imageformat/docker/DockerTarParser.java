@@ -202,7 +202,7 @@ public class DockerTarParser {
             final String imageConfigFileContents = FileUtils
                 .readFileToString(imageConfigFile, StandardCharsets.UTF_8);
             logger.debug(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            List<String> layerIds = imageConfigParser.getLayerIdsFromImageConfigFile(imageConfigFileContents);
+            List<String> layerIds = imageConfigParser.getLayerIdsFromImageConfigFile(gsonBuilder, imageConfigFileContents);
             return layerIds;
         } catch (Exception e) {
             logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));

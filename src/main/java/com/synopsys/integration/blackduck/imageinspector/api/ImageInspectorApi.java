@@ -68,7 +68,7 @@ public class ImageInspectorApi {
         this.gson = gson;
     }
 
-    @Autowired
+    // autowired does not work on GsonBuilder; not sure why
     public void setGsonBuilder(final GsonBuilder gsonBuilder) {
         this.gsonBuilder = gsonBuilder;
     }
@@ -113,6 +113,9 @@ public class ImageInspectorApi {
             throws IntegrationException {
         logger.info("getBdio()::");
         os.logMemory();
+        if (gsonBuilder == null) {
+            gsonBuilder = new GsonBuilder();
+        }
         return getBdioDocument(bdioGenerator, dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, organizeComponentsByLayer, includeRemovedComponents, cleanupWorkingDir, containerFileSystemOutputPath,
                 currentLinuxDistro);
     }

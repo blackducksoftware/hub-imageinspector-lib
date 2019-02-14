@@ -13,8 +13,7 @@ public class ImageConfigParserTest {
   @Test
   public void testImageConfigParser() {
     ImageConfigParser parser = new ImageConfigParser();
-    parser.setGsonBuilder(new GsonBuilder());
-    List<String> layerIds = parser.getLayerIdsFromImageConfigFile(CONFIG_FILE_CONTENTS);
+    List<String> layerIds = parser.getLayerIdsFromImageConfigFile(new GsonBuilder(), CONFIG_FILE_CONTENTS);
     assertEquals(1, layerIds.size());
     assertEquals("sha256:503e53e365f34399c4d58d8f4e23c161106cfbce4400e3d0a0357967bad69390", layerIds.get(0));
   }

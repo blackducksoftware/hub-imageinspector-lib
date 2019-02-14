@@ -149,7 +149,6 @@ public class DockerTarParserTest {
         tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setFileOperations(new FileOperations());
         ImageConfigParser imageConfigParser = new ImageConfigParser();
-        imageConfigParser.setGsonBuilder(new GsonBuilder());
         tarParser.setImageConfigParser(imageConfigParser);
         ManifestLayerMapping mapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, tarFilename, "alpine", "latest");
         assertEquals("alpine", mapping.getImageName());

@@ -30,21 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ImageConfigParser {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  private GsonBuilder gsonBuilder;
-
-  @Autowired
-  public void setGsonBuilder(final GsonBuilder gsonBuilder) {
-    this.gsonBuilder = gsonBuilder;
-  }
-
-  public List<String> getLayerIdsFromImageConfigFile(final String imageConfigFileContents) {
+  public List<String> getLayerIdsFromImageConfigFile(final GsonBuilder gsonBuilder, final String imageConfigFileContents) {
     try {
       logger.debug(String.format("imageConfigFileContents: %s", imageConfigFileContents));
       JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(imageConfigFileContents, JsonObject.class);
