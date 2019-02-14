@@ -25,42 +25,17 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.synopsys.integration.exception.IntegrationException;
-
 public enum ImageInspectorOsEnum {
-    UBUNTU(OperatingSystemEnum.UBUNTU),
-    CENTOS(OperatingSystemEnum.CENTOS),
-    ALPINE(OperatingSystemEnum.ALPINE);
-
-    private final OperatingSystemEnum rawOs;
-
-    ImageInspectorOsEnum(final OperatingSystemEnum rawOs) {
-        this.rawOs = rawOs;
-    }
+    UBUNTU,
+    CENTOS,
+    ALPINE;
 
     public static ImageInspectorOsEnum determineOperatingSystem(String operatingSystemName) {
-        ImageInspectorOsEnum result = null;
-        if (!StringUtils.isBlank(operatingSystemName)) {
+        if (StringUtils.isBlank(operatingSystemName)) {
+            return null;
+        } else {
             operatingSystemName = operatingSystemName.toUpperCase();
-            result = ImageInspectorOsEnum.valueOf(operatingSystemName);
+            return ImageInspectorOsEnum.valueOf(operatingSystemName);
         }
-        return result;
-    }
-
-    public static ImageInspectorOsEnum getImageInspectorOsEnum(final OperatingSystemEnum osEnum) throws IntegrationException {
-        switch (osEnum) {
-            case UBUNTU:
-                return ImageInspectorOsEnum.UBUNTU;
-            case CENTOS:
-                return ImageInspectorOsEnum.CENTOS;
-            case ALPINE:
-                return ImageInspectorOsEnum.ALPINE;
-            default:
-                throw new IntegrationException(String.format("Un-recognized operating system: %s", osEnum.toString()));
-        }
-    }
-
-    public OperatingSystemEnum getRawOs() {
-        return rawOs;
     }
 }

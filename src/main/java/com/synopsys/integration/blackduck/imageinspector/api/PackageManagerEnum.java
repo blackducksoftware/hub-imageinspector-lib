@@ -27,16 +27,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public enum PackageManagerEnum {
-    DPKG("/var/lib/dpkg", OperatingSystemEnum.UBUNTU),
-    RPM("/var/lib/rpm", OperatingSystemEnum.CENTOS),
-    APK("/lib/apk", OperatingSystemEnum.ALPINE),
+    DPKG("/var/lib/dpkg", ImageInspectorOsEnum.UBUNTU),
+    RPM("/var/lib/rpm", ImageInspectorOsEnum.CENTOS),
+    APK("/lib/apk", ImageInspectorOsEnum.ALPINE),
     NULL(null, null);
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManagerEnum.class);
     private final String directory;
-    private final OperatingSystemEnum inspectorOperatingSystem;
+    private final ImageInspectorOsEnum inspectorOperatingSystem;
 
-    PackageManagerEnum(final String directory, final OperatingSystemEnum inspectorOperatingSystem) {
+    PackageManagerEnum(final String directory, final ImageInspectorOsEnum inspectorOperatingSystem) {
         this.directory = directory;
         this.inspectorOperatingSystem = inspectorOperatingSystem;
     }
@@ -56,7 +56,7 @@ public enum PackageManagerEnum {
         return directory;
     }
 
-    public OperatingSystemEnum getInspectorOperatingSystem() {
+    public ImageInspectorOsEnum getInspectorOperatingSystem() {
         return inspectorOperatingSystem;
     }
 }

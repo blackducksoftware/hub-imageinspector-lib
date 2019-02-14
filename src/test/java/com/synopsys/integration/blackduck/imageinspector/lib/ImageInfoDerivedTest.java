@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.synopsys.integration.bdio.model.BdioProject;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import java.io.File;
@@ -44,7 +44,7 @@ public class ImageInfoDerivedTest {
     assertEquals("testFinalProjectVersionName", derived.getFinalProjectVersionName());
     assertEquals("testProjectName", derived.getBdioDocument().project.name);
     assertEquals(
-        OperatingSystemEnum.ALPINE, derived.getImageInfoParsed().getPkgMgr().getPackageManager().getInspectorOperatingSystem());
+        ImageInspectorOsEnum.ALPINE, derived.getImageInfoParsed().getPkgMgr().getPackageManager().getInspectorOperatingSystem());
   }
 
 }

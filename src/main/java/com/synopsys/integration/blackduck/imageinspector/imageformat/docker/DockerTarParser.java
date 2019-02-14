@@ -26,7 +26,6 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
-import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
@@ -126,7 +125,7 @@ public class DockerTarParser {
         return untaredFiles;
     }
 
-    public ImageInfoParsed extractDockerLayers(final Gson gson, final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
+    public ImageInfoParsed extractDockerLayers(final Gson gson, final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
         for (final String layerDotTarDirname : manifestLayerMapping.getLayers()) {
@@ -278,24 +277,18 @@ public class DockerTarParser {
         return layerMetadataFileContents;
     }
 
-    private ImageInfoParsed addPostLayerComponents(final Gson gson, final int layerIndex, final ComponentExtractorFactory componentExtractorFactory, final OperatingSystemEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents, final String layerExternalId) throws WrongInspectorOsException {
+    private ImageInfoParsed addPostLayerComponents(final Gson gson, final int layerIndex, final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents, final String layerExternalId) throws WrongInspectorOsException {
         logger.debug("Getting components present (so far) after adding this layer");
         if (currentOs == null) {
             logger.debug("Current (running on) OS not provided; cannot determine components present after adding this layer");
             return null;
         }
         ImageInfoParsed imageInfoParsed = null;
-            OperatingSystemEnum inspectorOs;
+        ImageInspectorOsEnum neededInspectorOs;
         try {
             imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
-            inspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
-            if (!inspectorOs.equals(currentOs)) {
-                ImageInspectorOsEnum neededInspectorOs = null;
-                try {
-                    neededInspectorOs = ImageInspectorOsEnum.getImageInspectorOsEnum(inspectorOs);
-                } catch (IntegrationException e) {
-                    logger.debug(String.format("Unable to convert OS %s into an inspector OS", inspectorOs.toString()));
-                }
+            neededInspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
+            if (!neededInspectorOs.equals(currentOs)) {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
                 throw new WrongInspectorOsException(neededInspectorOs, msg);
             }

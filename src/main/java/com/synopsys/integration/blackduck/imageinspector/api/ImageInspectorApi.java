@@ -183,7 +183,7 @@ public class ImageInspectorApi {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
-        final OperatingSystemEnum currentOs = os.deriveOs(currentLinuxDistro);
+        final ImageInspectorOsEnum currentOs = os.deriveOs(currentLinuxDistro);
         final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gson, currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
         logLayers(imageComponentHierarchy);
         cleanUpLayerTars(cleanupWorkingDir, layerTars);

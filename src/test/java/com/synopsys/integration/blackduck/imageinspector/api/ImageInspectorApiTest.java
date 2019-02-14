@@ -85,7 +85,7 @@ public class ImageInspectorApiTest {
         new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
             PackageManagerEnum.APK), "apline");
     Mockito.when(imageInspector
-        .extractDockerLayers(gson, OperatingSystemEnum.ALPINE, imageComponentHierarchy,
+        .extractDockerLayers(gson, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
             containerFileSystemRootDir,
             layerTarFiles, mapping)).thenReturn(imageInfoParsed);
 
@@ -100,7 +100,7 @@ public class ImageInspectorApiTest {
             mapping, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix,
             organizeComponentsByLayer, includeRemovedComponents)).thenReturn(imageInfoDerived);
     final Os os = Mockito.mock(Os.class);
-    Mockito.when(os.deriveOs("alpine")).thenReturn(OperatingSystemEnum.ALPINE);
+    Mockito.when(os.deriveOs("alpine")).thenReturn(ImageInspectorOsEnum.ALPINE);
     final ImageInspectorApi api = new ImageInspectorApi(imageInspector, os);
     api.setGsonBuilder(gsonBuilder);
     api.setGson(gson);

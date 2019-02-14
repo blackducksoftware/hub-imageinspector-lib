@@ -54,19 +54,19 @@ public class ImageInspectorApiIntTest {
 
     @Test
     public void testOnWrongOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
-        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.CENTOS);
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
         try {
             imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, "CENTOS");
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
-            assertEquals(OperatingSystemEnum.ALPINE.name(), e.getcorrectInspectorOs().name());
+            assertEquals(ImageInspectorOsEnum.ALPINE.name(), e.getcorrectInspectorOs().name());
         }
     }
 
     @Test
     public void testOnRightOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
-        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(OperatingSystemEnum.ALPINE);
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
         String[] apkPackages = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
         Mockito.when(apkExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkPackages);
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, "ALPINE");

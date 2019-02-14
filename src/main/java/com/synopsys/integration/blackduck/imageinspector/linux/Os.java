@@ -23,26 +23,24 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux;
 
+import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
+import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.synopsys.integration.blackduck.imageinspector.api.OperatingSystemEnum;
-import com.synopsys.integration.exception.IntegrationException;
-
 @Component
 public class Os {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public OperatingSystemEnum deriveOs(final String linuxDistroName) throws IntegrationException {
-        final OperatingSystemEnum osEnum = OperatingSystemEnum.determineOperatingSystem(linuxDistroName);
+    public ImageInspectorOsEnum deriveOs(final String linuxDistroName) throws IntegrationException {
+        final ImageInspectorOsEnum osEnum = ImageInspectorOsEnum.determineOperatingSystem(linuxDistroName);
         if (osEnum == null) {
             throw new IntegrationException(String.format("Unrecognized linux distro: %s", linuxDistroName));
         }
@@ -117,11 +115,11 @@ public class Os {
             String line = lines.get(0);
             if (line.startsWith("Red Hat")) {
                 logger.trace("Contents of redhat-release indicate RHEL");
-                return Optional.of(OperatingSystemEnum.RHEL.name().toLowerCase());
+                return Optional.of("rhel");
             }
             if (line.startsWith("CentOS")) {
                 logger.trace("Contents of redhat-release indicate CentOS");
-                return Optional.of(OperatingSystemEnum.CENTOS.name().toLowerCase());
+                return Optional.of("centos");
             }
             logger.warn(String.format("Found redhat-release file %s but don't understand the contents: '%s'", etcDirFile.getAbsolutePath(), line));
             return Optional.empty();
