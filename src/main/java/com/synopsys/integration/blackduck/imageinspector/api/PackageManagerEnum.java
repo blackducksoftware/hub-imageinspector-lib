@@ -23,26 +23,9 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public enum PackageManagerEnum {
     DPKG,
     RPM,
     APK,
     NULL;
-
-    private static final Logger logger = LoggerFactory.getLogger(PackageManagerEnum.class);
-    
-    // TODO is this used by DI? does it really add value over valueOf()?
-    public static PackageManagerEnum getPackageManagerEnumByName(String name) {
-        logger.trace(String.format("Checking to see whether %s is a package manager", name));
-        PackageManagerEnum matchingPkgMgr = null;
-        if (name != null) {
-            name = name.toUpperCase();
-            matchingPkgMgr = PackageManagerEnum.valueOf(name);
-            logger.trace(String.format("%s matched package manager %s", name, matchingPkgMgr));
-        }
-        return matchingPkgMgr;
-    }
 }

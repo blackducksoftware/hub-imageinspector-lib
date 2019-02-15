@@ -46,10 +46,14 @@ public class ApkPkgMgr implements PkgMgr {
   }
 
   @Override
+  public File getInspectorPackageManagerDirectory() {
+    return new File(PKG_MGR_DIR);
+  }
+
+  @Override
   public ImagePkgMgrDatabase getImagePkgMgrDatabase(File targetImageFileSystemRootDir) {
-    final File inspectorPackageManagerDirectory = new File(PKG_MGR_DIR);
     final File extractedPackageManagerDirectory = getExtractedPackageManagerDirectory(targetImageFileSystemRootDir);
-    final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(inspectorPackageManagerDirectory, extractedPackageManagerDirectory,
+    final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(extractedPackageManagerDirectory,
         PackageManagerEnum.APK);
     return targetImagePkgMgr;
   }

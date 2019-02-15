@@ -8,6 +8,7 @@ import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageIn
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import java.io.File;
 import java.util.Arrays;
 import org.junit.Test;
@@ -16,10 +17,10 @@ public class ImageInfoDerivedTest {
 
   @Test
   public void test() {
-    ImagePkgMgrDatabase pkgMgrDb = new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), new File("src/test/resources/imageDir/etc/apk"),
+    ImagePkgMgrDatabase pkgMgrDb = new ImagePkgMgrDatabase(new File("src/test/resources/imageDir/etc/apk"),
         PackageManagerEnum.APK);
     ImageInfoParsed parsed = new ImageInfoParsed(new File("src/test/resources/imageDir"),
-        pkgMgrDb, "alpine");
+        pkgMgrDb, "alpine", new ApkPkgMgr());
 
     assertEquals("imageDir", parsed.getFileSystemRootDir().getName());
     assertEquals("alpine", parsed.getLinuxDistroName());

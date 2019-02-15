@@ -10,6 +10,7 @@ public interface PkgMgr {
   String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";
 
   boolean isApplicable(final File targetImageFileSystemRootDir);
+  File getInspectorPackageManagerDirectory();
   ImagePkgMgrDatabase getImagePkgMgrDatabase(final File targetImageFileSystemRootDir);
   List<ComponentDetails> extractComponentsFromPkgMgrOutput(final File imageFileSystem, final String linuxDistroName, final String[] pkgMgrListOutputLines) throws IntegrationException;
 }

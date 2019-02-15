@@ -23,6 +23,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import java.io.File;
 
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
@@ -33,11 +34,13 @@ public class ImageInfoParsed {
     private final File fileSystemRootDir;
     private final ImagePkgMgrDatabase imagePkgMgrDatabase;
     private final String linuxDistroName;
+    private final PkgMgr pkgMgr;
 
-    public ImageInfoParsed(final File fileSystemRootDir, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName) {
+    public ImageInfoParsed(final File fileSystemRootDir, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName, PkgMgr pkgMgr) {
         this.fileSystemRootDir = fileSystemRootDir;
         this.imagePkgMgrDatabase = imagePkgMgrDatabase;
         this.linuxDistroName = linuxDistroName;
+        this.pkgMgr = pkgMgr;
     }
 
     public File getFileSystemRootDir() {
@@ -50,6 +53,10 @@ public class ImageInfoParsed {
 
     public String getLinuxDistroName() {
         return linuxDistroName;
+    }
+
+    public PkgMgr getPkgMgr() {
+        return pkgMgr;
     }
 
     @Override

@@ -23,10 +23,9 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
-import java.util.List;
-
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.exception.IntegrationException;
+import java.util.List;
 
 public interface ComponentExtractor {
     String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";

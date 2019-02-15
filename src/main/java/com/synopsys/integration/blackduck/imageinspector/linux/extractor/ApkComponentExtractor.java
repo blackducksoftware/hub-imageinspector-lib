@@ -27,6 +27,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
@@ -50,8 +51,11 @@ public class ApkComponentExtractor implements ComponentExtractor {
     private final PkgMgrExecutor pkgMgrExecutor;
     private final File imageFileSystem;
     private String architecture;
+    // TODO TEMP
+    private PkgMgr pkgMgr;
 
-    public ApkComponentExtractor(final FileOperations fileOperations, final PkgMgrExecutor pkgMgrExecutor, final File imageFileSystem, final String architecture) {
+    public ApkComponentExtractor(final PkgMgr pkgMgr, final FileOperations fileOperations, final PkgMgrExecutor pkgMgrExecutor, final File imageFileSystem, final String architecture) {
+        this.pkgMgr = pkgMgr;
         this.fileOperations = fileOperations;
         this.pkgMgrExecutor = pkgMgrExecutor;
         this.imageFileSystem = imageFileSystem;
@@ -61,7 +65,7 @@ public class ApkComponentExtractor implements ComponentExtractor {
     @Override
     public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase,
             final String linuxDistroName) throws IntegrationException {
-        final String[] pkgMgrListOutputLines = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
+        final String[] pkgMgrListOutputLines = pkgMgrExecutor.runPackageManager(pkgMgr, imagePkgMgrDatabase);
         final List<ComponentDetails> components = extractComponentsFromPkgMgrOutput(linuxDistroName, pkgMgrListOutputLines);
         return components;
     }

@@ -25,6 +25,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,8 +40,10 @@ public class DpkgComponentExtractor implements ComponentExtractor {
     private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
     private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
     private final PkgMgrExecutor pkgMgrExecutor;
+    private final PkgMgr pkgMgr;
 
-    public DpkgComponentExtractor(final PkgMgrExecutor pkgMgrExecutor) {
+    public DpkgComponentExtractor(final PkgMgr pkgMgr, final PkgMgrExecutor pkgMgrExecutor) {
+        this.pkgMgr = pkgMgr;
         this.pkgMgrExecutor = pkgMgrExecutor;
     }
 
@@ -48,7 +51,7 @@ public class DpkgComponentExtractor implements ComponentExtractor {
     public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
             throws IntegrationException {
 
-        final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
+        final String[] packageList = pkgMgrExecutor.runPackageManager(pkgMgr, imagePkgMgrDatabase);
         final List<ComponentDetails> components = extractComponentsFromPkgMgrOutput(linuxDistroName, packageList);
         return components;
     }

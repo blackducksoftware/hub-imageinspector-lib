@@ -27,6 +27,7 @@ import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.output.RpmPackage;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,9 +42,11 @@ public class RpmComponentExtractor implements ComponentExtractor {
     private static final String NO_VALUE = "(none)";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final PkgMgrExecutor pkgMgrExecutor;
+    private final PkgMgr pkgMgr;
     private final Gson gson;
 
-    public RpmComponentExtractor(final PkgMgrExecutor pkgMgrExecutor, final Gson gson) {
+    public RpmComponentExtractor(final PkgMgr pkgMgr, final PkgMgrExecutor pkgMgrExecutor, final Gson gson) {
+        this.pkgMgr = pkgMgr;
         this.pkgMgrExecutor = pkgMgrExecutor;
         this.gson = gson;
     }
@@ -51,7 +54,7 @@ public class RpmComponentExtractor implements ComponentExtractor {
     @Override
     public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
             throws IntegrationException {
-        final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
+        final String[] packageList = pkgMgrExecutor.runPackageManager(pkgMgr, imagePkgMgrDatabase);
         final List<ComponentDetails> components = extractComponentsFromPkgMgrOutput(linuxDistroName, packageList);
         return components;
     }

@@ -23,19 +23,18 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
+import com.google.gson.Gson;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import java.io.File;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
 
 @Component
 public class ComponentExtractorFactory {
@@ -65,14 +64,14 @@ public class ComponentExtractorFactory {
         this.fileOperations = fileOperations;
     }
 
-    public ComponentExtractor createComponentExtractor(final Gson gson, final File imageFileSystem, final String architecture, final PackageManagerEnum packageManagerEnum) {
+    public ComponentExtractor createComponentExtractor(final Gson gson, final PkgMgr pkgMgr, final File imageFileSystem, final String architecture, final PackageManagerEnum packageManagerEnum) {
         logger.debug("createComponentExtractor()");
         if (packageManagerEnum == PackageManagerEnum.APK) {
-            return new ApkComponentExtractor(fileOperations, apkExecutor, imageFileSystem, architecture);
+            return new ApkComponentExtractor(pkgMgr, fileOperations, apkExecutor, imageFileSystem, architecture);
         } else if (packageManagerEnum == PackageManagerEnum.DPKG) {
-            return new DpkgComponentExtractor(dpkgExecutor);
+            return new DpkgComponentExtractor(pkgMgr, dpkgExecutor);
         } else if (packageManagerEnum == PackageManagerEnum.RPM) {
-            return new RpmComponentExtractor(rpmExecutor, gson);
+            return new RpmComponentExtractor(pkgMgr, rpmExecutor, gson);
         } else {
             logger.info("No supported package manager found; will generate empty BDIO");
             return new NullComponentExtractor();

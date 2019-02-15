@@ -23,6 +23,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.api;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -168,7 +169,8 @@ public class BdioGeneratorApi {
 
     private String[] pkgListToBdioWithArch(final PackageManagerEnum pkgMgrType, final String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String blackDuckProjectName, final String blackDuckProjectVersion,
         final String codeLocationName, final String architecture) throws IntegrationException {
-        ComponentExtractor extractor = componentExtractorFactory.createComponentExtractor(gson, null, architecture, pkgMgrType);
+        ComponentExtractor extractor = componentExtractorFactory.createComponentExtractor(gson,
+            PkgMgrFactory.createPkgMgr(pkgMgrType), null, architecture, pkgMgrType);
         List<ComponentDetails> comps = extractor.extractComponentsFromPkgMgrOutput(linuxDistroName, pkgMgrListCmdOutputLines);
         logger.info(String.format("Extracted %d components from given package manager output", comps.size()));
         SimpleBdioDocument bdioDoc = bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);

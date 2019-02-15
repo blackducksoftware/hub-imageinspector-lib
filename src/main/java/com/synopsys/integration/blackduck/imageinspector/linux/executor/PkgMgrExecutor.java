@@ -24,6 +24,7 @@
 package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
@@ -47,13 +48,13 @@ public abstract class PkgMgrExecutor {
         this.listPackagesCommandParts = listPackagesCommandParts;
     }
 
-    public String[] runPackageManager(final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
+    public String[] runPackageManager(final PkgMgr pkgMgr, final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
         logger.info("Requesting lock for package manager execution");
         lock.lock();
         logger.info("Acquired lock for package manager execution");
         // TODO this needs to change to new pkg mgrs
         try {
-            final File packageManagerDirectory = imagePkgMgrDatabase.getInspectorPackageManagerDirectory();
+            final File packageManagerDirectory = pkgMgr.getInspectorPackageManagerDirectory();
             if (packageManagerDirectory.exists()) {
                 initPkgMgrDir(packageManagerDirectory);
             }

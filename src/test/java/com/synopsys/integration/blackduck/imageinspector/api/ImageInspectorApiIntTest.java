@@ -80,7 +80,7 @@ public class ImageInspectorApiIntTest {
     public void testOnRightOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
         String[] apkPackages = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
-        Mockito.when(apkExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkPackages);
+        Mockito.when(apkExecutor.runPackageManager(Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkPackages);
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, "ALPINE");
         System.out.printf("bdioDocument: %s\n", bdioDocument);
         assertEquals(PROJECT, bdioDocument.project.name);

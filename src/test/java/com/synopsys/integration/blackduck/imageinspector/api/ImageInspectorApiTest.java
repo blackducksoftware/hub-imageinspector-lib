@@ -18,6 +18,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
@@ -82,8 +83,8 @@ public class ImageInspectorApiTest {
 
     final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(
         new File("test/working/containerfilesystem"),
-        new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), new File("test/working/containerfilesystem/etc/apk"),
-            PackageManagerEnum.APK), "apline");
+        new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
+            PackageManagerEnum.APK), "apline", new ApkPkgMgr());
     Mockito.when(imageInspector
         .extractDockerLayers(gson, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
             containerFileSystemRootDir,

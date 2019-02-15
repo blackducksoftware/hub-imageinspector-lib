@@ -63,14 +63,21 @@ public class DockerTarParserTest {
     private static final String IMAGE_TAG = "1.0";
 
     private static final String LAYER_ID = "layerId1";
+    private static PkgMgr apkPkgMgr;
+    private static PkgMgr dpkgPkgMgr;
+    private static PkgMgr rpmPkgMgr;
     private static List<PkgMgr> pkgMgrs;
 
     @BeforeAll
     public static void setup() {
         pkgMgrs = new ArrayList<>(3);
-        pkgMgrs.add(new ApkPkgMgr());
-        pkgMgrs.add(new DpkgPkgMgr());
-        pkgMgrs.add(new RpmPkgMgr());
+        apkPkgMgr = new ApkPkgMgr();
+        dpkgPkgMgr = new DpkgPkgMgr();
+        rpmPkgMgr = new RpmPkgMgr();
+
+        pkgMgrs.add(apkPkgMgr);
+        pkgMgrs.add(dpkgPkgMgr);
+        pkgMgrs.add(rpmPkgMgr);
     }
     @Test
     public void testParseImageInfoApk() throws PkgMgrDataNotFoundException {
@@ -108,7 +115,7 @@ public class DockerTarParserTest {
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
         tarParser.extractDockerLayers(new Gson(), componentExtractorFactory, ImageInspectorOsEnum.CENTOS, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
         final ImageInfoParsed tarExtractionResults = tarParser.parseImageInfo(targetImageFileSystemRootDir);
-        assertEquals("/var/lib/rpm", tarExtractionResults.getImagePkgMgrDatabase().getInspectorPackageManagerDirectory().getAbsolutePath());
+        assertEquals("/var/lib/rpm", rpmPkgMgr.getInspectorPackageManagerDirectory().getAbsolutePath());
 
         boolean varLibRpmNameFound = false;
         final Collection<File> files = FileUtils.listFiles(workingDirectory, TrueFileFilter.TRUE, TrueFileFilter.TRUE);

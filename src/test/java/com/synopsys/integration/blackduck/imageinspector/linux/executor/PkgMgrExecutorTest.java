@@ -2,6 +2,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +18,8 @@ public class PkgMgrExecutorTest {
     pkgMgrExecutor.initPkgMgrDir(new File("src/test/resources"));
     pkgMgrExecutor.initValues(new ArrayList<>(), new ArrayList<>());
 
-    final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), new File("src/test/resources/imageDir/ubuntu/var/lib/dpkg"), PackageManagerEnum.DPKG);
-    pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
+    final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("src/test/resources/imageDir/ubuntu/var/lib/dpkg"), PackageManagerEnum.DPKG);
+    pkgMgrExecutor.runPackageManager(new DpkgPkgMgr(), imagePkgMgrDatabase);
 
   }
 

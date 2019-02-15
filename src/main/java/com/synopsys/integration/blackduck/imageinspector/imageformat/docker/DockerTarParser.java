@@ -155,7 +155,7 @@ public class DockerTarParser {
             imageComponentHierarchy.setFinalComponents(topLayer.getComponents());
         }
         if (imageInfoParsed == null) {
-            imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase(null, null, PackageManagerEnum.NULL), null);
+            imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase( null, PackageManagerEnum.NULL), null, null);
         }
         return imageInfoParsed;
     }
@@ -301,7 +301,7 @@ public class DockerTarParser {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
                 throw new WrongInspectorOsException(neededInspectorOs, msg);
             }
-            final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
+            final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getPkgMgr(), imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
             final List<ComponentDetails> comps;
             try {
                 comps = componentExtractor.extractComponents(imageInfoParsed.getImagePkgMgrDatabase(), imageInfoParsed.getLinuxDistroName());
@@ -338,7 +338,7 @@ public class DockerTarParser {
                 if (pkgMgr.isApplicable(targetImageFileSystemRootDir)) {
                     final ImagePkgMgrDatabase targetImagePkgMgr = pkgMgr.getImagePkgMgrDatabase(targetImageFileSystemRootDir);
                     final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
-                    final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir, targetImagePkgMgr, linuxDistroName);
+                    final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir, targetImagePkgMgr, linuxDistroName, pkgMgr);
                     return imagePkgMgrInfo;
                 }
             }

@@ -3,28 +3,30 @@ package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.gson.Gson;
+import com.synopsys.integration.bdio.SimpleBdioFactory;
+import com.synopsys.integration.bdio.model.BdioComponent;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
+import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
-import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.bdio.SimpleBdioFactory;
-import com.synopsys.integration.bdio.model.BdioComponent;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 
 public class ExtractorComposedTest {
 
@@ -34,12 +36,12 @@ public class ExtractorComposedTest {
         final String[] pkgMgrOutputLines = { "WARNING: Ignoring APKINDEX.adfa7ceb.tar.gz: No such file or directory",
                 "alpine-baselayout-3.1.0-r0", "musl-utils-1.1.19-r10" };
         final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(ApkExecutor.class);
-        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
+        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ComponentExtractor componentExtractor = new ApkComponentExtractor(new FileOperations(), pkgMgrExecutor, new File("src/test/resources/testApkFileSystem"), null);
+        final ComponentExtractor componentExtractor = new ApkComponentExtractor(new ApkPkgMgr(), new FileOperations(), pkgMgrExecutor, new File("src/test/resources/testApkFileSystem"), null);
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
-        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), imagePkgMgrDir, PackageManagerEnum.APK);
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
         List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "alpine");
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
@@ -70,13 +72,13 @@ public class ExtractorComposedTest {
                 "ii  login                   1:4.5-1ubuntu1         amd64        system login tools" };
 
         final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(DpkgExecutor.class);
-        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
+        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ComponentExtractor componentExtractor = new DpkgComponentExtractor(pkgMgrExecutor);
+        final ComponentExtractor componentExtractor = new DpkgComponentExtractor(new DpkgPkgMgr(), pkgMgrExecutor);
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
-        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), imagePkgMgrDir, PackageManagerEnum.DPKG);
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.DPKG);
         List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "ubuntu");
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
@@ -170,13 +172,13 @@ public class ExtractorComposedTest {
 
     private SimpleBdioDocument getBdioDocumentForRpmPackages(final String[] pkgMgrOutputLines) throws IntegrationException, IOException, InterruptedException {
         final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(RpmExecutor.class);
-        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
+        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final ComponentExtractor componentExtractor = new RpmComponentExtractor(pkgMgrExecutor, new Gson());
+        final ComponentExtractor componentExtractor = new RpmComponentExtractor(new RpmPkgMgr(), pkgMgrExecutor, new Gson());
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
-        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), imagePkgMgrDir, PackageManagerEnum.RPM);
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.RPM);
         List<ComponentDetails> comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "centos");
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
