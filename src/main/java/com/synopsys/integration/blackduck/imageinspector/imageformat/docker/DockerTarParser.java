@@ -154,7 +154,7 @@ public class DockerTarParser {
             imageComponentHierarchy.setFinalComponents(topLayer.getComponents());
         }
         if (imageInfoParsed == null) {
-            imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), null);
+            imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase(null, null, PackageManagerEnum.NULL), null);
         }
         return imageInfoParsed;
     }
@@ -294,15 +294,15 @@ public class DockerTarParser {
         ImageInspectorOsEnum neededInspectorOs;
         try {
             imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
-            neededInspectorOs = imageInfoParsed.getPkgMgr().getPackageManager().getInspectorOperatingSystem();
+            neededInspectorOs = imageInfoParsed.getImagePkgMgrDatabase().getPackageManager().getInspectorOperatingSystem();
             if (!neededInspectorOs.equals(currentOs)) {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
                 throw new WrongInspectorOsException(neededInspectorOs, msg);
             }
-            final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getPkgMgr().getPackageManager());
+            final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
             final List<ComponentDetails> comps;
             try {
-                comps = componentExtractor.extractComponents(imageInfoParsed.getPkgMgr(), imageInfoParsed.getLinuxDistroName());
+                comps = componentExtractor.extractComponents(imageInfoParsed.getImagePkgMgrDatabase(), imageInfoParsed.getLinuxDistroName());
             } catch (IntegrationException e) {
                 logger.debug(String.format("Unable to log components present after this layer: %s", e.getMessage()));
                 return imageInfoParsed;

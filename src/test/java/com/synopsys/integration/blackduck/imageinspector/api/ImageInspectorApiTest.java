@@ -82,7 +82,7 @@ public class ImageInspectorApiTest {
 
     final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(
         new File("test/working/containerfilesystem"),
-        new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
+        new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), new File("test/working/containerfilesystem/etc/apk"),
             PackageManagerEnum.APK), "apline");
     Mockito.when(imageInspector
         .extractDockerLayers(gson, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,

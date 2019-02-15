@@ -47,18 +47,18 @@ public abstract class PkgMgrExecutor {
         this.listPackagesCommandParts = listPackagesCommandParts;
     }
 
-    public String[] runPackageManager(final ImagePkgMgrDatabase imagePkgMgr) throws IntegrationException {
+    public String[] runPackageManager(final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
         logger.info("Requesting lock for package manager execution");
         lock.lock();
         logger.info("Acquired lock for package manager execution");
         // TODO this needs to change to new pkg mgrs
         try {
-            final File packageManagerDirectory = new File(imagePkgMgr.getPackageManager().getDirectory());
+            final File packageManagerDirectory = imagePkgMgrDatabase.getInspectorPackageManagerDirectory();
             if (packageManagerDirectory.exists()) {
                 initPkgMgrDir(packageManagerDirectory);
             }
-            logger.debug(String.format("Copying %s to %s", imagePkgMgr.getExtractedPackageManagerDirectory().getAbsolutePath(), packageManagerDirectory.getAbsolutePath()));
-            FileUtils.copyDirectory(imagePkgMgr.getExtractedPackageManagerDirectory(), packageManagerDirectory);
+            logger.debug(String.format("Copying %s to %s", imagePkgMgrDatabase.getExtractedPackageManagerDirectory().getAbsolutePath(), packageManagerDirectory.getAbsolutePath()));
+            FileUtils.copyDirectory(imagePkgMgrDatabase.getExtractedPackageManagerDirectory(), packageManagerDirectory);
             final String[] pkgMgrListOutputLines = listPackages();
             logger.trace(String.format("Package count: %d", pkgMgrListOutputLines.length));
             return pkgMgrListOutputLines;

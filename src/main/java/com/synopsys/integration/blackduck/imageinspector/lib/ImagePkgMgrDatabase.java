@@ -29,13 +29,18 @@ import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.util.Stringable;
 
 public class ImagePkgMgrDatabase extends Stringable {
-
+    private final File inspectorPackageManagerDirectory;
     private final File extractedPackageManagerDirectory;
     private final PackageManagerEnum packageManager;
 
-    public ImagePkgMgrDatabase(final File extractedPackageManagerDirectory, final PackageManagerEnum packageManager) {
+    public ImagePkgMgrDatabase(final File inspectorPackageManagerDirectory, final File extractedPackageManagerDirectory, final PackageManagerEnum packageManager) {
+        this.inspectorPackageManagerDirectory = inspectorPackageManagerDirectory;
         this.extractedPackageManagerDirectory = extractedPackageManagerDirectory;
         this.packageManager = packageManager;
+    }
+
+    public File getInspectorPackageManagerDirectory() {
+        return inspectorPackageManagerDirectory;
     }
 
     public File getExtractedPackageManagerDirectory() {

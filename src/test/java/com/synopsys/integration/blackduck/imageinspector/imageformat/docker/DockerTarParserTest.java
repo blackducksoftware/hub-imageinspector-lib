@@ -108,7 +108,7 @@ public class DockerTarParserTest {
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
         tarParser.extractDockerLayers(new Gson(), componentExtractorFactory, ImageInspectorOsEnum.CENTOS, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
         final ImageInfoParsed tarExtractionResults = tarParser.parseImageInfo(targetImageFileSystemRootDir);
-        assertEquals("/var/lib/rpm", tarExtractionResults.getPkgMgr().getPackageManager().getDirectory());
+        assertEquals("/var/lib/rpm", tarExtractionResults.getImagePkgMgrDatabase().getInspectorPackageManagerDirectory().getAbsolutePath());
 
         boolean varLibRpmNameFound = false;
         final Collection<File> files = FileUtils.listFiles(workingDirectory, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
@@ -206,8 +206,8 @@ public class DockerTarParserTest {
         final File containerFilesystemRoot = new File(String.format("src/test/resources/imageDir/%s", imageInspectorDistro));
         ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(containerFilesystemRoot);
         assertEquals(imageInspectorDistro, imageInfoParsed.getLinuxDistroName());
-        assertEquals(packageManagerType, imageInfoParsed.getPkgMgr().getPackageManager());
-        assertEquals(pkgMgrDirName, imageInfoParsed.getPkgMgr().getExtractedPackageManagerDirectory().getName());
+        assertEquals(packageManagerType, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
+        assertEquals(pkgMgrDirName, imageInfoParsed.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());
         assertEquals(imageInspectorDistro, imageInfoParsed.getFileSystemRootDir().getName());
     }
 }

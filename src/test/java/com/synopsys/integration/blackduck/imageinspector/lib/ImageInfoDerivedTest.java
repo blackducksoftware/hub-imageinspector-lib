@@ -15,15 +15,15 @@ public class ImageInfoDerivedTest {
 
   @Test
   public void test() {
-    ImagePkgMgrDatabase pkgMgrDb = new ImagePkgMgrDatabase(new File("src/test/resources/imageDir/etc/apk"),
+    ImagePkgMgrDatabase pkgMgrDb = new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), new File("src/test/resources/imageDir/etc/apk"),
         PackageManagerEnum.APK);
     ImageInfoParsed parsed = new ImageInfoParsed(new File("src/test/resources/imageDir"),
         pkgMgrDb, "alpine");
 
     assertEquals("imageDir", parsed.getFileSystemRootDir().getName());
     assertEquals("alpine", parsed.getLinuxDistroName());
-    assertEquals(PackageManagerEnum.APK, parsed.getPkgMgr().getPackageManager());
-    assertEquals("apk", parsed.getPkgMgr().getExtractedPackageManagerDirectory().getName());
+    assertEquals(PackageManagerEnum.APK, parsed.getImagePkgMgrDatabase().getPackageManager());
+    assertEquals("apk", parsed.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());
 
     ImageInfoDerived derived = new ImageInfoDerived(parsed);
     derived.setCodeLocationName("testCodelocationName");
@@ -44,7 +44,7 @@ public class ImageInfoDerivedTest {
     assertEquals("testFinalProjectVersionName", derived.getFinalProjectVersionName());
     assertEquals("testProjectName", derived.getBdioDocument().project.name);
     assertEquals(
-        ImageInspectorOsEnum.ALPINE, derived.getImageInfoParsed().getPkgMgr().getPackageManager().getInspectorOperatingSystem());
+        ImageInspectorOsEnum.ALPINE, derived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().getInspectorOperatingSystem());
   }
 
 }

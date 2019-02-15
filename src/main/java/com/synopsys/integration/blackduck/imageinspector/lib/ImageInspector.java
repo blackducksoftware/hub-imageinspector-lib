@@ -95,11 +95,11 @@ public class ImageInspector {
             final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) {
         logger.debug(String.format("generateBdioFromGivenComponents(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
-        final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getPkgMgr();
+        final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase();
         imageInfoDerived.setManifestLayerMapping(mapping);
         if (imagePkgMgr != null && imagePkgMgr.getPackageManager() != PackageManagerEnum.NULL) {
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
-                    imageInfoDerived.getImageInfoParsed().getPkgMgr().getPackageManager().toString()));
+                    imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().toString()));
         } else {
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
                     NO_PKG_MGR_FOUND));

@@ -39,7 +39,7 @@ public class ExtractorComposedTest {
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
         final ComponentExtractor componentExtractor = new ApkComponentExtractor(new FileOperations(), pkgMgrExecutor, new File("src/test/resources/testApkFileSystem"), null);
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
-        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.APK);
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), imagePkgMgrDir, PackageManagerEnum.APK);
         List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "alpine");
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
@@ -76,7 +76,7 @@ public class ExtractorComposedTest {
         final ComponentExtractor componentExtractor = new DpkgComponentExtractor(pkgMgrExecutor);
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
-        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.DPKG);
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), imagePkgMgrDir, PackageManagerEnum.DPKG);
         List<ComponentDetails>  comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "ubuntu");
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
@@ -176,7 +176,7 @@ public class ExtractorComposedTest {
         final ComponentExtractor componentExtractor = new RpmComponentExtractor(pkgMgrExecutor, new Gson());
 
         final File imagePkgMgrDir = new File("the code that uses this is mocked");
-        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(imagePkgMgrDir, PackageManagerEnum.RPM);
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("test/output/inspectorPkgMgr"), imagePkgMgrDir, PackageManagerEnum.RPM);
         List<ComponentDetails> comps = componentExtractor.extractComponents(imagePkgMgrDatabase, "centos");
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);

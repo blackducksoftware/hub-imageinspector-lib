@@ -39,7 +39,7 @@ public class ApkPkgMgr implements PkgMgr {
 
   @Override
   public boolean isApplicable(File targetImageFileSystemRootDir) {
-    final File packageManagerDirectory = getPackageManagerDirectory(targetImageFileSystemRootDir);
+    final File packageManagerDirectory = getExtractedPackageManagerDirectory(targetImageFileSystemRootDir);
     final boolean applies = packageManagerDirectory.exists();
     logger.debug(String.format("%s %s", this.getClass().getName(), applies ? "applies" : "does not apply"));
     return applies;
@@ -47,8 +47,9 @@ public class ApkPkgMgr implements PkgMgr {
 
   @Override
   public ImagePkgMgrDatabase getImagePkgMgrDatabase(File targetImageFileSystemRootDir) {
-    final File packageManagerDirectory = getPackageManagerDirectory(targetImageFileSystemRootDir);
-    final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(packageManagerDirectory,
+    final File inspectorPackageManagerDirectory = new File(PKG_MGR_DIR);
+    final File extractedPackageManagerDirectory = getExtractedPackageManagerDirectory(targetImageFileSystemRootDir);
+    final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(inspectorPackageManagerDirectory, extractedPackageManagerDirectory,
         PackageManagerEnum.APK);
     return targetImagePkgMgr;
   }
@@ -91,7 +92,7 @@ public class ApkPkgMgr implements PkgMgr {
     return components;
   }
 
-  private File getPackageManagerDirectory(File targetImageFileSystemRootDir) {
+  private File getExtractedPackageManagerDirectory(File targetImageFileSystemRootDir) {
     return new File(targetImageFileSystemRootDir, PKG_MGR_DIR);
   }
 
