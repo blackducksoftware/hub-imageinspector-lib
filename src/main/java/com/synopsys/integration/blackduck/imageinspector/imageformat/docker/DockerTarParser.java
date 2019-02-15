@@ -36,6 +36,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHiera
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
+import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageInspectorOsMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
@@ -294,7 +295,8 @@ public class DockerTarParser {
         ImageInspectorOsEnum neededInspectorOs;
         try {
             imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
-            neededInspectorOs = imageInfoParsed.getImagePkgMgrDatabase().getPackageManager().getInspectorOperatingSystem();
+            neededInspectorOs = PackageManagerToImageInspectorOsMapping
+                .getImageInspectorOs(imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
             if (!neededInspectorOs.equals(currentOs)) {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
                 throw new WrongInspectorOsException(neededInspectorOs, msg);

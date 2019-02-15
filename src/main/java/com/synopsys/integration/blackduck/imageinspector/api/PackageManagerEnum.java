@@ -27,19 +27,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public enum PackageManagerEnum {
-    // TODO move these to each pkg mgr
-    DPKG(ImageInspectorOsEnum.UBUNTU),
-    RPM(ImageInspectorOsEnum.CENTOS),
-    APK(ImageInspectorOsEnum.ALPINE),
-    NULL(null);
+    DPKG,
+    RPM,
+    APK,
+    NULL;
 
     private static final Logger logger = LoggerFactory.getLogger(PackageManagerEnum.class);
-    private final ImageInspectorOsEnum inspectorOperatingSystem;
-
-    PackageManagerEnum(final ImageInspectorOsEnum inspectorOperatingSystem) {
-        this.inspectorOperatingSystem = inspectorOperatingSystem;
-    }
-
+    
     // TODO is this used by DI? does it really add value over valueOf()?
     public static PackageManagerEnum getPackageManagerEnumByName(String name) {
         logger.trace(String.format("Checking to see whether %s is a package manager", name));
@@ -50,9 +44,5 @@ public enum PackageManagerEnum {
             logger.trace(String.format("%s matched package manager %s", name, matchingPkgMgr));
         }
         return matchingPkgMgr;
-    }
-
-    public ImageInspectorOsEnum getInspectorOperatingSystem() {
-        return inspectorOperatingSystem;
     }
 }
