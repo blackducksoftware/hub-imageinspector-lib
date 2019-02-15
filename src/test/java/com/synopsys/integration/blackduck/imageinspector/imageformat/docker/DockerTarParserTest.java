@@ -34,6 +34,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
@@ -62,10 +63,26 @@ public class DockerTarParserTest {
     private static final String LAYER_ID = "layerId1";
 
     @Test
-    public void testParseImageInfo() throws PkgMgrDataNotFoundException {
-        PkgMgr apkPkgMgr = new ApkPkgMgr();
-        List<PkgMgr> pkgMgrs = new ArrayList<>(1);
-        pkgMgrs.add(apkPkgMgr);
+    public void testParseImageInfoApk() throws PkgMgrDataNotFoundException {
+        String imageInspectorDistro = "alpine";
+        String pkgMgrDirName = "apk";
+
+        testParseImageInfo(imageInspectorDistro, PackageManagerEnum.APK, pkgMgrDirName);
+    }
+
+    @Test
+    public void testParseImageInfoDpkg() throws PkgMgrDataNotFoundException {
+        String imageInspectorDistro = "ubuntu";
+        String pkgMgrDirName = "dpkg";
+
+        testParseImageInfo(imageInspectorDistro, PackageManagerEnum.DPKG, pkgMgrDirName);
+    }
+
+    private void testParseImageInfo(String imageInspectorDistro, PackageManagerEnum packageManagerType, String pkgMgrDirName)
+        throws PkgMgrDataNotFoundException {
+        List<PkgMgr> pkgMgrs = new ArrayList<>(3);
+        pkgMgrs.add(new ApkPkgMgr());
+        pkgMgrs.add(new DpkgPkgMgr());
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
@@ -73,12 +90,12 @@ public class DockerTarParserTest {
         tarParser.setFileOperations(new FileOperations());
         tarParser.setPkgMgrs(pkgMgrs);
 
-        final File containerFilesystemRoot = new File("src/test/resources/imageDir/alpine");
+        final File containerFilesystemRoot = new File(String.format("src/test/resources/imageDir/%s", imageInspectorDistro));
         ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(containerFilesystemRoot);
-        assertEquals("alpine", imageInfoParsed.getLinuxDistroName());
-        assertEquals(PackageManagerEnum.APK, imageInfoParsed.getPkgMgr().getPackageManager());
-        assertEquals("apk", imageInfoParsed.getPkgMgr().getExtractedPackageManagerDirectory().getName());
-        assertEquals("alpine", imageInfoParsed.getFileSystemRootDir().getName());
+        assertEquals(imageInspectorDistro, imageInfoParsed.getLinuxDistroName());
+        assertEquals(packageManagerType, imageInfoParsed.getPkgMgr().getPackageManager());
+        assertEquals(pkgMgrDirName, imageInfoParsed.getPkgMgr().getExtractedPackageManagerDirectory().getName());
+        assertEquals(imageInspectorDistro, imageInfoParsed.getFileSystemRootDir().getName());
     }
 
     @Test

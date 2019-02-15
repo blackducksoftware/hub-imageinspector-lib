@@ -329,7 +329,7 @@ public class DockerTarParser {
 
 
     ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
-//        ImagePkgMgrDatabase targetImagePkgMgr = null;
+        ImagePkgMgrDatabase targetImagePkgMgr = null;
         // TODO call each pkgMgr isApplicable() method
         if (pkgMgrs == null) {
             logger.error("No pmgMgrs configured");
@@ -337,7 +337,7 @@ public class DockerTarParser {
             logger.info(String.format("*** pkgMgrs.size(): %d", pkgMgrs.size()));
             for (PkgMgr pkgMgr : pkgMgrs) {
                 if (pkgMgr.isApplicable(targetImageFileSystemRootDir)) {
-//                    targetImagePkgMgr = pkgMgr.getImagePkgMgrDatabase(targetImageFileSystemRootDir);
+                    targetImagePkgMgr = pkgMgr.getImagePkgMgrDatabase(targetImageFileSystemRootDir);
                 }
             }
         }
@@ -350,7 +350,7 @@ public class DockerTarParser {
             final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
             if (packageManagerDirectory.exists()) {
                 logger.info(String.format("Found package Manager Dir: %s", packageManagerDirectory.getAbsolutePath()));
-               ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(packageManagerDirectory, packageManagerEnum);
+//               ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(packageManagerDirectory, packageManagerEnum);
                 final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
                 final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir, targetImagePkgMgr, linuxDistroName);
                 return imagePkgMgrInfo;
