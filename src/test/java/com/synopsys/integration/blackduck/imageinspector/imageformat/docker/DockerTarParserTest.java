@@ -35,6 +35,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Compone
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
@@ -78,11 +79,20 @@ public class DockerTarParserTest {
         testParseImageInfo(imageInspectorDistro, PackageManagerEnum.DPKG, pkgMgrDirName);
     }
 
+    @Test
+    public void testParseImageInfoRpm() throws PkgMgrDataNotFoundException {
+        String imageInspectorDistro = "centos";
+        String pkgMgrDirName = "rpm";
+
+        testParseImageInfo(imageInspectorDistro, PackageManagerEnum.RPM, pkgMgrDirName);
+    }
+
     private void testParseImageInfo(String imageInspectorDistro, PackageManagerEnum packageManagerType, String pkgMgrDirName)
         throws PkgMgrDataNotFoundException {
         List<PkgMgr> pkgMgrs = new ArrayList<>(3);
         pkgMgrs.add(new ApkPkgMgr());
         pkgMgrs.add(new DpkgPkgMgr());
+        pkgMgrs.add(new RpmPkgMgr());
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
