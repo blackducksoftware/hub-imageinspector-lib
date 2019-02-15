@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public enum PackageManagerEnum {
+    // TODO move these to each pkg mgr
     DPKG("/var/lib/dpkg", ImageInspectorOsEnum.UBUNTU),
     RPM("/var/lib/rpm", ImageInspectorOsEnum.CENTOS),
     APK("/lib/apk", ImageInspectorOsEnum.ALPINE),

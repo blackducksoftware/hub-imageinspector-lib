@@ -57,9 +57,9 @@ public class RpmComponentExtractor implements ComponentExtractor {
     }
 
     @Override
-    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] packageList) {
+    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] pkgMgrListOutputLines) {
         final List<ComponentDetails> components = new ArrayList<>();
-        for (final String packageLine : packageList) {
+        for (final String packageLine : pkgMgrListOutputLines) {
             if (valid(packageLine)) {
                 final RpmPackage rpmPackage = gson.fromJson(packageLine, RpmPackage.class);
                 String packageName = rpmPackage.getName();

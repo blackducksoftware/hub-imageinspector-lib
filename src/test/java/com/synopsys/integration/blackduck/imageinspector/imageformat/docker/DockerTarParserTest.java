@@ -19,6 +19,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
@@ -30,6 +32,8 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +60,26 @@ public class DockerTarParserTest {
     private static final String IMAGE_TAG = "1.0";
 
     private static final String LAYER_ID = "layerId1";
+
+    @Test
+    public void testParseImageInfo() throws PkgMgrDataNotFoundException {
+        PkgMgr apkPkgMgr = new ApkPkgMgr();
+        List<PkgMgr> pkgMgrs = new ArrayList<>(1);
+        pkgMgrs.add(apkPkgMgr);
+
+        final DockerTarParser tarParser = new DockerTarParser();
+        tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setOs(new Os());
+        tarParser.setFileOperations(new FileOperations());
+        tarParser.setPkgMgrs(pkgMgrs);
+
+        final File containerFilesystemRoot = new File("src/test/resources/imageDir/alpine");
+        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(containerFilesystemRoot);
+        assertEquals("alpine", imageInfoParsed.getLinuxDistroName());
+        assertEquals(PackageManagerEnum.APK, imageInfoParsed.getPkgMgr().getPackageManager());
+        assertEquals("apk", imageInfoParsed.getPkgMgr().getExtractedPackageManagerDirectory().getName());
+        assertEquals("alpine", imageInfoParsed.getFileSystemRootDir().getName());
+    }
 
     @Test
     public void testExtractFullImage() throws IntegrationException, IOException {

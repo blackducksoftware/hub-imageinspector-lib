@@ -58,9 +58,9 @@ public abstract class PkgMgrExecutor {
             }
             logger.debug(String.format("Copying %s to %s", imagePkgMgr.getExtractedPackageManagerDirectory().getAbsolutePath(), packageManagerDirectory.getAbsolutePath()));
             FileUtils.copyDirectory(imagePkgMgr.getExtractedPackageManagerDirectory(), packageManagerDirectory);
-            final String[] packages = listPackages();
-            logger.trace(String.format("Package count: %d", packages.length));
-            return packages;
+            final String[] pkgMgrListOutputLines = listPackages();
+            logger.trace(String.format("Package count: %d", pkgMgrListOutputLines.length));
+            return pkgMgrListOutputLines;
         } catch (IOException | InterruptedException e) {
             throw new IntegrationException(String.format("Error installing or querying image's package manager database", e.getMessage()), e);
         } finally {

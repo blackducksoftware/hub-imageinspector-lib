@@ -61,16 +61,16 @@ public class ApkComponentExtractor implements ComponentExtractor {
     @Override
     public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase,
             final String linuxDistroName) throws IntegrationException {
-        final String[] packageList = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
-        final List<ComponentDetails> components = extractComponentsFromPkgMgrOutput(linuxDistroName, packageList);
+        final String[] pkgMgrListOutputLines = pkgMgrExecutor.runPackageManager(imagePkgMgrDatabase);
+        final List<ComponentDetails> components = extractComponentsFromPkgMgrOutput(linuxDistroName, pkgMgrListOutputLines);
         return components;
     }
 
     @Override
-    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] packageList) throws IntegrationException {
+    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] pkgMgrListOutputLines) throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
 
-        for (final String packageLine : packageList) {
+        for (final String packageLine : pkgMgrListOutputLines) {
             if (!packageLine.toLowerCase().startsWith("warning")) {
                 logger.trace(String.format("packageLine: %s", packageLine));
                 // Expected format: component-versionpart1-versionpart2

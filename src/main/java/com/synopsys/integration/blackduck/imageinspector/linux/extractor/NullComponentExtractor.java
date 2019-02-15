@@ -37,7 +37,7 @@ public class NullComponentExtractor implements ComponentExtractor {
     }
 
     @Override
-    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] packageList) throws IntegrationException {
+    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] pkgMgrListOutputLines) throws IntegrationException {
         return new ArrayList<>();
     }
 }

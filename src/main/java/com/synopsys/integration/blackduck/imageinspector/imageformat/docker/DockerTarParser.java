@@ -42,6 +42,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,6 +72,12 @@ public class DockerTarParser {
     private Os os;
     private ImageConfigParser imageConfigParser;
     private FileOperations fileOperations;
+    private List<PkgMgr> pkgMgrs;
+
+    @Autowired
+    public void setPkgMgrs(final List<PkgMgr> pkgMgrs) {
+        this.pkgMgrs = pkgMgrs;
+    }
 
     @Autowired
     public void setOs(final Os os) {
@@ -322,6 +329,19 @@ public class DockerTarParser {
 
 
     ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
+//        ImagePkgMgrDatabase targetImagePkgMgr = null;
+        // TODO call each pkgMgr isApplicable() method
+        if (pkgMgrs == null) {
+            logger.error("No pmgMgrs configured");
+        } else {
+            logger.info(String.format("*** pkgMgrs.size(): %d", pkgMgrs.size()));
+            for (PkgMgr pkgMgr : pkgMgrs) {
+                if (pkgMgr.isApplicable(targetImageFileSystemRootDir)) {
+//                    targetImagePkgMgr = pkgMgr.getImagePkgMgrDatabase(targetImageFileSystemRootDir);
+                }
+            }
+        }
+        // (still need code here to get distro)
         logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
         for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
             if (packageManagerEnum == PackageManagerEnum.NULL) {
@@ -330,7 +350,7 @@ public class DockerTarParser {
             final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
             if (packageManagerDirectory.exists()) {
                 logger.info(String.format("Found package Manager Dir: %s", packageManagerDirectory.getAbsolutePath()));
-                final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(packageManagerDirectory, packageManagerEnum);
+               ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(packageManagerDirectory, packageManagerEnum);
                 final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
                 final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir, targetImagePkgMgr, linuxDistroName);
                 return imagePkgMgrInfo;

@@ -1,0 +1,10 @@
+alpine-baselayout
+alpine-keys
+apk-tools
+boost-dev
+busybox
+g++
+libc-utils
+openjdk8-jre
+python
+vim

@@ -54,10 +54,10 @@ public class DpkgComponentExtractor implements ComponentExtractor {
     }
 
     @Override
-    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] packageList) {
+    public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] pkgMgrListOutputLines) {
         final List<ComponentDetails> components = new ArrayList<>();
         boolean startOfComponents = false;
-        for (final String packageLine : packageList) {
+        for (final String packageLine : pkgMgrListOutputLines) {
 
             if (packageLine != null) {
                 if (packageLine.matches(PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST)) {
