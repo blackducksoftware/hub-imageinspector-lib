@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -62,50 +63,28 @@ public class DockerTarParserTest {
     private static final String IMAGE_TAG = "1.0";
 
     private static final String LAYER_ID = "layerId1";
+    private static List<PkgMgr> pkgMgrs;
 
+    @BeforeAll
+    public static void setup() {
+        pkgMgrs = new ArrayList<>(3);
+        pkgMgrs.add(new ApkPkgMgr());
+        pkgMgrs.add(new DpkgPkgMgr());
+        pkgMgrs.add(new RpmPkgMgr());
+    }
     @Test
     public void testParseImageInfoApk() throws PkgMgrDataNotFoundException {
-        String imageInspectorDistro = "alpine";
-        String pkgMgrDirName = "apk";
-
-        testParseImageInfo(imageInspectorDistro, PackageManagerEnum.APK, pkgMgrDirName);
+        testParseImageInfo("alpine", PackageManagerEnum.APK, "apk");
     }
 
     @Test
     public void testParseImageInfoDpkg() throws PkgMgrDataNotFoundException {
-        String imageInspectorDistro = "ubuntu";
-        String pkgMgrDirName = "dpkg";
-
-        testParseImageInfo(imageInspectorDistro, PackageManagerEnum.DPKG, pkgMgrDirName);
+        testParseImageInfo("ubuntu", PackageManagerEnum.DPKG, "dpkg");
     }
 
     @Test
     public void testParseImageInfoRpm() throws PkgMgrDataNotFoundException {
-        String imageInspectorDistro = "centos";
-        String pkgMgrDirName = "rpm";
-
-        testParseImageInfo(imageInspectorDistro, PackageManagerEnum.RPM, pkgMgrDirName);
-    }
-
-    private void testParseImageInfo(String imageInspectorDistro, PackageManagerEnum packageManagerType, String pkgMgrDirName)
-        throws PkgMgrDataNotFoundException {
-        List<PkgMgr> pkgMgrs = new ArrayList<>(3);
-        pkgMgrs.add(new ApkPkgMgr());
-        pkgMgrs.add(new DpkgPkgMgr());
-        pkgMgrs.add(new RpmPkgMgr());
-
-        final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new ManifestFactory());
-        tarParser.setOs(new Os());
-        tarParser.setFileOperations(new FileOperations());
-        tarParser.setPkgMgrs(pkgMgrs);
-
-        final File containerFilesystemRoot = new File(String.format("src/test/resources/imageDir/%s", imageInspectorDistro));
-        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(containerFilesystemRoot);
-        assertEquals(imageInspectorDistro, imageInfoParsed.getLinuxDistroName());
-        assertEquals(packageManagerType, imageInfoParsed.getPkgMgr().getPackageManager());
-        assertEquals(pkgMgrDirName, imageInfoParsed.getPkgMgr().getExtractedPackageManagerDirectory().getName());
-        assertEquals(imageInspectorDistro, imageInfoParsed.getFileSystemRootDir().getName());
+        testParseImageInfo("centos", PackageManagerEnum.RPM, "rpm");
     }
 
     @Test
@@ -119,6 +98,7 @@ public class DockerTarParserTest {
         tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setOs(new Os());
         tarParser.setFileOperations(new FileOperations());
+        tarParser.setPkgMgrs(pkgMgrs);
 
         final List<File> layerTars = tarParser.extractLayerTars(tarExtractionDirectory, dockerTar);
         final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
@@ -174,6 +154,7 @@ public class DockerTarParserTest {
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setFileOperations(new FileOperations());
+        tarParser.setPkgMgrs(pkgMgrs);
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);
@@ -199,6 +180,7 @@ public class DockerTarParserTest {
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setFileOperations(new FileOperations());
+        tarParser.setPkgMgrs(pkgMgrs);
         ImageConfigParser imageConfigParser = new ImageConfigParser();
         tarParser.setImageConfigParser(imageConfigParser);
         ManifestLayerMapping mapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, tarFilename, "alpine", "latest");
@@ -210,5 +192,22 @@ public class DockerTarParserTest {
         System.out.printf("Manifest file contents: %s\n", h.getManifestFileContents());
         assertTrue(h.getImageConfigFileContents().contains("architecture"));
         assertTrue(h.getManifestFileContents().contains("Config"));
+    }
+
+    private void testParseImageInfo(String imageInspectorDistro, PackageManagerEnum packageManagerType, String pkgMgrDirName)
+        throws PkgMgrDataNotFoundException {
+
+        final DockerTarParser tarParser = new DockerTarParser();
+        tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setOs(new Os());
+        tarParser.setFileOperations(new FileOperations());
+        tarParser.setPkgMgrs(pkgMgrs);
+
+        final File containerFilesystemRoot = new File(String.format("src/test/resources/imageDir/%s", imageInspectorDistro));
+        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(containerFilesystemRoot);
+        assertEquals(imageInspectorDistro, imageInfoParsed.getLinuxDistroName());
+        assertEquals(packageManagerType, imageInfoParsed.getPkgMgr().getPackageManager());
+        assertEquals(pkgMgrDirName, imageInfoParsed.getPkgMgr().getExtractedPackageManagerDirectory().getName());
+        assertEquals(imageInspectorDistro, imageInfoParsed.getFileSystemRootDir().getName());
     }
 }

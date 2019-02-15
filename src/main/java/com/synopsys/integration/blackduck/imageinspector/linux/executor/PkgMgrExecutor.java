@@ -51,6 +51,7 @@ public abstract class PkgMgrExecutor {
         logger.info("Requesting lock for package manager execution");
         lock.lock();
         logger.info("Acquired lock for package manager execution");
+        // TODO this needs to change to new pkg mgrs
         try {
             final File packageManagerDirectory = new File(imagePkgMgr.getPackageManager().getDirectory());
             if (packageManagerDirectory.exists()) {

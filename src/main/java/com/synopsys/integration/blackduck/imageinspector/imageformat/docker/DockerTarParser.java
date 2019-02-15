@@ -327,37 +327,20 @@ public class DockerTarParser {
         return imageInfoParsed;
     }
 
-
     ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
-        ImagePkgMgrDatabase targetImagePkgMgr = null;
-        // TODO call each pkgMgr isApplicable() method
         if (pkgMgrs == null) {
             logger.error("No pmgMgrs configured");
         } else {
             logger.info(String.format("*** pkgMgrs.size(): %d", pkgMgrs.size()));
             for (PkgMgr pkgMgr : pkgMgrs) {
                 if (pkgMgr.isApplicable(targetImageFileSystemRootDir)) {
-                    targetImagePkgMgr = pkgMgr.getImagePkgMgrDatabase(targetImageFileSystemRootDir);
+                    final ImagePkgMgrDatabase targetImagePkgMgr = pkgMgr.getImagePkgMgrDatabase(targetImageFileSystemRootDir);
+                    final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
+                    final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir, targetImagePkgMgr, linuxDistroName);
+                    return imagePkgMgrInfo;
                 }
             }
         }
-        // (still need code here to get distro)
-        logger.debug(String.format("Checking image file system at %s for package managers", targetImageFileSystemRootDir.getName()));
-        for (final PackageManagerEnum packageManagerEnum : PackageManagerEnum.values()) {
-            if (packageManagerEnum == PackageManagerEnum.NULL) {
-                continue;
-            }
-            final File packageManagerDirectory = new File(targetImageFileSystemRootDir, packageManagerEnum.getDirectory());
-            if (packageManagerDirectory.exists()) {
-                logger.info(String.format("Found package Manager Dir: %s", packageManagerDirectory.getAbsolutePath()));
-//               ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(packageManagerDirectory, packageManagerEnum);
-                final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
-                final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir, targetImagePkgMgr, linuxDistroName);
-                return imagePkgMgrInfo;
-            } else {
-                logger.debug(String.format("Package manager dir %s does not exist", packageManagerDirectory.getAbsolutePath()));
-            }
-        }
-        throw new PkgMgrDataNotFoundException("No package manager files found in this Docker image.");
+        throw new PkgMgrDataNotFoundException("No package manager database found in this Docker image.");
     }
 }

@@ -7,16 +7,22 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -35,14 +41,20 @@ public class ImageInspectorApiIntTest {
     private static Os os;
     private static ImageInspectorApi imageInspectorApi;
     private static ApkExecutor apkExecutor;
+    private static List<PkgMgr> pkgMgrs;
 
     @BeforeAll
     public static void setup() {
+        pkgMgrs = new ArrayList<>(3);
+        pkgMgrs.add(new ApkPkgMgr());
+        pkgMgrs.add(new DpkgPkgMgr());
+        pkgMgrs.add(new RpmPkgMgr());
         os = Mockito.mock(Os.class);
         final DockerTarParser dockerTarParser = new DockerTarParser();
         dockerTarParser.setManifestFactory(new ManifestFactory());
         dockerTarParser.setOs(os);
         dockerTarParser.setFileOperations(new FileOperations());
+        dockerTarParser.setPkgMgrs(pkgMgrs);
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
         apkExecutor = Mockito.mock(ApkExecutor.class);
         componentExtractorFactory.setApkExecutor(apkExecutor);
