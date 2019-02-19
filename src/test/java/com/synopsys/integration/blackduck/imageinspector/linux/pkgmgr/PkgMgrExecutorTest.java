@@ -1,5 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,12 +13,13 @@ import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class PkgMgrExecutorTest {
     private static final File inspectorPkgMgrDir = new File("test/fakePkgMgrDir");
+    public static final String TEST_COMPONENT = "testComponent";
 
     @BeforeAll
     public static void setup() {
@@ -30,7 +33,9 @@ public class PkgMgrExecutorTest {
         PkgMgrExecutor executor = new PkgMgrExecutor();
         final PkgMgr testPkgMgr = new TestPkgMgr();
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("src/test/resources/testApkFileSystem/lib/apk"), PackageManagerEnum.APK);
-        executor.runPackageManager(new Executor(), testPkgMgr, imagePkgMgrDatabase);
+        final String[] output = executor.runPackageManager(new CmdExecutor(), testPkgMgr, imagePkgMgrDatabase);
+        assertEquals(1, output.length);
+        assertEquals(TEST_COMPONENT, output[0]);
     }
 
     private class TestPkgMgr implements PkgMgr {
@@ -68,7 +73,7 @@ public class PkgMgrExecutorTest {
 
         @Override
         public List<String> getListCommand() {
-            return Arrays.asList("echo", "");
+            return Arrays.asList("echo", TEST_COMPONENT);
         }
 
         @Override

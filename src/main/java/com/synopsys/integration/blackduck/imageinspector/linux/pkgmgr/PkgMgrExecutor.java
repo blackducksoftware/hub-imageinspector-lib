@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class PkgMgrExecutor {
@@ -17,7 +17,7 @@ public class PkgMgrExecutor {
     private static final Long CMD_TIMEOUT = 120000L;
     private final ReentrantLock lock = new ReentrantLock();
 
-    public String[] runPackageManager(final Executor executor, final PkgMgr pkgMgr, final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
+    public String[] runPackageManager(final CmdExecutor executor, final PkgMgr pkgMgr, final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
         logger.info("Requesting lock for package manager execution");
         lock.lock();
         logger.info("Acquired lock for package manager execution");
@@ -41,7 +41,7 @@ public class PkgMgrExecutor {
         }
     }
 
-    private String[] listPackages(final Executor executor, final PkgMgr pkgMgr) throws IntegrationException, IOException, InterruptedException {
+    private String[] listPackages(final CmdExecutor executor, final PkgMgr pkgMgr) throws IntegrationException, IOException, InterruptedException {
         String[] results;
         logger.debug("Executing package manager");
         try {

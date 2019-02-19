@@ -10,10 +10,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
-public class ExecutorTest {
+public class CmdExecutorTest {
 
     private static final String ARG = "\\{ epoch: \"%{E}\", name: \"%{N}\", version: \"%{V}-%{R}\", arch: \"%{ARCH}\" \\}\\n";
 
@@ -31,7 +31,7 @@ public class ExecutorTest {
         cmdParts.add("echo");
         cmdParts.add(ARG);
         System.out.printf("cmdParts via toString(): %s\n", cmdParts);
-        final String[] results = (new Executor()).executeCommand(cmdParts, 10000L);
+        final String[] results = (new CmdExecutor()).executeCommand(cmdParts, 10000L);
         assertEquals(1, results.length);
         assertEquals(ARG, results[0]);
     }

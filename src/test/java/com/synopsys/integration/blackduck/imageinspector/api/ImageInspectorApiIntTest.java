@@ -24,7 +24,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
@@ -58,7 +58,7 @@ public class ImageInspectorApiIntTest {
         os = Mockito.mock(Os.class);
 
         final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);
-        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(Executor.class), Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkOutput);
+        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(CmdExecutor.class), Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkOutput);
 
         final DockerTarParser dockerTarParser = new DockerTarParser();
         dockerTarParser.setManifestFactory(new ManifestFactory());

@@ -58,7 +58,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
@@ -70,7 +70,7 @@ public class DockerTarParser {
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Executor executor;
+    private CmdExecutor executor;
     private ManifestFactory manifestFactory;
     private Os os;
     private ImageConfigParser imageConfigParser;
@@ -79,7 +79,7 @@ public class DockerTarParser {
     private PkgMgrExecutor pkgMgrExecutor;
 
     @Autowired
-    public void setExecutor(final Executor executor) {
+    public void setExecutor(final CmdExecutor executor) {
         this.executor = executor;
     }
     @Autowired

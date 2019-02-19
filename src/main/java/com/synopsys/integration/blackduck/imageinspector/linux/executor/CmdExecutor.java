@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component
-public class Executor {
+public class CmdExecutor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public String[] executeCommand(final List<String> commandParts, final Long timeoutMillisec) throws IntegrationException, UnsupportedEncodingException {

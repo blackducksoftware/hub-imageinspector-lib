@@ -47,7 +47,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
@@ -127,7 +127,7 @@ public class DockerTarParserTest {
                 System.out.println(file.getAbsolutePath());
                 varLibRpmNameFound = true;
                 final List<String> cmd = Arrays.asList("strings", file.getAbsolutePath());
-                final String[] cmdOutput = (new Executor()).executeCommand(cmd, 30000L);
+                final String[] cmdOutput = (new CmdExecutor()).executeCommand(cmd, 30000L);
                 final String stringsOutput = Arrays.asList(cmdOutput).stream().collect(Collectors.joining("\n"));
                 assertTrue(stringsOutput.contains("bacula-console"));
                 assertTrue(stringsOutput.contains("bacula-client"));
