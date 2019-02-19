@@ -29,9 +29,19 @@ public class PkgMgrExecutorTest {
     }
 
     @Test
-    public void test() throws IntegrationException {
+    public void testWithoutUpgrade() throws IntegrationException {
         PkgMgrExecutor executor = new PkgMgrExecutor();
-        final PkgMgr testPkgMgr = new TestPkgMgr();
+        final PkgMgr testPkgMgr = new TestPkgMgr(Arrays.asList("echo", TEST_COMPONENT), Arrays.asList("echo", TEST_COMPONENT));
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("src/test/resources/testApkFileSystem/lib/apk"), PackageManagerEnum.APK);
+        final String[] output = executor.runPackageManager(new CmdExecutor(), testPkgMgr, imagePkgMgrDatabase);
+        assertEquals(1, output.length);
+        assertEquals(TEST_COMPONENT, output[0]);
+    }
+
+    @Test
+    public void testWithUpgrade() throws IntegrationException {
+        PkgMgrExecutor executor = new PkgMgrExecutor();
+        final PkgMgr testPkgMgr = new TestPkgMgr(Arrays.asList("thisisnotavalidcommand"), Arrays.asList("echo", TEST_COMPONENT));
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("src/test/resources/testApkFileSystem/lib/apk"), PackageManagerEnum.APK);
         final String[] output = executor.runPackageManager(new CmdExecutor(), testPkgMgr, imagePkgMgrDatabase);
         assertEquals(1, output.length);
@@ -40,6 +50,14 @@ public class PkgMgrExecutorTest {
 
     private class TestPkgMgr implements PkgMgr {
         private PkgMgrInitializer testPkgMgrInitializer = new TestPkgMgrInitializer();
+        private final List<String> firstListPkgsCommand;
+        private final List<String> subsequentListPkgsCommand;
+        private int listCmdCalledCount = 0;
+
+        private TestPkgMgr(final List<String> firstListPkgsCommand, final List<String> subsequentListPkgsCommand) {
+            this.firstListPkgsCommand = firstListPkgsCommand;
+            this.subsequentListPkgsCommand = subsequentListPkgsCommand;
+        }
 
         @Override
         public boolean isApplicable(final File targetImageFileSystemRootDir) {
@@ -68,12 +86,16 @@ public class PkgMgrExecutorTest {
 
         @Override
         public List<String> getUpgradeCommand() {
-            return Arrays.asList("echo", "");
+            return Arrays.asList("echo", "mocking upgrade operation");
         }
 
         @Override
         public List<String> getListCommand() {
-            return Arrays.asList("echo", TEST_COMPONENT);
+            listCmdCalledCount++;
+            if (listCmdCalledCount == 1) {
+                return firstListPkgsCommand;
+            }
+            return subsequentListPkgsCommand;
         }
 
         @Override
