@@ -11,16 +11,11 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.SimpleBdioFactory;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
@@ -36,8 +31,6 @@ public class ExtractorComposedTest {
 
         final String[] pkgMgrOutputLines = { "WARNING: Ignoring APKINDEX.adfa7ceb.tar.gz: No such file or directory",
                 "alpine-baselayout-3.1.0-r0", "musl-utils-1.1.19-r10" };
-        final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(ApkExecutor.class);
-        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
         final PkgMgr pkgMgr = new ApkPkgMgr();
@@ -72,9 +65,6 @@ public class ExtractorComposedTest {
         final String[] pkgMgrOutputLines = { "+++-=======================-======================-============-========================================================================",
                 "ii  libstdc++6:amd64        8-20180414-1ubuntu2    amd64        GNU Standard C++ Library v3",
                 "ii  login                   1:4.5-1ubuntu1         amd64        system login tools" };
-
-        final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(DpkgExecutor.class);
-        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutputLines);
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
         final PkgMgr pkgMgr = new DpkgPkgMgr();
