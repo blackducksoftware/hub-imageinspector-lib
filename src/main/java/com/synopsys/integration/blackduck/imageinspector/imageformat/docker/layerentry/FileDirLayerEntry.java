@@ -23,19 +23,21 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class FileDirLayerEntry implements LayerEntry {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());

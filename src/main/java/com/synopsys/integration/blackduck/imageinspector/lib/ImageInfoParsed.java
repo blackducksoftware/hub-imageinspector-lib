@@ -23,11 +23,12 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import java.io.File;
 
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 
 // Basic information about an image
 public class ImageInfoParsed {

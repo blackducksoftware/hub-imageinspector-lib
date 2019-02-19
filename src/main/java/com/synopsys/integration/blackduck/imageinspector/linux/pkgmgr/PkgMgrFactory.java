@@ -7,15 +7,18 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkg
 import com.synopsys.integration.exception.IntegrationException;
 
 public class PkgMgrFactory {
-  public static PkgMgr createPkgMgr(final PackageManagerEnum packageManagerType)
-      throws IntegrationException {
-    switch (packageManagerType) {
-      case DPKG: return new DpkgPkgMgr();
-      case APK: return new ApkPkgMgr();
-      case RPM: return new RpmPkgMgr();
-      default:
-      throw new IntegrationException(String.format("Unexpected package manager type: %s", packageManagerType.toString()));
+    public static PkgMgr createPkgMgr(final PackageManagerEnum packageManagerType)
+        throws IntegrationException {
+        switch (packageManagerType) {
+            case DPKG:
+                return new DpkgPkgMgr();
+            case APK:
+                return new ApkPkgMgr();
+            case RPM:
+                return new RpmPkgMgr();
+            default:
+                throw new IntegrationException(String.format("Unexpected package manager type: %s", packageManagerType.toString()));
+        }
     }
-  }
 
 }

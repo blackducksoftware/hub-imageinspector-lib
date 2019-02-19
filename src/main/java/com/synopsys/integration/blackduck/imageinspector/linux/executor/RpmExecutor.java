@@ -23,12 +23,15 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.executor;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.RpmComponentExtractor;
 import java.io.File;
+
 import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.RpmComponentExtractor;
 
 @Component
 public class RpmExecutor extends PkgMgrExecutor {

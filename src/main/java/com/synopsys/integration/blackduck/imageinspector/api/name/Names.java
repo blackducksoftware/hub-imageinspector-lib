@@ -24,6 +24,7 @@
 package com.synopsys.integration.blackduck.imageinspector.api.name;
 
 import java.io.File;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class Names {

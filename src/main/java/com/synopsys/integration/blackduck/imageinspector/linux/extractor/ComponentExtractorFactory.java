@@ -23,6 +23,13 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
+import java.io.File;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
@@ -30,11 +37,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecu
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
-import java.io.File;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ComponentExtractorFactory {

@@ -68,7 +68,7 @@ public class BdioGenerator {
             return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
         } else {
             if (includeRemovedComponents) {
-                final MutableDependencyGraph graph =  generateFlatGraphFromAllComponentsAllLayers(imageComponentHierarchy);
+                final MutableDependencyGraph graph = generateFlatGraphFromAllComponentsAllLayers(imageComponentHierarchy);
                 return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
             } else {
                 return generateFlatBdioDocumentFromComponents(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy.getFinalComponents());
@@ -77,8 +77,8 @@ public class BdioGenerator {
     }
 
     public final SimpleBdioDocument generateFlatBdioDocumentFromComponents(final String codeLocationName, final String projectName,
-            final String projectVersion,
-            final String linuxDistroName, List<ComponentDetails> comps) {
+        final String projectVersion,
+        final String linuxDistroName, List<ComponentDetails> comps) {
         final MutableDependencyGraph graph = generateFlatGraphFromComponents(comps);
         return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
     }

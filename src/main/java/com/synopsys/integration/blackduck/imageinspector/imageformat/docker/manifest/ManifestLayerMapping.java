@@ -23,8 +23,9 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest;
 
-import com.synopsys.integration.util.Stringable;
 import java.util.List;
+
+import com.synopsys.integration.util.Stringable;
 
 public class ManifestLayerMapping extends Stringable {
     private final String imageName;
@@ -42,7 +43,7 @@ public class ManifestLayerMapping extends Stringable {
     }
 
     public ManifestLayerMapping(final ManifestLayerMapping partialManafestLayerMapping, final List<String> layerExternalIds) {
-            this.imageName = partialManafestLayerMapping.getImageName();
+        this.imageName = partialManafestLayerMapping.getImageName();
         this.tagName = partialManafestLayerMapping.getTagName();
         this.config = partialManafestLayerMapping.getConfig();
         this.layers = partialManafestLayerMapping.getLayers();
@@ -66,7 +67,7 @@ public class ManifestLayerMapping extends Stringable {
     }
 
     public String getLayerExternalId(final int layerIndex) {
-        if ((layerExternalIds == null) || (layerExternalIds.size() < layerIndex+1)) {
+        if ((layerExternalIds == null) || (layerExternalIds.size() < layerIndex + 1)) {
             return null;
         }
         return layerExternalIds.get(layerIndex);

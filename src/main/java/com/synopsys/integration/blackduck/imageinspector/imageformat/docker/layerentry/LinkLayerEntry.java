@@ -23,18 +23,20 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class LinkLayerEntry implements LayerEntry {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -85,7 +87,7 @@ public class LinkLayerEntry implements LayerEntry {
                 fileOperations.createSymbolicLink(startLink, endLink);
             } catch (final IOException e) {
                 final String msg = String.format("Error creating symbolic link from %s to %s; " + "this will not affect the results unless it affects a file needed by the package manager; " + "Error: %s", startLink.toString(),
-                        endLink.toString(), e.getMessage());
+                    endLink.toString(), e.getMessage());
                 logger.warn(msg);
             }
         } else if (layerEntry.isLink()) {
@@ -106,7 +108,7 @@ public class LinkLayerEntry implements LayerEntry {
                 fileOperations.createLink(startLink, endLink);
             } catch (final IOException e) {
                 logger.warn(String.format("Error creating hard link from %s to %s; " + "this will not affect the results unless it affects a file needed by the package manager; " + "Error: %s", startLink.toString(), endLink.toString(),
-                        e.getMessage()));
+                    e.getMessage()));
             }
         }
         return otherFileToDeleteNone;

@@ -23,13 +23,14 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class LayerEntries {
     private static final Logger logger = LoggerFactory.getLogger(LayerEntries.class);

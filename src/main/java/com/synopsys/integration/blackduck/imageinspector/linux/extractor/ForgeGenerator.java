@@ -38,6 +38,7 @@ public class ForgeGenerator {
     // no need to add the distro to this table.
     // Linux distro names are mapped to lowercase before being looked up in this table.
     private static final Map<String, String> linuxDistroNameToKbForgeNameMapping = new HashMap<>();
+
     static {
         linuxDistroNameToKbForgeNameMapping.put("rhel", "redhat");
         linuxDistroNameToKbForgeNameMapping.put("sles", "opensuse");

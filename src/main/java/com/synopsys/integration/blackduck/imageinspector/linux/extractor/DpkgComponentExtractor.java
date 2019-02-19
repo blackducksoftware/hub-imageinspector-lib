@@ -23,15 +23,17 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DpkgComponentExtractor implements ComponentExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -49,7 +51,7 @@ public class DpkgComponentExtractor implements ComponentExtractor {
 
     @Override
     public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
-            throws IntegrationException {
+        throws IntegrationException {
 
         final String[] packageList = pkgMgrExecutor.runPackageManager(pkgMgr, imagePkgMgrDatabase);
         final List<ComponentDetails> components = extractComponentsFromPkgMgrOutput(linuxDistroName, packageList);

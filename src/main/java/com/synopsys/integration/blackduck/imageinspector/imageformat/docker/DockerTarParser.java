@@ -23,8 +23,28 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageInspectorOsMapping;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
@@ -36,7 +56,6 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHiera
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
-import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageInspectorOsMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
@@ -45,24 +64,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extractor.Compone
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 
 @Component
 public class DockerTarParser {
@@ -133,7 +134,8 @@ public class DockerTarParser {
         return untaredFiles;
     }
 
-    public ImageInfoParsed extractDockerLayers(final Gson gson, final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
+    public ImageInfoParsed extractDockerLayers(final Gson gson, final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy,
+        final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
         for (final String layerDotTarDirname : manifestLayerMapping.getLayers()) {
@@ -142,7 +144,8 @@ public class DockerTarParser {
             if (layerTar != null) {
                 extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
                 String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-                imageInfoParsed = addPostLayerComponents(gson, layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy,  targetImageFileSystemRootDir, layerMetadataFileContents, manifestLayerMapping.getLayerExternalId(layerIndex));
+                imageInfoParsed = addPostLayerComponents(gson, layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerMetadataFileContents,
+                    manifestLayerMapping.getLayerExternalId(layerIndex));
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
             }
@@ -155,7 +158,7 @@ public class DockerTarParser {
             imageComponentHierarchy.setFinalComponents(topLayer.getComponents());
         }
         if (imageInfoParsed == null) {
-            imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase( null, PackageManagerEnum.NULL), null, null);
+            imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), null, null);
         }
         return imageInfoParsed;
     }
@@ -207,7 +210,7 @@ public class DockerTarParser {
         try {
             final File imageConfigFile = new File(tarExtractionDirectory, imageConfigFileName);
             final String imageConfigFileContents = FileUtils
-                .readFileToString(imageConfigFile, StandardCharsets.UTF_8);
+                                                       .readFileToString(imageConfigFile, StandardCharsets.UTF_8);
             logger.debug(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
             List<String> layerIds = imageConfigParser.getLayerIdsFromImageConfigFile(gsonBuilder, imageConfigFileContents);
             return layerIds;
@@ -285,7 +288,8 @@ public class DockerTarParser {
         return layerMetadataFileContents;
     }
 
-    private ImageInfoParsed addPostLayerComponents(final Gson gson, final int layerIndex, final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents, final String layerExternalId) throws WrongInspectorOsException {
+    private ImageInfoParsed addPostLayerComponents(final Gson gson, final int layerIndex, final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs,
+        final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents, final String layerExternalId) throws WrongInspectorOsException {
         logger.debug("Getting components present (so far) after adding this layer");
         if (currentOs == null) {
             logger.debug("Current (running on) OS not provided; cannot determine components present after adding this layer");
@@ -296,12 +300,13 @@ public class DockerTarParser {
         try {
             imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
             neededInspectorOs = PackageManagerToImageInspectorOsMapping
-                .getImageInspectorOs(imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
+                                    .getImageInspectorOs(imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
             if (!neededInspectorOs.equals(currentOs)) {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
                 throw new WrongInspectorOsException(neededInspectorOs, msg);
             }
-            final ComponentExtractor componentExtractor = componentExtractorFactory.createComponentExtractor(gson, imageInfoParsed.getPkgMgr(), imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
+            final ComponentExtractor componentExtractor = componentExtractorFactory
+                                                              .createComponentExtractor(gson, imageInfoParsed.getPkgMgr(), imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
             final List<ComponentDetails> comps;
             try {
                 comps = componentExtractor.extractComponents(imageInfoParsed.getImagePkgMgrDatabase(), imageInfoParsed.getLinuxDistroName());

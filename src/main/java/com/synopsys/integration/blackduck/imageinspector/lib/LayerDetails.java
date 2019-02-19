@@ -25,8 +25,9 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import java.util.List;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
 import org.apache.commons.lang3.StringUtils;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
 
 public class LayerDetails {
     private final int layerIndex;

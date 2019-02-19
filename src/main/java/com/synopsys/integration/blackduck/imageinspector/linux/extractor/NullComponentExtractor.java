@@ -23,10 +23,11 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
-import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
-import com.synopsys.integration.exception.IntegrationException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
+import com.synopsys.integration.exception.IntegrationException;
 
 public class NullComponentExtractor implements ComponentExtractor {
 

@@ -23,21 +23,23 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.output.RpmPackage;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RpmComponentExtractor implements ComponentExtractor {
     private static final String PACKAGE_FORMAT_STRING = "\\{ epoch: \"%{E}\", name: \"%{N}\", version: \"%{V}-%{R}\", arch: \"%{ARCH}\" \\}\\n";
-    public static final List<String> UPGRADE_DATABASE_COMMAND = Arrays.asList("rpm",  "--rebuilddb");
+    public static final List<String> UPGRADE_DATABASE_COMMAND = Arrays.asList("rpm", "--rebuilddb");
     public static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("rpm", "-qa", "--qf", PACKAGE_FORMAT_STRING);
     private static final String NO_VALUE = "(none)";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -53,7 +55,7 @@ public class RpmComponentExtractor implements ComponentExtractor {
 
     @Override
     public List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
-            throws IntegrationException {
+        throws IntegrationException {
         final String[] packageList = pkgMgrExecutor.runPackageManager(pkgMgr, imagePkgMgrDatabase);
         final List<ComponentDetails> components = extractComponentsFromPkgMgrOutput(linuxDistroName, packageList);
         return components;

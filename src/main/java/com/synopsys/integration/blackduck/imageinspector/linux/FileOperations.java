@@ -33,8 +33,8 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
-
 import java.util.Date;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ public class FileOperations {
         PosixFileAttributes attrs;
         try {
             attrs = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class)
-                    .readAttributes();
+                        .readAttributes();
             logger.debug(String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions())));
         } catch (final IOException e) {
             logger.debug(String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage()));
