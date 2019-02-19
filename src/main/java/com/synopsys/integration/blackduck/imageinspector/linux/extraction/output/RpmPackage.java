@@ -21,18 +21,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
+package com.synopsys.integration.blackduck.imageinspector.linux.extraction.output;
 
-import java.util.List;
+public class RpmPackage {
+    private final String epoch;
+    private final String name;
+    private final String version;
+    private final String arch;
 
-import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
-import com.synopsys.integration.exception.IntegrationException;
+    public RpmPackage(final String epoch, final String name, final String version, final String arch) {
+        super();
+        this.epoch = epoch;
+        this.name = name;
+        this.version = version;
+        this.arch = arch;
+    }
 
-public interface ComponentExtractor {
-    String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";
+    public String getEpoch() {
+        return epoch;
+    }
 
-    List<ComponentDetails> extractComponents(final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName)
-        throws IntegrationException;
+    public String getName() {
+        return name;
+    }
 
-    List<ComponentDetails> extractComponentsFromPkgMgrOutput(final String linuxDistroName, final String[] packageList) throws IntegrationException;
+    public String getVersion() {
+        return version;
+    }
+
+    public String getArch() {
+        return arch;
+    }
 }

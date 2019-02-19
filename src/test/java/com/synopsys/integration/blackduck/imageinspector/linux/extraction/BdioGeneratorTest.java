@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
+package com.synopsys.integration.blackduck.imageinspector.linux.extraction;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.synopsys.integration.bdio.SimpleBdioFactory;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.BdioRelationship;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
@@ -108,6 +109,19 @@ public class BdioGeneratorTest {
             }
         }
         assertEquals(4, compCount);
+    }
+
+
+    @Test
+    public void testEmpty() {
+
+        final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
+
+        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
+        List<ComponentDetails>  comps = new ArrayList<>(0);
+        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
+
+        assertEquals(0, bdio.components.size());
     }
 
     private ImageComponentHierarchy createImageComponentHierarchy() {

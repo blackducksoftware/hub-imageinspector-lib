@@ -26,7 +26,7 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 
 public class ImageComponentHierarchy {
     private final String manifestFileContents;

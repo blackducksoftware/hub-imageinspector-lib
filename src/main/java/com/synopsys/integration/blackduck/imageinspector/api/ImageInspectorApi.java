@@ -47,7 +47,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGenerator;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component

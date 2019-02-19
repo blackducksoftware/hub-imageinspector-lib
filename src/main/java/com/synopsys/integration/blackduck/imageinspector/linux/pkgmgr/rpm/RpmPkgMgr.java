@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.output.RpmPackage;
+import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.extraction.output.RpmPackage;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;
@@ -58,6 +58,16 @@ public class RpmPkgMgr implements PkgMgr {
     @Override
     public File getInspectorPackageManagerDirectory() {
         return inspectorPkgMgrDir;
+    }
+
+    @Override
+    public List<String> getUpgradeCommand() {
+        return UPGRADE_DATABASE_COMMAND;
+    }
+
+    @Override
+    public List<String> getListCommand() {
+        return LIST_COMPONENTS_COMMAND;
     }
 
     @Override

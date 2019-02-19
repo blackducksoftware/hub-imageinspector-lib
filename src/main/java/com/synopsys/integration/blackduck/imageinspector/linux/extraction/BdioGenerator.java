@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
+package com.synopsys.integration.blackduck.imageinspector.linux.extraction;
 
 import java.io.CharArrayWriter;
 import java.io.File;

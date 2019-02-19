@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
+package com.synopsys.integration.blackduck.imageinspector.linux.extraction;
 
 import static org.junit.Assert.assertEquals;
 

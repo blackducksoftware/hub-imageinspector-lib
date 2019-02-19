@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
+package com.synopsys.integration.blackduck.imageinspector.linux.extraction;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -148,19 +147,6 @@ public class ExtractorComposedTest {
         assertTrue(String.format("component %s/%s/%s not found", comp1Name, comp1Version, comp1Arch), foundComp1);
         assertTrue(foundComp2);
         assertEquals(189, bdio.components.size());
-    }
-
-    // TODO this is only testing BdioGenerator, not pkg mgrs, so does it really belong here?
-    @Test
-    public void testNull() throws IntegrationException, IOException, InterruptedException {
-
-        final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-
-        final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
-        List<ComponentDetails>  comps = new ArrayList<>(0);
-        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
-
-        assertEquals(0, bdio.components.size());
     }
 
     private SimpleBdioDocument getBdioDocumentForRpmPackages(final String[] pkgMgrOutputLines) throws IntegrationException, IOException, InterruptedException {

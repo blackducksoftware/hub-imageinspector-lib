@@ -2,7 +2,6 @@ package com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
@@ -17,8 +16,6 @@ public class PkgMgrExecutor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private static final Long CMD_TIMEOUT = 120000L;
     private final ReentrantLock lock = new ReentrantLock();
-    private List<String> upgradeCommand;
-    private List<String> listPackagesCommandParts;
 
     public String[] runPackageManager(final PkgMgr pkgMgr, final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
         logger.info("Requesting lock for package manager execution");
@@ -32,7 +29,7 @@ public class PkgMgrExecutor {
             logger.debug(String.format("Copying %s to %s", imagePkgMgrDatabase.getExtractedPackageManagerDirectory().getAbsolutePath(), packageManagerDirectory.getAbsolutePath()));
             FileUtils
                 .copyDirectory(imagePkgMgrDatabase.getExtractedPackageManagerDirectory(), packageManagerDirectory);
-            final String[] pkgMgrListOutputLines = listPackages();
+            final String[] pkgMgrListOutputLines = listPackages(pkgMgr);
             logger.trace(String.format("Package count: %d", pkgMgrListOutputLines.length));
             return pkgMgrListOutputLines;
         } catch (IOException | InterruptedException e) {
@@ -44,20 +41,20 @@ public class PkgMgrExecutor {
         }
     }
 
-    private String[] listPackages() throws IntegrationException, IOException, InterruptedException {
+    private String[] listPackages(final PkgMgr pkgMgr) throws IntegrationException, IOException, InterruptedException {
         String[] results;
         logger.debug("Executing package manager");
         try {
-            results = Executor.executeCommand(listPackagesCommandParts, CMD_TIMEOUT);
-            logger.info(String.format("Command %s executed successfully", listPackagesCommandParts));
+            results = Executor.executeCommand(pkgMgr.getListCommand(), CMD_TIMEOUT);
+            logger.info(String.format("Command %s executed successfully", pkgMgr.getListCommand()));
         } catch (final Exception e) {
-            if (upgradeCommand != null) {
-                logger.warn(String.format("Error executing \"%s\": %s; Trying to upgrade package database by executing: %s", listPackagesCommandParts, e.getMessage(), upgradeCommand));
-                Executor.executeCommand(upgradeCommand, CMD_TIMEOUT);
-                results = Executor.executeCommand(listPackagesCommandParts, CMD_TIMEOUT);
-                logger.info(String.format("Command %s executed successfully on 2nd attempt (after db upgrade)", listPackagesCommandParts));
+            if (pkgMgr.getUpgradeCommand() != null) {
+                logger.warn(String.format("Error executing \"%s\": %s; Trying to upgrade package database by executing: %s", pkgMgr.getListCommand(), e.getMessage(), pkgMgr.getUpgradeCommand()));
+                Executor.executeCommand(pkgMgr.getUpgradeCommand(), CMD_TIMEOUT);
+                results = Executor.executeCommand(pkgMgr.getListCommand(), CMD_TIMEOUT);
+                logger.info(String.format("Command %s executed successfully on 2nd attempt (after db upgrade)", pkgMgr.getListCommand()));
             } else {
-                logger.error(String.format("Error executing \"%s\": %s; No upgrade command has been provided for this package manager", listPackagesCommandParts, e.getMessage()));
+                logger.error(String.format("Error executing \"%s\": %s; No upgrade command has been provided for this package manager", pkgMgr.getListCommand(), e.getMessage()));
                 throw e;
             }
         }

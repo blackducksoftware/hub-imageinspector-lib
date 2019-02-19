@@ -21,24 +21,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.linux.extractor.output;
+package com.synopsys.integration.blackduck.imageinspector.linux.extraction;
 
-public class RpmPackage {
-    private final String epoch;
+import com.synopsys.integration.util.Stringable;
+
+public class ComponentDetails extends Stringable {
     private final String name;
     private final String version;
-    private final String arch;
+    private final String externalId;
+    private final String architecture;
+    private final String linuxDistroName;
 
-    public RpmPackage(final String epoch, final String name, final String version, final String arch) {
-        super();
-        this.epoch = epoch;
+    public ComponentDetails(final String name, final String version, final String externalId, final String architecture, final String linuxDistroName) {
         this.name = name;
         this.version = version;
-        this.arch = arch;
-    }
-
-    public String getEpoch() {
-        return epoch;
+        this.externalId = externalId;
+        this.architecture = architecture;
+        this.linuxDistroName = linuxDistroName;
     }
 
     public String getName() {
@@ -49,7 +48,15 @@ public class RpmPackage {
         return version;
     }
 
-    public String getArch() {
-        return arch;
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public String getLinuxDistroName() {
+        return linuxDistroName;
     }
 }

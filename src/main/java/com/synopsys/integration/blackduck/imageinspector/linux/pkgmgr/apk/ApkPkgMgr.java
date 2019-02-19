@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;
@@ -32,8 +32,6 @@ public class ApkPkgMgr implements PkgMgr {
     public static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("apk", "info", "-v");
     private static final String ARCH_FILENAME = "arch";
     private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
-    //  private final PkgMgrExecutor pkgMgrExecutor;
-    //  private final File imageFileSystem;
     private final PkgMgrInitializer pkgMgrInitializer = new ApkPkgMgrInitializer();
     private String architecture;
     private final File inspectorPkgMgrDir;
@@ -76,6 +74,16 @@ public class ApkPkgMgr implements PkgMgr {
     @Override
     public File getInspectorPackageManagerDirectory() {
         return inspectorPkgMgrDir;
+    }
+
+    @Override
+    public List<String> getUpgradeCommand() {
+        return UPGRADE_DATABASE_COMMAND;
+    }
+
+    @Override
+    public List<String> getListCommand() {
+        return LIST_COMPONENTS_COMMAND;
     }
 
     @Override

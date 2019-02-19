@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;
@@ -33,6 +33,16 @@ public class NullPkgMgr implements PkgMgr {
 
     @Override
     public File getInspectorPackageManagerDirectory() {
+        return null;
+    }
+
+    @Override
+    public List<String> getUpgradeCommand() {
+        return null;
+    }
+
+    @Override
+    public List<String> getListCommand() {
         return null;
     }
 
