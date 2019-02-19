@@ -20,14 +20,14 @@ public class PkgMgrExecutor {
     private List<String> upgradeCommand;
     private List<String> listPackagesCommandParts;
 
-    public String[] runPackageManager(final PkgMgr pkgMgr, final PkgMgrInitializer pkgMgrInitializer, final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
+    public String[] runPackageManager(final PkgMgr pkgMgr, final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
         logger.info("Requesting lock for package manager execution");
         lock.lock();
         logger.info("Acquired lock for package manager execution");
         try {
             final File packageManagerDirectory = pkgMgr.getInspectorPackageManagerDirectory();
             if (packageManagerDirectory.exists()) {
-                pkgMgrInitializer.initPkgMgrDir(packageManagerDirectory);
+                pkgMgr.getPkgMgrInitializer().initPkgMgrDir(packageManagerDirectory);
             }
             logger.debug(String.format("Copying %s to %s", imagePkgMgrDatabase.getExtractedPackageManagerDirectory().getAbsolutePath(), packageManagerDirectory.getAbsolutePath()));
             FileUtils

@@ -60,9 +60,9 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component
@@ -75,6 +75,12 @@ public class DockerTarParser {
     private ImageConfigParser imageConfigParser;
     private FileOperations fileOperations;
     private List<PkgMgr> pkgMgrs;
+    private PkgMgrExecutor pkgMgrExecutor;
+
+    @Autowired
+    public void setPkgMgrExecutor(final PkgMgrExecutor pkgMgrExecutor) {
+        this.pkgMgrExecutor = pkgMgrExecutor;
+    }
 
     @Autowired
     public void setPkgMgrs(final List<PkgMgr> pkgMgrs) {
@@ -305,11 +311,11 @@ public class DockerTarParser {
                 final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
                 throw new WrongInspectorOsException(neededInspectorOs, msg);
             }
-            final ComponentExtractor componentExtractor = componentExtractorFactory
-                                                              .createComponentExtractor(gson, imageInfoParsed.getPkgMgr(), imageInfoParsed.getFileSystemRootDir(), null, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
             final List<ComponentDetails> comps;
             try {
-                comps = componentExtractor.extractComponents(imageInfoParsed.getImagePkgMgrDatabase(), imageInfoParsed.getLinuxDistroName());
+// TODO does this make sense?
+                final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());
+                comps = imageInfoParsed.getPkgMgr().extractComponentsFromPkgMgrOutput(imageInfoParsed.getFileSystemRootDir(), imageInfoParsed.getLinuxDistroName(), pkgMgrOutputLines);
             } catch (IntegrationException e) {
                 logger.debug(String.format("Unable to log components present after this layer: %s", e.getMessage()));
                 return imageInfoParsed;
@@ -335,13 +341,15 @@ public class DockerTarParser {
     }
 
     ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
+        // TODO does this make sense?
         if (pkgMgrs == null) {
             logger.error("No pmgMgrs configured");
         } else {
             logger.info(String.format("*** pkgMgrs.size(): %d", pkgMgrs.size()));
             for (PkgMgr pkgMgr : pkgMgrs) {
                 if (pkgMgr.isApplicable(targetImageFileSystemRootDir)) {
-                    final ImagePkgMgrDatabase targetImagePkgMgr = pkgMgr.getImagePkgMgrDatabase(targetImageFileSystemRootDir);
+                    final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(pkgMgr.getImagePackageManagerDirectory(targetImageFileSystemRootDir),
+                        pkgMgr.getType());
                     final String linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystemRootDir).orElse(null);
                     final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystemRootDir, targetImagePkgMgr, linuxDistroName, pkgMgr);
                     return imagePkgMgrInfo;

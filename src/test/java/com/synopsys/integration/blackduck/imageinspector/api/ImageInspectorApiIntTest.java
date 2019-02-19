@@ -1,8 +1,19 @@
 package com.synopsys.integration.blackduck.imageinspector.api;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.compress.compressors.CompressorException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
@@ -13,6 +24,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
@@ -20,14 +32,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkg
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.compress.compressors.CompressorException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 @Tag("integration")
 public class ImageInspectorApiIntTest {
@@ -43,18 +47,25 @@ public class ImageInspectorApiIntTest {
     private static ApkExecutor apkExecutor;
     private static List<PkgMgr> pkgMgrs;
 
+    private static String[] apkOutput = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
+
     @BeforeAll
-    public static void setup() {
+    public static void setup() throws IntegrationException {
         pkgMgrs = new ArrayList<>(3);
         pkgMgrs.add(new ApkPkgMgr());
         pkgMgrs.add(new DpkgPkgMgr());
         pkgMgrs.add(new RpmPkgMgr());
         os = Mockito.mock(Os.class);
+
+        final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);
+        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkOutput);
+
         final DockerTarParser dockerTarParser = new DockerTarParser();
         dockerTarParser.setManifestFactory(new ManifestFactory());
         dockerTarParser.setOs(os);
         dockerTarParser.setFileOperations(new FileOperations());
         dockerTarParser.setPkgMgrs(pkgMgrs);
+        dockerTarParser.setPkgMgrExecutor(pkgMgrExecutor);
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
         apkExecutor = Mockito.mock(ApkExecutor.class);
         componentExtractorFactory.setApkExecutor(apkExecutor);
@@ -78,14 +89,16 @@ public class ImageInspectorApiIntTest {
 
     @Test
     public void testOnRightOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
+        Mockito.when(os.isLinuxDistroFile(Mockito.any(File.class))).thenReturn(Boolean.TRUE);
+        Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
-        String[] apkPackages = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
-        Mockito.when(apkExecutor.runPackageManager(Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkPackages);
+
+        Mockito.when(apkExecutor.runPackageManager(Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkOutput);
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, "ALPINE");
         System.out.printf("bdioDocument: %s\n", bdioDocument);
         assertEquals(PROJECT, bdioDocument.project.name);
         assertEquals(PROJECT_VERSION, bdioDocument.project.version);
-        assertEquals(apkPackages.length, bdioDocument.components.size());
+        assertEquals(apkOutput.length, bdioDocument.components.size());
         for (BdioComponent comp : bdioDocument.components) {
             System.out.printf("comp: %s:%s:%s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
             if (comp.name.equals("boost-unit_test_framework")) {

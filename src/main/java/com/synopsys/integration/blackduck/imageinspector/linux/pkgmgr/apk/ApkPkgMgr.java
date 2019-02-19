@@ -16,11 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component
@@ -34,6 +34,7 @@ public class ApkPkgMgr implements PkgMgr {
     private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
     //  private final PkgMgrExecutor pkgMgrExecutor;
     //  private final File imageFileSystem;
+    private final PkgMgrInitializer pkgMgrInitializer = new ApkPkgMgrInitializer();
     private String architecture;
     private final File inspectorPkgMgrDir;
 
@@ -50,23 +51,30 @@ public class ApkPkgMgr implements PkgMgr {
 
     @Override
     public boolean isApplicable(File targetImageFileSystemRootDir) {
-        final File packageManagerDirectory = getExtractedPackageManagerDirectory(targetImageFileSystemRootDir);
+        final File packageManagerDirectory = getImagePackageManagerDirectory(targetImageFileSystemRootDir);
         final boolean applies = packageManagerDirectory.exists();
         logger.debug(String.format("%s %s", this.getClass().getName(), applies ? "applies" : "does not apply"));
         return applies;
     }
 
     @Override
-    public File getInspectorPackageManagerDirectory() {
-        return inspectorPkgMgrDir;
+    public PackageManagerEnum getType() {
+        return PackageManagerEnum.APK;
     }
 
     @Override
-    public ImagePkgMgrDatabase getImagePkgMgrDatabase(File targetImageFileSystemRootDir) {
-        final File extractedPackageManagerDirectory = getExtractedPackageManagerDirectory(targetImageFileSystemRootDir);
-        final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(extractedPackageManagerDirectory,
-            PackageManagerEnum.APK);
-        return targetImagePkgMgr;
+    public PkgMgrInitializer getPkgMgrInitializer() {
+        return pkgMgrInitializer;
+    }
+
+    @Override
+    public File getImagePackageManagerDirectory(final File targetImageFileSystemRootDir) {
+        return new File(targetImageFileSystemRootDir, STANDARD_PKG_MGR_DIR_PATH);
+    }
+
+    @Override
+    public File getInspectorPackageManagerDirectory() {
+        return inspectorPkgMgrDir;
     }
 
     @Override
@@ -98,20 +106,16 @@ public class ApkPkgMgr implements PkgMgr {
                 logger.trace(String.format("component: %s", component));
                 // if a package starts with a period, ignore it. It's a virtual meta package and the version information is missing
                 if (!component.startsWith(".")) {
-                    final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, component, version, getArchitecture(imageFileSystem));
+                    final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, component, version, getImageArchitecture(imageFileSystem));
                     logger.debug(String.format("Constructed externalId: %s", externalId));
-                    components.add(new ComponentDetails(component, version, externalId, getArchitecture(imageFileSystem), linuxDistroName));
+                    components.add(new ComponentDetails(component, version, externalId, getImageArchitecture(imageFileSystem), linuxDistroName));
                 }
             }
         }
         return components;
     }
 
-    private File getExtractedPackageManagerDirectory(File targetImageFileSystemRootDir) {
-        return new File(targetImageFileSystemRootDir, STANDARD_PKG_MGR_DIR_PATH);
-    }
-
-    private String getArchitecture(final File imageFileSystem) throws IntegrationException {
+    private String getImageArchitecture(final File imageFileSystem) throws IntegrationException {
         if (architecture == null) {
             architecture = "";
             final Optional<File> etc = new LinuxFileSystem(imageFileSystem, fileOperations).getEtcDir();
