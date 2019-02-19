@@ -115,7 +115,7 @@ public class DockerTarParserTest {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
-        tarParser.extractDockerLayers(new Gson(), componentExtractorFactory, ImageInspectorOsEnum.CENTOS, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
+        tarParser.extractDockerLayers(componentExtractorFactory, ImageInspectorOsEnum.CENTOS, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
         final ImageInfoParsed tarExtractionResults = tarParser.parseImageInfo(targetImageFileSystemRootDir);
         assertEquals("/var/lib/rpm", rpmPkgMgr.getInspectorPackageManagerDirectory().getAbsolutePath());
 
@@ -127,7 +127,7 @@ public class DockerTarParserTest {
                 System.out.println(file.getAbsolutePath());
                 varLibRpmNameFound = true;
                 final List<String> cmd = Arrays.asList("strings", file.getAbsolutePath());
-                final String[] cmdOutput = Executor.executeCommand(cmd, 30000L);
+                final String[] cmdOutput = (new Executor()).executeCommand(cmd, 30000L);
                 final String stringsOutput = Arrays.asList(cmdOutput).stream().collect(Collectors.joining("\n"));
                 assertTrue(stringsOutput.contains("bacula-console"));
                 assertTrue(stringsOutput.contains("bacula-client"));
@@ -171,7 +171,7 @@ public class DockerTarParserTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractDockerLayers(new Gson(), new ComponentExtractorFactory(), ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
+        tarParser.extractDockerLayers(new ComponentExtractorFactory(), ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));

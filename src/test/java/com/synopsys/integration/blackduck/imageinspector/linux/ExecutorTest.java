@@ -31,7 +31,7 @@ public class ExecutorTest {
         cmdParts.add("echo");
         cmdParts.add(ARG);
         System.out.printf("cmdParts via toString(): %s\n", cmdParts);
-        final String[] results = Executor.executeCommand(cmdParts, 10000L);
+        final String[] results = (new Executor()).executeCommand(cmdParts, 10000L);
         assertEquals(1, results.length);
         assertEquals(ARG, results[0]);
     }

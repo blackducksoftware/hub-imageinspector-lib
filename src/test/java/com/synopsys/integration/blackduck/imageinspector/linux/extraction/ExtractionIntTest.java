@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.junit.jupiter.api.Tag;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.SimpleBdioFactory;
@@ -21,9 +22,8 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgP
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
-public class ExtractorComposedTest {
-
-    // TODO think about test class name and package
+@Tag("integration")
+public class ExtractionIntTest {
 
     @Test
     public void testApk() throws IntegrationException, IOException, InterruptedException {

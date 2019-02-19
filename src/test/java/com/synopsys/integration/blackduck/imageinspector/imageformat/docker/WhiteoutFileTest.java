@@ -4,7 +4,18 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import com.google.gson.Gson;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
@@ -15,16 +26,6 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHiera
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class WhiteoutFileTest {
     private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
@@ -68,7 +69,7 @@ public class WhiteoutFileTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractDockerLayers(new Gson(), new ComponentExtractorFactory(), ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
+        tarParser.extractDockerLayers(new ComponentExtractorFactory(), ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
         final File opaqueDir = new File(targetImageFileSystemRootDir, "opaque");
         assertFalse("Whited-out opaque dir was created", opaqueDir.exists());
     }

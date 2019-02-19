@@ -2,6 +2,14 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.model.BdioProject;
@@ -20,12 +28,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGe
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 public class ImageInspectorApiTest {
 
@@ -86,7 +88,7 @@ public class ImageInspectorApiTest {
         new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
             PackageManagerEnum.APK), "apline", new ApkPkgMgr());
     Mockito.when(imageInspector
-        .extractDockerLayers(gson, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
+        .extractDockerLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
             containerFileSystemRootDir,
             layerTarFiles, mapping)).thenReturn(imageInfoParsed);
 

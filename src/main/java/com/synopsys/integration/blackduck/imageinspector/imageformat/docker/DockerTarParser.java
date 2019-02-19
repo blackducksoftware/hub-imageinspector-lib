@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageInspectorOsMapping;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
@@ -59,6 +58,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
+import com.synopsys.integration.blackduck.imageinspector.linux.executor.Executor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
@@ -70,6 +70,7 @@ public class DockerTarParser {
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Executor executor;
     private ManifestFactory manifestFactory;
     private Os os;
     private ImageConfigParser imageConfigParser;
@@ -77,6 +78,10 @@ public class DockerTarParser {
     private List<PkgMgr> pkgMgrs;
     private PkgMgrExecutor pkgMgrExecutor;
 
+    @Autowired
+    public void setExecutor(final Executor executor) {
+        this.executor = executor;
+    }
     @Autowired
     public void setPkgMgrExecutor(final PkgMgrExecutor pkgMgrExecutor) {
         this.pkgMgrExecutor = pkgMgrExecutor;
@@ -140,7 +145,7 @@ public class DockerTarParser {
         return untaredFiles;
     }
 
-    public ImageInfoParsed extractDockerLayers(final Gson gson, final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy,
+    public ImageInfoParsed extractDockerLayers(final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy,
         final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
@@ -150,7 +155,7 @@ public class DockerTarParser {
             if (layerTar != null) {
                 extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
                 String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-                imageInfoParsed = addPostLayerComponents(gson, layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerMetadataFileContents,
+                imageInfoParsed = addPostLayerComponents(layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerMetadataFileContents,
                     manifestLayerMapping.getLayerExternalId(layerIndex));
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
@@ -294,7 +299,7 @@ public class DockerTarParser {
         return layerMetadataFileContents;
     }
 
-    private ImageInfoParsed addPostLayerComponents(final Gson gson, final int layerIndex, final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs,
+    private ImageInfoParsed addPostLayerComponents(final int layerIndex, final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs,
         final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents, final String layerExternalId) throws WrongInspectorOsException {
         logger.debug("Getting components present (so far) after adding this layer");
         if (currentOs == null) {
@@ -314,7 +319,7 @@ public class DockerTarParser {
             final List<ComponentDetails> comps;
             try {
 // TODO does this make sense?
-                final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());
+                final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(executor, imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());
                 comps = imageInfoParsed.getPkgMgr().extractComponentsFromPkgMgrOutput(imageInfoParsed.getFileSystemRootDir(), imageInfoParsed.getLinuxDistroName(), pkgMgrOutputLines);
             } catch (IntegrationException e) {
                 logger.debug(String.format("Unable to log components present after this layer: %s", e.getMessage()));
