@@ -38,9 +38,8 @@ import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component
@@ -168,9 +167,8 @@ public class BdioGeneratorApi {
 
     private String[] pkgListToBdioWithArch(final PackageManagerEnum pkgMgrType, final String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String blackDuckProjectName, final String blackDuckProjectVersion,
         final String codeLocationName, final String architecture) throws IntegrationException {
-        ComponentExtractor extractor = componentExtractorFactory.createComponentExtractor(gson,
-            PkgMgrFactory.createPkgMgr(pkgMgrType), null, architecture, pkgMgrType);
-        List<ComponentDetails> comps = extractor.extractComponentsFromPkgMgrOutput(linuxDistroName, pkgMgrListCmdOutputLines);
+        PkgMgr extractor = componentExtractorFactory.createComponentExtractor(pkgMgrType, architecture);
+        List<ComponentDetails> comps = extractor.extractComponentsFromPkgMgrOutput(null, linuxDistroName, pkgMgrListCmdOutputLines);
         logger.info(String.format("Extracted %d components from given package manager output", comps.size()));
         SimpleBdioDocument bdioDoc = bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);
         try {

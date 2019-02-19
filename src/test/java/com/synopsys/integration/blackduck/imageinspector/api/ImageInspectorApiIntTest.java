@@ -68,7 +68,6 @@ public class ImageInspectorApiIntTest {
         dockerTarParser.setPkgMgrExecutor(pkgMgrExecutor);
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
         apkExecutor = Mockito.mock(ApkExecutor.class);
-        componentExtractorFactory.setApkExecutor(apkExecutor);
         final ImageInspector imageInspector = new ImageInspector(dockerTarParser, componentExtractorFactory);
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());

@@ -23,60 +23,32 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.linux.extractor;
 
-import java.io.File;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.DpkgExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.RpmExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.none.NullPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 
 @Component
 public class ComponentExtractorFactory {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private FileOperations fileOperations;
-    private ApkExecutor apkExecutor;
-    private DpkgExecutor dpkgExecutor;
-    private RpmExecutor rpmExecutor;
 
-    @Autowired
-    public void setApkExecutor(final ApkExecutor apkExecutor) {
-        this.apkExecutor = apkExecutor;
-    }
-
-    @Autowired
-    public void setDpkgExecutor(final DpkgExecutor dpkgExecutor) {
-        this.dpkgExecutor = dpkgExecutor;
-    }
-
-    @Autowired
-    public void setRpmExecutor(final RpmExecutor rpmExecutor) {
-        this.rpmExecutor = rpmExecutor;
-    }
-
-    @Autowired
-    public void setFileOperations(final FileOperations fileOperations) {
-        this.fileOperations = fileOperations;
-    }
-
-    public ComponentExtractor createComponentExtractor(final Gson gson, final PkgMgr pkgMgr, final File imageFileSystem, final String architecture, final PackageManagerEnum packageManagerEnum) {
+    public PkgMgr createComponentExtractor(final PackageManagerEnum packageManagerEnum, final String architecture) {
         logger.debug("createComponentExtractor()");
         if (packageManagerEnum == PackageManagerEnum.APK) {
-            return new ApkComponentExtractor(pkgMgr, fileOperations, apkExecutor, imageFileSystem, architecture);
+            return new ApkPkgMgr(architecture);
         } else if (packageManagerEnum == PackageManagerEnum.DPKG) {
-            return new DpkgComponentExtractor(pkgMgr, dpkgExecutor);
+            return new DpkgPkgMgr();
         } else if (packageManagerEnum == PackageManagerEnum.RPM) {
-            return new RpmComponentExtractor(pkgMgr, rpmExecutor, gson);
+            return new RpmPkgMgr();
         } else {
             logger.info("No supported package manager found; will generate empty BDIO");
-            return new NullComponentExtractor();
+            return new NullPkgMgr();
         }
     }
 }
