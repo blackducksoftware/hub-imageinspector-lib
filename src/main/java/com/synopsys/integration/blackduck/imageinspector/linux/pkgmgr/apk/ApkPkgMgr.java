@@ -25,7 +25,7 @@ import com.synopsys.integration.exception.IntegrationException;
 
 @Component
 public class ApkPkgMgr implements PkgMgr {
-    private static final String PKG_MGR_DIR = "/lib/apk";
+    private static final String STANDARD_PKG_MGR_DIR_PATH = "/lib/apk";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public static final List<String> UPGRADE_DATABASE_COMMAND = null;
@@ -35,6 +35,15 @@ public class ApkPkgMgr implements PkgMgr {
     //  private final PkgMgrExecutor pkgMgrExecutor;
     //  private final File imageFileSystem;
     private String architecture;
+    private final File inspectorPkgMgrDir;
+
+    public ApkPkgMgr() {
+        this.inspectorPkgMgrDir = new File(STANDARD_PKG_MGR_DIR_PATH);
+    }
+
+    public ApkPkgMgr(final String inspectorPkgMgrDirPath) {
+        this.inspectorPkgMgrDir = new File(inspectorPkgMgrDirPath);
+    }
 
     @Autowired
     private FileOperations fileOperations;
@@ -49,7 +58,7 @@ public class ApkPkgMgr implements PkgMgr {
 
     @Override
     public File getInspectorPackageManagerDirectory() {
-        return new File(PKG_MGR_DIR);
+        return inspectorPkgMgrDir;
     }
 
     @Override
@@ -99,7 +108,7 @@ public class ApkPkgMgr implements PkgMgr {
     }
 
     private File getExtractedPackageManagerDirectory(File targetImageFileSystemRootDir) {
-        return new File(targetImageFileSystemRootDir, PKG_MGR_DIR);
+        return new File(targetImageFileSystemRootDir, STANDARD_PKG_MGR_DIR_PATH);
     }
 
     private String getArchitecture(final File imageFileSystem) throws IntegrationException {

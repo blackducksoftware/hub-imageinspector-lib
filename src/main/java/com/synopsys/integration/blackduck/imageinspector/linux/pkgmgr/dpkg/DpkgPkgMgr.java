@@ -14,7 +14,16 @@ import com.synopsys.integration.exception.IntegrationException;
 
 public class DpkgPkgMgr implements PkgMgr {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private static final String PKG_MGR_DIR = "/var/lib/dpkg";
+    private static final String STANDARD_PKG_MGR_DIR_PATH = "/var/lib/dpkg";
+    private final File inspectorPkgMgrDir;
+
+    public DpkgPkgMgr() {
+        this.inspectorPkgMgrDir = new File(STANDARD_PKG_MGR_DIR_PATH);
+    }
+
+    public DpkgPkgMgr(final String inspectorPkgMgrDirPath) {
+        this.inspectorPkgMgrDir = new File(inspectorPkgMgrDirPath);
+    }
 
     @Override
     public boolean isApplicable(File targetImageFileSystemRootDir) {
@@ -26,7 +35,7 @@ public class DpkgPkgMgr implements PkgMgr {
 
     @Override
     public File getInspectorPackageManagerDirectory() {
-        return new File(PKG_MGR_DIR);
+        return inspectorPkgMgrDir;
     }
 
     @Override
@@ -45,6 +54,6 @@ public class DpkgPkgMgr implements PkgMgr {
     }
 
     private File getExtractedPackageManagerDirectory(File targetImageFileSystemRootDir) {
-        return new File(targetImageFileSystemRootDir, PKG_MGR_DIR);
+        return new File(targetImageFileSystemRootDir, STANDARD_PKG_MGR_DIR_PATH);
     }
 }
