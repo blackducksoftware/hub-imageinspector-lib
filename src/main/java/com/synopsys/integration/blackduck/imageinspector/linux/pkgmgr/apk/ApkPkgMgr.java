@@ -36,7 +36,7 @@ public class ApkPkgMgr implements PkgMgr {
     //  private final File imageFileSystem;
     private final PkgMgrInitializer pkgMgrInitializer = new ApkPkgMgrInitializer();
     private String architecture;
-    private File inspectorPkgMgrDir;
+    private final File inspectorPkgMgrDir;
 
     public ApkPkgMgr() {
         this.inspectorPkgMgrDir = new File(STANDARD_PKG_MGR_DIR_PATH);
@@ -45,11 +45,6 @@ public class ApkPkgMgr implements PkgMgr {
     public ApkPkgMgr(final String architecture) {
         this();
         this.architecture = architecture;
-    }
-
-    public ApkPkgMgr(String architecture, final File inspectorPkgMgrDir) {
-        this(architecture);
-        this.inspectorPkgMgrDir = inspectorPkgMgrDir;
     }
 
     @Autowired

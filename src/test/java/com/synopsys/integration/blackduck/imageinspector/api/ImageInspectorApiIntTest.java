@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
@@ -24,10 +25,10 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.ApkExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
@@ -54,7 +55,7 @@ public class ImageInspectorApiIntTest {
         pkgMgrs = new ArrayList<>(3);
         pkgMgrs.add(new ApkPkgMgr());
         pkgMgrs.add(new DpkgPkgMgr());
-        pkgMgrs.add(new RpmPkgMgr());
+        pkgMgrs.add(new RpmPkgMgr(new Gson()));
         os = Mockito.mock(Os.class);
 
         final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);

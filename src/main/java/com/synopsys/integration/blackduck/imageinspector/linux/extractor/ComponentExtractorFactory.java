@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
@@ -34,18 +35,20 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgP
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.none.NullPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 
+// TODO this is in wrong pkg, and has wrong name, but is part of the api
+
 @Component
 public class ComponentExtractorFactory {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public PkgMgr createComponentExtractor(final PackageManagerEnum packageManagerEnum, final String architecture) {
-        logger.debug("createComponentExtractor()");
+    public PkgMgr createPkgMgr(final PackageManagerEnum packageManagerEnum, final String architecture) {
+        logger.debug("createPkgMgr()");
         if (packageManagerEnum == PackageManagerEnum.APK) {
             return new ApkPkgMgr(architecture);
         } else if (packageManagerEnum == PackageManagerEnum.DPKG) {
             return new DpkgPkgMgr();
         } else if (packageManagerEnum == PackageManagerEnum.RPM) {
-            return new RpmPkgMgr();
+            return new RpmPkgMgr(new Gson());
         } else {
             logger.info("No supported package manager found; will generate empty BDIO");
             return new NullPkgMgr();

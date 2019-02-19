@@ -15,6 +15,23 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
@@ -37,21 +54,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkg
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 @Tag("integration")
 public class DockerTarParserTest {
@@ -73,7 +75,7 @@ public class DockerTarParserTest {
         pkgMgrs = new ArrayList<>(3);
         apkPkgMgr = new ApkPkgMgr();
         dpkgPkgMgr = new DpkgPkgMgr();
-        rpmPkgMgr = new RpmPkgMgr();
+        rpmPkgMgr = new RpmPkgMgr(new Gson());
 
         pkgMgrs.add(apkPkgMgr);
         pkgMgrs.add(dpkgPkgMgr);

@@ -1,34 +1,31 @@
 package com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.extractor.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class DpkgPkgMgr implements PkgMgr {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    public static final List<String> UPGRADE_DATABASE_COMMAND = null;
+    public static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("dpkg", "-l");
+    private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
+    private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
     private static final String STANDARD_PKG_MGR_DIR_PATH = "/var/lib/dpkg";
     private final PkgMgrInitializer pkgMgrInitializer = new DpkgPkgMgrInitializer();
     private final File inspectorPkgMgrDir;
 
-    @Autowired
-    private PkgMgrExecutor pkgMgrExecutor;
-
     public DpkgPkgMgr() {
         this.inspectorPkgMgrDir = new File(STANDARD_PKG_MGR_DIR_PATH);
-    }
-
-    public DpkgPkgMgr(final String inspectorPkgMgrDirPath) {
-        this.inspectorPkgMgrDir = new File(inspectorPkgMgrDirPath);
     }
 
     @Override
@@ -63,6 +60,42 @@ public class DpkgPkgMgr implements PkgMgr {
     public List<ComponentDetails> extractComponentsFromPkgMgrOutput(File imageFileSystem,
         String linuxDistroName, String[] pkgMgrListOutputLines)
         throws IntegrationException {
-        return null;
+        final List<ComponentDetails> components = new ArrayList<>();
+        boolean startOfComponents = false;
+        for (final String packageLine : pkgMgrListOutputLines) {
+
+            if (packageLine != null) {
+                if (packageLine.matches(PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST)) {
+                    startOfComponents = true;
+                } else if (startOfComponents) {
+                    // Expect: statusChar name version arch
+                    // Or: statusChar name:arch version arch
+                    final char packageStatus = packageLine.charAt(1);
+                    if (isInstalledStatus(packageStatus)) {
+                        final String componentInfo = packageLine.substring(3);
+                        final String[] componentInfoParts = componentInfo.trim().split(PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR);
+                        String name = componentInfoParts[0];
+                        final String version = componentInfoParts[1];
+                        final String archFromPkgMgrOutput = componentInfoParts[2];
+                        if (name.contains(":")) {
+                            name = name.substring(0, name.indexOf(":"));
+                        }
+                        final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, name, version, archFromPkgMgrOutput);
+                        logger.trace(String.format("Constructed externalId: %s", externalId));
+                        components.add(new ComponentDetails(name, version, externalId, archFromPkgMgrOutput, linuxDistroName));
+                    } else {
+                        logger.trace(String.format("Package \"%s\" is listed but not installed (package status: %s)", packageLine, packageStatus));
+                    }
+                }
+            }
+        }
+        return components;
+    }
+
+    private boolean isInstalledStatus(final Character packageStatus) {
+        if (packageStatus == 'i' || packageStatus == 'W' || packageStatus == 't') {
+            return true;
+        }
+        return false;
     }
 }

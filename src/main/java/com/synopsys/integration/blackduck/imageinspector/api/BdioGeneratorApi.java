@@ -167,8 +167,8 @@ public class BdioGeneratorApi {
 
     private String[] pkgListToBdioWithArch(final PackageManagerEnum pkgMgrType, final String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String blackDuckProjectName, final String blackDuckProjectVersion,
         final String codeLocationName, final String architecture) throws IntegrationException {
-        PkgMgr extractor = componentExtractorFactory.createComponentExtractor(pkgMgrType, architecture);
-        List<ComponentDetails> comps = extractor.extractComponentsFromPkgMgrOutput(null, linuxDistroName, pkgMgrListCmdOutputLines);
+        final PkgMgr pkgMgr = componentExtractorFactory.createPkgMgr(pkgMgrType, architecture);
+        List<ComponentDetails> comps = pkgMgr.extractComponentsFromPkgMgrOutput(null, linuxDistroName, pkgMgrListCmdOutputLines);
         logger.info(String.format("Extracted %d components from given package manager output", comps.size()));
         SimpleBdioDocument bdioDoc = bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);
         try {
