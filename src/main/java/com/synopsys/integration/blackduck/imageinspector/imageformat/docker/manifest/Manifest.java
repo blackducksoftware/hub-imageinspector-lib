@@ -61,7 +61,6 @@ public class Manifest {
 
     public ManifestLayerMapping getLayerMapping(final String targetImageName, final String targetTagName) throws IntegrationException, IOException {
         logger.debug(String.format("getLayerMappings(): targetImageName: %s; targetTagName: %s", targetImageName, targetTagName));
-        final List<ManifestLayerMapping> mappings = new ArrayList<>();
         final List<ImageInfo> images = getManifestContents();
         logger.debug(String.format("getLayerMappings(): images.size(): %d", images.size()));
         validateImageSpecificity(images, targetImageName, targetTagName);
