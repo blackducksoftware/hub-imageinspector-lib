@@ -95,21 +95,31 @@ public class ImageInspector {
 
     private ImageInfoDerived deriveImageInfo(final ManifestLayerMapping mapping, final String projectName, final String versionName,
         final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) {
-        logger.debug(String.format("generateBdioFromGivenComponents(): projectName: %s, versionName: %s", projectName, versionName));
+        logger.debug(String.format("deriveImageInfo(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
-        final ImagePkgMgrDatabase imagePkgMgrDatabase = imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase();
         imageInfoDerived.setManifestLayerMapping(mapping);
-        if (imagePkgMgrDatabase != null && imagePkgMgrDatabase.getPackageManager() != PackageManagerEnum.NULL) {
-            imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
-                imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().toString()));
-        } else {
-            imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
-                NO_PKG_MGR_FOUND));
-        }
+        imageInfoDerived.setCodeLocationName(deriveCodeLocationName(codeLocationPrefix, imageInfoDerived));
         imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName));
         imageInfoDerived.setFinalProjectVersionName(deriveBlackDuckProjectVersion(imageInfoDerived.getManifestLayerMapping(), versionName));
         logger.info(String.format("Black Duck project: %s, version: %s; Code location : %s", imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getCodeLocationName()));
         return imageInfoDerived;
+    }
+
+    private String deriveCodeLocationName(final String codeLocationPrefix, final ImageInfoDerived imageInfoDerived) {
+        final String pkgMgrName = derivePackageManagerName(imageInfoDerived);
+        return Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
+                pkgMgrName);
+    }
+
+    private String derivePackageManagerName(final ImageInfoDerived imageInfoDerived) {
+        final String pkgMgrName;
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase();
+        if (imagePkgMgrDatabase != null && imagePkgMgrDatabase.getPackageManager() != PackageManagerEnum.NULL) {
+            pkgMgrName = imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().toString();
+        } else {
+            pkgMgrName = NO_PKG_MGR_FOUND;
+        }
+        return pkgMgrName;
     }
 
     private String deriveBlackDuckProject(final String imageName, final String projectName) {
