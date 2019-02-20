@@ -318,7 +318,6 @@ public class DockerTarParser {
             }
             final List<ComponentDetails> comps;
             try {
-// TODO does this make sense?
                 final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(executor, imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());
                 comps = imageInfoParsed.getPkgMgr().extractComponentsFromPkgMgrOutput(imageInfoParsed.getFileSystemRootDir(), imageInfoParsed.getLinuxDistroName(), pkgMgrOutputLines);
             } catch (IntegrationException e) {
@@ -346,11 +345,10 @@ public class DockerTarParser {
     }
 
     ImageInfoParsed parseImageInfo(final File targetImageFileSystemRootDir) throws PkgMgrDataNotFoundException {
-        // TODO does this make sense?
         if (pkgMgrs == null) {
             logger.error("No pmgMgrs configured");
         } else {
-            logger.info(String.format("*** pkgMgrs.size(): %d", pkgMgrs.size()));
+            logger.trace(String.format("pkgMgrs.size(): %d", pkgMgrs.size()));
             for (PkgMgr pkgMgr : pkgMgrs) {
                 if (pkgMgr.isApplicable(targetImageFileSystemRootDir)) {
                     final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(pkgMgr.getImagePackageManagerDirectory(targetImageFileSystemRootDir),
