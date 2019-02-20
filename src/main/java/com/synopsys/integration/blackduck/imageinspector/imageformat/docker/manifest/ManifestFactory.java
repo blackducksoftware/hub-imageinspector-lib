@@ -27,6 +27,8 @@ import java.io.File;
 
 import org.springframework.stereotype.Component;
 
+import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
+
 @Component
 public class ManifestFactory {
 

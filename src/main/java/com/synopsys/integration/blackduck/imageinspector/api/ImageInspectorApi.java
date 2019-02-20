@@ -34,11 +34,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
@@ -53,7 +52,6 @@ import com.synopsys.integration.exception.IntegrationException;
 @Component
 public class ImageInspectorApi {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Gson gson;
     private GsonBuilder gsonBuilder;
     private ImageInspector imageInspector;
     private Os os;
@@ -63,11 +61,6 @@ public class ImageInspectorApi {
     @Autowired
     public void setBdioGenerator(final BdioGenerator bdioGenerator) {
         this.bdioGenerator = bdioGenerator;
-    }
-
-    @Autowired
-    public void setGson(final Gson gson) {
-        this.gson = gson;
     }
 
     // autowired does not work on GsonBuilder; not sure why

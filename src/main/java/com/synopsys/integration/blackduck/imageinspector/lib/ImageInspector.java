@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
@@ -40,11 +39,11 @@ import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
 import com.synopsys.integration.exception.IntegrationException;
 
+// As support for other image formats is added, this class will manage the list of TarParsers
 @Component
 public class ImageInspector {
     public static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
@@ -53,7 +52,6 @@ public class ImageInspector {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final DockerTarParser tarParser;
     private final ComponentExtractorFactory componentExtractorFactory;
-    private final Gson gson = new Gson();
 
     public ImageInspector(final DockerTarParser tarParser, final ComponentExtractorFactory componentExtractorFactory) {
         this.tarParser = tarParser;
@@ -99,9 +97,9 @@ public class ImageInspector {
         final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) {
         logger.debug(String.format("generateBdioFromGivenComponents(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
-        final ImagePkgMgrDatabase imagePkgMgr = imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase();
+        final ImagePkgMgrDatabase imagePkgMgrDatabase = imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase();
         imageInfoDerived.setManifestLayerMapping(mapping);
-        if (imagePkgMgr != null && imagePkgMgr.getPackageManager() != PackageManagerEnum.NULL) {
+        if (imagePkgMgrDatabase != null && imagePkgMgrDatabase.getPackageManager() != PackageManagerEnum.NULL) {
             imageInfoDerived.setCodeLocationName(Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
                 imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().toString()));
         } else {

@@ -10,18 +10,17 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.model.BdioProject;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMappingFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
+import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGenerator;
@@ -53,7 +52,6 @@ public class ImageInspectorApiTest {
     final String currentLinuxDistro = "alpine";
 
     final BdioGenerator bdioGenerator = new BdioGenerator();
-    final Gson gson = new Gson();
     final GsonBuilder gsonBuilder = new GsonBuilder();
 
     final ImageInspector imageInspector = Mockito.mock(ImageInspector.class);
@@ -106,7 +104,6 @@ public class ImageInspectorApiTest {
     Mockito.when(os.deriveOs("alpine")).thenReturn(ImageInspectorOsEnum.ALPINE);
     final ImageInspectorApi api = new ImageInspectorApi(imageInspector, os);
     api.setGsonBuilder(gsonBuilder);
-    api.setGson(gson);
     api.setBdioGenerator(bdioGenerator);
     final FileOperations fileOperations = Mockito.mock(FileOperations.class);
     Mockito.when(fileOperations.createTempDirectory()).thenReturn(new File("test"));

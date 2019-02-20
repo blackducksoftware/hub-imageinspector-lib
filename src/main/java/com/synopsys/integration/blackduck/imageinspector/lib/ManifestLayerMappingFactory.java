@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest;
+package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import java.util.List;
 

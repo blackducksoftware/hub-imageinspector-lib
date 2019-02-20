@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
+import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class ManifestTest {

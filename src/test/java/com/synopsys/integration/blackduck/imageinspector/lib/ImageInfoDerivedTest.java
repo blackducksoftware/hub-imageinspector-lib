@@ -7,7 +7,6 @@ import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageInspectorOsMapping;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import java.io.File;
 import java.util.Arrays;

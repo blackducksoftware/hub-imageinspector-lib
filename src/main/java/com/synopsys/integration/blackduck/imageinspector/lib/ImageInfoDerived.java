@@ -24,7 +24,6 @@
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
 
 // Comprehensive info about an image, including
 // the harder-to-derive bits

@@ -50,7 +50,7 @@ import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundE
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;

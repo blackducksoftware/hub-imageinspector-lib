@@ -21,7 +21,7 @@ import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnu
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
