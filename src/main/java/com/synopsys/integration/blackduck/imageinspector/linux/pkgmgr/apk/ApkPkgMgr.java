@@ -32,16 +32,18 @@ public class ApkPkgMgr implements PkgMgr {
     public static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("apk", "info", "-v");
     private static final String ARCH_FILENAME = "arch";
     private static final String ETC_SUBDIR_CONTAINING_ARCH = "apk";
-    private final PkgMgrInitializer pkgMgrInitializer = new ApkPkgMgrInitializer();
+    private final PkgMgrInitializer pkgMgrInitializer;
     private String architecture;
     private final File inspectorPkgMgrDir;
 
-    public ApkPkgMgr() {
+    @Autowired
+    public ApkPkgMgr(final FileOperations fileOperations) {
+        pkgMgrInitializer = new ApkPkgMgrInitializer(fileOperations);
         this.inspectorPkgMgrDir = new File(STANDARD_PKG_MGR_DIR_PATH);
     }
 
-    public ApkPkgMgr(final String architecture) {
-        this();
+    public ApkPkgMgr(final FileOperations fileOperations, final String architecture) {
+        this(fileOperations);
         this.architecture = architecture;
     }
 

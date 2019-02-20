@@ -7,15 +7,19 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.output.RpmPackage;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;
 
+@Component
 public class RpmPkgMgr implements PkgMgr {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String STANDARD_PKG_MGR_DIR_PATH = "/var/lib/rpm";
@@ -25,11 +29,13 @@ public class RpmPkgMgr implements PkgMgr {
     private static final String NO_VALUE = "(none)";
     private final Gson gson;
     private final File inspectorPkgMgrDir;
-    private final PkgMgrInitializer pkgMgrInitializer = new RpmPkgMgrInitializer();
+    private final PkgMgrInitializer pkgMgrInitializer;
 
-    public RpmPkgMgr(final Gson gson) {
-        this.inspectorPkgMgrDir = new File(STANDARD_PKG_MGR_DIR_PATH);
+    @Autowired
+    public RpmPkgMgr(final Gson gson, final FileOperations fileOperations) {
         this.gson = gson;
+        pkgMgrInitializer = new RpmPkgMgrInitializer(fileOperations);
+        this.inspectorPkgMgrDir = new File(STANDARD_PKG_MGR_DIR_PATH);
     }
 
     @Override

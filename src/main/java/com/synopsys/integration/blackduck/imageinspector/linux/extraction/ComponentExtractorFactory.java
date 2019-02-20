@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
@@ -44,11 +45,11 @@ public class ComponentExtractorFactory {
     public PkgMgr createPkgMgr(final PackageManagerEnum packageManagerEnum, final String architecture) {
         logger.debug("createPkgMgr()");
         if (packageManagerEnum == PackageManagerEnum.APK) {
-            return new ApkPkgMgr(architecture);
+            return new ApkPkgMgr(new FileOperations(), architecture);
         } else if (packageManagerEnum == PackageManagerEnum.DPKG) {
-            return new DpkgPkgMgr();
+            return new DpkgPkgMgr(new FileOperations());
         } else if (packageManagerEnum == PackageManagerEnum.RPM) {
-            return new RpmPkgMgr(new Gson());
+            return new RpmPkgMgr(new Gson(), new FileOperations());
         } else {
             logger.info("No supported package manager found; will generate empty BDIO");
             return new NullPkgMgr();

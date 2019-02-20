@@ -52,9 +52,9 @@ public class ImageInspectorApiIntTest {
     @BeforeAll
     public static void setup() throws IntegrationException {
         pkgMgrs = new ArrayList<>(3);
-        pkgMgrs.add(new ApkPkgMgr());
-        pkgMgrs.add(new DpkgPkgMgr());
-        pkgMgrs.add(new RpmPkgMgr(new Gson()));
+        pkgMgrs.add(new ApkPkgMgr(new FileOperations()));
+        pkgMgrs.add(new DpkgPkgMgr(new FileOperations()));
+        pkgMgrs.add(new RpmPkgMgr(new Gson(), new FileOperations()));
         os = Mockito.mock(Os.class);
 
         final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);

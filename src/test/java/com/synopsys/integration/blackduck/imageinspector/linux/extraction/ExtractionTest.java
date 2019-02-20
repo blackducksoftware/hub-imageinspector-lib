@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.synopsys.integration.bdio.SimpleBdioFactory;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
@@ -30,7 +31,7 @@ public class ExtractionTest {
                 "alpine-baselayout-3.1.0-r0", "musl-utils-1.1.19-r10" };
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final PkgMgr pkgMgr = new ApkPkgMgr();
+        final PkgMgr pkgMgr = new ApkPkgMgr(new FileOperations());
         final File imageFilesystem = new File("src/test/resources/testApkFileSystem");
         assertTrue(pkgMgr.isApplicable(imageFilesystem));
         assertEquals("apk", pkgMgr.getImagePackageManagerDirectory(imageFilesystem).getName());
@@ -64,7 +65,7 @@ public class ExtractionTest {
                 "ii  login                   1:4.5-1ubuntu1         amd64        system login tools" };
 
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
-        final PkgMgr pkgMgr = new DpkgPkgMgr();
+        final PkgMgr pkgMgr = new DpkgPkgMgr(new FileOperations());
         final File imageFilesystem = new File("src/test/resources/testDpkgFileSystem");
         assertTrue(pkgMgr.isApplicable(imageFilesystem));
         assertEquals("dpkg", pkgMgr.getImagePackageManagerDirectory(imageFilesystem).getName());
@@ -148,7 +149,7 @@ public class ExtractionTest {
     }
 
     private SimpleBdioDocument getBdioDocumentForRpmPackages(final String[] pkgMgrOutputLines) throws IntegrationException, IOException, InterruptedException {
-        final PkgMgr pkgMgr = new RpmPkgMgr(new Gson());
+        final PkgMgr pkgMgr = new RpmPkgMgr(new Gson(), new FileOperations());
         final File imageFilesystem = new File("src/test/resources/testRpmFileSystem");
         assertTrue(pkgMgr.isApplicable(imageFilesystem));
         assertEquals("rpm", pkgMgr.getImagePackageManagerDirectory(imageFilesystem).getName());

@@ -7,13 +7,17 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;
 
+@Component
 public class DpkgPkgMgr implements PkgMgr {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     public static final List<String> UPGRADE_DATABASE_COMMAND = null;
@@ -21,10 +25,12 @@ public class DpkgPkgMgr implements PkgMgr {
     private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
     private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
     private static final String STANDARD_PKG_MGR_DIR_PATH = "/var/lib/dpkg";
-    private final PkgMgrInitializer pkgMgrInitializer = new DpkgPkgMgrInitializer();
+    private final PkgMgrInitializer pkgMgrInitializer;
     private final File inspectorPkgMgrDir;
 
-    public DpkgPkgMgr() {
+    @Autowired
+    public DpkgPkgMgr(final FileOperations fileOperations) {
+        pkgMgrInitializer = new DpkgPkgMgrInitializer(fileOperations);
         this.inspectorPkgMgrDir = new File(STANDARD_PKG_MGR_DIR_PATH);
     }
 

@@ -4,12 +4,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;
 
+@Component
 public class NullPkgMgr implements PkgMgr {
     @Override
     public boolean isApplicable(final File targetImageFileSystemRootDir) {

@@ -84,7 +84,7 @@ public class ImageInspectorApiTest {
     final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(
         new File("test/working/containerfilesystem"),
         new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
-            PackageManagerEnum.APK), "apline", new ApkPkgMgr());
+            PackageManagerEnum.APK), "apline", new ApkPkgMgr(new FileOperations()));
     Mockito.when(imageInspector
         .extractDockerLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
             containerFileSystemRootDir,

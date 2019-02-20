@@ -73,9 +73,9 @@ public class DockerTarParserTest {
     @BeforeAll
     public static void setup() {
         pkgMgrs = new ArrayList<>(3);
-        apkPkgMgr = new ApkPkgMgr();
-        dpkgPkgMgr = new DpkgPkgMgr();
-        rpmPkgMgr = new RpmPkgMgr(new Gson());
+        apkPkgMgr = new ApkPkgMgr(new FileOperations());
+        dpkgPkgMgr = new DpkgPkgMgr(new FileOperations());
+        rpmPkgMgr = new RpmPkgMgr(new Gson(), new FileOperations());
 
         pkgMgrs.add(apkPkgMgr);
         pkgMgrs.add(dpkgPkgMgr);
