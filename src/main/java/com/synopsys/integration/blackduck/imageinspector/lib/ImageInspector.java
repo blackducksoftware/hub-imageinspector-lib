@@ -67,8 +67,7 @@ public class ImageInspector {
     }
 
     public ImageInfoParsed extractDockerLayers(final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File containerFileSystemRootDir, final List<File> layerTars,
-        final ManifestLayerMapping layerMapping) throws IOException,
-                                                            WrongInspectorOsException {
+        final ManifestLayerMapping layerMapping) throws IOException, WrongInspectorOsException {
         return tarParser.extractDockerLayers(componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
     }
 
