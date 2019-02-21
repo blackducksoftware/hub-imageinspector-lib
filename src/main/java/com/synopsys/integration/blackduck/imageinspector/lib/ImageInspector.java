@@ -63,12 +63,12 @@ public class ImageInspector {
     }
 
     public List<File> extractLayerTars(final File tarExtractionDirectory, final File dockerTar) throws IOException {
-        return tarParser.extractLayerTars(tarExtractionDirectory, dockerTar);
+        return tarParser.unPackImageTar(tarExtractionDirectory, dockerTar);
     }
 
     public ImageInfoParsed extractDockerLayers(final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File containerFileSystemRootDir, final List<File> layerTars,
         final ManifestLayerMapping layerMapping) throws IOException, WrongInspectorOsException {
-        return tarParser.extractDockerLayers(componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
+        return tarParser.extractImageLayers(componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
     }
 
     public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {

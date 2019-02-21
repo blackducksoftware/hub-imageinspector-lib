@@ -39,7 +39,7 @@ public class ImageInspectorTest {
 
         final File dockerTarfile = new File("src/test/resources/testDockerTarfile");
         final List<File> layerTars = imageInspector.extractLayerTars(tarExtractionDirectory, dockerTarfile);
-        Mockito.verify(tarParser).extractLayerTars(tarExtractionDirectory, dockerTarfile);
+        Mockito.verify(tarParser).unPackImageTar(tarExtractionDirectory, dockerTarfile);
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
         final String imageRepo = "alpine";
@@ -60,7 +60,7 @@ public class ImageInspectorTest {
         final String manifestFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/alpine.tar/manifest.json"), StandardCharsets.UTF_8);
         final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy( manifestFileContents, imageConfigFileContents);
             imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
-        Mockito.verify(tarParser).extractDockerLayers(componentExtractorFactory, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
+        Mockito.verify(tarParser).extractImageLayers(componentExtractorFactory, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
 
         final BdioGenerator bdioGenerator = new BdioGenerator();
         final String blackDuckProjectName = "testProjectName";

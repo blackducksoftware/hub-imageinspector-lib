@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -45,6 +46,11 @@ import org.springframework.stereotype.Component;
 public class FileOperations {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    public String readFileToString(final File inputFile) throws IOException {
+        return FileUtils
+            .readFileToString(inputFile, StandardCharsets.UTF_8);
+    }
 
     public void moveFile(final File fileToMove, final File destination) throws IOException {
         final String filename = fileToMove.getName();
