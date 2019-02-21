@@ -162,4 +162,8 @@ public class FileOperations {
     public File[] listFilesInDir(final File dir) {
         return dir.listFiles();
     }
+
+    public boolean isDirectory(final File dir) {
+        return dir.isDirectory();
+    }
 }

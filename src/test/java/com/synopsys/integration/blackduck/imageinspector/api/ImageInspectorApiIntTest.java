@@ -18,7 +18,9 @@ import org.mockito.Mockito;
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerTarExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
@@ -51,10 +53,11 @@ public class ImageInspectorApiIntTest {
 
     @BeforeAll
     public static void setup() throws IntegrationException {
+        final FileOperations fileOperations = new FileOperations();
         pkgMgrs = new ArrayList<>(3);
-        pkgMgrs.add(new ApkPkgMgr(new FileOperations()));
-        pkgMgrs.add(new DpkgPkgMgr(new FileOperations()));
-        pkgMgrs.add(new RpmPkgMgr(new Gson(), new FileOperations()));
+        pkgMgrs.add(new ApkPkgMgr(fileOperations));
+        pkgMgrs.add(new DpkgPkgMgr(fileOperations));
+        pkgMgrs.add(new RpmPkgMgr(new Gson(), fileOperations));
         os = Mockito.mock(Os.class);
 
         final PkgMgrExecutor pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);
@@ -66,6 +69,8 @@ public class ImageInspectorApiIntTest {
         dockerTarParser.setFileOperations(new FileOperations());
         dockerTarParser.setPkgMgrs(pkgMgrs);
         dockerTarParser.setPkgMgrExecutor(pkgMgrExecutor);
+        dockerTarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
+        dockerTarParser.setImageConfigParser(new ImageConfigParser());
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
         final ImageInspector imageInspector = new ImageInspector(dockerTarParser, componentExtractorFactory);
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);

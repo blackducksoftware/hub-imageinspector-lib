@@ -50,6 +50,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
@@ -109,6 +110,9 @@ public class DockerTarParserIntTest {
         tarParser.setOs(new Os());
         tarParser.setFileOperations(new FileOperations());
         tarParser.setPkgMgrs(pkgMgrs);
+        tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
+        tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
+        tarParser.setImageConfigParser(new ImageConfigParser());
 
         final List<File> layerTars = tarParser.unPackImageTar(tarExtractionDirectory, dockerTar);
         final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
@@ -165,6 +169,8 @@ public class DockerTarParserIntTest {
         tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setFileOperations(new FileOperations());
         tarParser.setPkgMgrs(pkgMgrs);
+        tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
+        tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);

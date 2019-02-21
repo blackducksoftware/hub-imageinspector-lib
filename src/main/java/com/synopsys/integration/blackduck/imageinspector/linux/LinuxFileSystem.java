@@ -56,7 +56,7 @@ public class LinuxFileSystem extends Stringable {
     public Optional<File> getEtcDir() {
         logger.debug(String.format("Looking in root dir %s for etc dir", root.getAbsolutePath()));
         final File etcDir = new File(root, "etc");
-        if (etcDir.isDirectory()) {
+        if (fileOperations.isDirectory(etcDir)) {
             return Optional.of(etcDir);
         } else {
             return Optional.empty();

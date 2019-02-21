@@ -77,6 +77,7 @@ public class DockerTarParser {
     private FileOperations fileOperations;
     private List<PkgMgr> pkgMgrs;
     private PkgMgrExecutor pkgMgrExecutor;
+    private DockerLayerTarExtractor dockerLayerTarExtractor;
 
     @Autowired
     public void setExecutor(final CmdExecutor executor) {
@@ -110,6 +111,11 @@ public class DockerTarParser {
     @Autowired
     public void setFileOperations(final FileOperations fileOperations) {
         this.fileOperations = fileOperations;
+    }
+
+    @Autowired
+    public void setDockerLayerTarExtractor(final DockerLayerTarExtractor dockerLayerTarExtractor) {
+        this.dockerLayerTarExtractor = dockerLayerTarExtractor;
     }
 
     public List<File> unPackImageTar(final File tarExtractionDirectory, final File dockerTar) throws IOException {
@@ -189,16 +195,16 @@ public class DockerTarParser {
     }
 
     public ImageInfoParsed extractImageLayers(final ComponentExtractorFactory componentExtractorFactory, final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy,
-        final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
+        final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
         for (final String layerDotTarDirname : manifestLayerMapping.getLayerInternalIds()) {
             logger.trace(String.format("Looking for tar for layer: %s", layerDotTarDirname));
             final File layerTar = getLayerTar(layerTars, layerDotTarDirname);
             if (layerTar != null) {
-                extractLayerTarToDir(targetImageFileSystemRootDir, layerTar);
+                extractLayerTarToDir(containerFileSystemRootDir, layerTar);
                 String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-                imageInfoParsed = addPostLayerComponents(layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerMetadataFileContents,
+                imageInfoParsed = addPostLayerComponents(layerIndex, componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerMetadataFileContents,
                     manifestLayerMapping.getLayerExternalId(layerIndex));
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
@@ -212,7 +218,7 @@ public class DockerTarParser {
             imageComponentHierarchy.setFinalComponents(topLayer.getComponents());
         }
         if (imageInfoParsed == null) {
-            imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), null, null);
+            imageInfoParsed = new ImageInfoParsed(containerFileSystemRootDir, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), null, null);
         }
         return imageInfoParsed;
     }
@@ -242,10 +248,10 @@ public class DockerTarParser {
 
     private Optional<String> extractLinuxDistroNameFromEtcDir(final File etcDir) {
         logger.trace(String.format("/etc directory: %s", etcDir.getAbsolutePath()));
-        if (etcDir.listFiles().length == 0) {
+        if (fileOperations.listFilesInDir(etcDir).length == 0) {
             logger.warn(String.format("Could not determine the Operating System because the /etc dir (%s) is empty", etcDir.getAbsolutePath()));
         }
-        return extractLinuxDistroNameFromFiles(etcDir.listFiles());
+        return extractLinuxDistroNameFromFiles(fileOperations.listFilesInDir(etcDir));
     }
 
     private Optional<String> extractLinuxDistroNameFromFiles(final File[] etcFiles) {
@@ -257,19 +263,19 @@ public class DockerTarParser {
         return Optional.empty();
     }
 
-    private File extractLayerTarToDir(final File targetImageFileSystemRoot, final File layerTar) throws IOException {
-        logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), targetImageFileSystemRoot.getAbsolutePath()));
-        final List<File> filesToRemove = DockerLayerTar.extractLayerTarToDir(fileOperations, layerTar, targetImageFileSystemRoot);
+    private File extractLayerTarToDir(final File containerFileSystemRootDir, final File layerTar) throws IOException {
+        logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), containerFileSystemRootDir.getAbsolutePath()));
+        final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(fileOperations, layerTar, containerFileSystemRootDir);
         for (final File fileToRemove : filesToRemove) {
             if (fileToRemove.isDirectory()) {
                 logger.debug(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));
                 FileUtils.deleteDirectory(fileToRemove);
             } else {
                 logger.debug(String.format("Removing file marked for deletion: %s", fileToRemove.getAbsolutePath()));
-                FileUtils.deleteQuietly(fileToRemove);
+                fileOperations.deleteQuietly(fileToRemove);
             }
         }
-        return targetImageFileSystemRoot;
+        return containerFileSystemRootDir;
     }
 
     private File getLayerTar(final List<File> layerTars, final String layer) {

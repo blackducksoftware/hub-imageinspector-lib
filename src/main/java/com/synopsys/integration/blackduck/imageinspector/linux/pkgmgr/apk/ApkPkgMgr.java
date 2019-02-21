@@ -35,20 +35,19 @@ public class ApkPkgMgr implements PkgMgr {
     private final PkgMgrInitializer pkgMgrInitializer;
     private String architecture;
     private final File inspectorPkgMgrDir;
+    private FileOperations fileOperations;
 
     @Autowired
     public ApkPkgMgr(final FileOperations fileOperations) {
         pkgMgrInitializer = new ApkPkgMgrInitializer(fileOperations);
         this.inspectorPkgMgrDir = new File(STANDARD_PKG_MGR_DIR_PATH);
+        this.fileOperations = fileOperations;
     }
 
     public ApkPkgMgr(final FileOperations fileOperations, final String architecture) {
         this(fileOperations);
         this.architecture = architecture;
     }
-
-    @Autowired
-    private FileOperations fileOperations;
 
     @Override
     public boolean isApplicable(File targetImageFileSystemRootDir) {
