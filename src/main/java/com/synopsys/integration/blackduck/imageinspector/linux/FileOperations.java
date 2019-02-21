@@ -158,4 +158,8 @@ public class FileOperations {
     public void deleteQuietly(final File file) {
         FileUtils.deleteQuietly(file);
     }
+
+    public File[] listFilesInDir(final File dir) {
+        return dir.listFiles();
+    }
 }

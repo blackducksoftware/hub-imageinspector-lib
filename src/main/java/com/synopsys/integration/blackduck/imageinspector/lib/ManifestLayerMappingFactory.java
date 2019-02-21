@@ -30,8 +30,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ManifestLayerMappingFactory {
 
-    public ManifestLayerMapping createManifestLayerMapping(final String imageName, final String tagName, final String config, final List<String> layers) {
-        final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, config, layers);
+    public ManifestLayerMapping createManifestLayerMapping(final String imageName, final String tagName, final String imageConfigFilename, final List<String> layers) {
+        final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, imageConfigFilename, layers);
         return mapping;
     }
 

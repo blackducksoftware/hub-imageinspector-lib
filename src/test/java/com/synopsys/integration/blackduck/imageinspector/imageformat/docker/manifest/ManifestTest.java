@@ -25,9 +25,9 @@ public class ManifestTest {
         ManifestLayerMapping manifestLayerMapping = manifest.getLayerMapping(targetImageName, targetTagName);
         assertEquals("alpine", manifestLayerMapping.getImageName());
         assertEquals("latest", manifestLayerMapping.getTagName());
-        assertEquals("caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json", manifestLayerMapping.getConfig());
-        assertEquals(1, manifestLayerMapping.getLayers().size());
-        assertEquals("03b951adf840798cb236a62db6705df7fb2f1e60e6f5fb93499ee8a566bd4114", manifestLayerMapping.getLayers().get(0));
+        assertEquals("caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json", manifestLayerMapping.getImageConfigFilename());
+        assertEquals(1, manifestLayerMapping.getLayerInternalIds().size());
+        assertEquals("03b951adf840798cb236a62db6705df7fb2f1e60e6f5fb93499ee8a566bd4114", manifestLayerMapping.getLayerInternalIds().get(0));
         // externalId is populated later when layer processed:
         assertEquals(null, manifestLayerMapping.getLayerExternalId(0));
     }

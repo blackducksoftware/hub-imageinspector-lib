@@ -1,6 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import org.mockito.Mockito;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
@@ -73,7 +75,7 @@ public class DockerTarParserTest {
 
     @Test
     public void testGetLayerMapping() throws IOException, IntegrationException {
-        final String tarFileName = "alpine.tar";
+        final String imageTarFilename = "alpine.tar";
         final String imageName = "alpine";
         final String imageTag = "latest";
 
@@ -89,21 +91,46 @@ public class DockerTarParserTest {
         final List<String> layerExternalIds = Arrays.asList("sha:Layer1", "sha:Layer2");
         ManifestLayerMapping layerMapping = new ManifestLayerMapping(imageName, imageTag, imageConfigFilename, layerInternalIds);
         Mockito.when(manifest.getLayerMapping(Mockito.anyString(), Mockito.anyString())).thenReturn(layerMapping);
-        final String imageConfigFileTestDataPath = String.format("src/test/resources/mockDockerConfig/%s", imageConfigFilename);
+        final String imageConfigFileTestDataPath = String.format("src/test/resources/MockDockerTarContents/%s", imageConfigFilename);
         final String imageConfigFileMockedPath = String.format("test/extraction/alpine.tar/%s", imageConfigFilename);
         final File imageConfigTestDataFile = new File(imageConfigFileTestDataPath);
         final File imageConfigMockedFile = new File(imageConfigFileMockedPath);
         final String imageConfigFileContents = FileUtils.readFileToString(imageConfigTestDataFile, StandardCharsets.UTF_8);
         Mockito.when(fileOperations
                          .readFileToString(imageConfigMockedFile)).thenReturn(imageConfigFileContents);
-        Mockito.when(imageConfigParser.getLayerIdsFromImageConfigFile(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
-        ManifestLayerMapping mapping = tarParser.getLayerMapping(gsonBuilder, tarExtractionDirectory, tarFileName, imageName, imageTag);
+        Mockito.when(imageConfigParser.getExternalLayerIdsFromImageConfigFile(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
+        ManifestLayerMapping mapping = tarParser.getLayerMapping(gsonBuilder, tarExtractionDirectory, imageTarFilename, imageName, imageTag);
         assertEquals(imageName, mapping.getImageName());
         assertEquals(imageTag, mapping.getTagName());
-        assertEquals(layerInternalIds.get(0), mapping.getLayers().get(0));
+        assertEquals(layerInternalIds.get(0), mapping.getLayerInternalIds().get(0));
         assertEquals(layerExternalIds.get(0), mapping.getLayerExternalId(0));
-        assertEquals(layerInternalIds.get(1), mapping.getLayers().get(1));
+        assertEquals(layerInternalIds.get(1), mapping.getLayerInternalIds().get(1));
         assertEquals(layerExternalIds.get(1), mapping.getLayerExternalId(1));
+    }
+
+    @Test
+    public void testCreateInitialImageComponentHierarchy() throws IntegrationException {
+
+        final String imageTarFilename = "alpine.tar";
+        final String imageName = "alpine";
+        final String imageTag = "latest";
+        final String imageConfigFileName = "caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json";
+
+        final File tarExtractionDirectory = new File("test/extraction");
+        final File mockedImageTarContentsDir = new File("src/test/resources/mockDockerTarContents");
+        final List<String> layerInternalIds = Arrays.asList("testLayer1", "testLayer2");
+        final List<String> layerExternalIds = Arrays.asList("sha:Layer1", "sha:Layer2");
+
+        final ManifestLayerMapping partialManifestLayerMapping = new ManifestLayerMapping(imageName, imageTag, imageConfigFileName, layerInternalIds);
+        final ManifestLayerMapping fullManifestLayerMapping = new ManifestLayerMapping(partialManifestLayerMapping, layerExternalIds);
+
+        final File manifestFile = new File(mockedImageTarContentsDir, "manifest.json");
+        final File configFile = new File(mockedImageTarContentsDir, imageConfigFileName);
+        final File[] filesInImageTar = { manifestFile, configFile };
+        Mockito.when(fileOperations.listFilesInDir(new File(tarExtractionDirectory, imageTarFilename))).thenReturn(filesInImageTar);
+        final ImageComponentHierarchy imageComponentHierarchy = tarParser.createInitialImageComponentHierarchy(tarExtractionDirectory, imageTarFilename, fullManifestLayerMapping);
+        assertTrue(imageComponentHierarchy.getManifestFileContents().contains(String.format("%s:%s", imageName, imageTag)));
+        assertTrue(imageComponentHierarchy.getImageConfigFileContents().contains("sha256:503e53e365f34399c4d58d8f4e23c161106cfbce4400e3d0a0357967bad69390"));
     }
 
 //    @Test

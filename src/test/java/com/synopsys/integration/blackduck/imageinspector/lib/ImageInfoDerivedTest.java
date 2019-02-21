@@ -42,7 +42,7 @@ public class ImageInfoDerivedTest {
         .asList("testLayer"));
     derived.setManifestLayerMapping(mapping);
 
-    assertEquals("testLayer", derived.getManifestLayerMapping().getLayers().get(0));
+    assertEquals("testLayer", derived.getManifestLayerMapping().getLayerInternalIds().get(0));
     assertEquals("testCodelocationName", derived.getCodeLocationName());
     assertEquals("testFinalProjectName", derived.getFinalProjectName());
     assertEquals("testFinalProjectVersionName", derived.getFinalProjectVersionName());

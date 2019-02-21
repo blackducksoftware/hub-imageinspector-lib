@@ -30,23 +30,23 @@ import com.synopsys.integration.util.Stringable;
 public class ManifestLayerMapping extends Stringable {
     private final String imageName;
     private final String tagName;
-    private final String config;
-    private final List<String> layers;
+    private final String imageConfigFilename;
+    private final List<String> layerInternalIds;
     private final List<String> layerExternalIds;
 
-    public ManifestLayerMapping(final String imageName, final String tagName, final String config, final List<String> layers) {
+    public ManifestLayerMapping(final String imageName, final String tagName, final String imageConfigFilename, final List<String> layers) {
         this.imageName = imageName;
         this.tagName = tagName;
-        this.config = config;
-        this.layers = layers;
+        this.imageConfigFilename = imageConfigFilename;
+        this.layerInternalIds = layers;
         this.layerExternalIds = null;
     }
 
     public ManifestLayerMapping(final ManifestLayerMapping partialManafestLayerMapping, final List<String> layerExternalIds) {
         this.imageName = partialManafestLayerMapping.getImageName();
         this.tagName = partialManafestLayerMapping.getTagName();
-        this.config = partialManafestLayerMapping.getConfig();
-        this.layers = partialManafestLayerMapping.getLayers();
+        this.imageConfigFilename = partialManafestLayerMapping.getImageConfigFilename();
+        this.layerInternalIds = partialManafestLayerMapping.getLayerInternalIds();
         this.layerExternalIds = layerExternalIds;
     }
 
@@ -58,12 +58,12 @@ public class ManifestLayerMapping extends Stringable {
         return tagName;
     }
 
-    public String getConfig() {
-        return config;
+    public String getImageConfigFilename() {
+        return imageConfigFilename;
     }
 
-    public List<String> getLayers() {
-        return layers;
+    public List<String> getLayerInternalIds() {
+        return layerInternalIds;
     }
 
     public String getLayerExternalId(final int layerIndex) {

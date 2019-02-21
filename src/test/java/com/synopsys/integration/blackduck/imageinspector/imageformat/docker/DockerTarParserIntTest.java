@@ -112,7 +112,7 @@ public class DockerTarParserIntTest {
 
         final List<File> layerTars = tarParser.unPackImageTar(tarExtractionDirectory, dockerTar);
         final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
-        assertEquals(2, layerMapping.getLayers().size());
+        assertEquals(2, layerMapping.getLayerInternalIds().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();

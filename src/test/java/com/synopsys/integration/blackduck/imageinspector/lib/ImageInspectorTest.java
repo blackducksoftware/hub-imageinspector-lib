@@ -80,7 +80,7 @@ public class ImageInspectorTest {
         assertEquals("testCodeLocationPrefix_alpine_latest_APK", imageInfoDerived.getCodeLocationName());
         assertEquals("APK", imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().name());
         assertEquals(imageRepo, imageInfoDerived.getManifestLayerMapping().getImageName());
-        assertEquals(layers.get(1), imageInfoDerived.getManifestLayerMapping().getLayers().get(1));
+        assertEquals(layers.get(1), imageInfoDerived.getManifestLayerMapping().getLayerInternalIds().get(1));
         assertEquals(String.format("%s/%s", blackDuckProjectName, blackDuckProjectVersion), imageInfoDerived.getBdioDocument().project.bdioExternalIdentifier.externalId);
     }
 }

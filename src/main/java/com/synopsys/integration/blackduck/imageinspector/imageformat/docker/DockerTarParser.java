@@ -158,7 +158,7 @@ public class DockerTarParser {
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(gsonBuilder, tarExtractionSubDirectory, partialMapping.getConfig());
+        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(gsonBuilder, tarExtractionSubDirectory, partialMapping.getImageConfigFilename());
         if (externalLayerIds == null) {
             return partialMapping;
         }
@@ -169,7 +169,7 @@ public class DockerTarParser {
         String manifestFileContents = null;
         String configFileContents = null;
         File tarContentsDirectory = new File(tarExtractionDirectory, tarFileName);
-        for (File tarFileContentsFile : tarContentsDirectory.listFiles()) {
+        for (File tarFileContentsFile : fileOperations.listFilesInDir(tarContentsDirectory)) {
             logger.info(String.format("File %s", tarFileContentsFile.getName()));
             if ("manifest.json".equals(tarFileContentsFile.getName())) {
                 try {
@@ -177,7 +177,7 @@ public class DockerTarParser {
                 } catch (IOException e) {
                     throw new IntegrationException(String.format("Error reading manifest file %s", tarFileContentsFile.getAbsolutePath()));
                 }
-            } else if (tarFileContentsFile.getName().equals(manifestLayerMapping.getConfig())) {
+            } else if (tarFileContentsFile.getName().equals(manifestLayerMapping.getImageConfigFilename())) {
                 try {
                     configFileContents = FileUtils.readFileToString(tarFileContentsFile, StandardCharsets.UTF_8);
                 } catch (IOException e) {
@@ -192,7 +192,7 @@ public class DockerTarParser {
         final File targetImageFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
-        for (final String layerDotTarDirname : manifestLayerMapping.getLayers()) {
+        for (final String layerDotTarDirname : manifestLayerMapping.getLayerInternalIds()) {
             logger.trace(String.format("Looking for tar for layer: %s", layerDotTarDirname));
             final File layerTar = getLayerTar(layerTars, layerDotTarDirname);
             if (layerTar != null) {
@@ -223,7 +223,7 @@ public class DockerTarParser {
             final String imageConfigFileContents = fileOperations
                                                        .readFileToString(imageConfigFile);
             logger.debug(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            final List<String> externalLayerIds = imageConfigParser.getLayerIdsFromImageConfigFile(gsonBuilder, imageConfigFileContents);
+            final List<String> externalLayerIds = imageConfigParser.getExternalLayerIdsFromImageConfigFile(gsonBuilder, imageConfigFileContents);
             return externalLayerIds;
         } catch (Exception e) {
             logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
