@@ -72,7 +72,7 @@ public class ImageInspectorApiIntTest {
         dockerTarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
         dockerTarParser.setImageConfigParser(new ImageConfigParser());
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
-        final ImageInspector imageInspector = new ImageInspector(dockerTarParser, componentExtractorFactory);
+        final ImageInspector imageInspector = new ImageInspector(dockerTarParser);
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());
         imageInspectorApi.setBdioGenerator(new BdioGenerator());

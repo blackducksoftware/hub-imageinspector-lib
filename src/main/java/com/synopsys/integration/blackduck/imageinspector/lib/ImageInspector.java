@@ -40,7 +40,6 @@ import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsExc
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
 import com.synopsys.integration.exception.IntegrationException;
 
 // As support for other image formats is added, this class will manage the list of TarParsers
@@ -51,11 +50,9 @@ public class ImageInspector {
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final DockerTarParser tarParser;
-    private final ComponentExtractorFactory componentExtractorFactory;
 
-    public ImageInspector(final DockerTarParser tarParser, final ComponentExtractorFactory componentExtractorFactory) {
+    public ImageInspector(final DockerTarParser tarParser) {
         this.tarParser = tarParser;
-        this.componentExtractorFactory = componentExtractorFactory;
     }
 
     public File getTarExtractionDirectory(final File workingDirectory) {
@@ -68,7 +65,7 @@ public class ImageInspector {
 
     public ImageInfoParsed extractDockerLayers(final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy, final File containerFileSystemRootDir, final List<File> layerTars,
         final ManifestLayerMapping layerMapping) throws IOException, WrongInspectorOsException {
-        return tarParser.extractImageLayers(componentExtractorFactory, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
+        return tarParser.extractImageLayers(currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerTars, layerMapping);
     }
 
     public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {

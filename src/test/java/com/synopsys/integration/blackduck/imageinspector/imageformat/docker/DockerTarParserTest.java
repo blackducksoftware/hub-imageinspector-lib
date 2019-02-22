@@ -189,7 +189,7 @@ public class DockerTarParserTest {
         Mockito.when(fileOperations.listFilesInDir(imageEtcDir)).thenReturn(etcDirFiles);
         Mockito.when(os.isLinuxDistroFile(osReleaseFile)).thenReturn(Boolean.TRUE);
         Mockito.when(os.getLinxDistroName(osReleaseFile)).thenReturn(Optional.of("alpine"));
-        ImageInfoParsed imageInfoParsed = tarParser.extractImageLayers(componentExtractorFactory, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
+        ImageInfoParsed imageInfoParsed = tarParser.extractImageLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
         containerFileSystemRootDir, layerTars, fullManifestLayerMapping);
         assertEquals("testCompName", imageComponentHierarchy.getFinalComponents().get(0).getName());
         assertEquals("Layer00_sha_Layer1", imageComponentHierarchy.getLayers().get(0).getLayerIndexedName());

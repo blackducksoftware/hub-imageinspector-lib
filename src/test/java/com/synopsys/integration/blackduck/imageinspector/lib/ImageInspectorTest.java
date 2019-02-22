@@ -22,7 +22,6 @@ import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
@@ -30,14 +29,12 @@ import com.synopsys.integration.exception.IntegrationException;
 public class ImageInspectorTest {
 
      DockerTarParser tarParser;
-     ComponentExtractorFactory componentExtractorFactory;
      ImageInspector imageInspector;
 
     @BeforeEach
     public void setUpEach() {
         tarParser = Mockito.mock(DockerTarParser.class);
-        componentExtractorFactory = Mockito.mock(ComponentExtractorFactory.class);
-        imageInspector = new ImageInspector(tarParser, componentExtractorFactory);
+        imageInspector = new ImageInspector(tarParser);
     }
 
     @Test
@@ -107,7 +104,7 @@ public class ImageInspectorTest {
         final String manifestFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/alpine.tar/manifest.json"), StandardCharsets.UTF_8);
         final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy( manifestFileContents, imageConfigFileContents);
         imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
-        Mockito.verify(tarParser).extractImageLayers(componentExtractorFactory, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
+        Mockito.verify(tarParser).extractImageLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
     }
 
     @Test
