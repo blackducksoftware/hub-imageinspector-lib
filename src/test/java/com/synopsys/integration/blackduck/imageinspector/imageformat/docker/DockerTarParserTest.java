@@ -107,7 +107,7 @@ public class DockerTarParserTest {
         final List<String> layerExternalIds = Arrays.asList("sha:Layer1", "sha:Layer2");
         ManifestLayerMapping layerMapping = new ManifestLayerMapping(imageName, imageTag, imageConfigFilename, layerInternalIds);
         Mockito.when(manifest.getLayerMapping(Mockito.anyString(), Mockito.anyString())).thenReturn(layerMapping);
-        final String imageConfigFileTestDataPath = String.format("src/test/resources/MockDockerTarContents/%s", imageConfigFilename);
+        final String imageConfigFileTestDataPath = String.format("src/test/resources/mockDockerTarContents/%s", imageConfigFilename);
         final String imageConfigFileMockedPath = String.format("test/extraction/alpine.tar/%s", imageConfigFilename);
         final File imageConfigTestDataFile = new File(imageConfigFileTestDataPath);
         final File imageConfigMockedFile = new File(imageConfigFileMockedPath);
