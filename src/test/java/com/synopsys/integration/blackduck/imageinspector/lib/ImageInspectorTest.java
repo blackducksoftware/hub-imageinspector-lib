@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -27,11 +28,19 @@ import com.synopsys.integration.exception.IntegrationException;
 
 public class ImageInspectorTest {
 
+     DockerTarParser tarParser;
+     ComponentExtractorFactory componentExtractorFactory;
+     ImageInspector imageInspector;
+
+    @BeforeEach
+    public void setUpEach() {
+        tarParser = Mockito.mock(DockerTarParser.class);
+        componentExtractorFactory = Mockito.mock(ComponentExtractorFactory.class);
+        imageInspector = new ImageInspector(tarParser, componentExtractorFactory);
+    }
+
     @Test
-    public void test() throws IOException, IntegrationException {
-        final DockerTarParser tarParser = Mockito.mock(DockerTarParser.class);
-        final ComponentExtractorFactory componentExtractorFactory = Mockito.mock(ComponentExtractorFactory.class);
-        final ImageInspector imageInspector = new ImageInspector(tarParser, componentExtractorFactory);
+    public void testAll() throws IOException, IntegrationException {
 
         final File workingDir = new File("src/test/resources/working");
         final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
@@ -82,5 +91,54 @@ public class ImageInspectorTest {
         assertEquals(imageRepo, imageInfoDerived.getManifestLayerMapping().getImageName());
         assertEquals(layers.get(1), imageInfoDerived.getManifestLayerMapping().getLayerInternalIds().get(1));
         assertEquals(String.format("%s/%s", blackDuckProjectName, blackDuckProjectVersion), imageInfoDerived.getBdioDocument().project.bdioExternalIdentifier.externalId);
+    }
+
+
+    @Test
+    public void testGetTarExtractionDirectory() {
+        final File workingDir = new File("src/test/resources/working");
+        final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
+        assertTrue(tarExtractionDirectory.getAbsolutePath().endsWith("src/test/resources/working/tarExtraction"));
+    }
+
+    @Test
+    public void testExtractLayerTars() throws IOException {
+        final File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
+        final File dockerTarfile = new File("src/test/resources/testDockerTarfile");
+        imageInspector.extractLayerTars(tarExtractionDirectory, dockerTarfile);
+        Mockito.verify(tarParser).unPackImageTar(tarExtractionDirectory, dockerTarfile);
+    }
+
+
+    @Test
+    public void testGetLayerMapping() throws IOException, IntegrationException {
+        final File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
+        final File dockerTarfile = new File("src/test/resources/testDockerTarfile");
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        final String imageRepo = "alpine";
+        final String imageTag = "latest";
+        imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), imageRepo, imageTag);
+        Mockito.verify(tarParser).getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), imageRepo, imageTag);
+    }
+
+    @Test
+    public void testCreateInitialImageComponentHierarchy() throws IOException, IntegrationException {
+
+        final File workingDir = new File("src/test/resources/working");
+        final File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
+        final File dockerTarfile = new File("src/test/resources/testDockerTarfile");
+        final String imageRepo = "alpine";
+        final String imageTag = "latest";
+        final List<File> layerTars = new ArrayList<>();
+        final File layerTar = new File(tarExtractionDirectory, String.format("%s/aaa/layer.tar", dockerTarfile.getName()));
+        layerTars.add(layerTar);
+
+        final String imageConfigFileContents = "testConfig";
+        final List<String> layers = new ArrayList<>();
+        layers.add("testLayer1");
+        layers.add("testLayer2");
+        final ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(imageRepo, imageTag, imageConfigFileContents, layers);
+        imageInspector.createInitialImageComponentHierarchy(workingDir, tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
+        Mockito.verify(tarParser).createInitialImageComponentHierarchy(tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
     }
 }
