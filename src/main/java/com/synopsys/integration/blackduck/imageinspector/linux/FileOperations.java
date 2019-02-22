@@ -166,4 +166,12 @@ public class FileOperations {
     public boolean isDirectory(final File dir) {
         return dir.isDirectory();
     }
+
+    public boolean mkdir(final File newDir) {
+        return newDir.mkdir();
+    }
+
+    public boolean createNewFile(final File newFile) throws IOException {
+        return newFile.createNewFile();
+    }
 }

@@ -18,8 +18,8 @@ public class DpkgPkgMgrInitializer implements PkgMgrInitializer {
     public void initPkgMgrDir(File packageManagerDatabaseDir) throws IOException {
         fileOperations.deleteFilesOnly(packageManagerDatabaseDir);
         final File statusFile = new File(packageManagerDatabaseDir, "status");
-        statusFile.createNewFile();
+        fileOperations.createNewFile(statusFile);
         final File updatesDir = new File(packageManagerDatabaseDir, "updates");
-        updatesDir.mkdir();
+        fileOperations.mkdir(updatesDir);
     }
 }
