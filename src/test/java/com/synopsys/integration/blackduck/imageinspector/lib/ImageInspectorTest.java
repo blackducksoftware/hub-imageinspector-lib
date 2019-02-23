@@ -103,8 +103,8 @@ public class ImageInspectorTest {
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final String manifestFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/alpine.tar/manifest.json"), StandardCharsets.UTF_8);
         final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy( manifestFileContents, imageConfigFileContents);
-        imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
-        Mockito.verify(tarParser).extractImageLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping);
+        imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping, null);
+        Mockito.verify(tarParser).extractImageLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping, null);
     }
 
     @Test

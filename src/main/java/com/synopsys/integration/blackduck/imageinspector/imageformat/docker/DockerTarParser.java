@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
@@ -194,7 +195,8 @@ public class DockerTarParser {
     }
 
     public ImageInfoParsed extractImageLayers(final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy,
-        final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping) throws IOException, WrongInspectorOsException {
+        final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping,
+        final String baseImageTopLayerExternalId) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
         for (final String layerDotTarDirname : manifestLayerMapping.getLayerInternalIds()) {
@@ -203,8 +205,9 @@ public class DockerTarParser {
             if (layerTar != null) {
                 extractLayerTarToDir(containerFileSystemRootDir, layerTar);
                 String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
+                final boolean isBaseImageTopLayer = (baseImageTopLayerExternalId != null) && baseImageTopLayerExternalId.equals(manifestLayerMapping.getLayerExternalId(layerIndex));
                 imageInfoParsed = addPostLayerComponents(layerIndex, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerMetadataFileContents,
-                    manifestLayerMapping.getLayerExternalId(layerIndex));
+                    manifestLayerMapping.getLayerExternalId(layerIndex), isBaseImageTopLayer);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
             }
@@ -214,12 +217,21 @@ public class DockerTarParser {
         int numLayers = layers.size();
         if (numLayers > 0) {
             LayerDetails topLayer = layers.get(numLayers - 1);
-            imageComponentHierarchy.setFinalComponents(topLayer.getComponents());
+            final List<ComponentDetails> netComponents = getNetComponents(topLayer.getComponents(), imageComponentHierarchy.getBaseImageComponents());
+            imageComponentHierarchy.setFinalComponents(netComponents);
         }
         if (imageInfoParsed == null) {
             imageInfoParsed = new ImageInfoParsed(containerFileSystemRootDir, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), null, null);
         }
         return imageInfoParsed;
+    }
+
+    private List<ComponentDetails> getNetComponents(final List<ComponentDetails> grossComponents, final List<ComponentDetails> componentsToOmit) {
+        logger.debug(String.format("There are %d components to omit", componentsToOmit.size()));
+        if (componentsToOmit == null || componentsToOmit.isEmpty()) {
+            return grossComponents;
+        }
+        return ListUtils.subtract(grossComponents, componentsToOmit);
     }
 
     private List<String> getExternalLayerIdsFromImageConfigFile(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String imageConfigFileName) {
@@ -305,7 +317,8 @@ public class DockerTarParser {
     }
 
     private ImageInfoParsed addPostLayerComponents(final int layerIndex, final ImageInspectorOsEnum currentOs,
-        final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents, final String layerExternalId) throws WrongInspectorOsException {
+        final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents, final String layerExternalId,
+        boolean isBaseImageTopLayer) throws WrongInspectorOsException {
         logger.debug("Getting components present (so far) after adding this layer");
         if (currentOs == null) {
             logger.debug("Current (running on) OS not provided; cannot determine components present after adding this layer");
@@ -335,6 +348,9 @@ public class DockerTarParser {
             }
             LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, comps);
             imageComponentHierarchy.addLayer(layer);
+            if (isBaseImageTopLayer) {
+                imageComponentHierarchy.setBaseImageComponents(comps);
+            }
         } catch (final WrongInspectorOsException wrongOsException) {
             throw wrongOsException;
         } catch (final PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {

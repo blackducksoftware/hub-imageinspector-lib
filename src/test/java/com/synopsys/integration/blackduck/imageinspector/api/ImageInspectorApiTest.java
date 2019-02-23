@@ -88,7 +88,7 @@ public class ImageInspectorApiTest {
     Mockito.when(imageInspector
         .extractDockerLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
             containerFileSystemRootDir,
-            layerTarFiles, mapping)).thenReturn(imageInfoParsed);
+            layerTarFiles, mapping, null)).thenReturn(imageInfoParsed);
 
     final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
     SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
@@ -114,7 +114,7 @@ public class ImageInspectorApiTest {
             codeLocationPrefix, dockerImageName, dockerTagName,
             organizeComponentsByLayer,
             includeRemovedComponents,
-            cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro);
+            cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro, null);
     assertEquals(blackDuckProjectName, result.project.name);
     assertEquals(blackDuckProjectVersion, result.project.version);
   }

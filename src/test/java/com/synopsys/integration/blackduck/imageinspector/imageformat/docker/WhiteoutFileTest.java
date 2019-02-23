@@ -76,7 +76,7 @@ public class WhiteoutFileTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping);
+        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping, null);
         final File opaqueDir = new File(targetImageFileSystemRootDir, "opaque");
         assertFalse("Whited-out opaque dir was created", opaqueDir.exists());
     }
