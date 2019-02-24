@@ -32,14 +32,14 @@ public class ImageComponentHierarchy {
     private final String manifestFileContents;
     private final String imageConfigFileContents;
     private final List<LayerDetails> layers;
-    private List<ComponentDetails> baseImageComponents;
+    private List<ComponentDetails> platformComponents;
     private List<ComponentDetails> finalComponents;
 
     public ImageComponentHierarchy(final String manifestFileContents, final String imageConfigFileContents) {
         this.manifestFileContents = manifestFileContents;
         this.imageConfigFileContents = imageConfigFileContents;
         this.layers = new ArrayList<>();
-        this.baseImageComponents = new ArrayList<>();
+        this.platformComponents = new ArrayList<>();
         this.finalComponents = new ArrayList<>();
     }
 
@@ -59,11 +59,11 @@ public class ImageComponentHierarchy {
         return layers;
     }
 
-    public void setBaseImageComponents(final List<ComponentDetails> baseImageComponents) {
-        if (baseImageComponents == null) {
+    public void setPlatformComponents(final List<ComponentDetails> platformComponents) {
+        if (platformComponents == null) {
             return;
         }
-        this.baseImageComponents = baseImageComponents;
+        this.platformComponents = platformComponents;
     }
 
     public void setFinalComponents(final List<ComponentDetails> finalComponents) {
@@ -73,8 +73,8 @@ public class ImageComponentHierarchy {
         this.finalComponents = finalComponents;
     }
 
-    public List<ComponentDetails> getBaseImageComponents() {
-        return baseImageComponents;
+    public List<ComponentDetails> getPlatformComponents() {
+        return platformComponents;
     }
 
     public List<ComponentDetails> getFinalComponents() {
