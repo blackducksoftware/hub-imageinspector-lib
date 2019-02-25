@@ -101,7 +101,7 @@ public class Os {
             if (line.startsWith(linePrefix)) {
                 final String[] parts = line.split("=");
                 final String distroName = parts[1].replaceAll("\"", "").toLowerCase();
-                logger.info(String.format("Found target image Linux distro name '%s' in file %s", distroName, etcDirFile.getAbsolutePath()));
+                logger.debug(String.format("Found target image Linux distro name '%s' in file %s", distroName, etcDirFile.getAbsolutePath()));
                 return Optional.of(distroName);
             }
         }

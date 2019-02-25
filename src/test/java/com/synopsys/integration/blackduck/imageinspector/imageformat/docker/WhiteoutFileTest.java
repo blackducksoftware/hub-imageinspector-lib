@@ -16,6 +16,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
@@ -65,6 +66,7 @@ public class WhiteoutFileTest {
         tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setFileOperations(new FileOperations());
         tarParser.setImageConfigParser(new ImageConfigParser());
+        tarParser.setLayerConfigParser(new LayerConfigParser());
         tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
         tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
         tarParser.setExecutor(new CmdExecutor());
@@ -76,7 +78,7 @@ public class WhiteoutFileTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping, null);
+        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping, null);
         final File opaqueDir = new File(targetImageFileSystemRootDir, "opaque");
         assertFalse("Whited-out opaque dir was created", opaqueDir.exists());
     }

@@ -33,17 +33,23 @@ public class LayerDetails {
     private final int layerIndex;
     private final String layerExternalId;
     private final String layerMetadataFileContents;
+    private final List<String> layerCmd;
     private final List<ComponentDetails> components;
 
-    public LayerDetails(final int layerIndex, final String layerExternalId, final String layerMetadataFileContents, final List<ComponentDetails> components) {
+    public LayerDetails(final int layerIndex, final String layerExternalId, final String layerMetadataFileContents, final List<String> layerCmd, final List<ComponentDetails> components) {
         this.layerIndex = layerIndex;
         this.layerExternalId = layerExternalId;
         this.layerMetadataFileContents = layerMetadataFileContents;
+        this.layerCmd = layerCmd;
         this.components = components;
     }
 
     public String getLayerMetadataFileContents() {
         return layerMetadataFileContents;
+    }
+
+    public List<String> getLayerCmd() {
+        return layerCmd;
     }
 
     public List<ComponentDetails> getComponents() {

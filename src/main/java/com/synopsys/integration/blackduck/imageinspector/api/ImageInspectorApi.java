@@ -194,7 +194,7 @@ public class ImageInspectorApi {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final ImageInspectorOsEnum currentOs = os.deriveOs(currentLinuxDistro);
-        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping, platformTopLayerExternalId);
+        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping, platformTopLayerExternalId);
         logLayers(imageComponentHierarchy);
         cleanUpLayerTars(cleanupWorkingDir, layerTars);
         ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
@@ -212,13 +212,13 @@ public class ImageInspectorApi {
             if (layer == null) {
                 logger.debug("Layer is null");
             } else if (layer.getComponents() == null) {
-                logger.debug(String.format("layer id %s has no componenents", layer.getLayerIndexedName()));
+                logger.debug(String.format("layer %s has no componenents", layer.getLayerIndexedName()));
             } else {
-                logger.debug(String.format("Layer ID %s has %d components; layer metadata file contents: %s", layer.getLayerIndexedName(), layer.getComponents().size(), layer.getLayerMetadataFileContents()));
+                logger.debug(String.format("Layer %s has %d components; layer cmd: %s", layer.getLayerIndexedName(), layer.getComponents().size(), layer.getLayerCmd()));
             }
         }
         if (imageComponentHierarchy.getFinalComponents() == null) {
-            logger.debug(String.format("Final image components list NOT SET"));
+            logger.debug(String.format("Final image components list not set"));
         } else {
             logger.debug(String.format("Final image components list has %d components", imageComponentHierarchy.getFinalComponents().size()));
         }

@@ -3,18 +3,24 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+@Component
 public class LayerConfigParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public List<String> parseCmd(final GsonBuilder gsonBuilder, final String layerConfigFileContents) {
         try {
+            if (StringUtils.isBlank(layerConfigFileContents)) {
+                return null;
+            }
             logger.debug(String.format("layerConfigFileContents: %s", layerConfigFileContents));
             JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(layerConfigFileContents, JsonObject.class);
             JsonObject containerConfigJsonObj = imageConfigJsonObj.getAsJsonObject("container_config");
@@ -27,7 +33,7 @@ public class LayerConfigParser {
             }
             return cmdParts;
         } catch (Exception e) {
-            logger.warn(String.format("Error parsing layer cmd from layer config file contents: %s", e.getMessage()));
+            logger.debug(String.format("Error parsing layer cmd from layer config file contents: %s", e.getMessage()));
         }
         return null;
     }

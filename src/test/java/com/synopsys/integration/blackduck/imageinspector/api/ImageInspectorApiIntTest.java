@@ -21,6 +21,7 @@ import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerTarExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageConfigParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LayerConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
@@ -71,6 +72,7 @@ public class ImageInspectorApiIntTest {
         dockerTarParser.setPkgMgrExecutor(pkgMgrExecutor);
         dockerTarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
         dockerTarParser.setImageConfigParser(new ImageConfigParser());
+        dockerTarParser.setLayerConfigParser(new LayerConfigParser());
         final ComponentExtractorFactory componentExtractorFactory = new ComponentExtractorFactory();
         final ImageInspector imageInspector = new ImageInspector(dockerTarParser);
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);

@@ -42,6 +42,7 @@ public class DockerTarParserTest {
     private CmdExecutor cmdExecutor;
     private PkgMgrExecutor pkgMgrExecutor;
     private ImageConfigParser imageConfigParser;
+    private LayerConfigParser layerConfigParser;
     private DockerLayerTarExtractor dockerLayerTarExtractor;
     private List<PkgMgr> pkgMgrs;
     private DockerTarParser tarParser;
@@ -61,6 +62,8 @@ public class DockerTarParserTest {
         pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);
 
         imageConfigParser = Mockito.mock(ImageConfigParser.class);
+        layerConfigParser = Mockito.mock(LayerConfigParser.class);
+        Mockito.when(layerConfigParser.parseCmd(Mockito.any(GsonBuilder.class), Mockito.anyString())).thenReturn(Arrays.asList("testLayerCmd", "testLayerCmdArg"));
         dockerLayerTarExtractor = Mockito.mock(DockerLayerTarExtractor.class);
         pkgMgrs = new ArrayList<>(1);
         pkgMgrs.add(pkgMgr);
@@ -72,6 +75,7 @@ public class DockerTarParserTest {
         tarParser.setExecutor(cmdExecutor);
         tarParser.setFileOperations(fileOperations);
         tarParser.setImageConfigParser(imageConfigParser);
+        tarParser.setLayerConfigParser(layerConfigParser);
         tarParser.setPkgMgrExecutor(pkgMgrExecutor);
         tarParser.setDockerLayerTarExtractor(dockerLayerTarExtractor);
     }
@@ -189,7 +193,7 @@ public class DockerTarParserTest {
         Mockito.when(fileOperations.listFilesInDir(imageEtcDir)).thenReturn(etcDirFiles);
         Mockito.when(os.isLinuxDistroFile(osReleaseFile)).thenReturn(Boolean.TRUE);
         Mockito.when(os.getLinxDistroName(osReleaseFile)).thenReturn(Optional.of("alpine"));
-        ImageInfoParsed imageInfoParsed = tarParser.extractImageLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
+        ImageInfoParsed imageInfoParsed = tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
         containerFileSystemRootDir, layerTars, fullManifestLayerMapping, null);
         assertEquals("testCompName", imageComponentHierarchy.getFinalComponents().get(0).getName());
         assertEquals("Layer00_sha_Layer1", imageComponentHierarchy.getLayers().get(0).getLayerIndexedName());

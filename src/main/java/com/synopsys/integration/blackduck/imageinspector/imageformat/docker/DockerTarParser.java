@@ -74,6 +74,7 @@ public class DockerTarParser {
     private ManifestFactory manifestFactory;
     private Os os;
     private ImageConfigParser imageConfigParser;
+    private LayerConfigParser layerConfigParser;
     private FileOperations fileOperations;
     private List<PkgMgr> pkgMgrs;
     private PkgMgrExecutor pkgMgrExecutor;
@@ -106,6 +107,11 @@ public class DockerTarParser {
     @Autowired
     public void setImageConfigParser(final ImageConfigParser imageConfigParser) {
         this.imageConfigParser = imageConfigParser;
+    }
+
+    @Autowired
+    public void setLayerConfigParser(final LayerConfigParser layerConfigParser) {
+        this.layerConfigParser = layerConfigParser;
     }
 
     @Autowired
@@ -194,7 +200,7 @@ public class DockerTarParser {
         return new ImageComponentHierarchy(manifestFileContents, configFileContents);
     }
 
-    public ImageInfoParsed extractImageLayers(final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy,
+    public ImageInfoParsed extractImageLayers(final GsonBuilder gsonBuilder, final ImageInspectorOsEnum currentOs, final ImageComponentHierarchy imageComponentHierarchy,
         final File containerFileSystemRootDir, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping,
         final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
@@ -204,9 +210,10 @@ public class DockerTarParser {
             final File layerTar = getLayerTar(layerTars, layerDotTarDirname);
             if (layerTar != null) {
                 extractLayerTarToDir(containerFileSystemRootDir, layerTar);
-                String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
+                final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
+                final List<String> layerCmd = layerConfigParser.parseCmd(gsonBuilder, layerMetadataFileContents);
                 final boolean isPlatformTopLayer = isThisThePlatformTopLayer(manifestLayerMapping, platformTopLayerExternalId, layerIndex);
-                imageInfoParsed = addPostLayerComponents(layerIndex, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerMetadataFileContents,
+                imageInfoParsed = addPostLayerComponents(layerIndex, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerMetadataFileContents, layerCmd,
                     manifestLayerMapping.getLayerExternalId(layerIndex), isPlatformTopLayer);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
@@ -324,11 +331,12 @@ public class DockerTarParser {
     }
 
     private ImageInfoParsed addPostLayerComponents(final int layerIndex, final ImageInspectorOsEnum currentOs,
-        final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents, final String layerExternalId,
+        final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents,
+        final List<String> layerCmd, final String layerExternalId,
         boolean isPlatformTopLayer) throws WrongInspectorOsException {
-        logger.debug(String.format("Getting components present (so far) after adding layer %d", layerIndex));
+        logger.debug(String.format("Getting components present (so far) after adding layer %s", layerExternalId));
         if (currentOs == null) {
-            logger.debug(String.format("Current (running on) OS not provided; cannot determine components present after adding layer %d", layerIndex));
+            logger.debug(String.format("Current (running on) OS not provided; cannot determine components present after adding layer %s", layerExternalId));
             return null;
         }
         ImageInfoParsed imageInfoParsed = null;
@@ -346,14 +354,14 @@ public class DockerTarParser {
                 final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(executor, imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());
                 comps = imageInfoParsed.getPkgMgr().extractComponentsFromPkgMgrOutput(imageInfoParsed.getFileSystemRootDir(), imageInfoParsed.getLinuxDistroName(), pkgMgrOutputLines);
             } catch (IntegrationException e) {
-                logger.debug(String.format("Unable to log components present after layer %d: %s", layerIndex, e.getMessage()));
+                logger.debug(String.format("Unable to log components present after layer %s: %s", layerExternalId, e.getMessage()));
                 return imageInfoParsed;
             }
-            logger.info(String.format("Found %d components in file system after adding layer %d:", comps.size(), layerIndex));
+            logger.info(String.format("Found %d components in file system after adding layer %s (cmd: %s):", comps.size(), layerExternalId, layerCmd));
             for (ComponentDetails comp : comps) {
                 logger.debug(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }
-            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, comps);
+            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd, comps);
             imageComponentHierarchy.addLayer(layer);
             if (isPlatformTopLayer) {
                 imageComponentHierarchy.setPlatformComponents(comps);
@@ -361,12 +369,12 @@ public class DockerTarParser {
         } catch (final WrongInspectorOsException wrongOsException) {
             throw wrongOsException;
         } catch (final PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
-            logger.debug(String.format("Unable to collect components present after layer %d: The file system is not yet populated with the linux distro and package manager files: %s", layerIndex, pkgMgrDataNotFoundException.getMessage()));
-            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, null);
+            logger.debug(String.format("Unable to collect components present after layer %s: The file system is not yet populated with the linux distro and package manager files: %s", layerExternalId, pkgMgrDataNotFoundException.getMessage()));
+            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd,  null);
             imageComponentHierarchy.addLayer(layer);
         } catch (final Exception otherException) {
-            logger.debug(String.format("Unable to collect components present after layer %d", layerIndex));
-            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, null);
+            logger.debug(String.format("Unable to collect components present after layer %s", layerExternalId));
+            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd,  null);
             imageComponentHierarchy.addLayer(layer);
         }
         return imageInfoParsed;

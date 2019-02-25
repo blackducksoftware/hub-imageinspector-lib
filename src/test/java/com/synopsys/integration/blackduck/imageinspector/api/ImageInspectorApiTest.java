@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -74,7 +75,7 @@ public class ImageInspectorApiTest {
     final ComponentDetails comp = new ComponentDetails("testCompName", "testCompVersion",
         "testCompExternalId", "testCompArchitecture", "testLinuxDistroName");
     components.add(comp);
-    final LayerDetails layerDetails = new LayerDetails(0, "layer00", "layerMetaData", components);
+    final LayerDetails layerDetails = new LayerDetails(0, "layer00", "layerMetaData", Arrays.asList("layerCmd", "layerCmdArg"), components);
     imageComponentHierarchy.addLayer(layerDetails);
     imageComponentHierarchy.setFinalComponents(components);
     Mockito.when(imageInspector
@@ -86,7 +87,7 @@ public class ImageInspectorApiTest {
         new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
             PackageManagerEnum.APK), "apline", new ApkPkgMgr(new FileOperations()));
     Mockito.when(imageInspector
-        .extractDockerLayers(ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
+        .extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
             containerFileSystemRootDir,
             layerTarFiles, mapping, null)).thenReturn(imageInfoParsed);
 
