@@ -234,7 +234,7 @@ public class DockerTarParser {
     }
 
     private List<ComponentDetails> getNetComponents(final List<ComponentDetails> grossComponents, final List<ComponentDetails> componentsToOmit) {
-        logger.debug(String.format("There are %d components to omit", componentsToOmit.size()));
+        logger.info(String.format("There are %d components to omit", componentsToOmit.size()));
         if (componentsToOmit == null || componentsToOmit.isEmpty()) {
             return grossComponents;
         }
@@ -328,7 +328,7 @@ public class DockerTarParser {
         boolean isPlatformTopLayer) throws WrongInspectorOsException {
         logger.debug(String.format("Getting components present (so far) after adding layer %d", layerIndex));
         if (currentOs == null) {
-            logger.debug("Current (running on) OS not provided; cannot determine components present after adding this layer");
+            logger.debug(String.format("Current (running on) OS not provided; cannot determine components present after adding layer %d", layerIndex));
             return null;
         }
         ImageInfoParsed imageInfoParsed = null;
@@ -346,10 +346,10 @@ public class DockerTarParser {
                 final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(executor, imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());
                 comps = imageInfoParsed.getPkgMgr().extractComponentsFromPkgMgrOutput(imageInfoParsed.getFileSystemRootDir(), imageInfoParsed.getLinuxDistroName(), pkgMgrOutputLines);
             } catch (IntegrationException e) {
-                logger.debug(String.format("Unable to log components present after this layer: %s", e.getMessage()));
+                logger.debug(String.format("Unable to log components present after layer %d: %s", layerIndex, e.getMessage()));
                 return imageInfoParsed;
             }
-            logger.debug(String.format("Found %d components in file system after adding this layer:", comps.size()));
+            logger.info(String.format("Found %d components in file system after adding layer %d:", comps.size(), layerIndex));
             for (ComponentDetails comp : comps) {
                 logger.debug(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }
@@ -361,11 +361,11 @@ public class DockerTarParser {
         } catch (final WrongInspectorOsException wrongOsException) {
             throw wrongOsException;
         } catch (final PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
-            logger.debug(String.format("Unable to collect components present after this layer: The file system is not yet populated with the linux distro and package manager files: %s", pkgMgrDataNotFoundException.getMessage()));
+            logger.debug(String.format("Unable to collect components present after layer %d: The file system is not yet populated with the linux distro and package manager files: %s", layerIndex, pkgMgrDataNotFoundException.getMessage()));
             LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, null);
             imageComponentHierarchy.addLayer(layer);
         } catch (final Exception otherException) {
-            logger.debug("Unable to collect components present after this layer");
+            logger.debug(String.format("Unable to collect components present after layer %d", layerIndex));
             LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, null);
             imageComponentHierarchy.addLayer(layer);
         }

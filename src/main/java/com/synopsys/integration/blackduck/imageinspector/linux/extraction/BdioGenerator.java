@@ -109,7 +109,7 @@ public class BdioGenerator {
         final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, projectVersion);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
-        logger.info(String.format("Found %s potential components", graph.getRootDependencies().size()));
+        logger.info(String.format("Returning %d components", graph.getRootDependencies().size()));
         simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, graph);
         return bdioDocument;
     }
