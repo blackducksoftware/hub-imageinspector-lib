@@ -107,7 +107,7 @@ public class ImageInspectorApi {
         final String currentLinuxDistro,
         final String platformTopLayerExternalId)
         throws IntegrationException {
-        logger.info("getBdio()::");
+        logger.info("getBdio()");
         os.logMemory();
         if (gsonBuilder == null) {
             gsonBuilder = new GsonBuilder();
@@ -195,12 +195,21 @@ public class ImageInspectorApi {
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         final ImageInspectorOsEnum currentOs = os.deriveOs(currentLinuxDistro);
         final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping, platformTopLayerExternalId);
+        validatePlatformResults(platformTopLayerExternalId, imageComponentHierarchy);
         logLayers(imageComponentHierarchy);
         cleanUpLayerTars(cleanupWorkingDir, layerTars);
         ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
             codeLocationPrefix, organizeComponentsByLayer, includeRemovedComponents);
         createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);
         return imageInfoDerived;
+    }
+
+    private void validatePlatformResults(final String givenPlatformTopLayerExternalId, final ImageComponentHierarchy imageComponentHierarchy) throws IntegrationException {
+        if (StringUtils.isNotBlank(givenPlatformTopLayerExternalId)) {
+            if (!imageComponentHierarchy.isPlatformTopLayerFound()) {
+                throw new IntegrationException(String.format("Platform top layer id (%s) was specified but not found", givenPlatformTopLayerExternalId));
+            }
+        }
     }
 
     private void logLayers(final ImageComponentHierarchy imageComponentHierarchy) {

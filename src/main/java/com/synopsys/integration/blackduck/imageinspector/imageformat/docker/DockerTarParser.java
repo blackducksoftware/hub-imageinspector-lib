@@ -182,7 +182,7 @@ public class DockerTarParser {
         String configFileContents = null;
         File tarContentsDirectory = new File(tarExtractionDirectory, tarFileName);
         for (File tarFileContentsFile : fileOperations.listFilesInDir(tarContentsDirectory)) {
-            logger.info(String.format("File %s", tarFileContentsFile.getName()));
+            logger.debug(String.format("File %s", tarFileContentsFile.getName()));
             if ("manifest.json".equals(tarFileContentsFile.getName())) {
                 try {
                     manifestFileContents = FileUtils.readFileToString(tarFileContentsFile, StandardCharsets.UTF_8);
@@ -213,8 +213,14 @@ public class DockerTarParser {
                 final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
                 final List<String> layerCmd = layerConfigParser.parseCmd(gsonBuilder, layerMetadataFileContents);
                 final boolean isPlatformTopLayer = isThisThePlatformTopLayer(manifestLayerMapping, platformTopLayerExternalId, layerIndex);
+                if (isPlatformTopLayer) {
+                    imageComponentHierarchy.setPlatformTopLayerIndex(layerIndex);
+                }
                 imageInfoParsed = addPostLayerComponents(layerIndex, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerMetadataFileContents, layerCmd,
                     manifestLayerMapping.getLayerExternalId(layerIndex), isPlatformTopLayer);
+                if (isPlatformTopLayer) {
+                    logger.info(String.format("Layer %s is the top layer of the platform. Components present after adding this layer will be omitted from results", platformTopLayerExternalId));
+                }
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
             }

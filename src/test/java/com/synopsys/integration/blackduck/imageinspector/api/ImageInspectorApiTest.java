@@ -30,6 +30,8 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkg
 import com.synopsys.integration.exception.IntegrationException;
 
 public class ImageInspectorApiTest {
+  // TODO split this test up
+  // TODO add test for invalid platformTop specified: should throw exception
 
   @Test
   public void test() throws IntegrationException, IOException {

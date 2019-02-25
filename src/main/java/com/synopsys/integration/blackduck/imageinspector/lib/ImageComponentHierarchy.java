@@ -32,6 +32,7 @@ public class ImageComponentHierarchy {
     private final String manifestFileContents;
     private final String imageConfigFileContents;
     private final List<LayerDetails> layers;
+    private int platformTopLayerIndex;
     private List<ComponentDetails> platformComponents;
     private List<ComponentDetails> finalComponents;
 
@@ -39,6 +40,7 @@ public class ImageComponentHierarchy {
         this.manifestFileContents = manifestFileContents;
         this.imageConfigFileContents = imageConfigFileContents;
         this.layers = new ArrayList<>();
+        platformTopLayerIndex = -1;
         this.platformComponents = new ArrayList<>();
         this.finalComponents = new ArrayList<>();
     }
@@ -57,6 +59,17 @@ public class ImageComponentHierarchy {
 
     public List<LayerDetails> getLayers() {
         return layers;
+    }
+
+    public void setPlatformTopLayerIndex(final int platformTopLayerIndex) {
+        this.platformTopLayerIndex = platformTopLayerIndex;
+    }
+
+    public boolean isPlatformTopLayerFound() {
+        if (platformTopLayerIndex >= 0) {
+            return true;
+        }
+        return false;
     }
 
     public void setPlatformComponents(final List<ComponentDetails> platformComponents) {

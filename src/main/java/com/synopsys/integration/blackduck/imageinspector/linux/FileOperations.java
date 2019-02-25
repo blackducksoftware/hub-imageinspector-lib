@@ -143,7 +143,7 @@ public class FileOperations {
     public File createTempDirectory() throws IOException {
         final String suffix = String.format("_%s_%s", Thread.currentThread().getName(), Long.toString(new Date().getTime()));
         final File temp = File.createTempFile("ImageInspectorApi_", suffix);
-        logger.info(String.format("Creating working dir %s", temp.getAbsolutePath()));
+        logger.debug(String.format("Creating temp dir %s", temp.getAbsolutePath()));
         if (!temp.delete()) {
             throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
         }
