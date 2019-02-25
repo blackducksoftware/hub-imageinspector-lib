@@ -114,7 +114,7 @@ public class DockerTarParserTest {
         final String imageConfigFileContents = FileUtils.readFileToString(imageConfigTestDataFile, StandardCharsets.UTF_8);
         Mockito.when(fileOperations
                          .readFileToString(imageConfigMockedFile)).thenReturn(imageConfigFileContents);
-        Mockito.when(imageConfigParser.getExternalLayerIdsFromImageConfigFile(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
+        Mockito.when(imageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
         ManifestLayerMapping mapping = tarParser.getLayerMapping(gsonBuilder, tarExtractionDirectory, imageTarFilename, imageName, imageTag);
         assertEquals(imageName, mapping.getImageName());
         assertEquals(imageTag, mapping.getTagName());

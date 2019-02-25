@@ -38,7 +38,7 @@ import com.google.gson.JsonObject;
 public class ImageConfigParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public List<String> getExternalLayerIdsFromImageConfigFile(final GsonBuilder gsonBuilder, final String imageConfigFileContents) {
+    public List<String> parseExternalLayerIds(final GsonBuilder gsonBuilder, final String imageConfigFileContents) {
         try {
             logger.debug(String.format("imageConfigFileContents: %s", imageConfigFileContents));
             JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(imageConfigFileContents, JsonObject.class);
