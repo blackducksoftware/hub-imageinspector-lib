@@ -81,8 +81,9 @@ public class ImageInspector {
         final String versionName,
         final String codeLocationPrefix,
         final boolean organizeComponentsByLayer,
-        final boolean includeRemovedComponents) {
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed);
+        final boolean includeRemovedComponents,
+        final boolean platformComponentsExcluded) {
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed, platformComponentsExcluded);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(imageInfoDerived.getCodeLocationName(),
             imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy, organizeComponentsByLayer, includeRemovedComponents);
         imageInfoDerived.setBdioDocument(bdioDocument);
@@ -90,21 +91,21 @@ public class ImageInspector {
     }
 
     private ImageInfoDerived deriveImageInfo(final ManifestLayerMapping mapping, final String projectName, final String versionName,
-        final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed) {
+        final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed, final boolean platformComponentsExcluded) {
         logger.debug(String.format("deriveImageInfo(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
         imageInfoDerived.setManifestLayerMapping(mapping);
-        imageInfoDerived.setCodeLocationName(deriveCodeLocationName(codeLocationPrefix, imageInfoDerived));
+        imageInfoDerived.setCodeLocationName(deriveCodeLocationName(codeLocationPrefix, imageInfoDerived, platformComponentsExcluded));
         imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName));
         imageInfoDerived.setFinalProjectVersionName(deriveBlackDuckProjectVersion(imageInfoDerived.getManifestLayerMapping(), versionName));
         logger.info(String.format("Black Duck project: %s, version: %s; Code location : %s", imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getCodeLocationName()));
         return imageInfoDerived;
     }
 
-    private String deriveCodeLocationName(final String codeLocationPrefix, final ImageInfoDerived imageInfoDerived) {
+    private String deriveCodeLocationName(final String codeLocationPrefix, final ImageInfoDerived imageInfoDerived, final boolean platformComponentsExcluded) {
         final String pkgMgrName = derivePackageManagerName(imageInfoDerived);
         return Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
-                pkgMgrName);
+                pkgMgrName, platformComponentsExcluded);
     }
 
     private String derivePackageManagerName(final ImageInfoDerived imageInfoDerived) {

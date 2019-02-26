@@ -28,8 +28,8 @@ import com.synopsys.integration.exception.IntegrationException;
 
 public class ImageInspectorTest {
 
-     DockerTarParser tarParser;
-     ImageInspector imageInspector;
+     private DockerTarParser tarParser;
+    private ImageInspector imageInspector;
 
     @BeforeEach
     public void setUpEach() {
@@ -109,8 +109,20 @@ public class ImageInspectorTest {
     }
 
     @Test
-    public void testGenerateBdioFromGivenComponents() throws IOException, IntegrationException {
+    public void testGenerateBdioFromGivenComponentsFull() throws IOException, IntegrationException {
+        final boolean platformComponentsExcluded=false;
+        final ImageInfoDerived imageInfoDerived = doGeneratedBdioFromGivenComponentsTest(platformComponentsExcluded);
+        assertEquals("testCodeLocationPrefix_alpine_latest_APK", imageInfoDerived.getCodeLocationName());
+    }
 
+    @Test
+    public void testGenerateBdioFromGivenComponentsApp() throws IOException, IntegrationException {
+        final boolean platformComponentsExcluded=true;
+        final ImageInfoDerived imageInfoDerived = doGeneratedBdioFromGivenComponentsTest(platformComponentsExcluded);
+        assertEquals("testCodeLocationPrefix_alpine_latest_app_APK", imageInfoDerived.getCodeLocationName());
+    }
+
+    private ImageInfoDerived doGeneratedBdioFromGivenComponentsTest(final boolean platformComponentsExcluded) throws IOException {
         final File workingDir = new File("src/test/resources/working");
         final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
         final String imageRepo = "alpine";
@@ -136,13 +148,13 @@ public class ImageInspectorTest {
         final PkgMgr pkgMgr = new ApkPkgMgr(new FileOperations());
         final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, imagePkgMgrDatabase, linuxDistroName, pkgMgr);
         final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
-            codeLocationPrefix, organizeComponentsByLayer, includeRemovedComponents);
+            codeLocationPrefix, organizeComponentsByLayer, includeRemovedComponents, platformComponentsExcluded);
         assertEquals(blackDuckProjectName, imageInfoDerived.getFinalProjectName());
         assertEquals(blackDuckProjectVersion, imageInfoDerived.getFinalProjectVersionName());
-        assertEquals("testCodeLocationPrefix_alpine_latest_APK", imageInfoDerived.getCodeLocationName());
         assertEquals("APK", imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().name());
         assertEquals(imageRepo, imageInfoDerived.getManifestLayerMapping().getImageName());
         assertEquals(layers.get(1), imageInfoDerived.getManifestLayerMapping().getLayerInternalIds().get(1));
         assertEquals(String.format("%s/%s", blackDuckProjectName, blackDuckProjectVersion), imageInfoDerived.getBdioDocument().project.bdioExternalIdentifier.externalId);
+        return imageInfoDerived;
     }
 }

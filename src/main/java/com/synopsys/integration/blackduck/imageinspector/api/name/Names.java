@@ -33,11 +33,16 @@ public class Names {
         return String.format("image_%s_v_%s", cleanImageName(imageName), imageTag);
     }
 
-    public static String getCodeLocationName(final String codelocationPrefix, final String imageName, final String imageTag, final String pkgMgrName) {
-        if (!StringUtils.isBlank(codelocationPrefix)) {
-            return String.format("%s_%s_%s_%s", codelocationPrefix, cleanImageName(imageName), imageTag, pkgMgrName);
+    public static String getCodeLocationName(final String codelocationPrefix, final String imageName, final String imageTag, final String pkgMgrName,
+        final boolean platformComponentsExcluded) {
+        String appQualifier = "";
+        if (platformComponentsExcluded) {
+            appQualifier = "_app";
         }
-        return String.format("%s_%s_%s", cleanImageName(imageName), imageTag, pkgMgrName);
+        if (!StringUtils.isBlank(codelocationPrefix)) {
+            return String.format("%s_%s_%s%s_%s", codelocationPrefix, cleanImageName(imageName), imageTag, appQualifier, pkgMgrName);
+        }
+        return String.format("%s_%s%s_%s", cleanImageName(imageName), imageTag, appQualifier, pkgMgrName);
     }
 
     private static String slashesToUnderscore(final String givenString) {

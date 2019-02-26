@@ -102,7 +102,7 @@ public class ImageInspectorApiTest {
     Mockito.when(imageInspector
         .generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy,
             mapping, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix,
-            organizeComponentsByLayer, includeRemovedComponents)).thenReturn(imageInfoDerived);
+            organizeComponentsByLayer, includeRemovedComponents, false)).thenReturn(imageInfoDerived);
     final Os os = Mockito.mock(Os.class);
     Mockito.when(os.deriveOs("alpine")).thenReturn(ImageInspectorOsEnum.ALPINE);
     final ImageInspectorApi api = new ImageInspectorApi(imageInspector, os);

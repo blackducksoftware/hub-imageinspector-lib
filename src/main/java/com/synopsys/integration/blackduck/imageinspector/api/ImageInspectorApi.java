@@ -199,7 +199,7 @@ public class ImageInspectorApi {
         logLayers(imageComponentHierarchy);
         cleanUpLayerTars(cleanupWorkingDir, layerTars);
         ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
-            codeLocationPrefix, organizeComponentsByLayer, includeRemovedComponents);
+            codeLocationPrefix, organizeComponentsByLayer, includeRemovedComponents, StringUtils.isNotBlank(platformTopLayerExternalId));
         createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath);
         return imageInfoDerived;
     }
