@@ -15,7 +15,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.lib.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.bdio.BdioReader;

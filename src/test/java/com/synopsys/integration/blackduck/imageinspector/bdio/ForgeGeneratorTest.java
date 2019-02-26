@@ -1,10 +1,10 @@
-package com.synopsys.integration.blackduck.imageinspector.linux.extraction;
+package com.synopsys.integration.blackduck.imageinspector.bdio;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.synopsys.integration.blackduck.imageinspector.lib.ForgeGenerator;
+import com.synopsys.integration.blackduck.imageinspector.bdio.ForgeGenerator;
 
 public class ForgeGeneratorTest {
 

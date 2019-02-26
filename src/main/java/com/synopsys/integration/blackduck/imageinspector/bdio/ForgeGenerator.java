@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.lib;
+package com.synopsys.integration.blackduck.imageinspector.bdio;
 
 import java.util.HashMap;
 import java.util.Map;

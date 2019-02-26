@@ -21,10 +21,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.lib;
+package com.synopsys.integration.blackduck.imageinspector.bdio;
 
 import java.io.CharArrayWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -40,6 +39,9 @@ import com.synopsys.integration.bdio.model.Forge;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.bdio.model.dependency.Dependency;
 import com.synopsys.integration.bdio.model.externalid.ExternalId;
+import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
+import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 
 @Component
 public class BdioGenerator {
@@ -79,10 +81,6 @@ public class BdioGenerator {
         final String linuxDistroName, List<ComponentDetails> comps) {
         final MutableDependencyGraph graph = generateFlatGraphFromComponents(comps);
         return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
-    }
-
-    public final void writeBdio(final File bdioFile, final SimpleBdioDocument bdioDocument) throws IOException {
-        simpleBdioFactory.writeSimpleBdioDocumentToFile(bdioFile, bdioDocument);
     }
 
     public final void writeBdio(final Writer writer, final SimpleBdioDocument bdioDocument) throws IOException {
