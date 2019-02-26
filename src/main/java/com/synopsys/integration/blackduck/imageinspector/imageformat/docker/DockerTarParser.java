@@ -251,7 +251,9 @@ public class DockerTarParser {
         if (componentsToOmit == null || componentsToOmit.isEmpty()) {
             return grossComponents;
         }
-        return ListUtils.subtract(grossComponents, componentsToOmit);
+        List<ComponentDetails> netComponents = ListUtils.subtract(grossComponents, componentsToOmit);
+        logger.debug(String.format("grossComponents: %d, componentsToOmit: %d, netComponents: %d", grossComponents.size(), componentsToOmit.size(), netComponents.size()));
+        return netComponents;
     }
 
     private List<String> getExternalLayerIdsFromImageConfigFile(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String imageConfigFileName) {
