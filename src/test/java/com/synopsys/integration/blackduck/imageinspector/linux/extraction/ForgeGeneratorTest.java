@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.synopsys.integration.blackduck.imageinspector.lib.ForgeGenerator;
+
 public class ForgeGeneratorTest {
 
     @Test

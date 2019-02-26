@@ -59,8 +59,8 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappin
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
+import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;

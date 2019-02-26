@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;

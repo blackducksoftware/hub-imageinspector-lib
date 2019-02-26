@@ -27,9 +27,9 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
+import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
@@ -154,8 +154,23 @@ public class DockerTarParserTest {
     }
 
     @Test
-    public void testExtractImageLayers() throws IOException, IntegrationException {
+    public void testExtractImageLayersFull() throws IOException, IntegrationException {
+        final ImageComponentHierarchy imageComponentHierarchy = doExtractImageLayersTest(false);
+        assertEquals("testCompName", imageComponentHierarchy.getFinalComponents().get(0).getName());
+        assertEquals("Layer00_sha_Layer1", imageComponentHierarchy.getLayers().get(0).getLayerIndexedName());
+        assertEquals("testCompName", imageComponentHierarchy.getLayers().get(0).getComponents().get(0).getName());
+    }
 
+
+    @Test
+    public void testExtractImageLayersApp() throws IOException, IntegrationException {
+        final ImageComponentHierarchy imageComponentHierarchy = doExtractImageLayersTest(true);
+        assertEquals(0, imageComponentHierarchy.getFinalComponents().size());
+        assertEquals("Layer00_sha_Layer1", imageComponentHierarchy.getLayers().get(0).getLayerIndexedName());
+        assertEquals("testCompName", imageComponentHierarchy.getLayers().get(0).getComponents().get(0).getName());
+    }
+
+    private ImageComponentHierarchy doExtractImageLayersTest(final boolean excludePlatform) throws IOException, IntegrationException {
         final String imageName = "alpine";
         final String imageTag = "latest";
         final String imageConfigFileName = "caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json";
@@ -163,11 +178,16 @@ public class DockerTarParserTest {
         final File mockedImageTarContentsDir = new File("src/test/resources/mockDockerTarContents");
         final List<String> layerInternalIds = Arrays.asList("03b951adf840798cb236a62db6705df7fb2f1e60e6f5fb93499ee8a566bd4114");
         final List<String> layerExternalIds = Arrays.asList("sha:Layer1");
-
+        final String platformTopLayerId;
+        if (excludePlatform) {
+            platformTopLayerId = "sha:Layer1";
+        } else {
+            platformTopLayerId = null;
+        }
         final ManifestLayerMapping partialManifestLayerMapping = new ManifestLayerMapping(imageName, imageTag, imageConfigFileName, layerInternalIds);
         final ManifestLayerMapping fullManifestLayerMapping = new ManifestLayerMapping(partialManifestLayerMapping, layerExternalIds);
 
-        final ComponentExtractorFactory componentExtractorFactory = Mockito.mock(ComponentExtractorFactory.class);
+        final PkgMgrFactory pkgMgrFactory = Mockito.mock(PkgMgrFactory.class);
 
         final File manifestFile = new File(mockedImageTarContentsDir, "manifest.json");
         final File configFile = new File(mockedImageTarContentsDir, imageConfigFileName);
@@ -194,9 +214,7 @@ public class DockerTarParserTest {
         Mockito.when(os.isLinuxDistroFile(osReleaseFile)).thenReturn(Boolean.TRUE);
         Mockito.when(os.getLinxDistroName(osReleaseFile)).thenReturn(Optional.of("alpine"));
         ImageInfoParsed imageInfoParsed = tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
-        containerFileSystemRootDir, layerTars, fullManifestLayerMapping, null);
-        assertEquals("testCompName", imageComponentHierarchy.getFinalComponents().get(0).getName());
-        assertEquals("Layer00_sha_Layer1", imageComponentHierarchy.getLayers().get(0).getLayerIndexedName());
-        assertEquals("testCompName", imageComponentHierarchy.getLayers().get(0).getComponents().get(0).getName());
+        containerFileSystemRootDir, layerTars, fullManifestLayerMapping, platformTopLayerId);
+        return imageComponentHierarchy;
     }
 }

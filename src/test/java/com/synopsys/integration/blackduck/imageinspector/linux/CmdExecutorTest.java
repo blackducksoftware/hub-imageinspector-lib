@@ -10,7 +10,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class CmdExecutorTest {

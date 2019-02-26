@@ -39,7 +39,6 @@ import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGenerator;
 import com.synopsys.integration.exception.IntegrationException;
 
 // As support for other image formats is added, this class will manage the list of TarParsers

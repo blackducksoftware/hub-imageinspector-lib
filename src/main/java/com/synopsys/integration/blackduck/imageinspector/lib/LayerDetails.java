@@ -27,8 +27,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
-
 public class LayerDetails {
     private final int layerIndex;
     private final String layerExternalId;

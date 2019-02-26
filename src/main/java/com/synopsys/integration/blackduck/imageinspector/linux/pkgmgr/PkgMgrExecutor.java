@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component

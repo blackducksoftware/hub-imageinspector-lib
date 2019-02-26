@@ -36,9 +36,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.lib.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
@@ -54,18 +54,18 @@ public class BdioGeneratorApi {
     public static final String LINUX_DISTRO_NAME_ALPINE = "alpine";
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private ComponentExtractorFactory componentExtractorFactory;
+    private PkgMgrFactory pkgMgrFactory;
     private Gson gson;
     private final BdioGenerator bdioGenerator;
 
     /**
      * @param gson
-     * @param componentExtractorFactory
+     * @param pkgMgrFactory
      * @param bdioGenerator
      */
-    public BdioGeneratorApi(final Gson gson, final ComponentExtractorFactory componentExtractorFactory, final BdioGenerator bdioGenerator) {
+    public BdioGeneratorApi(final Gson gson, final PkgMgrFactory pkgMgrFactory, final BdioGenerator bdioGenerator) {
         this.gson = gson;
-        this.componentExtractorFactory = componentExtractorFactory;
+        this.pkgMgrFactory = pkgMgrFactory;
         this.bdioGenerator = bdioGenerator;
     }
 
@@ -167,7 +167,7 @@ public class BdioGeneratorApi {
 
     private String[] pkgListToBdioWithArch(final PackageManagerEnum pkgMgrType, final String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String blackDuckProjectName, final String blackDuckProjectVersion,
         final String codeLocationName, final String architecture) throws IntegrationException {
-        final PkgMgr pkgMgr = componentExtractorFactory.createPkgMgr(pkgMgrType, architecture);
+        final PkgMgr pkgMgr = pkgMgrFactory.createPkgMgr(pkgMgrType, architecture);
         List<ComponentDetails> comps = pkgMgr.extractComponentsFromPkgMgrOutput(null, linuxDistroName, pkgMgrListCmdOutputLines);
         logger.info(String.format("Extracted %d components from given package manager output", comps.size()));
         SimpleBdioDocument bdioDoc = bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);

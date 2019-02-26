@@ -15,8 +15,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.lib.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.bdio.BdioReader;
 import com.synopsys.integration.bdio.SimpleBdioFactory;
@@ -27,7 +27,7 @@ public class PkgListToBdioTest {
 
     @Test
     public void testPkgListToBdioFileUbuntu() throws IOException, IntegrationException {
-        BdioGeneratorApi api = new BdioGeneratorApi(gson, new ComponentExtractorFactory(), new BdioGenerator(new SimpleBdioFactory()));
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), new BdioGenerator(new SimpleBdioFactory()));
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/dpkg/ubuntu_dpkg_output.txt";
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         String bdioOutputFilePath = "test/output/bdioFromDpkgOutput.jsonld";
@@ -56,7 +56,7 @@ public class PkgListToBdioTest {
 
     @Test
     public void testPkgListToBdioFileAlpine() throws IOException, IntegrationException {
-        BdioGeneratorApi api = new BdioGeneratorApi(gson, new ComponentExtractorFactory(), new BdioGenerator(new SimpleBdioFactory()));
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), new BdioGenerator(new SimpleBdioFactory()));
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/apk/alpine_apk_output.txt";
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         String bdioOutputFilePath = "test/output/bdioFromApkOutput.jsonld";
@@ -79,7 +79,7 @@ public class PkgListToBdioTest {
     @Test
     public void testPkgListToBdioLinesAlpineUsingNonApkMethod() throws IntegrationException, IOException {
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/apk/alpine_apk_output.txt";
-        BdioGeneratorApi api = new BdioGeneratorApi(gson, new ComponentExtractorFactory(), new BdioGenerator(new SimpleBdioFactory()));
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), new BdioGenerator(new SimpleBdioFactory()));
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         List<String> pkgMgrOutputLinesList = FileUtils.readLines(pkgMgrOutputFile, StandardCharsets.UTF_8);
         String[] pkgMgrOutputLines = pkgMgrOutputLinesList.toArray(new String[pkgMgrOutputLinesList.size()]);
@@ -93,7 +93,7 @@ public class PkgListToBdioTest {
     }
 
     private SimpleBdioDocument testPkgListToBdioLines(final String pkgMgrOutputFilePath, final String linuxDistroName, final PackageManagerEnum pkgMgrType) throws IOException, IntegrationException {
-        BdioGeneratorApi api = new BdioGeneratorApi(gson, new ComponentExtractorFactory(), new BdioGenerator(new SimpleBdioFactory()));
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), new BdioGenerator(new SimpleBdioFactory()));
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         List<String> pkgMgrOutputLinesList = FileUtils.readLines(pkgMgrOutputFile, StandardCharsets.UTF_8);
         String[] pkgMgrOutputLines = pkgMgrOutputLinesList.toArray(new String[pkgMgrOutputLinesList.size()]);

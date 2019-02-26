@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.linux.extraction.output;
+package com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm;
 
 public class RpmPackage {
     private final String epoch;

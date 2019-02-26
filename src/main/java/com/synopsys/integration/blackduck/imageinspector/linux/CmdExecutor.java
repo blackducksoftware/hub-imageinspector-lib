@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.linux.executor;
+package com.synopsys.integration.blackduck.imageinspector.linux;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -27,7 +27,7 @@ import java.io.File;
 import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.exception.IntegrationException;
 
 public interface PkgMgr {

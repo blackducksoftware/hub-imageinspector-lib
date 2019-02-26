@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.linux.executor.CmdExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.extraction.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
+import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class PkgMgrExecutorTest {
