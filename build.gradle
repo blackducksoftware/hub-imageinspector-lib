@@ -13,7 +13,7 @@ buildscript {
 
 apply plugin: "io.spring.dependency-management"
 
-version = '9.0.0-SNAPSHOT'
+version = '9.0.0'
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencyManagement {
