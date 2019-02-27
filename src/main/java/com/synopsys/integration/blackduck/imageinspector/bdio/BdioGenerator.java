@@ -57,7 +57,7 @@ public class BdioGenerator {
         this.simpleBdioFactory = simpleBdioFactory;
     }
 
-    public final SimpleBdioDocument generateBdioDocumentFromImageComponentHierarchy(final String codeLocationName, final String projectName,
+    public SimpleBdioDocument generateBdioDocumentFromImageComponentHierarchy(final String codeLocationName, final String projectName,
         final String projectVersion,
         final String linuxDistroName, ImageComponentHierarchy imageComponentHierarchy,
         final boolean organizeComponentsByLayer,
@@ -76,14 +76,14 @@ public class BdioGenerator {
         }
     }
 
-    public final SimpleBdioDocument generateFlatBdioDocumentFromComponents(final String codeLocationName, final String projectName,
+    public SimpleBdioDocument generateFlatBdioDocumentFromComponents(final String codeLocationName, final String projectName,
         final String projectVersion,
         final String linuxDistroName, List<ComponentDetails> comps) {
         final MutableDependencyGraph graph = generateFlatGraphFromComponents(comps);
         return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
     }
 
-    public final void writeBdio(final Writer writer, final SimpleBdioDocument bdioDocument) throws IOException {
+    public void writeBdio(final Writer writer, final SimpleBdioDocument bdioDocument) throws IOException {
         try (final BdioWriter bdioWriter = simpleBdioFactory.createBdioWriter(writer)) {
             simpleBdioFactory.writeSimpleBdioDocument(bdioWriter, bdioDocument);
         }
