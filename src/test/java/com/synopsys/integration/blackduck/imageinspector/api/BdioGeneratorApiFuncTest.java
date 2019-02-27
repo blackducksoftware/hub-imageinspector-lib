@@ -22,7 +22,7 @@ import com.synopsys.integration.bdio.BdioReader;
 import com.synopsys.integration.bdio.SimpleBdioFactory;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 
-public class PkgListToBdioTest {
+public class BdioGeneratorApiFuncTest {
     private Gson gson = new Gson();
 
     @Test
