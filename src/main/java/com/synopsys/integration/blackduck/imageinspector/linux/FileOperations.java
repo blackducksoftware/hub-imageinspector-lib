@@ -34,7 +34,9 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -73,22 +75,31 @@ public class FileOperations {
         if (!logger.isDebugEnabled()) {
             return;
         }
-        logger.debug(String.format("Current process owner: %s", System.getProperty("user.name")));
+        final List<String> msgs = getFileOwnerGroupPermsMsgs(file);
+        for (String msg : msgs) {
+            logger.debug(msg);
+        }
+    }
+
+    List<String> getFileOwnerGroupPermsMsgs(final File file) {
+        final List<String> msgs = new ArrayList<>(8);
+        msgs.add(String.format("Current process owner: %s", System.getProperty("user.name")));
         if (!file.exists()) {
-            logger.debug(String.format("File %s does not exist", file.getAbsolutePath()));
-            return;
+            msgs.add(String.format("File %s does not exist", file.getAbsolutePath()));
+            return msgs;
         }
         if (file.isDirectory()) {
-            logger.debug(String.format("File %s is a directory", file.getAbsolutePath()));
+            msgs.add(String.format("File %s is a directory", file.getAbsolutePath()));
         }
         PosixFileAttributes attrs;
         try {
             attrs = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class)
                         .readAttributes();
-            logger.debug(String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions())));
+            msgs.add(String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions())));
         } catch (final IOException e) {
-            logger.debug(String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage()));
+            msgs.add(String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage()));
         }
+        return msgs;
     }
 
     public void deleteDirPersistently(final File dir) {

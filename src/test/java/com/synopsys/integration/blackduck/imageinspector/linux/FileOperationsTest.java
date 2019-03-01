@@ -1,26 +1,31 @@
 package com.synopsys.integration.blackduck.imageinspector.linux;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class FileOperationsTest {
+    private static FileOperations fileOperations;
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
+    public static void setUpBeforeClass() {
+        fileOperations = new FileOperations();
     }
 
     @AfterClass
-    public static void tearDownAfterClass() throws Exception {
+    public static void tearDownAfterClass() {
     }
 
     @Test
-    public void test() throws IOException {
+    public void testMoveFile() throws IOException {
         final File fileToMove = new File("test/fileToMove.txt");
         fileToMove.createNewFile();
         final File destinationDir = new File("test/output");
@@ -29,8 +34,57 @@ public class FileOperationsTest {
         }
         final File destinationFile = new File(destinationDir, "fileToMove.txt");
         destinationFile.delete();
-        final FileOperations fileOperations = new FileOperations();
+
         fileOperations.moveFile(fileToMove, destinationDir);
         assertTrue(destinationFile.exists());
+    }
+
+    @Test
+    public void testDeleteFilesOnly() throws IOException {
+        final File fileToDelete = new File("test/dirWithFileToDelete/fileToDelete.txt");
+        fileToDelete.getParentFile().mkdir();
+        fileToDelete.createNewFile();
+
+        fileOperations.deleteFilesOnly(fileToDelete.getParentFile());
+
+        assertFalse(fileToDelete.exists());
+        assertTrue(fileToDelete.getParentFile().exists());
+    }
+
+
+    @Test
+    public void testGetFileOwnerGroupPermsMsgs() throws IOException {
+        final File fileToLog = new File("test/dirWithFileToDelete/fileToDelete.txt");
+        fileToLog.getParentFile().mkdir();
+        fileToLog.createNewFile();
+
+        final List<String> msgs = fileOperations.getFileOwnerGroupPermsMsgs(fileToLog);
+
+        assertEquals(2, msgs.size());
+        assertTrue(msgs.get(0).startsWith("Current process owner:"));
+        assertTrue(msgs.get(1).contains("owner:"));
+        assertTrue(msgs.get(1).contains("group:"));
+        assertTrue(msgs.get(1).contains("perms:"));
+    }
+
+    @Test
+    public void testDeleteDirPersistently() throws IOException {
+        final File fileToDelete = new File("test/dirWithFileToDelete/fileToDelete.txt");
+        fileToDelete.getParentFile().mkdir();
+        fileToDelete.createNewFile();
+
+        fileOperations.deleteDirPersistently(fileToDelete.getParentFile());
+
+        assertFalse(fileToDelete.exists());
+        assertFalse(fileToDelete.getParentFile().exists());
+    }
+
+    @Test
+    public void testCreateTempDirectory() throws IOException {
+        final File tempDir = fileOperations.createTempDirectory();
+
+        assertTrue(tempDir.isDirectory());
+        assertTrue(tempDir.canWrite());
+        assertEquals(0, tempDir.listFiles().length);
     }
 }
