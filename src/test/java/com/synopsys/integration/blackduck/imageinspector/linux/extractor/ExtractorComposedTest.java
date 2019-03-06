@@ -118,10 +118,10 @@ public class ExtractorComposedTest {
                 assertEquals("ncurses-base/5.9-14.20130511.el7_4/noarch", comp.bdioExternalIdentifier.externalId);
                 assertEquals("5.9-14.20130511.el7_4", comp.version);
             }
-            if ("111:krb5-libs".equals(comp.name)) {
+            if ("krb5-libs".equals(comp.name)) {
                 foundComp2 = true;
-                assertEquals("111:krb5-libs/1.15.1-19.el7/x86_64", comp.bdioExternalIdentifier.externalId);
-                assertEquals("1.15.1-19.el7", comp.version);
+                assertEquals("krb5-libs/111:1.15.1-19.el7/x86_64", comp.bdioExternalIdentifier.externalId);
+                assertEquals("111:1.15.1-19.el7", comp.version);
             }
         }
         assertTrue(foundComp1);

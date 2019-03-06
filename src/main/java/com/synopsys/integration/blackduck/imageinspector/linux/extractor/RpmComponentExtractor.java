@@ -60,17 +60,18 @@ public class RpmComponentExtractor implements ComponentExtractor {
         for (final String packageLine : packageList) {
             if (valid(packageLine)) {
                 final RpmPackage rpmPackage = gson.fromJson(packageLine, RpmPackage.class);
-                String packageName = rpmPackage.getName();
+                final String packageName = rpmPackage.getName();
+                String packageVersion = rpmPackage.getVersion();
                 if (!NO_VALUE.equals(rpmPackage.getEpoch())) {
-                    packageName = String.format("%s:%s", rpmPackage.getEpoch(), rpmPackage.getName());
+                    packageVersion = String.format("%s:%s", rpmPackage.getEpoch(), rpmPackage.getVersion());
                 }
                 String arch = "";
                 if (!NO_VALUE.equals(rpmPackage.getArch())) {
                     arch = rpmPackage.getArch();
                 }
-                final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, packageName, rpmPackage.getVersion(), arch);
+                final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, packageName, packageVersion, arch);
                 logger.debug(String.format("Adding externalId %s to components list", externalId));
-                components.add(new ComponentDetails(packageName, rpmPackage.getVersion(), externalId, arch, linuxDistroName));
+                components.add(new ComponentDetails(packageName, packageVersion, externalId, arch, linuxDistroName));
             }
         }
         return components;
