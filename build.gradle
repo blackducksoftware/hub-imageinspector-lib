@@ -23,7 +23,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation 'com.blackducksoftware.integration:integration-bdio:16.4.0'
+    implementation 'com.blackducksoftware.integration:integration-bdio:17.1.2'
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework:spring-context'
     implementation 'commons-io:commons-io:2.5'
