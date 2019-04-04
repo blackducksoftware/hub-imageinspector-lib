@@ -24,6 +24,7 @@ package com.synopsys.integration.blackduck.imageinspector.bdio;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -36,11 +37,14 @@ public class ForgeGenerator {
     // If the KB name matches the Linux distro ID found in os-release/lsb-release, there is
     // no need to add the distro to this table.
     // Linux distro names are mapped to lowercase before being looked up in this table.
+    // The lookup is a "starts with" comparison, so a key of "opensuse" matches any Linux distro
+    // name that starts with "opensuse" (case INsensitive).
     private static final Map<String, String> linuxDistroNameToKbForgeNameMapping = new HashMap<>();
 
     static {
         linuxDistroNameToKbForgeNameMapping.put("rhel", "redhat");
         linuxDistroNameToKbForgeNameMapping.put("sles", "opensuse");
+        linuxDistroNameToKbForgeNameMapping.put("opensuse", "opensuse");
     }
 
     public static Forge createProjectForge(final String linuxDistroName) {
@@ -60,10 +64,8 @@ public class ForgeGenerator {
             return new Forge("/", "/", "none");
         }
         final String linuxDistroNameLowerCase = linuxDistroName == null ? "" : linuxDistroName.toLowerCase();
-        String kbName = linuxDistroNameLowerCase;
-        if (linuxDistroNameToKbForgeNameMapping.containsKey(linuxDistroNameLowerCase)) {
-            kbName = linuxDistroNameToKbForgeNameMapping.get(linuxDistroNameLowerCase);
-        }
+        Optional<String> overriddenKbName = findMatch(linuxDistroNameLowerCase);
+        String kbName = overriddenKbName.orElse(linuxDistroNameLowerCase);
         String forgeId;
         if (doPreferredAliasNamespace) {
             forgeId = String.format("@%s", kbName);
@@ -72,5 +74,14 @@ public class ForgeGenerator {
         }
         final Forge preferredNamespaceForge = new Forge("/", "/", forgeId);
         return preferredNamespaceForge;
+    }
+
+    private static Optional<String> findMatch(final String linuxDistroNameLowerCase) {
+        for (String fromName : linuxDistroNameToKbForgeNameMapping.keySet()) {
+            if (linuxDistroNameLowerCase.startsWith(fromName.toLowerCase())) {
+                return Optional.of(linuxDistroNameToKbForgeNameMapping.get(fromName));
+            }
+        }
+        return Optional.empty();
     }
 }
