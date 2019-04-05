@@ -1,6 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.api;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileReader;
@@ -15,6 +16,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.gson.Gson;
+import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.exception.IntegrationException;
@@ -115,12 +117,8 @@ public class BdioGeneratorApiFuncTest {
         assertEquals("Project", bdioDoc.project.type);
         assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
         assertEquals(665, bdioDoc.components.size());
-        assertEquals("libboost-fiber1.65.1", bdioDoc.components.get(0).name);
-        assertEquals("1.65.1+dfsg-0ubuntu5", bdioDoc.components.get(0).version);
-        assertEquals("libboost-fiber1.65.1/1.65.1+dfsg-0ubuntu5/amd64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
-        assertEquals("jblas", bdioDoc.components.get(100).name);
-        assertEquals("1.2.4-1", bdioDoc.components.get(100).version);
-        assertEquals("jblas/1.2.4-1/amd64", bdioDoc.components.get(100).bdioExternalIdentifier.externalId);
+        verifyContainsComp(bdioDoc, "libboost-fiber1.65.1", "1.65.1+dfsg-0ubuntu5", "libboost-fiber1.65.1/1.65.1+dfsg-0ubuntu5/amd64");
+        verifyContainsComp(bdioDoc, "jblas", "1.2.4-1", "jblas/1.2.4-1/amd64");
     }
 
     private void verifyBdioDocCentosMinusVimPlusBacula(final SimpleBdioDocument bdioDoc) {
@@ -129,9 +127,7 @@ public class BdioGeneratorApiFuncTest {
         assertEquals("Project", bdioDoc.project.type);
         assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
         assertEquals(189, bdioDoc.components.size());
-        assertEquals("perl-Sys-MemInfo", bdioDoc.components.get(0).name);
-        assertEquals("0.91-7.el7", bdioDoc.components.get(0).version);
-        assertEquals("perl-Sys-MemInfo/0.91-7.el7/x86_64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
+        verifyContainsComp(bdioDoc, "perl-Sys-MemInfo", "0.91-7.el7", "perl-Sys-MemInfo/0.91-7.el7/x86_64");
     }
 
     private void verifyBdioDocAlpine(final SimpleBdioDocument bdioDoc) {
@@ -140,9 +136,19 @@ public class BdioGeneratorApiFuncTest {
         assertEquals("Project", bdioDoc.project.type);
         assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
         assertEquals(95, bdioDoc.components.size());
-        assertEquals("boost-python", bdioDoc.components.get(0).name);
-        assertEquals("1.62.0-r5", bdioDoc.components.get(0).version);
-        assertEquals("boost-python/1.62.0-r5/x86_64", bdioDoc.components.get(0).bdioExternalIdentifier.externalId);
+        verifyContainsComp(bdioDoc, "boost-python", "1.62.0-r5", "boost-python/1.62.0-r5/x86_64");
+    }
+
+    private void verifyContainsComp(final SimpleBdioDocument bdioDoc, final String compName, final String compVersion, final String compExternalId) {
+        boolean foundComp = false;
+        for (BdioComponent comp : bdioDoc.components) {
+            if (comp.name.equals(compName)) {
+                foundComp = true;
+                assertEquals(compVersion, comp.version);
+                assertEquals(compExternalId, comp.bdioExternalIdentifier.externalId);
+            }
+        }
+        assertTrue(foundComp);
     }
 
     private SimpleBdioDocument toBdioDocument(final String[] bdioLines) throws IOException {
