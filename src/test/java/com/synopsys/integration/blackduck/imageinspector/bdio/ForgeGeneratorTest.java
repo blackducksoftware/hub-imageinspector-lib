@@ -17,6 +17,7 @@ public class ForgeGeneratorTest {
         assertEquals("@opensuse", ForgeGenerator.createComponentForge("SLES").getName());
         assertEquals("@redhat", ForgeGenerator.createComponentForge("RHEL").getName());
         assertEquals("@redhat", ForgeGenerator.createComponentForge("rhel").getName());
+        assertEquals("@fedora", ForgeGenerator.createComponentForge("fedora").getName());
         assertEquals("none", ForgeGenerator.createComponentForge(null).getName());
     }
 
