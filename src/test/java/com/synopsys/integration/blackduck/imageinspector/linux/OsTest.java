@@ -1,8 +1,10 @@
 package test.java.com.synopsys.integration.blackduck.imageinspector.linux;
 
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+
 import java.io.File;
+
+import org.junit.Test;
 
 public class OsTest {
 
@@ -22,5 +24,11 @@ public class OsTest {
     public void testGetLinuxDistroNameRhel() {
         com.synopsys.integration.blackduck.imageinspector.linux.Os os = new com.synopsys.integration.blackduck.imageinspector.linux.Os();
         assertEquals("rhel", os.getLinxDistroName(new File("src/test/resources/osdetection/redhat/redhat-release")).get());
+    }
+
+    @Test
+    public void testGetLinuxDistroNameFedora() {
+        com.synopsys.integration.blackduck.imageinspector.linux.Os os = new com.synopsys.integration.blackduck.imageinspector.linux.Os();
+        assertEquals("fedora", os.getLinxDistroName(new File("src/test/resources/osdetection/fedora/redhat-release")).get());
     }
 }

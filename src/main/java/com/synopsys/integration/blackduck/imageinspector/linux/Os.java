@@ -122,6 +122,10 @@ public class Os {
                 logger.trace("Contents of redhat-release indicate CentOS");
                 return Optional.of("centos");
             }
+            if (line.startsWith("Fedora")) {
+                logger.trace("Contents of redhat-release indicate Fedora");
+                return Optional.of("fedora");
+            }
             logger.warn(String.format("Found redhat-release file %s but don't understand the contents: '%s'", etcDirFile.getAbsolutePath(), line));
             return Optional.empty();
         }
