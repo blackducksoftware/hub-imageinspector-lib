@@ -81,7 +81,7 @@ public class Os {
         }
     }
 
-    private Optional<String> getLinuxDistroNameFromStandardReleaseFile(final File etcDirFile) throws IOException {
+    private Optional<String> getLinuxDistroNameFromStandardReleaseFile(final File etcDirFile) {
         String linePrefix = null;
         if ("lsb-release".equals(etcDirFile.getName())) {
             logger.trace("Found lsb-release");
@@ -93,40 +93,50 @@ public class Os {
             logger.warn(String.format("File %s is not a Linux distribution-identifying file", etcDirFile.getAbsolutePath()));
             return Optional.empty();
         }
-        List<String> lines = null;
-        lines = FileUtils.readLines(etcDirFile, StandardCharsets.UTF_8);
-        for (String line : lines) {
-            line = line.trim();
-            if (line.startsWith(linePrefix)) {
-                final String[] parts = line.split("=");
-                final String distroName = parts[1].replaceAll("\"", "").toLowerCase();
-                logger.debug(String.format("Found target image Linux distro name '%s' in file %s", distroName, etcDirFile.getAbsolutePath()));
-                return Optional.of(distroName);
+        try {
+            List<String> lines = null;
+            lines = FileUtils.readLines(etcDirFile, StandardCharsets.UTF_8);
+            for (String line : lines) {
+                line = line.trim();
+                if (line.startsWith(linePrefix)) {
+                    final String[] parts = line.split("=");
+                    final String distroName = parts[1].replaceAll("\"", "").toLowerCase();
+                    logger.debug(String.format("Found target image Linux distro name '%s' in file %s", distroName, etcDirFile.getAbsolutePath()));
+                    return Optional.of(distroName);
+                }
             }
+        } catch (IOException e) {
+            logger.error(String.format("Error reading %s", etcDirFile.getAbsolutePath()));
+            return Optional.empty();
         }
         logger.warn(String.format("Did not find value for %s in %s", linePrefix, etcDirFile.getAbsolutePath()));
         return Optional.empty();
     }
 
-    private Optional<String> getLinuxDistroNameFromRedHatReleaseFile(final File etcDirFile) throws IOException {
+    private Optional<String> getLinuxDistroNameFromRedHatReleaseFile(final File etcDirFile) {
         logger.trace("Found redhat-release");
-        List<String> lines = null;
-        lines = FileUtils.readLines(etcDirFile, StandardCharsets.UTF_8);
-        if (lines.size() > 0) {
-            String line = lines.get(0);
-            if (line.startsWith("Red Hat")) {
-                logger.trace("Contents of redhat-release indicate RHEL");
-                return Optional.of("rhel");
+        try {
+            List<String> lines = null;
+            lines = FileUtils.readLines(etcDirFile, StandardCharsets.UTF_8);
+            if (lines.size() > 0) {
+                String line = lines.get(0);
+                if (line.startsWith("Red Hat")) {
+                    logger.trace("Contents of redhat-release indicate RHEL");
+                    return Optional.of("rhel");
+                }
+                if (line.startsWith("CentOS")) {
+                    logger.trace("Contents of redhat-release indicate CentOS");
+                    return Optional.of("centos");
+                }
+                if (line.startsWith("Fedora")) {
+                    logger.trace("Contents of redhat-release indicate Fedora");
+                    return Optional.of("fedora");
+                }
+                logger.warn(String.format("Found redhat-release file %s but don't understand the contents: '%s'", etcDirFile.getAbsolutePath(), line));
+                return Optional.empty();
             }
-            if (line.startsWith("CentOS")) {
-                logger.trace("Contents of redhat-release indicate CentOS");
-                return Optional.of("centos");
-            }
-            if (line.startsWith("Fedora")) {
-                logger.trace("Contents of redhat-release indicate Fedora");
-                return Optional.of("fedora");
-            }
-            logger.warn(String.format("Found redhat-release file %s but don't understand the contents: '%s'", etcDirFile.getAbsolutePath(), line));
+        } catch (IOException e) {
+            logger.error(String.format("Error reading %s", etcDirFile.getAbsolutePath()));
             return Optional.empty();
         }
         logger.warn(String.format("Unable to discern linux distro from %s", etcDirFile.getAbsolutePath()));

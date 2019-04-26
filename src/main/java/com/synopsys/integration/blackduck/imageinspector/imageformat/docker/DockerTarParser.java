@@ -286,10 +286,13 @@ public class DockerTarParser {
         return extractLinuxDistroNameFromFiles(fileOperations.listFilesInDir(etcDir));
     }
 
-    private Optional<String> extractLinuxDistroNameFromFiles(final File[] etcFiles) {
+    Optional<String> extractLinuxDistroNameFromFiles(final File[] etcFiles) {
         for (final File etcFile : etcFiles) {
             if (os.isLinuxDistroFile(etcFile)) {
-                return os.getLinxDistroName(etcFile);
+                final Optional<String> distroAccordingToThisFile = os.getLinxDistroName(etcFile);
+                if (distroAccordingToThisFile.isPresent()) {
+                    return distroAccordingToThisFile;
+                }
             }
         }
         return Optional.empty();

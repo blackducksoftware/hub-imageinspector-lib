@@ -170,6 +170,28 @@ public class DockerTarParserTest {
         assertEquals("testCompName", imageComponentHierarchy.getLayers().get(0).getComponents().get(0).getName());
     }
 
+    @Test
+    public void testIgnoreUnreadableDistroFiles() {
+        final DockerTarParser tarParserWithRealOsObject;
+        tarParserWithRealOsObject = new DockerTarParser();
+        tarParserWithRealOsObject.setPkgMgrs(pkgMgrs);
+        tarParserWithRealOsObject.setOs(new Os());
+        tarParserWithRealOsObject.setManifestFactory(manifestFactory);
+        tarParserWithRealOsObject.setExecutor(cmdExecutor);
+        tarParserWithRealOsObject.setFileOperations(fileOperations);
+        tarParserWithRealOsObject.setImageConfigParser(imageConfigParser);
+        tarParserWithRealOsObject.setLayerConfigParser(layerConfigParser);
+        tarParserWithRealOsObject.setPkgMgrExecutor(pkgMgrExecutor);
+        tarParserWithRealOsObject.setDockerLayerTarExtractor(dockerLayerTarExtractor);
+
+        final File[] etcFiles = {
+            new File("thisdirdoesnotexist/os-release"),
+                                    new File("src/test/resources/osdetection/fedora/redhat-release")
+        };
+        Optional<String> distroFound = tarParserWithRealOsObject.extractLinuxDistroNameFromFiles(etcFiles);
+        assertEquals("fedora", distroFound.get());
+    }
+
     private ImageComponentHierarchy doExtractImageLayersTest(final boolean excludePlatform) throws IOException, IntegrationException {
         final String imageName = "alpine";
         final String imageTag = "latest";
