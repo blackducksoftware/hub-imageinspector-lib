@@ -84,7 +84,7 @@ public class ImageInspectorApiIntTest {
     public void testOnWrongOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
         try {
-            imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, "CENTOS", null);
+            imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "CENTOS", null);
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
@@ -98,7 +98,7 @@ public class ImageInspectorApiIntTest {
         Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
 
-        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, "ALPINE", null);
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "ALPINE", null);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
         assertEquals(PROJECT, bdioDocument.project.name);
         assertEquals(PROJECT_VERSION, bdioDocument.project.version);
