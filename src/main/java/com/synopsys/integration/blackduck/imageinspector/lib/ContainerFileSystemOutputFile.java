@@ -2,7 +2,9 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +23,12 @@ public class ContainerFileSystemOutputFile {
         containerFileSys.writeToTarGz(containerFileSystemTarFile);
     }
 
-    public static void createImageWrappedContainerFileSystemTar(final File targetImageFileSystemRootDir, final String imageWrappedContainerFileSystemOutputPath) {
-
+    public static void createImageWrappedContainerFileSystemTar(final File targetImageFileSystemRootDir, final String imageWrappedContainerFileSystemOutputPath) throws IOException {
+        logger.info("Including image-wrapped container file system in output");
+        final File dockerfileDir = targetImageFileSystemRootDir.getParentFile();
+        final File dockerfile = new File(dockerfileDir, "Dockerfile");
+        final String dockerfileContents = String.format("FROM scratch\nCOPY %s .", targetImageFileSystemRootDir.getName());
+        FileUtils.writeStringToFile(dockerfile, dockerfileContents, StandardCharsets.UTF_8);
+        // TODO: docker build -t repo:tag .
     }
 }
