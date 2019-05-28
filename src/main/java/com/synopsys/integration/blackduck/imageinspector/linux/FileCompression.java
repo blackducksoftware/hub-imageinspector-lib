@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -48,6 +49,20 @@ public class FileCompression {
                 fOut.close();
             }
         }
+    }
+
+    public static void gZipFile(final File fileToCompress, final File compressedFile) throws IOException {
+        final byte[] buffer = new byte[1024];
+        final FileOutputStream fileOutputStream = new FileOutputStream(compressedFile);
+        final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fileOutputStream);
+        final FileInputStream fileInputStream = new FileInputStream(fileToCompress);
+        int bytesRead;
+        while ((bytesRead = fileInputStream.read(buffer)) > 0) {
+            gzipOutputStream.write(buffer, 0, bytesRead);
+        }
+        fileInputStream.close();
+        gzipOutputStream.finish();;
+        gzipOutputStream.close();
     }
 
     private static void addFileToTar(final TarArchiveOutputStream tOut, final File fileToAdd, final String base) throws IOException {
