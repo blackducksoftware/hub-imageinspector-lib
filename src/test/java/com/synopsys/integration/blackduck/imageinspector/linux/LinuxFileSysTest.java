@@ -6,23 +6,22 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.compress.compressors.CompressorException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public class FileSysTest {
+public class LinuxFileSysTest {
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpBeforeClass() throws Exception {
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownAfterClass() throws Exception {
     }
 
     @Test
-    public void test() throws CompressorException, IOException {
+    public void testWriteToTarGz() throws IOException {
         final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/imageDir"), new FileOperations());
         final File outputTarFile = new File("test/containerFileSystem.tar.gz");
         outputTarFile.delete();
@@ -30,5 +29,4 @@ public class FileSysTest {
         fSys.writeToTarGz(outputTarFile);
         assertTrue(outputTarFile.exists());
     }
-
 }
