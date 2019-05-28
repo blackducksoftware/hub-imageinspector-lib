@@ -17,8 +17,8 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileCompression {
-    private static final Logger logger = LoggerFactory.getLogger(FileCompression.class);
+public class CompressedFile {
+    private static final Logger logger = LoggerFactory.getLogger(CompressedFile.class);
 
     public static void writeDirToTarGz(final FileOperations fileOperations, final File dir, final File outputTarGzFile) throws IOException {
         outputTarGzFile.getParentFile().mkdirs();

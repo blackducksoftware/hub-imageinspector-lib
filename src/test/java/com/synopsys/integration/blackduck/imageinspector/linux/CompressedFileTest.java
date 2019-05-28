@@ -11,7 +11,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class FileCompressionTest {
+public class CompressedFileTest {
     private static File fileToCompress;
     private static File compressedFile;
 
@@ -34,7 +34,7 @@ public class FileCompressionTest {
     public void test() throws IOException {
         assertTrue(fileToCompress.exists());
         assertFalse(compressedFile.exists());
-        FileCompression.gZipFile(fileToCompress, compressedFile);
+        CompressedFile.gZipFile(fileToCompress, compressedFile);
         assertTrue(compressedFile.exists());
         assertEquals("fileToCompress.txt.gz", compressedFile.getName());
     }

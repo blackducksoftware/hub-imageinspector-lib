@@ -53,7 +53,7 @@ public class LinuxFileSystem extends Stringable {
     }
 
     public void writeToTarGz(final File outputTarFile) throws IOException {
-        FileCompression.writeDirToTarGz(fileOperations, root, outputTarFile);
+        CompressedFile.writeDirToTarGz(fileOperations, root, outputTarFile);
     }
 
 }
