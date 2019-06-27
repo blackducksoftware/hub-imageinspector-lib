@@ -2,15 +2,17 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.lay
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class LinkLayerEntryTest {
   private static FileOperations fileOperations;
@@ -33,6 +35,23 @@ public class LinkLayerEntryTest {
     Optional<File> fileToRemove = layerEntry.process();
     Path startLinkPath = new File(new File("test/output/testFileName").getAbsolutePath()).toPath();
     Path endLinkPath = new File(new File("test/output/testLinkName").getAbsolutePath()).toPath();
+    Mockito.verify(fileOperations).createSymbolicLink(startLinkPath, endLinkPath);
+    assertEquals(Optional.empty(), fileToRemove);
+  }
+
+  @Test
+  public void testRelSymbolicLink() throws IOException {
+    final TarArchiveEntry archiveEntry = Mockito.mock(TarArchiveEntry.class);
+    Mockito.when(archiveEntry.getName()).thenReturn("testFileName");
+    Mockito.when(archiveEntry.isFile()).thenReturn(true);
+    Mockito.when(archiveEntry.getLinkName()).thenReturn("../sisterDir/testFileName");
+    Mockito.when(archiveEntry.isSymbolicLink()).thenReturn(true);
+    Mockito.when(archiveEntry.isLink()).thenReturn(false);
+    final File layerOutputDir = new File("test/output");
+    final LayerEntry layerEntry = new LinkLayerEntry(fileOperations, archiveEntry, layerOutputDir);
+    Optional<File> fileToRemove = layerEntry.process();
+    Path startLinkPath = new File(new File("test/output/testFileName").getAbsolutePath()).toPath();
+    Path endLinkPath = new File("../sisterDir/testFileName").toPath();
     Mockito.verify(fileOperations).createSymbolicLink(startLinkPath, endLinkPath);
     assertEquals(Optional.empty(), fileToRemove);
   }

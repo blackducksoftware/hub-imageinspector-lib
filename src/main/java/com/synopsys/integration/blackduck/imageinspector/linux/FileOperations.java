@@ -184,4 +184,25 @@ public class FileOperations {
     public boolean createNewFile(final File newFile) throws IOException {
         return newFile.createNewFile();
     }
+
+    public void pruneDanglingSymLinksRecursively(final File dir) throws IOException {
+        for (final File dirEntry : dir.listFiles()) {
+            final Path dirEntryAsPath = dirEntry.toPath();
+            if (Files.isSymbolicLink(dirEntryAsPath)) {
+                final Path symLinkTargetPath = Files.readSymbolicLink(dirEntryAsPath);
+                final File symLinkTargetFile = new File(dir, symLinkTargetPath.toString());
+                logger.trace(String.format("Found symlink %s -> %s [link value: %s]", dirEntry.getAbsolutePath(), symLinkTargetFile.getAbsolutePath(), symLinkTargetPath));
+                if (!symLinkTargetFile.exists()) {
+                    logger.trace(String.format("Symlink target %s does not exist; deleting %s", symLinkTargetFile.getCanonicalPath(), dirEntry.getCanonicalPath()));
+                    final boolean deleteSucceeded = dirEntry.delete();
+                    if (!deleteSucceeded) {
+                        logger.warn(String.format("Delete of dangling symlink %s failed", dirEntry.getAbsolutePath()));
+                    }
+                }
+            }
+            if (dirEntry.isDirectory()) {
+                pruneDanglingSymLinksRecursively(dirEntry);
+            }
+        }
+    }
 }

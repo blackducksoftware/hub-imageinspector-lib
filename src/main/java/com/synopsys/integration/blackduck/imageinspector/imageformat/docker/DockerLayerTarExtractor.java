@@ -44,18 +44,23 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 public class DockerLayerTarExtractor {
     private static final Logger logger = LoggerFactory.getLogger(DockerLayerTarExtractor.class);
 
-    public List<File> extractLayerTarToDir(final FileOperations fileOperations, final File layerTar, final File layerOutputDir) throws IOException {
-        logger.debug(String.format("layerTar: %s", layerTar.getAbsolutePath()));
+    public List<File> extractLayerTarToDir(final File tarFile, final File outputDir) throws IOException {
+        final FileOperations fileOperations = new FileOperations();
+        return extractLayerTarToDir(fileOperations, tarFile, outputDir);
+    }
+
+    public List<File> extractLayerTarToDir(final FileOperations fileOperations, final File tarFile, final File outputDir) throws IOException {
+        logger.debug(String.format("tarFile: %s", tarFile.getAbsolutePath()));
         final List<File> filesToRemove = new ArrayList<>();
-        final TarArchiveInputStream layerInputStream = new TarArchiveInputStream(new FileInputStream(layerTar), "UTF-8");
+        final TarArchiveInputStream tarFileInputStream = new TarArchiveInputStream(new FileInputStream(tarFile), "UTF-8");
         try {
-            layerOutputDir.mkdirs();
-            logger.debug(String.format("layerOutputDir: %s", layerOutputDir.getAbsolutePath()));
-            TarArchiveEntry layerEntry;
-            while (null != (layerEntry = layerInputStream.getNextTarEntry())) {
+            outputDir.mkdirs();
+            logger.debug(String.format("outputDir: %s", outputDir.getAbsolutePath()));
+            TarArchiveEntry tarFileEntry;
+            while (null != (tarFileEntry = tarFileInputStream.getNextTarEntry())) {
                 try {
-                    final LayerEntry layerEntryHandler = LayerEntries.createLayerEntry(fileOperations, layerInputStream, layerEntry, layerOutputDir);
-                    final Optional<File> otherFileToRemove = layerEntryHandler.process();
+                    final LayerEntry tarFileEntryHandler = LayerEntries.createLayerEntry(fileOperations, tarFileInputStream, tarFileEntry, outputDir);
+                    final Optional<File> otherFileToRemove = tarFileEntryHandler.process();
                     if (otherFileToRemove.isPresent()) {
                         logger.debug(String.format("File/directory marked for removal: %s", otherFileToRemove.get().getAbsolutePath()));
                         filesToRemove.add(otherFileToRemove.get());
@@ -65,7 +70,7 @@ public class DockerLayerTarExtractor {
                 }
             }
         } finally {
-            IOUtils.closeQuietly(layerInputStream);
+            IOUtils.closeQuietly(tarFileInputStream);
         }
         return filesToRemove;
     }

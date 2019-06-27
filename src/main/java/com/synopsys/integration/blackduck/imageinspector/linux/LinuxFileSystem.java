@@ -98,8 +98,11 @@ public class LinuxFileSystem extends Stringable {
 
         TarArchiveEntry tarEntry = null;
         if (Files.isSymbolicLink(fileToAdd.toPath())) {
+            final String linkName = Files.readSymbolicLink(fileToAdd.toPath()).toString();
+            logger.trace(String.format("Creating TarArchiveEntry: %s with linkName: %s", entryName, linkName));
             tarEntry = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK);
-            tarEntry.setLinkName(Files.readSymbolicLink(fileToAdd.toPath()).toString());
+            tarEntry.setLinkName(linkName);
+            logger.trace(String.format("Created TarArchiveEntry: %s; is symlink: %b: %s", tarEntry.getName(), tarEntry.isSymbolicLink(), tarEntry.getLinkName()));
         } else {
             tarEntry = new TarArchiveEntry(fileToAdd, entryName);
         }

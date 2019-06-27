@@ -23,8 +23,9 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 public interface LayerEntry {
-    Optional<File> process();
+    Optional<File> process() throws IOException;
 }

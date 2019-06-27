@@ -2,14 +2,16 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.lay
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class WhiteOutFileLayerEntryTest {
   private static FileOperations fileOperations;
@@ -31,7 +33,7 @@ public class WhiteOutFileLayerEntryTest {
   }
 
   @Test
-  public void testInvalid() {
+  public void testInvalid() throws IOException {
     final TarArchiveEntry archiveEntry = Mockito.mock(TarArchiveEntry.class);
     Mockito.when(archiveEntry.getName()).thenReturn("testInvalidWhitedOutFileName");
     final File layerOutputDir = new File("test/output");
