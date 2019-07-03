@@ -35,7 +35,8 @@ public class LinkLayerEntryTest {
     Optional<File> fileToRemove = layerEntry.process();
     Path startLinkPath = new File(new File("test/output/testFileName").getAbsolutePath()).toPath();
     Path endLinkPath = new File(new File("test/output/testLinkName").getAbsolutePath()).toPath();
-    Mockito.verify(fileOperations).createSymbolicLink(startLinkPath, endLinkPath);
+    Path expectedEndLink = startLinkPath.getParent().relativize(endLinkPath);
+    Mockito.verify(fileOperations).createSymbolicLink(startLinkPath, expectedEndLink);
     assertEquals(Optional.empty(), fileToRemove);
   }
 
