@@ -76,6 +76,8 @@ public class LinuxFileSystem extends Stringable {
             tOut = new TarArchiveOutputStream(gzOut);
             tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
             addFileToTar(tOut, root, "");
+        } catch (Exception unexpectedException) {
+            logger.error(String.format("Unexpected error creating tar.gz file: %s", unexpectedException.getMessage()), unexpectedException);
         } finally {
             if (tOut != null) {
                 tOut.finish();
@@ -93,36 +95,51 @@ public class LinuxFileSystem extends Stringable {
         }
     }
 
-    private void addFileToTar(final TarArchiveOutputStream tOut, final File fileToAdd, final String base) throws IOException {
-        final String entryName = base + fileToAdd.getName();
-
-        TarArchiveEntry tarEntry = null;
-        if (Files.isSymbolicLink(fileToAdd.toPath())) {
-            final String linkName = Files.readSymbolicLink(fileToAdd.toPath()).toString();
-            logger.trace(String.format("Creating TarArchiveEntry: %s with linkName: %s", entryName, linkName));
-            tarEntry = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK);
-            tarEntry.setLinkName(linkName);
-            logger.trace(String.format("Created TarArchiveEntry: %s; is symlink: %b: %s", tarEntry.getName(), tarEntry.isSymbolicLink(), tarEntry.getLinkName()));
-        } else {
-            tarEntry = new TarArchiveEntry(fileToAdd, entryName);
-        }
-        tOut.putArchiveEntry(tarEntry);
-
-        if (Files.isSymbolicLink(fileToAdd.toPath())) {
-            tOut.closeArchiveEntry();
-        } else if (fileToAdd.isFile()) {
-            try (final InputStream fileToAddInputStream = new FileInputStream(fileToAdd)) {
-                IOUtils.copy(fileToAddInputStream, tOut);
+    private void addFileToTar(final TarArchiveOutputStream tOut, final File fileToAdd, final String base) {
+        try {
+            logger.trace(String.format("Adding to tar.gz file: %s", fileToAdd.getAbsolutePath()));
+            final String entryName = base + fileToAdd.getName();
+            TarArchiveEntry tarEntry = null;
+            if (Files.isSymbolicLink(fileToAdd.toPath())) {
+                final String linkName = Files.readSymbolicLink(fileToAdd.toPath()).toString();
+                logger.trace(String.format("Creating TarArchiveEntry: %s with linkName: %s", entryName, linkName));
+                tarEntry = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK);
+                tarEntry.setLinkName(linkName);
+                logger.trace(String.format("Created TarArchiveEntry: %s; is symlink: %b: %s", tarEntry.getName(), tarEntry.isSymbolicLink(), tarEntry.getLinkName()));
+            } else {
+                tarEntry = new TarArchiveEntry(fileToAdd, entryName);
             }
-            tOut.closeArchiveEntry();
-        } else {
-            tOut.closeArchiveEntry();
-            final File[] children = fileToAdd.listFiles();
-            if (children != null) {
-                for (final File child : children) {
-                    logger.trace(String.format("Adding to tar.gz file: %s", child.getAbsolutePath()));
-                    addFileToTar(tOut, child, entryName + "/");
+            logger.trace(String.format("Putting archive entry for %s into archive", fileToAdd.getAbsolutePath()));
+            tOut.putArchiveEntry(tarEntry);
+
+            if (Files.isSymbolicLink(fileToAdd.toPath())) {
+                logger.trace(String.format("Closing archive entry for symlink %s", fileToAdd.getAbsolutePath()));
+                tOut.closeArchiveEntry();
+            } else if (fileToAdd.isFile()) {
+                logger.trace(String.format("Copying data for file %s", fileToAdd.getAbsolutePath()));
+                try (final InputStream fileToAddInputStream = new FileInputStream(fileToAdd)) {
+                    IOUtils.copy(fileToAddInputStream, tOut);
+                } catch (Exception copyException) {
+                    logger.warn(String.format("Unable to copy file to archive: %s: %s", fileToAdd.getAbsolutePath(), copyException.getMessage()), copyException);
                 }
+                logger.trace(String.format("Closing file entry for symlink %s", fileToAdd.getAbsolutePath()));
+                tOut.closeArchiveEntry();
+            } else {
+                logger.trace(String.format("Closing file entry for non-symlink/non-file %s", fileToAdd.getAbsolutePath()));
+                tOut.closeArchiveEntry();
+                final File[] children = fileToAdd.listFiles();
+                if (children != null) {
+                    for (final File child : children) {
+                        addFileToTar(tOut, child, entryName + "/");
+                    }
+                }
+            }
+        } catch (Exception unExpectedException) {
+            logger.warn(String.format("Unable to add file to archive: %s: %s", fileToAdd.getAbsolutePath(), unExpectedException.getMessage()), unExpectedException);
+            try {
+                tOut.closeArchiveEntry();
+                logger.trace("closeArchiveEntry succeeded");
+            } catch (Exception closeArchiveEntryException) {
             }
         }
     }
