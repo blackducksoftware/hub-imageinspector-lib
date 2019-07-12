@@ -29,6 +29,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -36,9 +39,11 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarConstants;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.util.Stringable;
 
 public class LinuxFileSystem extends Stringable {
@@ -62,7 +67,7 @@ public class LinuxFileSystem extends Stringable {
         }
     }
 
-    public void writeToTarGz(final File outputTarFile) throws IOException {
+    public void writeToTarGz(final File outputTarFile, final String containerFileSystemExcludedPathListString) throws IOException {
         outputTarFile.getParentFile().mkdirs();
         fileOperations.logFileOwnerGroupPerms(outputTarFile.getParentFile());
         FileOutputStream fOut = null;
@@ -75,7 +80,9 @@ public class LinuxFileSystem extends Stringable {
             gzOut = new GzipCompressorOutputStream(bOut);
             tOut = new TarArchiveOutputStream(gzOut);
             tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
-            addFileToTar(tOut, root, "");
+            final List<String> containerFileSystemExcludedPathList = cleanPaths(getListFromCommaSeparatedString(containerFileSystemExcludedPathListString));
+            final String rootName = root.getName();
+            addFileToTar(tOut, rootName, root, null, containerFileSystemExcludedPathList);
         } catch (Exception unexpectedException) {
             logger.error(String.format("Unexpected error creating tar.gz file: %s", unexpectedException.getMessage()), unexpectedException);
         } finally {
@@ -95,10 +102,16 @@ public class LinuxFileSystem extends Stringable {
         }
     }
 
-    private void addFileToTar(final TarArchiveOutputStream tOut, final File fileToAdd, final String base) {
+    private void addFileToTar(final TarArchiveOutputStream tOut, final String rootName, final File fileToAdd, String base, final List<String> containerFileSystemExcludedPathList) {
         try {
             logger.trace(String.format("Adding to tar.gz file: %s", fileToAdd.getAbsolutePath()));
+            base = base == null ? "" : base;
             final String entryName = base + fileToAdd.getName();
+            final String entryNameMadeAbsolute = toAbsolute(rootName, entryName);
+            if (containerFileSystemExcludedPathList.contains(entryNameMadeAbsolute)) {
+                logger.info(String.format("Pruning %s from tar file because it maps to excluded path %s", fileToAdd.getAbsolutePath(), entryNameMadeAbsolute));
+                return;
+            }
             TarArchiveEntry tarEntry = null;
             if (Files.isSymbolicLink(fileToAdd.toPath())) {
                 final String linkName = Files.readSymbolicLink(fileToAdd.toPath()).toString();
@@ -130,7 +143,7 @@ public class LinuxFileSystem extends Stringable {
                 final File[] children = fileToAdd.listFiles();
                 if (children != null) {
                     for (final File child : children) {
-                        addFileToTar(tOut, child, entryName + "/");
+                        addFileToTar(tOut, rootName, child, entryName + "/", containerFileSystemExcludedPathList);
                     }
                 }
             }
@@ -142,5 +155,33 @@ public class LinuxFileSystem extends Stringable {
             } catch (Exception closeArchiveEntryException) {
             }
         }
+    }
+
+    private String toAbsolute(final String rootName, final String entryName) throws IntegrationException {
+        if (!entryName.startsWith(rootName)) {
+            throw new IntegrationException(String.format("Error converting entryName %s to absolute path for rootName %s: entryName should start with rootName", entryName, rootName));
+        }
+        final String absolutePath = entryName.substring(rootName.length());
+        return absolutePath;
+    }
+
+    private List<String> getListFromCommaSeparatedString(final String containerFileSystemExcludedPathListString) {
+        if (StringUtils.isBlank(containerFileSystemExcludedPathListString)) {
+            return new ArrayList<>(0);
+        }
+        return Arrays.asList(containerFileSystemExcludedPathListString.split(","));
+    }
+
+    private List<String> cleanPaths(final List<String> rawPaths) {
+        final List<String> cleanedPaths = new ArrayList<>(rawPaths.size());
+        for (final String rawPath : rawPaths) {
+            final String cleanedPath = rawPath.endsWith("/") ? removeFinalCharacter(rawPath) : rawPath;
+            cleanedPaths.add(cleanedPath);
+        }
+        return cleanedPaths;
+    }
+
+    private String removeFinalCharacter(final String rawPath) {
+        return rawPath.substring(0, rawPath.length() - 1);
     }
 }

@@ -117,7 +117,7 @@ public class ImageInspectorApiTest {
             codeLocationPrefix, dockerImageName, dockerTagName,
             organizeComponentsByLayer,
             includeRemovedComponents,
-            cleanupWorkingDir, containerFileSystemOutputPath, currentLinuxDistro, null);
+            cleanupWorkingDir, containerFileSystemOutputPath, null, currentLinuxDistro, null);
     assertEquals(blackDuckProjectName, result.project.name);
     assertEquals(blackDuckProjectVersion, result.project.version);
   }
