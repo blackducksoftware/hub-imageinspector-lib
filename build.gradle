@@ -5,7 +5,7 @@ buildscript {
         maven { url 'https://plugins.gradle.org/m2/' }
     }
     dependencies {
-		classpath "com.blackducksoftware.integration:common-gradle-plugin:0.0.55"
+		classpath "com.blackducksoftware.integration:common-gradle-plugin:0.0.+"
 		classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
 		classpath 'com.bmuschko:gradle-docker-plugin:3.0.6'
     }
@@ -13,7 +13,7 @@ buildscript {
 
 apply plugin: "io.spring.dependency-management"
 
-version = '10.0.1'
+version = '10.0.1-SNAPSHOT'
 apply plugin: 'com.blackducksoftware.integration.library'
 
 dependencyManagement {
