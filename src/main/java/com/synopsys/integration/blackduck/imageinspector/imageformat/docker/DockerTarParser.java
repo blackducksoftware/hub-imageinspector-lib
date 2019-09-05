@@ -215,7 +215,7 @@ public class DockerTarParser {
                 if (isPlatformTopLayer) {
                     imageComponentHierarchy.setPlatformTopLayerIndex(layerIndex);
                 }
-                imageInfoParsed = addPostLayerComponents(layerIndex, currentOs, imageComponentHierarchy, containerFileSystemRootDir, layerMetadataFileContents, layerCmd,
+                imageInfoParsed = addPostLayerComponents(layerIndex, currentOs, imageInfoParsed, imageComponentHierarchy, containerFileSystemRootDir, layerMetadataFileContents, layerCmd,
                     manifestLayerMapping.getLayerExternalId(layerIndex), isPlatformTopLayer);
                 if (isPlatformTopLayer) {
                     logger.info(String.format("Layer %s is the top layer of the platform. Components present after adding this layer will be omitted from results", platformTopLayerExternalId));
@@ -340,7 +340,7 @@ public class DockerTarParser {
         return layerMetadataFileContents;
     }
 
-    private ImageInfoParsed addPostLayerComponents(final int layerIndex, final ImageInspectorOsEnum currentOs,
+    private ImageInfoParsed addPostLayerComponents(final int layerIndex, final ImageInspectorOsEnum currentOs, ImageInfoParsed imageInfoParsed,
         final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents,
         final List<String> layerCmd, final String layerExternalId,
         boolean isPlatformTopLayer) throws WrongInspectorOsException {
@@ -349,15 +349,19 @@ public class DockerTarParser {
             logger.debug(String.format("Current (running on) OS not provided; cannot determine components present after adding layer %s", layerExternalId));
             return null;
         }
-        ImageInfoParsed imageInfoParsed = null;
-        ImageInspectorOsEnum neededInspectorOs;
+
         try {
-            imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
-            neededInspectorOs = PackageManagerToImageInspectorOsMapping
-                                    .getImageInspectorOs(imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
-            if (!neededInspectorOs.equals(currentOs)) {
-                final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
-                throw new WrongInspectorOsException(neededInspectorOs, msg);
+            if (imageInfoParsed == null) {
+                logger.trace("Attempting to determine the target image package manager");
+                imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
+                final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
+                                        .getImageInspectorOs(imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
+                if (!neededInspectorOs.equals(currentOs)) {
+                    final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
+                    throw new WrongInspectorOsException(neededInspectorOs, msg);
+                }
+            } else {
+                logger.trace(String.format("The target image package manager has previously been determined: %s", imageInfoParsed.getImagePkgMgrDatabase().getPackageManager().toString()));
             }
             final List<ComponentDetails> comps;
             try {
