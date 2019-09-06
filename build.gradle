@@ -18,7 +18,7 @@ project.ext.junitShowStandardStreams = 'true'
 
 apply plugin: "io.spring.dependency-management"
 
-version = '10.0.4'
+version = '10.0.5-SNAPSHOT'
 
 dependencyManagement {
     imports {
