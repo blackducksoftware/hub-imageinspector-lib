@@ -113,18 +113,18 @@ public class BdioGenerator {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             Dependency layerDependency = addLayerDependency(graph, layer.getLayerIndexedName());
-            logger.debug(String.format("Created layer node: %s", layerDependency.name));
+            logger.trace(String.format("Created layer node: %s", layerDependency.name));
             for (final ComponentDetails comp : layer.getComponents()) {
                 if (imageComponentHierarchy.getFinalComponents().contains(comp)) {
-                    logger.debug(String.format("layer comp %s:%s is in final components list; including it in this layer", comp.getName(), comp.getVersion()));
+                    logger.trace(String.format("layer comp %s:%s is in final components list; including it in this layer", comp.getName(), comp.getVersion()));
                     addDependency(graph, layerDependency, comp);
                 } else {
-                    logger.debug(String.format("layer comp %s:%s is not in final component list", comp.getName(), comp.getVersion()));
+                    logger.trace(String.format("layer comp %s:%s is not in final component list", comp.getName(), comp.getVersion()));
                     if (includeRemovedComponents) {
-                        logger.debug(String.format("\tIncluding it in this layer"));
+                        logger.trace(String.format("\tIncluding it in this layer"));
                         addDependency(graph, layerDependency, comp);
                     } else {
-                        logger.debug(String.format("\tExcluding it from this layer"));
+                        logger.trace(String.format("\tExcluding it from this layer"));
                     }
                 }
             }
@@ -152,7 +152,7 @@ public class BdioGenerator {
 
     private void addDependency(final MutableDependencyGraph graph, final Dependency parent, final ComponentDetails comp) {
         final Forge componentForge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
-        logger.debug(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge.getName()));
+        logger.trace(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge.getName()));
         addCompDependencyWithGivenForge(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge, parent);
     }
 

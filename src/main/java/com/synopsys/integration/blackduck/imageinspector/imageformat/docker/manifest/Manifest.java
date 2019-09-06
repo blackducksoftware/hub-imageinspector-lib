@@ -66,7 +66,7 @@ public class Manifest {
         logger.debug(String.format("getLayerMappings(): images.size(): %d", images.size()));
         validateImageSpecificity(images, targetImageName, targetTagName);
         for (final ImageInfo image : images) {
-            logger.debug(String.format("getLayerMappings(): image: %s", image));
+            logger.trace(String.format("getLayerMappings(): image: %s", image));
             final String foundRepoTag = findRepoTag(images.size(), image, targetImageName, targetTagName);
             if (foundRepoTag == null) {
                 continue;
@@ -82,7 +82,7 @@ public class Manifest {
     private String findRepoTag(final int numImages, final ImageInfo image, final String targetImageName, final String targetTagName) throws IntegrationException {
         // user didn't specify which image, and there is only one: return it
         if (numImages == 1 && StringUtils.isBlank(targetImageName) && StringUtils.isBlank(targetTagName)) {
-            logger.debug(String.format("User did not specify a repo:tag, and there's only one imamge; inspecting that one: %s", getRepoTag(image)));
+            logger.debug(String.format("User did not specify a repo:tag, and there's only one image; inspecting that one: %s", getRepoTag(image)));
             return getRepoTag(image);
         }
         final String targetRepoTag = deriveSpecifiedRepoTag(targetImageName, targetTagName);
@@ -110,7 +110,7 @@ public class Manifest {
             layerIds.add(layer.substring(0, layer.indexOf('/')));
         }
         final ManifestLayerMapping mapping = manifestLayerMappingFactory.createManifestLayerMapping(imageName, tagName, image.config, layerIds);
-        logger.debug(String.format("Found layer mapping: Image %s, Tag %s, Layers: %s", mapping.getImageName(), mapping.getTagName(), mapping.getLayerInternalIds()));
+        logger.trace(String.format("Found layer mapping: Image %s, Tag %s, Layers: %s", mapping.getImageName(), mapping.getTagName(), mapping.getLayerInternalIds()));
         return mapping;
     }
 
@@ -135,12 +135,12 @@ public class Manifest {
         final List<ImageInfo> images = new ArrayList<>();
         logger.debug("getManifestContents(): extracting manifest file content");
         final String manifestContentString = extractManifestFileContent(dockerTarFileName);
-        logger.debug(String.format("getManifestContents(): parsing: %s", manifestContentString));
+        logger.trace(String.format("getManifestContents(): parsing: %s", manifestContentString));
         final JsonParser parser = new JsonParser();
         final JsonArray manifestContent = parser.parse(manifestContentString).getAsJsonArray();
         final Gson gson = new Gson();
         for (final JsonElement element : manifestContent) {
-            logger.debug(String.format("getManifestContents(): element: %s", element.toString()));
+            logger.trace(String.format("getManifestContents(): element: %s", element.toString()));
             images.add(gson.fromJson(element, ImageInfo.class));
         }
         return images;

@@ -39,14 +39,14 @@ public class ImageConfigParser {
 
     public List<String> parseExternalLayerIds(final GsonBuilder gsonBuilder, final String imageConfigFileContents) {
         try {
-            logger.debug(String.format("imageConfigFileContents: %s", imageConfigFileContents));
+            logger.trace(String.format("imageConfigFileContents: %s", imageConfigFileContents));
             JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(imageConfigFileContents, JsonObject.class);
             JsonObject rootFsJsonObj = imageConfigJsonObj.getAsJsonObject("rootfs");
             JsonArray layerIdsJsonArray = rootFsJsonObj.getAsJsonArray("diff_ids");
             final int numLayers = layerIdsJsonArray.size();
             final List<String> layerIds = new ArrayList<>(numLayers);
             for (int i = 0; i < numLayers; i++) {
-                logger.debug(String.format("layer ID: %s", layerIdsJsonArray.get(i).getAsString()));
+                logger.trace(String.format("layer ID: %s", layerIdsJsonArray.get(i).getAsString()));
                 layerIds.add(layerIdsJsonArray.get(i).getAsString());
             }
             return layerIds;

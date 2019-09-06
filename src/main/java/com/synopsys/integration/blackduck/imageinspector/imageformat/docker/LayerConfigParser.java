@@ -43,19 +43,19 @@ public class LayerConfigParser {
             if (StringUtils.isBlank(layerConfigFileContents)) {
                 return null;
             }
-            logger.debug(String.format("layerConfigFileContents: %s", layerConfigFileContents));
+            logger.trace(String.format("layerConfigFileContents: %s", layerConfigFileContents));
             JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(layerConfigFileContents, JsonObject.class);
             JsonObject containerConfigJsonObj = imageConfigJsonObj.getAsJsonObject("container_config");
             JsonArray cmdPartsJsonArray = containerConfigJsonObj.getAsJsonArray("Cmd");
             final int numParts = cmdPartsJsonArray.size();
             final List<String> cmdParts = new ArrayList<>(numParts);
             for (int i = 0; i < numParts; i++) {
-                logger.debug(String.format("layer cmd part: %s", cmdPartsJsonArray.get(i).getAsString()));
+                logger.trace(String.format("layer cmd part: %s", cmdPartsJsonArray.get(i).getAsString()));
                 cmdParts.add(cmdPartsJsonArray.get(i).getAsString());
             }
             return cmdParts;
         } catch (Exception e) {
-            logger.debug(String.format("Error parsing layer cmd from layer config file contents: %s", e.getMessage()));
+            logger.trace(String.format("Error parsing layer cmd from layer config file contents: %s", e.getMessage()));
         }
         return null;
     }

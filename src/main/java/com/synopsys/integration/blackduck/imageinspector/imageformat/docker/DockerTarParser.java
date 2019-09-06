@@ -181,7 +181,7 @@ public class DockerTarParser {
         String configFileContents = null;
         File tarContentsDirectory = new File(tarExtractionDirectory, tarFileName);
         for (File tarFileContentsFile : fileOperations.listFilesInDir(tarContentsDirectory)) {
-            logger.debug(String.format("File %s", tarFileContentsFile.getName()));
+            logger.trace(String.format("File %s", tarFileContentsFile.getName()));
             if ("manifest.json".equals(tarFileContentsFile.getName())) {
                 try {
                     manifestFileContents = FileUtils.readFileToString(tarFileContentsFile, StandardCharsets.UTF_8);
@@ -241,7 +241,7 @@ public class DockerTarParser {
     private boolean isThisThePlatformTopLayer(final ManifestLayerMapping manifestLayerMapping, final String platformTopLayerExternalId, final int layerIndex) {
         final String currentLayerExternalId = manifestLayerMapping.getLayerExternalId(layerIndex);
         boolean isTop = (platformTopLayerExternalId != null) && platformTopLayerExternalId.equals(currentLayerExternalId);
-        logger.debug(String.format("Results of test for top of platform: layerIndex: %d, platformTopLayerExternalId: %s, currentLayerExternalId: %s, isTop: %b", layerIndex, platformTopLayerExternalId, currentLayerExternalId, isTop));
+        logger.trace(String.format("Results of test for top of platform: layerIndex: %d, platformTopLayerExternalId: %s, currentLayerExternalId: %s, isTop: %b", layerIndex, platformTopLayerExternalId, currentLayerExternalId, isTop));
         return isTop;
     }
 
@@ -260,7 +260,7 @@ public class DockerTarParser {
             final File imageConfigFile = new File(tarExtractionDirectory, imageConfigFileName);
             final String imageConfigFileContents = fileOperations
                                                        .readFileToString(imageConfigFile);
-            logger.debug(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
+            logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
             final List<String> externalLayerIds = imageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents);
             return externalLayerIds;
         } catch (Exception e) {
@@ -303,10 +303,10 @@ public class DockerTarParser {
         final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(fileOperations, layerTar, containerFileSystemRootDir);
         for (final File fileToRemove : filesToRemove) {
             if (fileToRemove.isDirectory()) {
-                logger.debug(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));
+                logger.trace(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));
                 FileUtils.deleteDirectory(fileToRemove);
             } else {
-                logger.debug(String.format("Removing file marked for deletion: %s", fileToRemove.getAbsolutePath()));
+                logger.trace(String.format("Removing file marked for deletion: %s", fileToRemove.getAbsolutePath()));
                 fileOperations.deleteQuietly(fileToRemove);
             }
         }
@@ -317,7 +317,7 @@ public class DockerTarParser {
         File layerTar = null;
         for (final File candidateLayerTar : layerTars) {
             if (layer.equals(candidateLayerTar.getParentFile().getName())) {
-                logger.debug(String.format("Found layer tar for layer %s", layer));
+                logger.trace(String.format("Found layer tar for layer %s", layer));
                 layerTar = candidateLayerTar;
                 break;
             }
@@ -332,10 +332,10 @@ public class DockerTarParser {
         try {
             if (metadataFile.exists()) {
                 layerMetadataFileContents = FileUtils.readFileToString(metadataFile, StandardCharsets.UTF_8);
-                logger.debug(String.format("%s: %s", metadataFile.getAbsolutePath(), layerMetadataFileContents));
+                logger.trace(String.format("%s: %s", metadataFile.getAbsolutePath(), layerMetadataFileContents));
             }
         } catch (IOException e) {
-            logger.debug(String.format("Unable to log contents of %s: %s", metadataFile.getAbsolutePath(), e.getMessage()));
+            logger.trace(String.format("Unable to log contents of %s: %s", metadataFile.getAbsolutePath(), e.getMessage()));
         }
         return layerMetadataFileContents;
     }
@@ -344,9 +344,10 @@ public class DockerTarParser {
         final ImageComponentHierarchy imageComponentHierarchy, final File targetImageFileSystemRootDir, final String layerMetadataFileContents,
         final List<String> layerCmd, final String layerExternalId,
         boolean isPlatformTopLayer) throws WrongInspectorOsException {
-        logger.debug(String.format("Getting components present (so far) after adding layer %s", layerExternalId));
+        logger.debug(String.format("Getting components present (so far) after adding layer %d", layerIndex));
+        logger.trace(String.format("Layer ID: %s", layerExternalId));
         if (currentOs == null) {
-            logger.debug(String.format("Current (running on) OS not provided; cannot determine components present after adding layer %s", layerExternalId));
+            logger.debug(String.format("Current (running on) OS not provided; cannot determine components present after adding layer %d", layerIndex));
             return null;
         }
 
@@ -368,12 +369,12 @@ public class DockerTarParser {
                 final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(executor, imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());
                 comps = imageInfoParsed.getPkgMgr().extractComponentsFromPkgMgrOutput(imageInfoParsed.getFileSystemRootDir(), imageInfoParsed.getLinuxDistroName(), pkgMgrOutputLines);
             } catch (IntegrationException e) {
-                logger.debug(String.format("Unable to log components present after layer %s: %s", layerExternalId, e.getMessage()));
+                logger.debug(String.format("Unable to log components present after layer %d: %s", layerIndex, e.getMessage()));
                 return imageInfoParsed;
             }
             logger.info(String.format("Found %d components in file system after adding layer %s (cmd: %s):", comps.size(), layerExternalId, layerCmd));
             for (ComponentDetails comp : comps) {
-                logger.debug(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
+                logger.trace(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }
             LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd, comps);
             imageComponentHierarchy.addLayer(layer);
@@ -383,11 +384,11 @@ public class DockerTarParser {
         } catch (final WrongInspectorOsException wrongOsException) {
             throw wrongOsException;
         } catch (final PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
-            logger.debug(String.format("Unable to collect components present after layer %s: The file system is not yet populated with the linux distro and package manager files: %s", layerExternalId, pkgMgrDataNotFoundException.getMessage()));
+            logger.debug(String.format("Unable to collect components present after layer %d: The file system is not yet populated with the linux distro and package manager files: %s", layerIndex, pkgMgrDataNotFoundException.getMessage()));
             LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd,  null);
             imageComponentHierarchy.addLayer(layer);
         } catch (final Exception otherException) {
-            logger.debug(String.format("Unable to collect components present after layer %s", layerExternalId));
+            logger.debug(String.format("Unable to collect components present after layer %d", layerIndex));
             LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd,  null);
             imageComponentHierarchy.addLayer(layer);
         }
