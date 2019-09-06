@@ -353,7 +353,7 @@ public class DockerTarParser {
 
         try {
             if (imageInfoParsed == null) {
-                logger.trace("Attempting to determine the target image package manager");
+                logger.debug("Attempting to determine the target image package manager");
                 imageInfoParsed = parseImageInfo(targetImageFileSystemRootDir);
                 final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
                                         .getImageInspectorOs(imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
@@ -362,7 +362,7 @@ public class DockerTarParser {
                     throw new WrongInspectorOsException(neededInspectorOs, msg);
                 }
             } else {
-                logger.trace(String.format("The target image package manager has previously been determined: %s", imageInfoParsed.getImagePkgMgrDatabase().getPackageManager().toString()));
+                logger.debug(String.format("The target image package manager has previously been determined: %s", imageInfoParsed.getImagePkgMgrDatabase().getPackageManager().toString()));
             }
             final List<ComponentDetails> comps;
             try {
@@ -372,7 +372,7 @@ public class DockerTarParser {
                 logger.debug(String.format("Unable to log components present after layer %d: %s", layerIndex, e.getMessage()));
                 return imageInfoParsed;
             }
-            logger.info(String.format("Found %d components in file system after adding layer %s (cmd: %s):", comps.size(), layerExternalId, layerCmd));
+            logger.info(String.format("Found %d components in file system after adding layer %d", comps.size(), layerIndex));
             for (ComponentDetails comp : comps) {
                 logger.trace(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }

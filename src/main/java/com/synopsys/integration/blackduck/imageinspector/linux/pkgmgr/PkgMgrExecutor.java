@@ -42,9 +42,9 @@ public class PkgMgrExecutor {
     private final ReentrantLock lock = new ReentrantLock();
 
     public String[] runPackageManager(final CmdExecutor executor, final PkgMgr pkgMgr, final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
-        logger.debug("Requesting lock for package manager execution");
+        logger.trace("Requesting lock for package manager execution");
         lock.lock();
-        logger.debug("Acquired lock for package manager execution");
+        logger.trace("Acquired lock for package manager execution");
         try {
             final File packageManagerDirectory = pkgMgr.getInspectorPackageManagerDirectory();
             if (packageManagerDirectory.exists()) {
@@ -61,7 +61,7 @@ public class PkgMgrExecutor {
         } finally {
             logger.debug("Finished package manager execution");
             lock.unlock();
-            logger.debug("Released lock after package manager execution");
+            logger.trace("Released lock after package manager execution");
         }
     }
 

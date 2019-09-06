@@ -218,23 +218,23 @@ public class ImageInspectorApi {
     }
 
     private void logLayers(final ImageComponentHierarchy imageComponentHierarchy) {
-        if (!logger.isDebugEnabled()) {
+        if (!logger.isTraceEnabled()) {
             return;
         }
-        logger.debug(String.format("layer dump:"));
+        logger.trace(String.format("layer dump:"));
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             if (layer == null) {
-                logger.debug("Layer is null");
+                logger.trace("Layer is null");
             } else if (layer.getComponents() == null) {
-                logger.debug(String.format("layer %s has no componenents", layer.getLayerIndexedName()));
+                logger.trace(String.format("layer %s has no componenents", layer.getLayerIndexedName()));
             } else {
-                logger.debug(String.format("Layer %s has %d components; layer cmd: %s", layer.getLayerIndexedName(), layer.getComponents().size(), layer.getLayerCmd()));
+                logger.trace(String.format("Layer %s has %d components; layer cmd: %s", layer.getLayerIndexedName(), layer.getComponents().size(), layer.getLayerCmd()));
             }
         }
         if (imageComponentHierarchy.getFinalComponents() == null) {
-            logger.debug(String.format("Final image components list not set"));
+            logger.trace(String.format("Final image components list not set"));
         } else {
-            logger.debug(String.format("Final image components list has %d components", imageComponentHierarchy.getFinalComponents().size()));
+            logger.trace(String.format("Final image components list has %d components", imageComponentHierarchy.getFinalComponents().size()));
         }
     }
 

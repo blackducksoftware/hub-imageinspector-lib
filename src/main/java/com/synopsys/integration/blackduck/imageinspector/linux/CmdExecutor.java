@@ -81,7 +81,7 @@ public class CmdExecutor {
             throw new IntegrationException(String.format("Execution of command: %s: Error code: %d: stderr: %s", commandString, exitValue, errorStream.toString(StandardCharsets.UTF_8.name())));
         }
 
-        logger.debug(String.format("Command output: %s", outputStream.toString(StandardCharsets.UTF_8.name())));
+        logger.trace(String.format("Command output: %s", outputStream.toString(StandardCharsets.UTF_8.name())));
         return outputStream.toString(StandardCharsets.UTF_8.name()).split(System.lineSeparator());
     }
 
