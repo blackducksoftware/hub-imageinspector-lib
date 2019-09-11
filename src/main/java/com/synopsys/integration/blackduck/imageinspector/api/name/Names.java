@@ -61,7 +61,15 @@ public class Names {
     }
 
     public static String getContainerFileSystemTarFilename(final String imageNameTag, final String tarPath) {
-        final String containerFilesystemFilenameSuffix = "containerfilesystem.tar.gz";
+        return getContainerOutputTarFileNameUsingBase("containerfilesystem", imageNameTag, tarPath);
+    }
+
+    public static String getContainerFileSystemAppLayersTarFilename(final String imageNameTag, final String tarPath) {
+        return getContainerOutputTarFileNameUsingBase("containerfilesystem_app_only", imageNameTag, tarPath);
+    }
+
+    private static String getContainerOutputTarFileNameUsingBase(final String contentHint, final String imageNameTag, final String tarPath) {
+        final String containerFilesystemFilenameSuffix = String.format("%s.tar.gz", contentHint);
         if (StringUtils.isNotBlank(imageNameTag)) {
             return String.format("%s_%s", cleanImageName(imageNameTag), containerFilesystemFilenameSuffix);
         } else {
