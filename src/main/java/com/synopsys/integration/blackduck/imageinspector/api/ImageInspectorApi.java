@@ -42,6 +42,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
+import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
@@ -198,8 +199,9 @@ public class ImageInspectorApi {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
+        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
         final ImageInspectorOsEnum currentOs = os.deriveOs(currentLinuxDistro);
-        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping, platformTopLayerExternalId);
+        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, platformTopLayerExternalId);
         validatePlatformResults(platformTopLayerExternalId, imageComponentHierarchy);
         logLayers(imageComponentHierarchy);
         cleanUpLayerTars(cleanupWorkingDir, layerTars);

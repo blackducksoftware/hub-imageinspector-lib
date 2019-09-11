@@ -22,6 +22,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
+import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
@@ -40,6 +41,7 @@ public class ImageInspectorApiTest {
     final File tarExtractionDirectory = new File(workingDir, "extractionDir");
     final File containerFileSystemRootDir = new File(tarExtractionDirectory,
         "imageFiles/image_testImageRepo_v_testTag");
+    final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFileSystemRootDir);
     final String tarFilename = "alpine_latest.tar";
     final File dockerTarfile = new File(targetDir, tarFilename);
     final String dockerImageName = "testImageRepo";
@@ -85,12 +87,12 @@ public class ImageInspectorApiTest {
             mapping)).thenReturn(imageComponentHierarchy);
 
     final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(
-        new File("test/working/containerfilesystem"),
+        targetImageFileSystem,
         new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
             PackageManagerEnum.APK), "apline", new ApkPkgMgr(new FileOperations()));
     Mockito.when(imageInspector
         .extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
-            containerFileSystemRootDir,
+            targetImageFileSystem,
             layerTarFiles, mapping, null)).thenReturn(imageInfoParsed);
 
     final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);

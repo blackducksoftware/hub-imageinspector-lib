@@ -45,6 +45,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHiera
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
@@ -119,8 +120,9 @@ public class DockerTarParserIntTest {
         assertEquals(2, layerMapping.getLayerInternalIds().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.CENTOS, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping, null);
-        tarParser.parseImageInfo(targetImageFileSystemRootDir);
+        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
+        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.CENTOS, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
+        tarParser.parseImageInfo(targetImageFileSystem);
         assertEquals("/var/lib/rpm", rpmPkgMgr.getInspectorPackageManagerDirectory().getAbsolutePath());
 
         boolean varLibRpmNameFound = false;
@@ -178,7 +180,8 @@ public class DockerTarParserIntTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystemRootDir, layerTars, layerMapping, null);
+        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
+        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));
@@ -221,10 +224,11 @@ public class DockerTarParserIntTest {
         tarParser.setPkgMgrs(pkgMgrs);
 
         final File containerFilesystemRoot = new File(String.format("src/test/resources/imageDir/%s", imageInspectorDistro));
-        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(containerFilesystemRoot);
+        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFilesystemRoot);
+        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem);
         assertEquals(imageInspectorDistro, imageInfoParsed.getLinuxDistroName());
         assertEquals(packageManagerType, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
         assertEquals(pkgMgrDirName, imageInfoParsed.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());
-        assertEquals(imageInspectorDistro, imageInfoParsed.getFileSystemRootDir().getName());
+        assertEquals(imageInspectorDistro, imageInfoParsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
     }
 }

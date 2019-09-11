@@ -22,8 +22,6 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
-import java.io.File;
-
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
@@ -31,20 +29,20 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 
 // Basic information about an image
 public class ImageInfoParsed {
-    private final File fileSystemRootDir;
+    private final TargetImageFileSystem targetImageFileSystem;
     private final ImagePkgMgrDatabase imagePkgMgrDatabase;
     private final String linuxDistroName;
     private final PkgMgr pkgMgr;
 
-    public ImageInfoParsed(final File fileSystemRootDir, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName, PkgMgr pkgMgr) {
-        this.fileSystemRootDir = fileSystemRootDir;
+    public ImageInfoParsed(final TargetImageFileSystem targetImageFileSystem, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName, PkgMgr pkgMgr) {
+        this.targetImageFileSystem = targetImageFileSystem;
         this.imagePkgMgrDatabase = imagePkgMgrDatabase;
         this.linuxDistroName = linuxDistroName;
         this.pkgMgr = pkgMgr;
     }
 
-    public File getFileSystemRootDir() {
-        return fileSystemRootDir;
+    public TargetImageFileSystem getTargetImageFileSystem() {
+        return targetImageFileSystem;
     }
 
     public ImagePkgMgrDatabase getImagePkgMgrDatabase() {

@@ -25,6 +25,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHiera
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
@@ -217,6 +218,7 @@ public class DockerTarParserTest {
         final String imageConfigFileContents = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);
         final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy(manifestFileContents, imageConfigFileContents);
         final File containerFileSystemRootDir = new File("test/containerFileSystemRoot");
+        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFileSystemRootDir);
         final File dockerLayerTar = new File("src/test/resources/mockDockerTarContents/03b951adf840798cb236a62db6705df7fb2f1e60e6f5fb93499ee8a566bd4114/layer.tar");
         final List<File> layerTars = Arrays.asList(dockerLayerTar);
 
@@ -236,7 +238,7 @@ public class DockerTarParserTest {
         Mockito.when(os.isLinuxDistroFile(osReleaseFile)).thenReturn(Boolean.TRUE);
         Mockito.when(os.getLinxDistroName(osReleaseFile)).thenReturn(Optional.of("alpine"));
         ImageInfoParsed imageInfoParsed = tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
-        containerFileSystemRootDir, layerTars, fullManifestLayerMapping, platformTopLayerId);
+        targetImageFileSystem, layerTars, fullManifestLayerMapping, platformTopLayerId);
         return imageComponentHierarchy;
     }
 }

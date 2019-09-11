@@ -101,11 +101,12 @@ public class ImageInspectorTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
+        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
         final String manifestFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/alpine.tar/manifest.json"), StandardCharsets.UTF_8);
         final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy( manifestFileContents, imageConfigFileContents);
         final GsonBuilder gsonBuilder = new GsonBuilder();
-        imageInspector.extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping, null);
-        Mockito.verify(tarParser).extractImageLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystemRootDir, layerTars, manifestLayerMapping, null);
+        imageInspector.extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, null);
+        Mockito.verify(tarParser).extractImageLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, null);
     }
 
     @Test
@@ -134,6 +135,7 @@ public class ImageInspectorTest {
         final ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(imageRepo, imageTag, imageConfigFileContents, layers);
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
+        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
         final String manifestFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/alpine.tar/manifest.json"), StandardCharsets.UTF_8);
         final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy( manifestFileContents, imageConfigFileContents);
         final BdioGenerator bdioGenerator = new BdioGenerator();
@@ -146,7 +148,7 @@ public class ImageInspectorTest {
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(extractedPackageManagerDirectory, PackageManagerEnum.APK);
         final String linuxDistroName = "alpine";
         final PkgMgr pkgMgr = new ApkPkgMgr(new FileOperations());
-        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystemRootDir, imagePkgMgrDatabase, linuxDistroName, pkgMgr);
+        final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(targetImageFileSystem, imagePkgMgrDatabase, linuxDistroName, pkgMgr);
         final ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
             codeLocationPrefix, organizeComponentsByLayer, includeRemovedComponents, platformComponentsExcluded);
         assertEquals(blackDuckProjectName, imageInfoDerived.getFinalProjectName());

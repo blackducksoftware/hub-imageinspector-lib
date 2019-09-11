@@ -21,10 +21,12 @@ public class ImageInfoDerivedTest {
   public void test() {
     ImagePkgMgrDatabase pkgMgrDb = new ImagePkgMgrDatabase(new File("src/test/resources/imageDir/etc/apk"),
         PackageManagerEnum.APK);
-    ImageInfoParsed parsed = new ImageInfoParsed(new File("src/test/resources/imageDir"),
+    final File targetImageFileSystemRootDir = new File("src/test/resources/imageDir");
+    final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
+    ImageInfoParsed parsed = new ImageInfoParsed(targetImageFileSystem,
         pkgMgrDb, "alpine", new ApkPkgMgr(new FileOperations()));
 
-    assertEquals("imageDir", parsed.getFileSystemRootDir().getName());
+    assertEquals("imageDir", parsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
     assertEquals("alpine", parsed.getLinuxDistroName());
     assertEquals(PackageManagerEnum.APK, parsed.getImagePkgMgrDatabase().getPackageManager());
     assertEquals("apk", parsed.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());
