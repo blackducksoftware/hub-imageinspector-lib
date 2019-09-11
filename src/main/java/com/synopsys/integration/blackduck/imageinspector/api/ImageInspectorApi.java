@@ -199,7 +199,11 @@ public class ImageInspectorApi {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
-        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
+        File targetImageFileSystemAppLayersRootDir = null;
+        if (StringUtils.isNotBlank(platformTopLayerExternalId)) {
+            targetImageFileSystemAppLayersRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemAppLayersRootDirName(imageRepo, imageTag));
+        }
+        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
         final ImageInspectorOsEnum currentOs = os.deriveOs(currentLinuxDistro);
         final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, platformTopLayerExternalId);
         validatePlatformResults(platformTopLayerExternalId, imageComponentHierarchy);
@@ -207,7 +211,7 @@ public class ImageInspectorApi {
         cleanUpLayerTars(cleanupWorkingDir, layerTars);
         ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
             codeLocationPrefix, organizeComponentsByLayer, includeRemovedComponents, StringUtils.isNotBlank(platformTopLayerExternalId));
-        createContainerFileSystemTarIfRequested(targetImageFileSystemRootDir, containerFileSystemOutputPath, containerFileSystemExcludedPathListString);
+        createContainerFileSystemTarIfRequested(targetImageFileSystem, containerFileSystemOutputPath, containerFileSystemExcludedPathListString);
         return imageInfoDerived;
     }
 
@@ -249,13 +253,14 @@ public class ImageInspectorApi {
         }
     }
 
-    private void createContainerFileSystemTarIfRequested(final File targetImageFileSystemRootDir, final String containerFileSystemOutputPath, final String containerFileSystemExcludedPathListString) throws IOException, CompressorException {
+    private void createContainerFileSystemTarIfRequested(final TargetImageFileSystem targetImageFileSystem, final String containerFileSystemOutputPath, final String containerFileSystemExcludedPathListString) throws IOException, CompressorException {
         if (StringUtils.isNotBlank(containerFileSystemOutputPath)) {
             logger.info("Including container file system in output");
             final File outputDirectory = new File(containerFileSystemOutputPath);
             final File containerFileSystemTarFile = new File(containerFileSystemOutputPath);
-            logger.debug(String.format("Creating container filesystem tarfile %s from %s into %s", containerFileSystemTarFile.getAbsolutePath(), targetImageFileSystemRootDir.getAbsolutePath(), outputDirectory.getAbsolutePath()));
-            final LinuxFileSystem containerFileSys = new LinuxFileSystem(targetImageFileSystemRootDir, fileOperations);
+            final File returnedTargetImageFileSystem = targetImageFileSystem.getTargetImageFileSystemAppOnly().orElse(targetImageFileSystem.getTargetImageFileSystemFull());
+            logger.debug(String.format("Creating container filesystem tarfile %s from %s into %s", containerFileSystemTarFile.getAbsolutePath(), returnedTargetImageFileSystem.getAbsolutePath(), outputDirectory.getAbsolutePath()));
+            final LinuxFileSystem containerFileSys = new LinuxFileSystem(returnedTargetImageFileSystem, fileOperations);
             containerFileSys.writeToTarGz(containerFileSystemTarFile, containerFileSystemExcludedPathListString);
         }
     }

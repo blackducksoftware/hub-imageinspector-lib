@@ -1,6 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.compress.compressors.CompressorException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerTarExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageConfigParser;
@@ -25,13 +26,12 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Laye
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
@@ -44,7 +44,8 @@ public class ImageInspectorApiIntTest {
 
     private static final String PROJECT = "SB001";
 
-    private static final String IMAGE_TARFILE = "build/images/test/alpine.tar";
+    private static final String SIMPLE_IMAGE_TARFILE = "build/images/test/alpine.tar";
+    private static final String MULTILAYER_IMAGE_TARFILE = "build/images/test/centos_minus_vim_plus_bacula.tar";
     
     private static Os os;
     private static ImageInspectorApi imageInspectorApi;
@@ -81,10 +82,10 @@ public class ImageInspectorApiIntTest {
     }
 
     @Test
-    public void testOnWrongOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
+    public void testOnWrongOs() throws IntegrationException {
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
         try {
-            imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "CENTOS", null);
+            imageInspectorApi.getBdio(SIMPLE_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "CENTOS", null);
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
@@ -93,12 +94,12 @@ public class ImageInspectorApiIntTest {
     }
 
     @Test
-    public void testOnRightOs() throws IntegrationException, IOException, InterruptedException, CompressorException {
+    public void testOnRightOs() throws IntegrationException {
         Mockito.when(os.isLinuxDistroFile(Mockito.any(File.class))).thenReturn(Boolean.TRUE);
         Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
 
-        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "ALPINE", null);
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(SIMPLE_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "ALPINE", null);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
         assertEquals(PROJECT, bdioDocument.project.name);
         assertEquals(PROJECT_VERSION, bdioDocument.project.version);
@@ -114,5 +115,27 @@ public class ImageInspectorApiIntTest {
                 assertEquals("ca-certificates/20171114-r0/x86_64", comp.bdioExternalIdentifier.externalId);
             }
         }
+    }
+
+    @Test
+    public void testAppOnlyFileSystem() throws IntegrationException, IOException {
+        Mockito.when(os.isLinuxDistroFile(Mockito.any(File.class))).thenReturn(Boolean.TRUE);
+        Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("centos"));
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
+
+        final FileOperations fileOperations = new FileOperations();
+        final File tempDir = fileOperations.createTempDirectory();
+        final File destinationFile = new File(tempDir, "out.tar.gz");
+        final String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
+
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(MULTILAYER_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null,
+            null, null, false, false, false,
+            containerFileSystemOutputFilePath, null, "CENTOS",
+            "sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11");
+
+        final File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
+        System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());
+        assertTrue(containerFileSystemFile.length() > 40000000);
+        assertTrue(containerFileSystemFile.length() < 80000000);
     }
 }

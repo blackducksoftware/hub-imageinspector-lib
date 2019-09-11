@@ -205,22 +205,25 @@ public class DockerTarParser {
         final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
+        boolean inApplicationLayers = false;
         for (final String layerDotTarDirname : manifestLayerMapping.getLayerInternalIds()) {
             logger.trace(String.format("Looking for tar for layer: %s", layerDotTarDirname));
             final File layerTar = getLayerTar(layerTars, layerDotTarDirname);
             if (layerTar != null) {
-                extractLayerTarToDir(targetImageFileSystem, layerTar);
+                extractLayerTarToDir(targetImageFileSystem.getTargetImageFileSystemFull(), layerTar);
+                if (inApplicationLayers && targetImageFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
+                    extractLayerTarToDir(targetImageFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
+                }
                 final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
                 final List<String> layerCmd = layerConfigParser.parseCmd(gsonBuilder, layerMetadataFileContents);
                 final boolean isPlatformTopLayer = isThisThePlatformTopLayer(manifestLayerMapping, platformTopLayerExternalId, layerIndex);
                 if (isPlatformTopLayer) {
                     imageComponentHierarchy.setPlatformTopLayerIndex(layerIndex);
+                    inApplicationLayers = true; // will be true next iteration
+                    logger.info(String.format("Layer %d is the top layer of the platform. Components present after adding this layer will be omitted from results", layerIndex));
                 }
                 imageInfoParsed = addPostLayerComponents(layerIndex, currentOs, imageInfoParsed, imageComponentHierarchy, targetImageFileSystem, layerMetadataFileContents, layerCmd,
                     manifestLayerMapping.getLayerExternalId(layerIndex), isPlatformTopLayer);
-                if (isPlatformTopLayer) {
-                    logger.info(String.format("Layer %s is the top layer of the platform. Components present after adding this layer will be omitted from results", platformTopLayerExternalId));
-                }
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
             }
@@ -299,10 +302,9 @@ public class DockerTarParser {
         return Optional.empty();
     }
 
-    private void extractLayerTarToDir(final TargetImageFileSystem targetImageFileSystem, final File layerTar) throws IOException {
-        final File targetImageFileSystemFull = targetImageFileSystem.getTargetImageFileSystemFull();
-        logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), targetImageFileSystemFull.getAbsolutePath()));
-        final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(fileOperations, layerTar, targetImageFileSystemFull);
+    private void extractLayerTarToDir(final File destinationDir, final File layerTar) throws IOException {
+        logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), destinationDir.getAbsolutePath()));
+        final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(fileOperations, layerTar, destinationDir);
         for (final File fileToRemove : filesToRemove) {
             if (fileToRemove.isDirectory()) {
                 logger.trace(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));

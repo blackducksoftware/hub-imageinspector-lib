@@ -32,6 +32,10 @@ public class Names {
         return String.format("image_%s_v_%s", cleanImageName(imageName), imageTag);
     }
 
+    public static String getTargetImageFileSystemAppLayersRootDirName(final String imageName, final String imageTag) {
+        return String.format("image_app_layers_%s_v_%s", cleanImageName(imageName), imageTag);
+    }
+
     public static String getCodeLocationName(final String codelocationPrefix, final String imageName, final String imageTag, final String pkgMgrName,
         final boolean platformComponentsExcluded) {
         String appQualifier = "";
