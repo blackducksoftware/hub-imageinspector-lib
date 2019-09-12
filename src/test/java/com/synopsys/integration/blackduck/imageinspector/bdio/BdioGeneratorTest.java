@@ -34,7 +34,7 @@ public class BdioGeneratorTest {
     public void testFlatExcludeRemoved() {
         BdioGenerator bdioGenerator = new BdioGenerator();
         ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchy();
-        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, false, false);
+        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, false, false, false);
 
         int componentCount = 0;
         int componentChildCount = 0;
@@ -54,7 +54,7 @@ public class BdioGeneratorTest {
     public void testFlatIncludeRemoved() {
         BdioGenerator bdioGenerator = new BdioGenerator();
         ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchy();
-        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, false, true);
+        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, false, true, false);
 
         int componentCount = 0;
         int componentChildCount = 0;
@@ -74,7 +74,7 @@ public class BdioGeneratorTest {
     public void testHierarchicalIncludeRemoved() {
         BdioGenerator bdioGenerator = new BdioGenerator();
         ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchy();
-        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, true, true);
+        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, true, true, false);
 
         int layerCount = 0;
         for (BdioRelationship rel : bdioDoc.project.relationships) {
@@ -103,7 +103,7 @@ public class BdioGeneratorTest {
     public void testHierarchicalExcludeRemoved() {
         BdioGenerator bdioGenerator = new BdioGenerator();
         ImageComponentHierarchy imageComponentHierarchy = createImageComponentHierarchy();
-        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, true, false);
+        SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, true, false, false);
 
         int layerCount = 0;
         for (BdioRelationship rel : bdioDoc.project.relationships) {
@@ -133,7 +133,7 @@ public class BdioGeneratorTest {
 
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         List<ComponentDetails>  comps = new ArrayList<>(0);
-        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
+        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps, false);
 
         assertEquals(0, bdio.components.size());
     }
@@ -151,7 +151,7 @@ public class BdioGeneratorTest {
         assertEquals("apk", pkgMgr.getImagePackageManagerDirectory(imageFilesystem).getName());
         List<ComponentDetails> comps = pkgMgr.extractComponentsFromPkgMgrOutput(imageFilesystem, "alpine", pkgMgrOutputLines);
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
-        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
+        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps, false);
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
         boolean foundComp2 = false;
@@ -185,7 +185,7 @@ public class BdioGeneratorTest {
         assertEquals("dpkg", pkgMgr.getImagePackageManagerDirectory(imageFilesystem).getName());
         List<ComponentDetails> comps = pkgMgr.extractComponentsFromPkgMgrOutput(imageFilesystem, "ubuntu", pkgMgrOutputLines);
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
-        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
+        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps, false);
 
         assertEquals(2, bdio.components.size());
         boolean foundComp1 = false;
@@ -270,7 +270,7 @@ public class BdioGeneratorTest {
         List<ComponentDetails> comps = pkgMgr.extractComponentsFromPkgMgrOutput(imageFilesystem, "centos", pkgMgrOutputLines);
         final SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
-        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps);
+        final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps, false);
         return bdio;
     }
 

@@ -84,7 +84,8 @@ public class ImageInspector {
         final boolean platformComponentsExcluded) {
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed, platformComponentsExcluded);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(imageInfoDerived.getCodeLocationName(),
-            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy, organizeComponentsByLayer, includeRemovedComponents);
+            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy, organizeComponentsByLayer,
+            includeRemovedComponents, platformComponentsExcluded);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
@@ -95,7 +96,7 @@ public class ImageInspector {
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
         imageInfoDerived.setManifestLayerMapping(mapping);
         imageInfoDerived.setCodeLocationName(deriveCodeLocationName(codeLocationPrefix, imageInfoDerived, platformComponentsExcluded));
-        imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName));
+        imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName, platformComponentsExcluded));
         imageInfoDerived.setFinalProjectVersionName(deriveBlackDuckProjectVersion(imageInfoDerived.getManifestLayerMapping(), versionName));
         logger.info(String.format("Black Duck project: %s, version: %s; Code location : %s", imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getCodeLocationName()));
         return imageInfoDerived;
@@ -118,10 +119,11 @@ public class ImageInspector {
         return pkgMgrName;
     }
 
-    private String deriveBlackDuckProject(final String imageName, final String projectName) {
+    private String deriveBlackDuckProject(final String imageName, final String projectName,
+        final boolean platformComponentsExcluded) {
         String blackDuckProjectName;
         if (StringUtils.isBlank(projectName)) {
-            blackDuckProjectName = Names.getBlackDuckProjectNameFromImageName(imageName);
+            blackDuckProjectName = Names.getBlackDuckProjectNameFromImageName(imageName, platformComponentsExcluded);
         } else {
             logger.debug("Using project from config property");
             blackDuckProjectName = projectName;

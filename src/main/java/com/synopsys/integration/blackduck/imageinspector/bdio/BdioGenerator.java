@@ -60,26 +60,29 @@ public class BdioGenerator {
         final String projectVersion,
         final String linuxDistroName, ImageComponentHierarchy imageComponentHierarchy,
         final boolean organizeComponentsByLayer,
-        final boolean includeRemovedComponents) {
+        final boolean includeRemovedComponents,
+        final boolean platformComponentsExcluded) {
 
         if (organizeComponentsByLayer) {
             final MutableDependencyGraph graph = generateLayeredGraphFromHierarchy(imageComponentHierarchy, includeRemovedComponents);
-            return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
+            return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph, platformComponentsExcluded);
         } else {
             if (includeRemovedComponents) {
                 final MutableDependencyGraph graph = generateFlatGraphFromAllComponentsAllLayers(imageComponentHierarchy);
-                return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
+                return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph, platformComponentsExcluded);
             } else {
-                return generateFlatBdioDocumentFromComponents(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy.getFinalComponents());
+                return generateFlatBdioDocumentFromComponents(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy.getFinalComponents(),
+                    platformComponentsExcluded);
             }
         }
     }
 
     public SimpleBdioDocument generateFlatBdioDocumentFromComponents(final String codeLocationName, final String projectName,
         final String projectVersion,
-        final String linuxDistroName, List<ComponentDetails> comps) {
+        final String linuxDistroName, List<ComponentDetails> comps,
+        final boolean platformComponentsExcluded) {
         final MutableDependencyGraph graph = generateFlatGraphFromComponents(comps);
-        return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
+        return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph, platformComponentsExcluded);
     }
 
     public void writeBdio(final Writer writer, final SimpleBdioDocument bdioDocument) throws IOException {
@@ -99,7 +102,8 @@ public class BdioGenerator {
 
     private final SimpleBdioDocument generateBdioDocumentFromGraph(final String codeLocationName, final String projectName,
         final String projectVersion,
-        final String linuxDistroName, final MutableDependencyGraph graph) {
+        final String linuxDistroName, final MutableDependencyGraph graph,
+        final boolean platformComponentsExcluded) {
 
         final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
         final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, projectVersion);

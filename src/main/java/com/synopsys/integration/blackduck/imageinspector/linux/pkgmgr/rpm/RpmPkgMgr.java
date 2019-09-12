@@ -34,11 +34,10 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
-import com.synopsys.integration.exception.IntegrationException;
 
 @Component
 public class RpmPkgMgr implements PkgMgr {
@@ -99,8 +98,7 @@ public class RpmPkgMgr implements PkgMgr {
 
     @Override
     public List<ComponentDetails> extractComponentsFromPkgMgrOutput(File imageFileSystem,
-        String linuxDistroName, String[] pkgMgrListOutputLines)
-        throws IntegrationException {
+        String linuxDistroName, String[] pkgMgrListOutputLines) {
         final List<ComponentDetails> components = new ArrayList<>();
         for (final String packageLine : pkgMgrListOutputLines) {
             if (valid(packageLine)) {
@@ -115,7 +113,7 @@ public class RpmPkgMgr implements PkgMgr {
                     arch = rpmPackage.getArch();
                 }
                 final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, packageName, packageVersion, arch);
-                logger.debug(String.format("Adding externalId %s to components list", externalId));
+                logger.trace(String.format("Adding externalId %s to components list", externalId));
                 components.add(new ComponentDetails(packageName, packageVersion, externalId, arch, linuxDistroName));
             }
         }

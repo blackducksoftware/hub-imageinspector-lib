@@ -33,11 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
-import com.synopsys.integration.exception.IntegrationException;
 
 @Component
 public class DpkgPkgMgr implements PkgMgr {
@@ -96,8 +95,7 @@ public class DpkgPkgMgr implements PkgMgr {
 
     @Override
     public List<ComponentDetails> extractComponentsFromPkgMgrOutput(File imageFileSystem,
-        String linuxDistroName, String[] pkgMgrListOutputLines)
-        throws IntegrationException {
+        String linuxDistroName, String[] pkgMgrListOutputLines) {
         final List<ComponentDetails> components = new ArrayList<>();
         boolean startOfComponents = false;
         for (final String packageLine : pkgMgrListOutputLines) {

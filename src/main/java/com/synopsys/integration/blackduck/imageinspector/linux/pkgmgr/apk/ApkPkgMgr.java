@@ -139,7 +139,7 @@ public class ApkPkgMgr implements PkgMgr {
                 // if a package starts with a period, ignore it. It's a virtual meta package and the version information is missing
                 if (!component.startsWith(".")) {
                     final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, component, version, getImageArchitecture(imageFileSystem));
-                    logger.debug(String.format("Constructed externalId: %s", externalId));
+                    logger.trace(String.format("Constructed externalId: %s", externalId));
                     components.add(new ComponentDetails(component, version, externalId, getImageArchitecture(imageFileSystem), linuxDistroName));
                 }
             }

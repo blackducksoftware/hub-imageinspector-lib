@@ -27,6 +27,8 @@ import java.io.File;
 import org.apache.commons.lang3.StringUtils;
 
 public class Names {
+    private static final String CONTAINER_FILESYSTEM_IDENTIFIER = "containerfilesystem";
+    private static final String APP_ONLY_HINT = "app";
 
     public static String getTargetImageFileSystemRootDirName(final String imageName, final String imageTag) {
         return String.format("image_%s_v_%s", cleanImageName(imageName), imageTag);
@@ -40,7 +42,7 @@ public class Names {
         final boolean platformComponentsExcluded) {
         String appQualifier = "";
         if (platformComponentsExcluded) {
-            appQualifier = "_app";
+            appQualifier = String.format("_%s", APP_ONLY_HINT);
         }
         if (!StringUtils.isBlank(codelocationPrefix)) {
             return String.format("%s_%s_%s%s_%s", codelocationPrefix, cleanImageName(imageName), imageTag, appQualifier, pkgMgrName);
@@ -52,7 +54,11 @@ public class Names {
         return givenString.replaceAll("/", "_");
     }
 
-    public static String getBlackDuckProjectNameFromImageName(final String imageName) {
+    public static String getBlackDuckProjectNameFromImageName(String imageName,
+        final boolean platformComponentsExcluded) {
+        if (platformComponentsExcluded) {
+            imageName = String.format("%s_%s", imageName, APP_ONLY_HINT);
+        }
         return cleanImageName(imageName);
     }
 
@@ -61,11 +67,12 @@ public class Names {
     }
 
     public static String getContainerFileSystemTarFilename(final String imageNameTag, final String tarPath) {
-        return getContainerOutputTarFileNameUsingBase("containerfilesystem", imageNameTag, tarPath);
+        return getContainerOutputTarFileNameUsingBase(CONTAINER_FILESYSTEM_IDENTIFIER, imageNameTag, tarPath);
     }
 
     public static String getContainerFileSystemAppLayersTarFilename(final String imageNameTag, final String tarPath) {
-        return getContainerOutputTarFileNameUsingBase("app_only_containerfilesystem", imageNameTag, tarPath);
+        final String contentHint = String.format("%s_%s", APP_ONLY_HINT, CONTAINER_FILESYSTEM_IDENTIFIER);
+        return getContainerOutputTarFileNameUsingBase(contentHint, imageNameTag, tarPath);
     }
 
     private static String getContainerOutputTarFileNameUsingBase(final String contentHint, final String imageNameTag, final String tarPath) {
