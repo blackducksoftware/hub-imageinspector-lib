@@ -65,7 +65,7 @@ public class Names {
     }
 
     public static String getContainerFileSystemAppLayersTarFilename(final String imageNameTag, final String tarPath) {
-        return getContainerOutputTarFileNameUsingBase("containerfilesystem_app_only", imageNameTag, tarPath);
+        return getContainerOutputTarFileNameUsingBase("app_only_containerfilesystem", imageNameTag, tarPath);
     }
 
     private static String getContainerOutputTarFileNameUsingBase(final String contentHint, final String imageNameTag, final String tarPath) {
