@@ -22,7 +22,7 @@ public class LinuxFileSystemTest {
 
     @Test
     public void testWriteToTar() throws IOException {
-        final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/testDpkgFileSystem"), new FileOperations());
+        final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/imageDir/ubuntu"), new FileOperations());
         final File outputTarFile = new File("test/containerFileSystem.tar");
         outputTarFile.delete();
         assertFalse(outputTarFile.exists());
@@ -33,13 +33,13 @@ public class LinuxFileSystemTest {
 
     @Test
     public void testWriteToTarGz() throws IOException {
-        final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/imageDir"), new FileOperations());
+        final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/imageDir/ubuntu"), new FileOperations());
         final File outputTarFile = new File("test/containerFileSystem.tar.gz");
         outputTarFile.delete();
         assertFalse(outputTarFile.exists());
         fSys.writeToTarGz(outputTarFile, null);
         assertTrue(outputTarFile.exists());
-        assertTrue(outputTarFile.length() > 800L);
+        assertTrue(outputTarFile.length() > 400L);
     }
 
     @Test

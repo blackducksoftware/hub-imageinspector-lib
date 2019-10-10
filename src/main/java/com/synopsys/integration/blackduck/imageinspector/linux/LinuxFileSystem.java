@@ -79,9 +79,7 @@ public class LinuxFileSystem extends Stringable {
             tOut = new TarArchiveOutputStream(bOut);
             tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
             final List<String> containerFileSystemExcludedPathList = new ArrayList<>(0);
-            //final String rootName = root.getName();
             final String rootName = "/";
-            //addFileToTar(tOut, rootName, root, null, containerFileSystemExcludedPathList);
             final File[] children = root.listFiles();
             if (children != null) {
                 for (final File child : children) {
@@ -89,7 +87,7 @@ public class LinuxFileSystem extends Stringable {
                 }
             }
         } catch (Exception unexpectedException) {
-            logger.error(String.format("Unexpected error creating tar.gz file: %s", unexpectedException.getMessage()), unexpectedException);
+            logger.error(String.format("Unexpected error creating tar file: %s", unexpectedException.getMessage()), unexpectedException);
         } finally {
             if (tOut != null) {
                 tOut.finish();
@@ -118,8 +116,15 @@ public class LinuxFileSystem extends Stringable {
             tOut = new TarArchiveOutputStream(gzOut);
             tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
             final List<String> containerFileSystemExcludedPathList = cleanPaths(getListFromCommaSeparatedString(containerFileSystemExcludedPathListString));
-            final String rootName = root.getName();
-            addFileToTar(tOut, rootName, root, null, containerFileSystemExcludedPathList);
+            //final String rootName = root.getName();
+            //addFileToTar(tOut, rootName, root, null, containerFileSystemExcludedPathList);
+            final String rootName = "/";
+            final File[] children = root.listFiles();
+            if (children != null) {
+                for (final File child : children) {
+                    addFileToTar(tOut, rootName, child, rootName, containerFileSystemExcludedPathList);
+                }
+            }
         } catch (Exception unexpectedException) {
             logger.error(String.format("Unexpected error creating tar.gz file: %s", unexpectedException.getMessage()), unexpectedException);
         } finally {
@@ -141,7 +146,7 @@ public class LinuxFileSystem extends Stringable {
 
     private void addFileToTar(final TarArchiveOutputStream tOut, final String rootName, final File fileToAdd, String base, final List<String> containerFileSystemExcludedPathList) {
         try {
-            logger.trace(String.format("Adding to tar.gz file: %s", fileToAdd.getAbsolutePath()));
+            logger.trace(String.format("Adding to tar/tar.gz file: %s", fileToAdd.getAbsolutePath()));
             base = base == null ? "" : base;
             final String entryName = base + fileToAdd.getName();
             final String entryNameMadeAbsolute = toAbsolute(rootName, entryName);
