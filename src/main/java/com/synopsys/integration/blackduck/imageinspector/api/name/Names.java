@@ -22,12 +22,9 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.api.name;
 
-import java.io.File;
-
 import org.apache.commons.lang3.StringUtils;
 
 public class Names {
-    private static final String CONTAINER_FILESYSTEM_IDENTIFIER = "containerfilesystem";
     private static final String APP_ONLY_HINT = "app";
 
     public static String getTargetImageFileSystemRootDirName(final String imageName, final String imageTag) {
@@ -50,10 +47,6 @@ public class Names {
         return String.format("%s_%s%s_%s", cleanImageName(imageName), imageTag, appQualifier, pkgMgrName);
     }
 
-    private static String slashesToUnderscore(final String givenString) {
-        return givenString.replaceAll("/", "_");
-    }
-
     public static String getBlackDuckProjectNameFromImageName(String imageName,
         final boolean platformComponentsExcluded) {
         if (platformComponentsExcluded) {
@@ -66,28 +59,8 @@ public class Names {
         return colonsToUnderscores(slashesToUnderscore(imageName));
     }
 
-    public static String getContainerFileSystemTarFilename(final String imageNameTag, final String tarPath) {
-        return getContainerOutputTarFileNameUsingBase(CONTAINER_FILESYSTEM_IDENTIFIER, imageNameTag, tarPath);
-    }
-
-    public static String getContainerFileSystemAppLayersTarFilename(final String imageNameTag, final String tarPath) {
-        final String contentHint = String.format("%s_%s", APP_ONLY_HINT, CONTAINER_FILESYSTEM_IDENTIFIER);
-        return getContainerOutputTarFileNameUsingBase(contentHint, imageNameTag, tarPath);
-    }
-
-    private static String getContainerOutputTarFileNameUsingBase(final String contentHint, final String imageNameTag, final String tarPath) {
-        final String containerFilesystemFilenameSuffix = String.format("%s.tar.gz", contentHint);
-        if (StringUtils.isNotBlank(imageNameTag)) {
-            return String.format("%s_%s", cleanImageName(imageNameTag), containerFilesystemFilenameSuffix);
-        } else {
-            final File tarFile = new File(tarPath);
-            final String tarFilename = tarFile.getName();
-            if (tarFilename.contains(".")) {
-                final int finalPeriodIndex = tarFilename.lastIndexOf('.');
-                return String.format("%s_%s", tarFilename.substring(0, finalPeriodIndex), containerFilesystemFilenameSuffix);
-            }
-            return String.format("%s_%s", cleanImageName(tarFilename), containerFilesystemFilenameSuffix);
-        }
+    private static String slashesToUnderscore(final String givenString) {
+        return givenString.replaceAll("/", "_");
     }
 
     private static String colonsToUnderscores(final String imageName) {

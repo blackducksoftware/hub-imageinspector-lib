@@ -21,17 +21,6 @@ public class LinuxFileSystemTest {
     }
 
     @Test
-    public void testWriteToTar() throws IOException {
-        final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/testDpkgFileSystem"), new FileOperations());
-        final File outputTarFile = new File("test/containerFileSystem.tar");
-        outputTarFile.delete();
-        assertFalse(outputTarFile.exists());
-        fSys.writeToTar(outputTarFile);
-        assertTrue(outputTarFile.exists());
-        assertTrue(outputTarFile.length() > 2000L);
-    }
-
-    @Test
     public void testWriteToTarGz() throws IOException {
         final LinuxFileSystem fSys = new LinuxFileSystem(new File("src/test/resources/imageDir"), new FileOperations());
         final File outputTarFile = new File("test/containerFileSystem.tar.gz");

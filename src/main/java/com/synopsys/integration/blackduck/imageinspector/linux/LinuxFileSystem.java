@@ -67,43 +67,6 @@ public class LinuxFileSystem extends Stringable {
         }
     }
 
-    public void writeToTar(final File outputTarFile) throws IOException {
-        outputTarFile.getParentFile().mkdirs();
-        fileOperations.logFileOwnerGroupPerms(outputTarFile.getParentFile());
-        FileOutputStream fOut = null;
-        BufferedOutputStream bOut = null;
-        TarArchiveOutputStream tOut = null;
-        try {
-            fOut = new FileOutputStream(outputTarFile);
-            bOut = new BufferedOutputStream(fOut);
-            tOut = new TarArchiveOutputStream(bOut);
-            tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
-            final List<String> containerFileSystemExcludedPathList = new ArrayList<>(0);
-            //final String rootName = root.getName();
-            final String rootName = "/";
-            //addFileToTar(tOut, rootName, root, null, containerFileSystemExcludedPathList);
-            final File[] children = root.listFiles();
-            if (children != null) {
-                for (final File child : children) {
-                    addFileToTar(tOut, rootName, child, rootName, containerFileSystemExcludedPathList);
-                }
-            }
-        } catch (Exception unexpectedException) {
-            logger.error(String.format("Unexpected error creating tar.gz file: %s", unexpectedException.getMessage()), unexpectedException);
-        } finally {
-            if (tOut != null) {
-                tOut.finish();
-                tOut.close();
-            }
-            if (bOut != null) {
-                bOut.close();
-            }
-            if (fOut != null) {
-                fOut.close();
-            }
-        }
-    }
-
     public void writeToTarGz(final File outputTarFile, final String containerFileSystemExcludedPathListString) throws IOException {
         outputTarFile.getParentFile().mkdirs();
         fileOperations.logFileOwnerGroupPerms(outputTarFile.getParentFile());
