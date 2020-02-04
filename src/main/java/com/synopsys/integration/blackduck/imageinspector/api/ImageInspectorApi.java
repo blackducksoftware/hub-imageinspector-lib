@@ -58,6 +58,12 @@ public class ImageInspectorApi {
     private FileOperations fileOperations;
     private BdioGenerator bdioGenerator;
 
+
+    public ImageInspectorApi(ImageInspector imageInspector, Os os) {
+        this.imageInspector = imageInspector;
+        this.os = os;
+    }
+
     @Autowired
     public void setBdioGenerator(final BdioGenerator bdioGenerator) {
         this.bdioGenerator = bdioGenerator;
@@ -71,11 +77,6 @@ public class ImageInspectorApi {
     @Autowired
     public void setFileOperations(final FileOperations fileOperations) {
         this.fileOperations = fileOperations;
-    }
-
-    public ImageInspectorApi(ImageInspector imageInspector, Os os) {
-        this.imageInspector = imageInspector;
-        this.os = os;
     }
 
     /**
@@ -99,27 +100,12 @@ public class ImageInspectorApi {
      * @return The generated BDIO object representing the componets (packages) read from the images's package manager database.
      * @throws IntegrationException
      */
-    public SimpleBdioDocument getBdio(final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion,
-        final String codeLocationPrefix, final String givenImageRepo, final String givenImageTag,
-        final boolean organizeComponentsByLayer,
-        final boolean includeRemovedComponents,
-        final boolean cleanupWorkingDir,
-        final String containerFileSystemOutputPath,
-        final String containerFileSystemExcludedPathListString,
-        final String currentLinuxDistro,
-        final String platformTopLayerExternalId)
-        throws IntegrationException {
-        logger.info("getBdio()");
-        os.logMemory();
-        if (gsonBuilder == null) {
-            gsonBuilder = new GsonBuilder();
-        }
-        return getBdioDocument(bdioGenerator, dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, organizeComponentsByLayer, includeRemovedComponents, cleanupWorkingDir,
-            containerFileSystemOutputPath, containerFileSystemExcludedPathListString,
-            currentLinuxDistro, platformTopLayerExternalId);
-    }
-
-    private SimpleBdioDocument getBdioDocument(final BdioGenerator bdioGenerator, final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix,
+    @Deprecated
+    public SimpleBdioDocument getBdio(
+        final String dockerTarfilePath,
+        final String blackDuckProjectName,
+        final String blackDuckProjectVersion,
+        final String codeLocationPrefix,
         final String givenImageRepo,
         final String givenImageTag,
         final boolean organizeComponentsByLayer,
@@ -130,31 +116,49 @@ public class ImageInspectorApi {
         final String currentLinuxDistro,
         final String platformTopLayerExternalId)
         throws IntegrationException {
-        final ImageInfoDerived imageInfoDerived = inspect(bdioGenerator, dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag,
-            organizeComponentsByLayer,
-            includeRemovedComponents,
-            cleanupWorkingDir,
-            containerFileSystemOutputPath, containerFileSystemExcludedPathListString,
-            currentLinuxDistro, platformTopLayerExternalId);
+
+        final ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
+            .setDockerTarfilePath(dockerTarfilePath)
+            .setBlackDuckProjectName(blackDuckProjectName)
+            .setBlackDuckProjectVersion(blackDuckProjectVersion)
+            .setCodeLocationPrefix(codeLocationPrefix)
+            .setGivenImageRepo(givenImageRepo)
+            .setGivenImageTag(givenImageTag)
+            .setOrganizeComponentsByLayer(organizeComponentsByLayer)
+            .setIncludeRemovedComponents(includeRemovedComponents)
+            .setCleanupWorkingDir(cleanupWorkingDir)
+            .setContainerFileSystemOutputPath(containerFileSystemOutputPath)
+            .setContainerFileSystemExcludedPathListString(containerFileSystemExcludedPathListString)
+            .setCurrentLinuxDistro(currentLinuxDistro)
+            .setPlatformTopLayerExternalId(platformTopLayerExternalId)
+            .build();
+        return getBdio(imageInspectionRequest);
+    }
+
+    public SimpleBdioDocument getBdio(final ImageInspectionRequest imageInspectionRequest) throws IntegrationException {
+        logger.info("getBdio()");
+        os.logMemory();
+        if (gsonBuilder == null) {
+            gsonBuilder = new GsonBuilder();
+        }
+        return getBdioDocument(imageInspectionRequest);
+    }
+
+    private SimpleBdioDocument getBdioDocument(final ImageInspectionRequest imageInspectionRequest)
+        throws IntegrationException {
+        final ImageInfoDerived imageInfoDerived = inspect(imageInspectionRequest);
         return imageInfoDerived.getBdioDocument();
     }
 
-    private ImageInfoDerived inspect(final BdioGenerator bdioGenerator, final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix, final String givenImageRepo,
-        final String givenImageTag,
-        final boolean organizeComponentsByLayer,
-        final boolean includeRemovedComponents,
-        final boolean cleanupWorkingDir, final String containerFileSystemOutputPath, final String containerFileSystemExcludedPathListString,
-        final String currentLinuxDistro,
-        final String platformImageTopLayerExternalId)
+    private ImageInfoDerived inspect(final ImageInspectionRequest imageInspectionRequest)
         throws IntegrationException {
         final String effectivePlatformTopLayerExternalId;
-        if (organizeComponentsByLayer || includeRemovedComponents) {
+        if (imageInspectionRequest.isOrganizeComponentsByLayer() || imageInspectionRequest.isIncludeRemovedComponents()) {
             // base image component exclusion not supported when either of these is true
             effectivePlatformTopLayerExternalId = null;
         } else {
-            effectivePlatformTopLayerExternalId = platformImageTopLayerExternalId;
+            effectivePlatformTopLayerExternalId = imageInspectionRequest.getPlatformTopLayerExternalId();
         }
-        final File dockerTarfile = new File(dockerTarfilePath);
         File tempDir;
         try {
             tempDir = fileOperations.createTempDirectory();
@@ -163,13 +167,13 @@ public class ImageInspectorApi {
         }
         ImageInfoDerived imageInfoDerived = null;
         try {
-            imageInfoDerived = inspectUsingGivenWorkingDir(bdioGenerator, dockerTarfile, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag,
-                containerFileSystemOutputPath, containerFileSystemExcludedPathListString, currentLinuxDistro,
-                tempDir, organizeComponentsByLayer, includeRemovedComponents, cleanupWorkingDir, effectivePlatformTopLayerExternalId);
+            imageInfoDerived = inspectUsingGivenWorkingDir(imageInspectionRequest,
+                tempDir,
+                effectivePlatformTopLayerExternalId);
         } catch (IOException | CompressorException e) {
             throw new IntegrationException(String.format("Error inspecting image: %s", e.getMessage()), e);
         } finally {
-            if (cleanupWorkingDir) {
+            if (imageInspectionRequest.isCleanupWorkingDir()) {
                 logger.info(String.format("Deleting working dir %s", tempDir.getAbsolutePath()));
                 fileOperations.deleteDirPersistently(tempDir);
             }
@@ -177,22 +181,16 @@ public class ImageInspectorApi {
         return imageInfoDerived;
     }
 
-    private ImageInfoDerived inspectUsingGivenWorkingDir(final BdioGenerator bdioGenerator, final File dockerTarfile, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix,
-        final String givenImageRepo,
-        final String givenImageTag,
-        final String containerFileSystemOutputPath,
-        final String containerFileSystemExcludedPathListString,
-        final String currentLinuxDistro, final File tempDir,
-        final boolean organizeComponentsByLayer,
-        final boolean includeRemovedComponents,
-        final boolean cleanupWorkingDir,
-        final String platformTopLayerExternalId)
+    private ImageInfoDerived inspectUsingGivenWorkingDir(final ImageInspectionRequest imageInspectionRequest,
+        final File tempDir,
+        final String effectivePlatformTopLayerExternalId)
         throws IOException, IntegrationException, CompressorException {
+        final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
         final File workingDir = new File(tempDir, "working");
         final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final List<File> layerTars = imageInspector.extractLayerTars(tarExtractionDirectory, dockerTarfile);
-        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), givenImageRepo, givenImageTag);
+        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
         final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(workingDir, tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
         final String imageRepo = manifestLayerMapping.getImageName();
         final String imageTag = manifestLayerMapping.getTagName();
@@ -200,18 +198,22 @@ public class ImageInspectorApi {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         File targetImageFileSystemAppLayersRootDir = null;
-        if (StringUtils.isNotBlank(platformTopLayerExternalId)) {
+        if (StringUtils.isNotBlank(effectivePlatformTopLayerExternalId)) {
             targetImageFileSystemAppLayersRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemAppLayersRootDirName(imageRepo, imageTag));
         }
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
-        final ImageInspectorOsEnum currentOs = os.deriveOs(currentLinuxDistro);
-        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, platformTopLayerExternalId);
-        validatePlatformResults(platformTopLayerExternalId, imageComponentHierarchy);
+        final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
+        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping,
+            imageInspectionRequest.getPlatformTopLayerExternalId());
+        validatePlatformResults(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
         logLayers(imageComponentHierarchy);
-        cleanUpLayerTars(cleanupWorkingDir, layerTars);
-        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping, blackDuckProjectName, blackDuckProjectVersion,
-            codeLocationPrefix, organizeComponentsByLayer, includeRemovedComponents, StringUtils.isNotBlank(platformTopLayerExternalId));
-        createContainerFileSystemTarIfRequested(targetImageFileSystem, containerFileSystemOutputPath, containerFileSystemExcludedPathListString);
+        cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), layerTars);
+        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping,
+            imageInspectionRequest.getBlackDuckProjectName(), imageInspectionRequest.getBlackDuckProjectVersion(),
+            imageInspectionRequest.getCodeLocationPrefix(), imageInspectionRequest.isOrganizeComponentsByLayer(), imageInspectionRequest.isIncludeRemovedComponents(),
+            StringUtils.isNotBlank(effectivePlatformTopLayerExternalId));
+        createContainerFileSystemTarIfRequested(targetImageFileSystem, imageInspectionRequest.getContainerFileSystemOutputPath(),
+            imageInspectionRequest.getContainerFileSystemExcludedPathListString());
         return imageInfoDerived;
     }
 
