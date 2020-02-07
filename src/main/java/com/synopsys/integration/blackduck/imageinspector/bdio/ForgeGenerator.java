@@ -1,7 +1,7 @@
 /**
  * hub-imageinspector-lib
  *
- * Copyright (c) 2019 Synopsys, Inc.
+ * Copyright (c) 2020 Synopsys, Inc.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -45,6 +45,7 @@ public class ForgeGenerator {
         linuxDistroNameToKbForgeNameMapping.put("rhel", "redhat");
         linuxDistroNameToKbForgeNameMapping.put("sles", "opensuse");
         linuxDistroNameToKbForgeNameMapping.put("opensuse", "opensuse");
+        linuxDistroNameToKbForgeNameMapping.put("amzn", "centos");
     }
 
     public static Forge createProjectForge(final String linuxDistroName) {

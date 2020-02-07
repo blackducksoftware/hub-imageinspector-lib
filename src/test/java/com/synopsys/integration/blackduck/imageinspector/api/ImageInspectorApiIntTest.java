@@ -135,7 +135,7 @@ public class ImageInspectorApiIntTest {
 
         final File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
         System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());
-        assertTrue(containerFileSystemFile.length() > 40000000);
+        assertTrue(containerFileSystemFile.length() > 10000000);
         assertTrue(containerFileSystemFile.length() < 80000000);
     }
 }

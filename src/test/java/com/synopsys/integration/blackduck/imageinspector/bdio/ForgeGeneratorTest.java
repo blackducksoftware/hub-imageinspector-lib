@@ -19,6 +19,7 @@ public class ForgeGeneratorTest {
         assertEquals("@redhat", ForgeGenerator.createComponentForge("rhel").getName());
         assertEquals("@fedora", ForgeGenerator.createComponentForge("fedora").getName());
         assertEquals("none", ForgeGenerator.createComponentForge(null).getName());
+        assertEquals("@centos", ForgeGenerator.createComponentForge("amzn").getName());
     }
 
     @Test
