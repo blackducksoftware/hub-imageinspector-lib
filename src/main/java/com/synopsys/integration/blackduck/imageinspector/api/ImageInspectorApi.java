@@ -107,6 +107,7 @@ public class ImageInspectorApi {
         final String containerFileSystemOutputPath,
         final String containerFileSystemExcludedPathListString,
         final String currentLinuxDistro,
+        final String targetLinuxDistroOverride,
         final String platformTopLayerExternalId)
         throws IntegrationException {
         logger.info("getBdio()");
@@ -116,7 +117,7 @@ public class ImageInspectorApi {
         }
         return getBdioDocument(bdioGenerator, dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag, organizeComponentsByLayer, includeRemovedComponents, cleanupWorkingDir,
             containerFileSystemOutputPath, containerFileSystemExcludedPathListString,
-            currentLinuxDistro, platformTopLayerExternalId);
+            currentLinuxDistro, targetLinuxDistroOverride, platformTopLayerExternalId);
     }
 
     private SimpleBdioDocument getBdioDocument(final BdioGenerator bdioGenerator, final String dockerTarfilePath, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationPrefix,
@@ -128,6 +129,7 @@ public class ImageInspectorApi {
         final String containerFileSystemOutputPath,
         final String containerFileSystemExcludedPathListString,
         final String currentLinuxDistro,
+        final String targetLinuxDistroOverride,
         final String platformTopLayerExternalId)
         throws IntegrationException {
         final ImageInfoDerived imageInfoDerived = inspect(bdioGenerator, dockerTarfilePath, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag,
@@ -135,7 +137,7 @@ public class ImageInspectorApi {
             includeRemovedComponents,
             cleanupWorkingDir,
             containerFileSystemOutputPath, containerFileSystemExcludedPathListString,
-            currentLinuxDistro, platformTopLayerExternalId);
+            currentLinuxDistro, targetLinuxDistroOverride, platformTopLayerExternalId);
         return imageInfoDerived.getBdioDocument();
     }
 
@@ -145,6 +147,7 @@ public class ImageInspectorApi {
         final boolean includeRemovedComponents,
         final boolean cleanupWorkingDir, final String containerFileSystemOutputPath, final String containerFileSystemExcludedPathListString,
         final String currentLinuxDistro,
+        final String targetLinuxDistroOverride,
         final String platformImageTopLayerExternalId)
         throws IntegrationException {
         final String effectivePlatformTopLayerExternalId;
@@ -164,7 +167,7 @@ public class ImageInspectorApi {
         ImageInfoDerived imageInfoDerived = null;
         try {
             imageInfoDerived = inspectUsingGivenWorkingDir(bdioGenerator, dockerTarfile, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, givenImageRepo, givenImageTag,
-                containerFileSystemOutputPath, containerFileSystemExcludedPathListString, currentLinuxDistro,
+                containerFileSystemOutputPath, containerFileSystemExcludedPathListString, currentLinuxDistro, targetLinuxDistroOverride,
                 tempDir, organizeComponentsByLayer, includeRemovedComponents, cleanupWorkingDir, effectivePlatformTopLayerExternalId);
         } catch (IOException | CompressorException e) {
             throw new IntegrationException(String.format("Error inspecting image: %s", e.getMessage()), e);
@@ -182,7 +185,9 @@ public class ImageInspectorApi {
         final String givenImageTag,
         final String containerFileSystemOutputPath,
         final String containerFileSystemExcludedPathListString,
-        final String currentLinuxDistro, final File tempDir,
+        final String currentLinuxDistro,
+        final String targetLinuxDistroOverride,
+        final File tempDir,
         final boolean organizeComponentsByLayer,
         final boolean includeRemovedComponents,
         final boolean cleanupWorkingDir,
@@ -205,7 +210,7 @@ public class ImageInspectorApi {
         }
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
         final ImageInspectorOsEnum currentOs = os.deriveOs(currentLinuxDistro);
-        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, platformTopLayerExternalId);
+        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, targetLinuxDistroOverride, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, platformTopLayerExternalId);
         validatePlatformResults(platformTopLayerExternalId, imageComponentHierarchy);
         logLayers(imageComponentHierarchy);
         cleanUpLayerTars(cleanupWorkingDir, layerTars);

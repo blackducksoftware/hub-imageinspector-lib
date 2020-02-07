@@ -121,8 +121,8 @@ public class DockerTarParserIntTest {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.CENTOS, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
-        tarParser.parseImageInfo(targetImageFileSystem);
+        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.CENTOS, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
+        tarParser.parseImageInfo(targetImageFileSystem, null);
         assertEquals("/var/lib/rpm", rpmPkgMgr.getInspectorPackageManagerDirectory().getAbsolutePath());
 
         boolean varLibRpmNameFound = false;
@@ -181,7 +181,7 @@ public class DockerTarParserIntTest {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.UBUNTU, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
+        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.UBUNTU, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));
@@ -225,7 +225,7 @@ public class DockerTarParserIntTest {
 
         final File containerFilesystemRoot = new File(String.format("src/test/resources/imageDir/%s", imageInspectorDistro));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFilesystemRoot);
-        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem);
+        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem, null);
         assertEquals(imageInspectorDistro, imageInfoParsed.getLinuxDistroName());
         assertEquals(packageManagerType, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
         assertEquals(pkgMgrDirName, imageInfoParsed.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());

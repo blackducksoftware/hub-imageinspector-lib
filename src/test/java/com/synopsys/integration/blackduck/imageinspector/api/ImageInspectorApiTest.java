@@ -91,7 +91,7 @@ public class ImageInspectorApiTest {
         new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
             PackageManagerEnum.APK), "apline", new ApkPkgMgr(new FileOperations()));
     Mockito.when(imageInspector
-        .extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy,
+        .extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy,
             targetImageFileSystem,
             layerTarFiles, mapping, null)).thenReturn(imageInfoParsed);
 
@@ -119,7 +119,7 @@ public class ImageInspectorApiTest {
             codeLocationPrefix, dockerImageName, dockerTagName,
             organizeComponentsByLayer,
             includeRemovedComponents,
-            cleanupWorkingDir, containerFileSystemOutputPath, null, currentLinuxDistro, null);
+            cleanupWorkingDir, containerFileSystemOutputPath, null, currentLinuxDistro, null, null);
     assertEquals(blackDuckProjectName, result.project.name);
     assertEquals(blackDuckProjectVersion, result.project.version);
   }

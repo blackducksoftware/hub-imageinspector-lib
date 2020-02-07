@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -85,7 +86,7 @@ public class ImageInspectorApiIntTest {
     public void testOnWrongOs() throws IntegrationException {
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
         try {
-            imageInspectorApi.getBdio(SIMPLE_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "CENTOS", null);
+            imageInspectorApi.getBdio(SIMPLE_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "CENTOS", null, null);
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
@@ -95,11 +96,26 @@ public class ImageInspectorApiIntTest {
 
     @Test
     public void testOnRightOs() throws IntegrationException {
+        doTest(null);
+    }
+
+    @Test
+    public void testOnRightOsDistroOverride() throws IntegrationException {
+        doTest("overriddendistroname");
+    }
+
+    private void doTest(final String targetLinuxDistroOverride) throws IntegrationException {
+        final String expectedForgeName;
+        if (StringUtils.isNotBlank(targetLinuxDistroOverride)) {
+            expectedForgeName = "@" + targetLinuxDistroOverride;
+        } else {
+            expectedForgeName = "@alpine";
+        }
         Mockito.when(os.isLinuxDistroFile(Mockito.any(File.class))).thenReturn(Boolean.TRUE);
         Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
 
-        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(SIMPLE_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "ALPINE", null);
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(SIMPLE_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "ALPINE", targetLinuxDistroOverride, null);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
         assertEquals(PROJECT, bdioDocument.project.name);
         assertEquals(PROJECT_VERSION, bdioDocument.project.version);
@@ -109,10 +125,12 @@ public class ImageInspectorApiIntTest {
             if (comp.name.equals("boost-unit_test_framework")) {
                 assertEquals("1.62.0-r5", comp.version);
                 assertEquals("boost-unit_test_framework/1.62.0-r5/x86_64", comp.bdioExternalIdentifier.externalId);
+                assertEquals(expectedForgeName, comp.bdioExternalIdentifier.forge);
             } else {
                 assertEquals("ca-certificates", comp.name);
                 assertEquals("20171114-r0", comp.version);
                 assertEquals("ca-certificates/20171114-r0/x86_64", comp.bdioExternalIdentifier.externalId);
+                assertEquals(expectedForgeName, comp.bdioExternalIdentifier.forge);
             }
         }
     }
@@ -130,7 +148,7 @@ public class ImageInspectorApiIntTest {
 
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(MULTILAYER_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null,
             null, null, false, false, false,
-            containerFileSystemOutputFilePath, null, "CENTOS",
+            containerFileSystemOutputFilePath, null, "CENTOS", null,
             "sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11");
 
         final File containerFileSystemFile = new File(containerFileSystemOutputFilePath);

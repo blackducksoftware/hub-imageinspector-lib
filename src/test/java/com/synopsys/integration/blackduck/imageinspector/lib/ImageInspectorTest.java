@@ -105,8 +105,8 @@ public class ImageInspectorTest {
         final String manifestFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/alpine.tar/manifest.json"), StandardCharsets.UTF_8);
         final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy( manifestFileContents, imageConfigFileContents);
         final GsonBuilder gsonBuilder = new GsonBuilder();
-        imageInspector.extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, null);
-        Mockito.verify(tarParser).extractImageLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, null);
+        imageInspector.extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, null);
+        Mockito.verify(tarParser).extractImageLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, null);
     }
 
     @Test
