@@ -406,13 +406,16 @@ public class DockerTarParser {
             logger.trace(String.format("pkgMgrs.size(): %d", pkgMgrs.size()));
             for (PkgMgr pkgMgr : pkgMgrs) {
                 if (pkgMgr.isApplicable(targetImageFileSystem.getTargetImageFileSystemFull())) {
+                    logger.trace(String.format("Package manager %s applies", pkgMgr.getType().toString()));
                     final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(pkgMgr.getImagePackageManagerDirectory(targetImageFileSystem.getTargetImageFileSystemFull()),
                         pkgMgr.getType());
                     final String linuxDistroName;
                     if (StringUtils.isNotBlank(targetLinuxDistroOverride)) {
                         linuxDistroName = targetLinuxDistroOverride;
+                        logger.trace(String.format("Target linux distro name overridden by caller to: %s", linuxDistroName));
                     } else {
                         linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystem.getTargetImageFileSystemFull()).orElse(null);
+                        logger.trace(String.format("Target linux distro name derived from image file system: %s", linuxDistroName));
                     }
                     final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystem, targetImagePkgMgr, linuxDistroName, pkgMgr);
                     return imagePkgMgrInfo;
