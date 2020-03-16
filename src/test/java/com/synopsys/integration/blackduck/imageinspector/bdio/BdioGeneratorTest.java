@@ -38,7 +38,7 @@ public class BdioGeneratorTest {
 
         int componentCount = 0;
         int componentChildCount = 0;
-        for (BdioComponent bdioComp : bdioDoc.components) {
+        for (BdioComponent bdioComp : bdioDoc.getComponents()) {
             System.out.printf("Comp: %s/%s\n", bdioComp.name, bdioComp.version);
             componentCount++;
             for (BdioRelationship rel : bdioComp.relationships) {
@@ -58,7 +58,7 @@ public class BdioGeneratorTest {
 
         int componentCount = 0;
         int componentChildCount = 0;
-        for (BdioComponent bdioComp : bdioDoc.components) {
+        for (BdioComponent bdioComp : bdioDoc.getComponents()) {
             System.out.printf("Comp: %s/%s\n", bdioComp.name, bdioComp.version);
             componentCount++;
             for (BdioRelationship rel : bdioComp.relationships) {
@@ -77,7 +77,7 @@ public class BdioGeneratorTest {
         SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, true, true, false);
 
         int layerCount = 0;
-        for (BdioRelationship rel : bdioDoc.project.relationships) {
+        for (BdioRelationship rel : bdioDoc.getProject().relationships) {
             System.out.printf("Layer: %s: %s\n", rel.relationshipType, rel.related);
             layerCount++;
         }
@@ -85,7 +85,7 @@ public class BdioGeneratorTest {
         System.out.printf("====\n");
         layerCount = 0;
         int compCount = 0;
-        for (BdioComponent bdioComp : bdioDoc.components) {
+        for (BdioComponent bdioComp : bdioDoc.getComponents()) {
             if (bdioComp.name.startsWith("Layer")) {
                 System.out.printf("\t%s/%s\n", bdioComp.name, bdioComp.version);
                 layerCount++;
@@ -106,14 +106,14 @@ public class BdioGeneratorTest {
         SimpleBdioDocument bdioDoc = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy("testCodeLocation", "testProject", "testProjectVersion", "ubuntu", imageComponentHierarchy, true, false, false);
 
         int layerCount = 0;
-        for (BdioRelationship rel : bdioDoc.project.relationships) {
+        for (BdioRelationship rel : bdioDoc.getProject().relationships) {
             System.out.printf("Layer: %s: %s\n", rel.relationshipType, rel.related);
             layerCount++;
         }
         assertEquals(2, layerCount);
         System.out.printf("====\n");
         int compCount = 0;
-        for (BdioComponent bdioComp : bdioDoc.components) {
+        for (BdioComponent bdioComp : bdioDoc.getComponents()) {
             if (bdioComp.name.startsWith("layer")) {
                 System.out.printf("\t%s/%s\n", bdioComp.name, bdioComp.version);
             }
@@ -135,7 +135,7 @@ public class BdioGeneratorTest {
         List<ComponentDetails>  comps = new ArrayList<>(0);
         final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps, false);
 
-        assertEquals(0, bdio.components.size());
+        assertEquals(0, bdio.getComponents().size());
     }
 
     @Test
@@ -152,10 +152,10 @@ public class BdioGeneratorTest {
         List<ComponentDetails> comps = pkgMgr.extractComponentsFromPkgMgrOutput(imageFilesystem, "alpine", pkgMgrOutputLines);
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps, false);
-        assertEquals(2, bdio.components.size());
+        assertEquals(2, bdio.getComponents().size());
         boolean foundComp1 = false;
         boolean foundComp2 = false;
-        for (final BdioComponent bdioComp : bdio.components) {
+        for (final BdioComponent bdioComp : bdio.getComponents()) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", bdioComp.name, bdioComp.version, bdioComp.bdioExternalIdentifier.externalId);
             assertEquals("@alpine", bdioComp.bdioExternalIdentifier.forge);
             if ("alpine-baselayout".equals(bdioComp.name)) {
@@ -187,10 +187,10 @@ public class BdioGeneratorTest {
         final BdioGenerator bdioGenerator = new BdioGenerator(simpleBdioFactory);
         final SimpleBdioDocument bdio = bdioGenerator.generateFlatBdioDocumentFromComponents("codeLocationName", "projectName", "projectVersion", "preferredAliasNamespace", comps, false);
 
-        assertEquals(2, bdio.components.size());
+        assertEquals(2, bdio.getComponents().size());
         boolean foundComp1 = false;
         boolean foundComp2 = false;
-        for (final BdioComponent comp : bdio.components) {
+        for (final BdioComponent comp : bdio.getComponents()) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
             assertEquals("@ubuntu", comp.bdioExternalIdentifier.forge);
             if ("libstdc++6".equals(comp.name)) {
@@ -214,10 +214,10 @@ public class BdioGeneratorTest {
         };
         final SimpleBdioDocument bdio = getBdioDocumentForRpmPackages(pkgMgrOutputLines);
 
-        assertEquals(2, bdio.components.size());
+        assertEquals(2, bdio.getComponents().size());
         boolean foundComp1 = false;
         boolean foundComp2 = false;
-        for (final BdioComponent comp : bdio.components) {
+        for (final BdioComponent comp : bdio.getComponents()) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
             assertEquals("@centos", comp.bdioExternalIdentifier.forge);
             if ("ncurses-base".equals(comp.name)) {
@@ -245,7 +245,7 @@ public class BdioGeneratorTest {
         final String comp1Arch = "x86_64";
         boolean foundComp1 = false;
         boolean foundComp2 = false;
-        for (final BdioComponent comp : bdio.components) {
+        for (final BdioComponent comp : bdio.getComponents()) {
             System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
             assertEquals("@centos", comp.bdioExternalIdentifier.forge);
             if (comp1Name.equals(comp.name)) {
@@ -259,7 +259,7 @@ public class BdioGeneratorTest {
         }
         assertTrue(String.format("component %s/%s/%s not found", comp1Name, comp1Version, comp1Arch), foundComp1);
         assertTrue(foundComp2);
-        assertEquals(189, bdio.components.size());
+        assertEquals(189, bdio.getComponents().size());
     }
 
     private SimpleBdioDocument getBdioDocumentForRpmPackages(final String[] pkgMgrOutputLines) throws IntegrationException, IOException, InterruptedException {

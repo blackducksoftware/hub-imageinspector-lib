@@ -34,9 +34,9 @@ public class ImageInfoDerivedTest {
     ImageInfoDerived derived = new ImageInfoDerived(parsed);
     derived.setCodeLocationName("testCodelocationName");
     SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
-    bdioDoc.project = new BdioProject();
-    bdioDoc.project.name = "testProjectName";
-    assertEquals("testProjectName", bdioDoc.project.name);
+    bdioDoc.setProject(new BdioProject());
+    bdioDoc.getProject().name = "testProjectName";
+    assertEquals("testProjectName", bdioDoc.getProject().name);
     derived.setBdioDocument(bdioDoc);
     derived.setFinalProjectName("testFinalProjectName");
     derived.setFinalProjectVersionName("testFinalProjectVersionName");
@@ -48,7 +48,7 @@ public class ImageInfoDerivedTest {
     assertEquals("testCodelocationName", derived.getCodeLocationName());
     assertEquals("testFinalProjectName", derived.getFinalProjectName());
     assertEquals("testFinalProjectVersionName", derived.getFinalProjectVersionName());
-    assertEquals("testProjectName", derived.getBdioDocument().project.name);
+    assertEquals("testProjectName", derived.getBdioDocument().getProject().name);
     assertEquals(
         ImageInspectorOsEnum.ALPINE, PackageManagerToImageInspectorOsMapping
             .getImageInspectorOs(derived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager()));

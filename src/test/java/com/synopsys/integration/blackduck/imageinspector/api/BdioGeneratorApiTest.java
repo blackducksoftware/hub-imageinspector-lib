@@ -45,8 +45,8 @@ public class BdioGeneratorApiTest {
         Mockito.when(pkgMgr.extractComponentsFromPkgMgrOutput(null, linuxDistroName, pkgMgrListCmdOutputLines)).thenReturn(comps);
 
         SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
-        bdioDoc.project = new BdioProject();
-        bdioDoc.project.name = "testBdioProject";
+        bdioDoc.setProject(new BdioProject());
+        bdioDoc.getProject().name = "testBdioProject";
         Mockito.when(bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps, false)).thenReturn(bdioDoc);
         final String[] mockedOutput = { "mockedOutput"};
         Mockito.when(bdioGenerator.getBdioAsStringArray(bdioDoc)).thenReturn(mockedOutput);

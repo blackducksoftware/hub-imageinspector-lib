@@ -117,7 +117,7 @@ public class BdioGenerator {
         final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             Dependency layerDependency = addLayerDependency(graph, layer.getLayerIndexedName());
-            logger.trace(String.format("Created layer node: %s", layerDependency.name));
+            logger.trace(String.format("Created layer node: %s", layerDependency.getName()));
             for (final ComponentDetails comp : layer.getComponents()) {
                 if (imageComponentHierarchy.getFinalComponents().contains(comp)) {
                     logger.trace(String.format("layer comp %s:%s is in final components list; including it in this layer", comp.getName(), comp.getVersion()));
@@ -164,7 +164,7 @@ public class BdioGenerator {
         final Forge forge = ForgeGenerator.createLayerForge();
         final ExternalId extId = simpleBdioFactory.createPathExternalId(forge, name);
         final Dependency layerDep = simpleBdioFactory.createDependency(name, "", extId);
-        logger.trace(String.format("adding layer node %s as child to dependency node tree; dataId: %s", layerDep.name, layerDep.externalId.createBdioId()));
+        logger.trace(String.format("adding layer node %s as child to dependency node tree; dataId: %s", layerDep.getName(), layerDep.getExternalId().createBdioId()));
         graph.addChildToRoot(layerDep);
         return layerDep;
     }
@@ -172,7 +172,7 @@ public class BdioGenerator {
     private Dependency addCompDependencyWithGivenForge(final MutableDependencyGraph graph, final String name, final String version, final String arch, final Forge forge, Dependency parent) {
         final ExternalId extId = simpleBdioFactory.createArchitectureExternalId(forge, name, version, arch);
         final Dependency dep = simpleBdioFactory.createDependency(name, version, extId);
-        logger.trace(String.format("adding %s as child to dependency node tree; dataId: %s", dep.name, dep.externalId.createBdioId()));
+        logger.trace(String.format("adding %s as child to dependency node tree; dataId: %s", dep.getName(), dep.getExternalId().createBdioId()));
         if (parent == null) {
             graph.addChildToRoot(dep);
         } else {

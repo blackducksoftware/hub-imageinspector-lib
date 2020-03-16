@@ -112,36 +112,36 @@ public class BdioGeneratorApiFuncTest {
     }
 
     private void verifyBdioDocUbuntu(final SimpleBdioDocument bdioDoc) {
-        assertEquals("test-blackDuckProjectName", bdioDoc.project.name);
-        assertEquals("test-blackDuckProjectVersion", bdioDoc.project.version);
-        assertEquals("Project", bdioDoc.project.type);
-        assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
-        assertEquals(665, bdioDoc.components.size());
+        assertEquals("test-blackDuckProjectName", bdioDoc.getProject().name);
+        assertEquals("test-blackDuckProjectVersion", bdioDoc.getProject().version);
+        assertEquals("Project", bdioDoc.getProject().type);
+        assertEquals("test-codeLocationName", bdioDoc.getBillOfMaterials().spdxName);
+        assertEquals(665, bdioDoc.getComponents().size());
         verifyContainsComp(bdioDoc, "libboost-fiber1.65.1", "1.65.1+dfsg-0ubuntu5", "libboost-fiber1.65.1/1.65.1+dfsg-0ubuntu5/amd64");
         verifyContainsComp(bdioDoc, "jblas", "1.2.4-1", "jblas/1.2.4-1/amd64");
     }
 
     private void verifyBdioDocCentosMinusVimPlusBacula(final SimpleBdioDocument bdioDoc) {
-        assertEquals("test-blackDuckProjectName", bdioDoc.project.name);
-        assertEquals("test-blackDuckProjectVersion", bdioDoc.project.version);
-        assertEquals("Project", bdioDoc.project.type);
-        assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
-        assertEquals(189, bdioDoc.components.size());
+        assertEquals("test-blackDuckProjectName", bdioDoc.getProject().name);
+        assertEquals("test-blackDuckProjectVersion", bdioDoc.getProject().version);
+        assertEquals("Project", bdioDoc.getProject().type);
+        assertEquals("test-codeLocationName", bdioDoc.getBillOfMaterials().spdxName);
+        assertEquals(189, bdioDoc.getComponents().size());
         verifyContainsComp(bdioDoc, "perl-Sys-MemInfo", "0.91-7.el7", "perl-Sys-MemInfo/0.91-7.el7/x86_64");
     }
 
     private void verifyBdioDocAlpine(final SimpleBdioDocument bdioDoc) {
-        assertEquals("test-blackDuckProjectName", bdioDoc.project.name);
-        assertEquals("test-blackDuckProjectVersion", bdioDoc.project.version);
-        assertEquals("Project", bdioDoc.project.type);
-        assertEquals("test-codeLocationName", bdioDoc.billOfMaterials.spdxName);
-        assertEquals(95, bdioDoc.components.size());
+        assertEquals("test-blackDuckProjectName", bdioDoc.getProject().name);
+        assertEquals("test-blackDuckProjectVersion", bdioDoc.getProject().version);
+        assertEquals("Project", bdioDoc.getProject().type);
+        assertEquals("test-codeLocationName", bdioDoc.getBillOfMaterials().spdxName);
+        assertEquals(95, bdioDoc.getComponents().size());
         verifyContainsComp(bdioDoc, "boost-python", "1.62.0-r5", "boost-python/1.62.0-r5/x86_64");
     }
 
     private void verifyContainsComp(final SimpleBdioDocument bdioDoc, final String compName, final String compVersion, final String compExternalId) {
         boolean foundComp = false;
-        for (BdioComponent comp : bdioDoc.components) {
+        for (BdioComponent comp : bdioDoc.getComponents()) {
             if (comp.name.equals(compName)) {
                 foundComp = true;
                 assertEquals(compVersion, comp.version);
