@@ -156,7 +156,7 @@ public class ImageInspectorTest {
         assertEquals("APK", imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().name());
         assertEquals(imageRepo, imageInfoDerived.getManifestLayerMapping().getImageName());
         assertEquals(layers.get(1), imageInfoDerived.getManifestLayerMapping().getLayerInternalIds().get(1));
-        assertEquals(String.format("%s/%s", blackDuckProjectName, blackDuckProjectVersion), imageInfoDerived.getBdioDocument().project.bdioExternalIdentifier.externalId);
+        assertEquals(String.format("%s/%s", blackDuckProjectName, blackDuckProjectVersion), imageInfoDerived.getBdioDocument().getProject().bdioExternalIdentifier.externalId);
         return imageInfoDerived;
     }
 }

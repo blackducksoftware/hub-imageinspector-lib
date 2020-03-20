@@ -117,10 +117,10 @@ public class ImageInspectorApiIntTest {
 
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(SIMPLE_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "ALPINE", targetLinuxDistroOverride, null);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
-        assertEquals(PROJECT, bdioDocument.project.name);
-        assertEquals(PROJECT_VERSION, bdioDocument.project.version);
-        assertEquals(apkOutput.length, bdioDocument.components.size());
-        for (BdioComponent comp : bdioDocument.components) {
+        assertEquals(PROJECT, bdioDocument.getProject().name);
+        assertEquals(PROJECT_VERSION, bdioDocument.getProject().version);
+        assertEquals(apkOutput.length, bdioDocument.getComponents().size());
+        for (BdioComponent comp : bdioDocument.getComponents()) {
             System.out.printf("comp: %s:%s:%s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
             if (comp.name.equals("boost-unit_test_framework")) {
                 assertEquals("1.62.0-r5", comp.version);

@@ -53,7 +53,7 @@ public class ForgeGenerator {
     }
 
     public static Forge createLayerForge() {
-        return new Forge("/", "/", "DOCKER_INSPECTOR");
+        return new Forge("/","DOCKER_INSPECTOR");
     }
 
     public static Forge createComponentForge(final String linuxDistroName) {
@@ -62,12 +62,12 @@ public class ForgeGenerator {
 
     private static Forge createForge(final String linuxDistroName, boolean doPreferredAliasNamespace) {
         if (StringUtils.isBlank(linuxDistroName)) {
-            return new Forge("/", "/", "none");
+            return new Forge("/","none");
         }
         final String linuxDistroNameLowerCase = linuxDistroName == null ? "" : linuxDistroName.toLowerCase();
         Optional<String> overriddenKbName = findMatch(linuxDistroNameLowerCase);
         String kbName = overriddenKbName.orElse(linuxDistroNameLowerCase);
-        final Forge preferredNamespaceForge = new Forge("/", "/", kbName, doPreferredAliasNamespace);
+        final Forge preferredNamespaceForge = new Forge("/", kbName, doPreferredAliasNamespace);
         return preferredNamespaceForge;
     }
 

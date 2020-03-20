@@ -97,9 +97,9 @@ public class ImageInspectorApiTest {
 
     final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
     SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
-    bdioDoc.project = new BdioProject();
-    bdioDoc.project.name = blackDuckProjectName;
-    bdioDoc.project.version = blackDuckProjectVersion;
+    bdioDoc.setProject(new BdioProject());
+    bdioDoc.getProject().name = blackDuckProjectName;
+    bdioDoc.getProject().version = blackDuckProjectVersion;
     imageInfoDerived.setBdioDocument(bdioDoc);
     Mockito.when(imageInspector
         .generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy,
@@ -120,8 +120,8 @@ public class ImageInspectorApiTest {
             organizeComponentsByLayer,
             includeRemovedComponents,
             cleanupWorkingDir, containerFileSystemOutputPath, null, currentLinuxDistro, null, null);
-    assertEquals(blackDuckProjectName, result.project.name);
-    assertEquals(blackDuckProjectVersion, result.project.version);
+    assertEquals(blackDuckProjectName, result.getProject().name);
+    assertEquals(blackDuckProjectVersion, result.getProject().version);
   }
 
 }
