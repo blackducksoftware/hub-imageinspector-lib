@@ -85,7 +85,7 @@ public class ImageInspector {
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed, platformComponentsExcluded);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(imageInfoDerived.getCodeLocationName(),
             imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy, organizeComponentsByLayer,
-            includeRemovedComponents, platformComponentsExcluded);
+            includeRemovedComponents);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
