@@ -8,8 +8,9 @@ install: true
 
 addons:
   sonarcloud:
+    organization: "black-duck-software"
     token:
-      secure: "bFsSPGboAoA3d9uNpi/EslbfvYlamZ49ALPWgxTbZJog+TZbxVDHSbK0fApDK68LtszDKptozGoYPV6D3hLT82pInfMuoZmdFL3K21GcE+WetXED52fshcK+xYouLsx7kxz+TyXQFCtbKdrQiHPMNJEYu5iSHNoCH/1ZG7RaZ9Gz3KPTi1EVaRoTEPxSM05QMtcYrnyTUlEF9/0Sa4FBimCTKKRLX7XHegk1oagbOTc8tkJc7cMVQbP8yBAJzDzxybL09YQ90S3kHHzzOGTS9DjFg2MtU9MxWOMgUymejcG6scPdV2hXUp9spV8KwF/YafeM16wNPBs/JzLUr+IsPENfZjcd2pmSwnZbV7nCsxku1bWU6ow2qWf0qIA0mgBLQlQssKXMl22BqoX7vECkZh3u4Et4npj81l/LsJuNdcfROZB209Hzi9b4u4VBHqApZKGtygxs75+pv/D4nizots9iCk5GKCSoUuVLz9fQXXMC/xJiS1FftA628w5op9L19LJ6fDs9WByb7tZjBQ1pvXJiB9slSywIgJ7BApBpI67sZBerDhL503HeiKV+JXPTy7xOqUKywU/PcV8RRsFYCWIL21m0BgJ8SACW81KUKzDwvbHfjkGF9ZQNA0prXYN4lRQonqQTgZ+4LQgPM+cyF56P+uhADiBmDgTWl14QDlo="
+      secure: "dKDdmXBOOrB/BhBfk+LYH4KkP8X4HSSwTlOO1GMAWOxFMQnIBpLTyXCVoKNUEq/uEjt7Zo4+mo6M3ij6H1a/XofPrMmuRZJCOZqFV81nGPudQ5IqxuFrCGCsUMVeS5sVju6za2mUcJb2IBCiquXKIJhuhW34HkNVRSyAvMuiw2jVh8K/k9IbPEjLLqXcWRznFN96T4I/cYQ5xcqnFrtTKxkdneB2dOFLXr2n7MjieYm5SqJvmxJ7QVlAkJ2q4bMeVeODrtcUvnFX4/c0L6TQCCLByqxO85vpLitj/DrexpFfzqevvZ74kzfrWbDBGr8OFoETK6A8OvLw5czX9+nl1Z6DRIj3LYo9Ak+UTSVucjwMyttnqnKmBoz6k04k6l9IvusGAla+gip5vAXUhfN5FFpKlfrWvgJPHIEf+Kvz0hedJ0umMNwow+lia6QboXCf/gB8RAgvDjUsiIAY9uj8ONUW1QEKR9QKTccvLt/MlwfA+hkDIXYEYqdCVTR2QWwuR/56g0Mfr5pWHOctgbV5FYAUkF7NlCd13aSOGzHUpYpBXyMHSPt5pfU3uawmanea+N4suD9oY89B1PHNG6UXva6ge7v1F1XjCWd/kcGzEgEcZ2zGGAuhbZmo/HKRNYeMDgPT3EJVcfLudtPJ4STmBWas++LJkKRwWZ4DscSlO2E="
 
 jdk:
 - openjdk8
@@ -20,8 +21,7 @@ notifications:
     - bdsoss@blackducksoftware.com
 
 script:
-- "./gradlew clean build jacocoTestReport coveralls"
-####- "./gradlew clean build jacocoTestReport coveralls sonarqube"
+- "./gradlew clean build jacocoTestReport coveralls sonarqube"
 
 after_success:
 - bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)
