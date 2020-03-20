@@ -29,7 +29,7 @@ dependencyManagement {
 }
 
 dependencies {
-    api 'com.synopsys.integration:integration-bdio:20.0.0-SNAPSHOT'
+    api 'com.synopsys.integration:integration-bdio:21.0.0'
     api 'org.springframework.boot:spring-boot-starter'
     api 'org.springframework:spring-context'
     api 'org.apache.commons:commons-exec:1.3'
