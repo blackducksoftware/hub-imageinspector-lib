@@ -29,7 +29,7 @@ public class PkgMgrExecutorTest {
     }
 
     @Test
-    public void testWithoutUpgrade() throws IntegrationException {
+    public void testWithoutUpgrade() throws IntegrationException, InterruptedException {
         PkgMgrExecutor executor = new PkgMgrExecutor();
         final PkgMgr testPkgMgr = new TestPkgMgr(Arrays.asList("echo", TEST_COMPONENT), Arrays.asList("echo", TEST_COMPONENT));
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("src/test/resources/testApkFileSystem/lib/apk"), PackageManagerEnum.APK);
@@ -39,7 +39,7 @@ public class PkgMgrExecutorTest {
     }
 
     @Test
-    public void testWithUpgrade() throws IntegrationException {
+    public void testWithUpgrade() throws IntegrationException, InterruptedException {
         PkgMgrExecutor executor = new PkgMgrExecutor();
         final PkgMgr testPkgMgr = new TestPkgMgr(Arrays.asList("thisisnotavalidcommand"), Arrays.asList("echo", TEST_COMPONENT));
         final ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(new File("src/test/resources/testApkFileSystem/lib/apk"), PackageManagerEnum.APK);

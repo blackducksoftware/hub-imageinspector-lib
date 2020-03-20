@@ -68,7 +68,7 @@ public class FileOperationsTest {
     }
 
     @Test
-    public void testDeleteDirPersistently() throws IOException {
+    public void testDeleteDirPersistently() throws IOException, InterruptedException {
         final File fileToDelete = new File("test/dirWithFileToDelete/fileToDelete.txt");
         fileToDelete.getParentFile().mkdir();
         fileToDelete.createNewFile();

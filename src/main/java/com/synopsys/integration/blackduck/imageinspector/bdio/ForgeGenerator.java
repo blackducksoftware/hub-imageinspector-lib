@@ -64,7 +64,7 @@ public class ForgeGenerator {
         if (StringUtils.isBlank(linuxDistroName)) {
             return new Forge("/","none");
         }
-        final String linuxDistroNameLowerCase = linuxDistroName == null ? "" : linuxDistroName.toLowerCase();
+        final String linuxDistroNameLowerCase = linuxDistroName.toLowerCase();
         Optional<String> overriddenKbName = findMatch(linuxDistroNameLowerCase);
         String kbName = overriddenKbName.orElse(linuxDistroNameLowerCase);
         final Forge preferredNamespaceForge = new Forge("/", kbName, doPreferredAliasNamespace);

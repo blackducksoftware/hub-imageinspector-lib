@@ -73,23 +73,19 @@ public class LinuxFileSystem extends Stringable {
         FileOutputStream fOut = null;
         BufferedOutputStream bOut = null;
         GzipCompressorOutputStream gzOut = null;
-        TarArchiveOutputStream tOut = null;
         try {
             fOut = new FileOutputStream(outputTarFile);
             bOut = new BufferedOutputStream(fOut);
             gzOut = new GzipCompressorOutputStream(bOut);
-            tOut = new TarArchiveOutputStream(gzOut);
-            tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
-            final List<String> containerFileSystemExcludedPathList = cleanPaths(getListFromCommaSeparatedString(containerFileSystemExcludedPathListString));
-            final String rootName = root.getName();
-            addFileToTar(tOut, rootName, root, null, containerFileSystemExcludedPathList);
+            try (TarArchiveOutputStream tOut = new TarArchiveOutputStream(gzOut)) {
+                tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
+                final List<String> containerFileSystemExcludedPathList = cleanPaths(getListFromCommaSeparatedString(containerFileSystemExcludedPathListString));
+                final String rootName = root.getName();
+                addFileToTar(tOut, rootName, root, null, containerFileSystemExcludedPathList);
+            }
         } catch (Exception unexpectedException) {
             logger.error(String.format("Unexpected error creating tar.gz file: %s", unexpectedException.getMessage()), unexpectedException);
         } finally {
-            if (tOut != null) {
-                tOut.finish();
-                tOut.close();
-            }
             if (gzOut != null) {
                 gzOut.close();
             }

@@ -362,7 +362,7 @@ public class DockerTarParser {
                 final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
                                         .getImageInspectorOs(imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
                 if (!neededInspectorOs.equals(currentOs)) {
-                    final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs == null ? "<unknown>" : neededInspectorOs.toString());
+                    final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs.toString());
                     throw new WrongInspectorOsException(neededInspectorOs, msg);
                 }
             } else {

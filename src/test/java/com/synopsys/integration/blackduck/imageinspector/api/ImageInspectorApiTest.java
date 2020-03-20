@@ -35,7 +35,7 @@ public class ImageInspectorApiTest {
   // TODO add test for invalid platformTop specified: should throw exception
 
   @Test
-  public void test() throws IntegrationException, IOException {
+  public void test() throws IntegrationException, IOException, InterruptedException {
     final File workingDir = new File("test/working");
     final File targetDir = new File(workingDir, "target");
     final File tarExtractionDirectory = new File(workingDir, "extractionDir");

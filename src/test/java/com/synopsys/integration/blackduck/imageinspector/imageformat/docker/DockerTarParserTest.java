@@ -155,7 +155,7 @@ public class DockerTarParserTest {
     }
 
     @Test
-    public void testExtractImageLayersFull() throws IOException, IntegrationException {
+    public void testExtractImageLayersFull() throws IOException, IntegrationException, InterruptedException {
         final ImageComponentHierarchy imageComponentHierarchy = doExtractImageLayersTest(false);
         assertEquals("testCompName", imageComponentHierarchy.getFinalComponents().get(0).getName());
         assertEquals("Layer00_sha_Layer1", imageComponentHierarchy.getLayers().get(0).getLayerIndexedName());
@@ -164,7 +164,7 @@ public class DockerTarParserTest {
 
 
     @Test
-    public void testExtractImageLayersApp() throws IOException, IntegrationException {
+    public void testExtractImageLayersApp() throws IOException, IntegrationException, InterruptedException {
         final ImageComponentHierarchy imageComponentHierarchy = doExtractImageLayersTest(true);
         assertEquals(0, imageComponentHierarchy.getFinalComponents().size());
         assertEquals("Layer00_sha_Layer1", imageComponentHierarchy.getLayers().get(0).getLayerIndexedName());
@@ -193,7 +193,7 @@ public class DockerTarParserTest {
         assertEquals("fedora", distroFound.get());
     }
 
-    private ImageComponentHierarchy doExtractImageLayersTest(final boolean excludePlatform) throws IOException, IntegrationException {
+    private ImageComponentHierarchy doExtractImageLayersTest(final boolean excludePlatform) throws IOException, IntegrationException, InterruptedException {
         final String imageName = "alpine";
         final String imageTag = "latest";
         final String imageConfigFileName = "caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json";

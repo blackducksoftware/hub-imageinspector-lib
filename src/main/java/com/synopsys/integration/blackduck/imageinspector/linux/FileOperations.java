@@ -101,7 +101,7 @@ public class FileOperations {
         return msgs;
     }
 
-    public void deleteDirPersistently(final File dir) {
+    public void deleteDirPersistently(final File dir) throws InterruptedException {
         for (int i = 0; i < 10; i++) {
             logger.debug(String.format("Attempt #%d to delete dir %s", i, dir.getAbsolutePath()));
             try {
@@ -113,11 +113,7 @@ public class FileOperations {
                 logger.debug(String.format("Dir %s has been deleted", dir.getAbsolutePath()));
                 return;
             }
-            try {
-                Thread.sleep(1000L);
-            } catch (final InterruptedException e) {
-                logger.warn(String.format("deleteDir() sleep interrupted: %s", e.getMessage()));
-            }
+            Thread.sleep(1000L);
         }
         logger.warn(String.format("Unable to delete dir %s", dir.getAbsolutePath()));
     }

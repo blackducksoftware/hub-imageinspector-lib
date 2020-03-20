@@ -55,7 +55,7 @@ public class ImageInspectorApiIntTest {
     private static String[] apkOutput = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
 
     @BeforeAll
-    public static void setup() throws IntegrationException {
+    public static void setup() throws IntegrationException, InterruptedException {
         final FileOperations fileOperations = new FileOperations();
         pkgMgrs = new ArrayList<>(3);
         pkgMgrs.add(new ApkPkgMgr(fileOperations));
@@ -83,10 +83,18 @@ public class ImageInspectorApiIntTest {
     }
 
     @Test
-    public void testOnWrongOs() throws IntegrationException {
+    public void testOnWrongOs() throws IntegrationException, InterruptedException {
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
         try {
-            imageInspectorApi.getBdio(SIMPLE_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "CENTOS", null, null);
+            final ImageInspectionRequest imageInspectionRequest = new ImageInspectionRequestBuilder()
+                                               .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
+                                               .setBlackDuckProjectName(PROJECT)
+                                               .setBlackDuckProjectVersion(PROJECT_VERSION)
+                                               .setOrganizeComponentsByLayer(false)
+                                               .setIncludeRemovedComponents(false)
+                                               .setCurrentLinuxDistro("CENTOS")
+                                               .build();
+            imageInspectorApi.getBdio(imageInspectionRequest);
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
@@ -95,16 +103,16 @@ public class ImageInspectorApiIntTest {
     }
 
     @Test
-    public void testOnRightOs() throws IntegrationException {
+    public void testOnRightOs() throws IntegrationException, InterruptedException {
         doTest(null);
     }
 
     @Test
-    public void testOnRightOsDistroOverride() throws IntegrationException {
+    public void testOnRightOsDistroOverride() throws IntegrationException, InterruptedException {
         doTest("overriddendistroname");
     }
 
-    private void doTest(final String targetLinuxDistroOverride) throws IntegrationException {
+    private void doTest(final String targetLinuxDistroOverride) throws IntegrationException, InterruptedException {
         final String expectedForgeName;
         if (StringUtils.isNotBlank(targetLinuxDistroOverride)) {
             expectedForgeName = "@" + targetLinuxDistroOverride;
@@ -136,7 +144,7 @@ public class ImageInspectorApiIntTest {
     }
 
     @Test
-    public void testAppOnlyFileSystem() throws IntegrationException, IOException {
+    public void testAppOnlyFileSystem() throws IntegrationException, IOException, InterruptedException {
         Mockito.when(os.isLinuxDistroFile(Mockito.any(File.class))).thenReturn(Boolean.TRUE);
         Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("centos"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);

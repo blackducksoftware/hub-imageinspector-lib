@@ -41,7 +41,7 @@ public class PkgMgrExecutor {
     private static final Long CMD_TIMEOUT = 120000L;
     private final ReentrantLock lock = new ReentrantLock();
 
-    public String[] runPackageManager(final CmdExecutor executor, final PkgMgr pkgMgr, final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException {
+    public String[] runPackageManager(final CmdExecutor executor, final PkgMgr pkgMgr, final ImagePkgMgrDatabase imagePkgMgrDatabase) throws IntegrationException, InterruptedException {
         logger.trace("Requesting lock for package manager execution");
         lock.lock();
         logger.trace("Acquired lock for package manager execution");
@@ -56,7 +56,7 @@ public class PkgMgrExecutor {
             final String[] pkgMgrListOutputLines = listPackages(executor, pkgMgr);
             logger.trace(String.format("Package count: %d", pkgMgrListOutputLines.length));
             return pkgMgrListOutputLines;
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             throw new IntegrationException(String.format("Error installing or querying image's package manager database", e.getMessage()), e);
         } finally {
             logger.debug("Finished package manager execution");

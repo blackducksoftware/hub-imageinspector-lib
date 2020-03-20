@@ -98,7 +98,7 @@ public class ImageInspectorApi {
      * @param targetLinuxDistroOverride                 Optional. The linux distro name to use when constructing BDIO. Used to override the name in the image with something equivalent that the Black Duck KB recognizes.
      * @param platformTopLayerExternalId                Optional. (Ignored if either organizeComponentsByLayer or includeRemovedComponents is true.) If you want to ignore components from the underlying platform, set this to the ID of the top layer of the platform. Components from the platform layers will be excluded from the output.
      * @return The generated BDIO object representing the componets (packages) read from the images's package manager database.
-     * @throws IntegrationException
+     * @throws IntegrationException, InterruptedException
      */
     @Deprecated
     public SimpleBdioDocument getBdio(
@@ -116,7 +116,7 @@ public class ImageInspectorApi {
         final String currentLinuxDistro,
         final String targetLinuxDistroOverride,
         final String platformTopLayerExternalId)
-        throws IntegrationException {
+        throws IntegrationException, InterruptedException {
 
         final ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
                                                                   .setDockerTarfilePath(dockerTarfilePath)
@@ -137,7 +137,7 @@ public class ImageInspectorApi {
         return getBdio(imageInspectionRequest);
     }
 
-    public SimpleBdioDocument getBdio(final ImageInspectionRequest imageInspectionRequest) throws IntegrationException {
+    public SimpleBdioDocument getBdio(final ImageInspectionRequest imageInspectionRequest) throws IntegrationException, InterruptedException {
         logger.info("getBdio()");
         os.logMemory();
         if (gsonBuilder == null) {
@@ -147,13 +147,13 @@ public class ImageInspectorApi {
     }
 
     private SimpleBdioDocument getBdioDocument(final ImageInspectionRequest imageInspectionRequest)
-        throws IntegrationException {
+        throws IntegrationException, InterruptedException {
         final ImageInfoDerived imageInfoDerived = inspect(imageInspectionRequest);
         return imageInfoDerived.getBdioDocument();
     }
 
     private ImageInfoDerived inspect(final ImageInspectionRequest imageInspectionRequest)
-        throws IntegrationException {
+        throws IntegrationException, InterruptedException {
         final String effectivePlatformTopLayerExternalId;
         if (imageInspectionRequest.isOrganizeComponentsByLayer() || imageInspectionRequest.isIncludeRemovedComponents()) {
             // base image component exclusion not supported when either of these is true
