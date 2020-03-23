@@ -122,8 +122,14 @@ public class ImageInspectorApiIntTest {
         Mockito.when(os.isLinuxDistroFile(Mockito.any(File.class))).thenReturn(Boolean.TRUE);
         Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
-
-        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(SIMPLE_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null, null, null, false, false, false, null, null, "ALPINE", targetLinuxDistroOverride, null);
+        final ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
+            .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
+            .setBlackDuckProjectName(PROJECT)
+            .setBlackDuckProjectVersion(PROJECT_VERSION)
+            .setCurrentLinuxDistro("ALPINE")
+            .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
+            .build();
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
         assertEquals(PROJECT, bdioDocument.getProject().name);
         assertEquals(PROJECT_VERSION, bdioDocument.getProject().version);
@@ -153,11 +159,15 @@ public class ImageInspectorApiIntTest {
         final File tempDir = fileOperations.createTempDirectory();
         final File destinationFile = new File(tempDir, "out.tar.gz");
         final String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
-
-        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(MULTILAYER_IMAGE_TARFILE, PROJECT, PROJECT_VERSION, null,
-            null, null, false, false, false,
-            containerFileSystemOutputFilePath, null, "CENTOS", null,
-            "sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11");
+        final ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
+            .setDockerTarfilePath(MULTILAYER_IMAGE_TARFILE)
+            .setBlackDuckProjectName(PROJECT)
+            .setBlackDuckProjectVersion(PROJECT_VERSION)
+            .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+            .setCurrentLinuxDistro("CENTOS")
+            .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
+            .build();
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
 
         final File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
         System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());

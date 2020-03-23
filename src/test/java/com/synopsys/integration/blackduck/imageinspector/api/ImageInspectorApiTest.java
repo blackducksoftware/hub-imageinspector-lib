@@ -114,12 +114,21 @@ public class ImageInspectorApiTest {
     Mockito.when(fileOperations.createTempDirectory()).thenReturn(new File("test"));
     api.setFileOperations(fileOperations);
 
-    SimpleBdioDocument result = api
-        .getBdio(dockerTarfile.getAbsolutePath(), blackDuckProjectName, blackDuckProjectVersion,
-            codeLocationPrefix, dockerImageName, dockerTagName,
-            organizeComponentsByLayer,
-            includeRemovedComponents,
-            cleanupWorkingDir, containerFileSystemOutputPath, null, currentLinuxDistro, null, null);
+    final ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
+        .setDockerTarfilePath(dockerTarfile.getAbsolutePath())
+        .setBlackDuckProjectName(blackDuckProjectName)
+        .setBlackDuckProjectVersion(blackDuckProjectVersion)
+        .setCodeLocationPrefix(codeLocationPrefix)
+        .setGivenImageRepo(dockerImageName)
+        .setGivenImageTag(dockerTagName)
+        .setOrganizeComponentsByLayer(organizeComponentsByLayer)
+        .setIncludeRemovedComponents(includeRemovedComponents)
+        .setCleanupWorkingDir(cleanupWorkingDir)
+        .setContainerFileSystemOutputPath(containerFileSystemOutputPath)
+        .setCurrentLinuxDistro(currentLinuxDistro)
+        .build();
+    final SimpleBdioDocument result = api
+        .getBdio(imageInspectionRequest);
     assertEquals(blackDuckProjectName, result.getProject().name);
     assertEquals(blackDuckProjectVersion, result.getProject().version);
   }

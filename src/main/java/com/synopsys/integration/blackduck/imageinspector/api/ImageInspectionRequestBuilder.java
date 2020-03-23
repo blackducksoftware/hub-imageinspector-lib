@@ -23,6 +23,7 @@
 package com.synopsys.integration.blackduck.imageinspector.api;
 
 public class ImageInspectionRequestBuilder {
+    private String loggingLevel;
     private String dockerTarfilePath;
     private String blackDuckProjectName;
     private String blackDuckProjectVersion;
@@ -41,6 +42,10 @@ public class ImageInspectionRequestBuilder {
     public ImageInspectionRequestBuilder() {
     }
 
+    public ImageInspectionRequestBuilder setLoggingLevel(final String loggingLevel) {
+        this.loggingLevel = loggingLevel;
+        return this;
+    }
     public ImageInspectionRequestBuilder setDockerTarfilePath(final String dockerTarfilePath) {
         this.dockerTarfilePath = dockerTarfilePath;
         return this;
@@ -113,6 +118,7 @@ public class ImageInspectionRequestBuilder {
 
     public ImageInspectionRequest build() {
         return new ImageInspectionRequest(
+            loggingLevel,
             dockerTarfilePath,
             blackDuckProjectName,
             blackDuckProjectVersion,

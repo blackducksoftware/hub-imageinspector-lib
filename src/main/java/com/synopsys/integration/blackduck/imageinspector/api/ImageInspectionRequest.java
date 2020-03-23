@@ -22,7 +22,10 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.api;
 
-public class ImageInspectionRequest {
+import com.synopsys.integration.util.Stringable;
+
+public class ImageInspectionRequest extends Stringable {
+    private final String loggingLevel;
     private final String dockerTarfilePath;
     private final String blackDuckProjectName;
     private final String blackDuckProjectVersion;
@@ -38,7 +41,8 @@ public class ImageInspectionRequest {
     private final String targetLinuxDistroOverride;
     private final String platformTopLayerExternalId;
 
-    public ImageInspectionRequest(final String dockerTarfilePath,
+    public ImageInspectionRequest(final String loggingLevel,
+        final String dockerTarfilePath,
         final String blackDuckProjectName,
         final String blackDuckProjectVersion,
         final String codeLocationPrefix,
@@ -52,6 +56,7 @@ public class ImageInspectionRequest {
         final String currentLinuxDistro,
         final String targetLinuxDistroOverride,
         final String platformTopLayerExternalId) {
+        this.loggingLevel = loggingLevel;
         this.dockerTarfilePath = dockerTarfilePath;
         this.blackDuckProjectName = blackDuckProjectName;
         this.blackDuckProjectVersion = blackDuckProjectVersion;
@@ -66,6 +71,10 @@ public class ImageInspectionRequest {
         this.currentLinuxDistro = currentLinuxDistro;
         this.targetLinuxDistroOverride = targetLinuxDistroOverride;
         this.platformTopLayerExternalId = platformTopLayerExternalId;
+    }
+
+    public String getLoggingLevel() {
+        return loggingLevel;
     }
 
     public String getDockerTarfilePath() {

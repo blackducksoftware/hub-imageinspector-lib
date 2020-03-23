@@ -136,7 +136,15 @@ public class ImageInspectorApi {
                                                                   .build();
         return getBdio(imageInspectionRequest);
     }
-
+    /**
+     * Get a BDIO object representing the packages found in the docker image in the given tarfile. If the tarfile contains
+     * more than one image, givenImageRepo and givenImageTag are used to select an image. If containerFileSystemOutputPath
+     * is provided, this method will also write the container filesystem (reconstructed as part of the processing
+     * required to read the image's packages) to that file as a .tar.gz file.
+     * @param imageInspectionRequest                    Required. The request details.
+     * @return The generated BDIO object representing the componets (packages) read from the images's package manager database.
+     * @throws IntegrationException, InterruptedException
+     */
     public SimpleBdioDocument getBdio(final ImageInspectionRequest imageInspectionRequest) throws IntegrationException, InterruptedException {
         logger.info("getBdio()");
         os.logMemory();
