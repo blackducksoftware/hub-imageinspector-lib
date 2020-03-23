@@ -44,6 +44,7 @@ public class FileDirLayerEntry implements LayerEntry {
     private final TarArchiveInputStream layerInputStream;
     private final TarArchiveEntry archiveEntry;
     private final File layerOutputDir;
+    private final Optional<File> otherFileToDeleteNone = Optional.empty();
 
     public FileDirLayerEntry(final FileOperations fileOperations, final TarArchiveInputStream layerInputStream, final TarArchiveEntry archiveEntry, final File layerOutputDir) {
         this.fileOperations = fileOperations;
@@ -54,7 +55,6 @@ public class FileDirLayerEntry implements LayerEntry {
 
     @Override
     public Optional<File> process() {
-        final Optional<File> otherFileToDeleteNone = Optional.empty();
         final String fileSystemEntryName = archiveEntry.getName();
         logger.trace(String.format("Processing file/dir: %s", fileSystemEntryName));
 

@@ -39,6 +39,7 @@ public class WhiteOutFileLayerEntry implements LayerEntry {
     private final FileOperations fileOperations;
     private final TarArchiveEntry layerEntry;
     private final File layerOutputDir;
+    private final Optional<File> otherFileToDeleteNone = Optional.empty();
 
     public WhiteOutFileLayerEntry(final FileOperations fileOperations, final TarArchiveEntry layerEntry, final File layerOutputDir) {
         this.fileOperations = fileOperations;
@@ -48,7 +49,6 @@ public class WhiteOutFileLayerEntry implements LayerEntry {
 
     @Override
     public Optional<File> process() {
-        final Optional<File> otherFileToDeleteNone = Optional.empty();
         final String fileSystemEntryName = layerEntry.getName();
         logger.trace(String.format("Found white-out file %s", fileSystemEntryName));
 
