@@ -74,6 +74,5 @@ public class WhiteOutFileLayerEntry extends LayerEntryNoFileToDelete {
                 logger.warn(String.format("Error removing whited-out file %s", filePathToRemove));
             }
         }
-        return;
     }
 }

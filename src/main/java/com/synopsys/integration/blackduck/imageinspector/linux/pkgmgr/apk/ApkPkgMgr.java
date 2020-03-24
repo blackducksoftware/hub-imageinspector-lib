@@ -150,7 +150,7 @@ public class ApkPkgMgr implements PkgMgr {
         for (int i = 0; i < parts.length - 2; i++) {
             final String part = parts[i];
             if (StringUtils.isNotBlank(component)) {
-                component += String.format("-%s", part);
+                component = String.format("%s-%s", component, part);
             } else {
                 component = part;
             }

@@ -63,7 +63,6 @@ public class LinkLayerEntry extends LayerEntryNoFileToDelete {
         } else if (layerEntry.isLink()) {
             processHardLink(layerOutputDirPath, startLink);
         }
-        return;
     }
 
     private void processSymbolicLink(final Path layerOutputDirPath, final Path startLink) throws IOException {

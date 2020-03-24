@@ -74,12 +74,10 @@ public class FileDirLayerEntry extends LayerEntryNoFileToDelete {
                 logger.error(String.format("Error copying file %s to %s: %s", fileSystemEntryName, outputFile.getAbsolutePath(), e.getMessage()));
                 return;
             } finally {
-                if (outputFileStream != null) {
-                    try {
-                        outputFileStream.close();
-                    } catch (final IOException e) {
-                        logger.error(String.format("Error closing output file stream for: %s: %s", outputFile.getAbsolutePath(), e.getMessage()));
-                    }
+                try {
+                    outputFileStream.close();
+                } catch (final IOException e) {
+                    logger.error(String.format("Error closing output file stream for: %s: %s", outputFile.getAbsolutePath(), e.getMessage()));
                 }
             }
         } else {
@@ -88,6 +86,5 @@ public class FileDirLayerEntry extends LayerEntryNoFileToDelete {
                 logger.trace(String.format("mkdir of %s didn't succeed, but it might have already existed", outputFile.getAbsolutePath()));
             }
         }
-        return;
     }
 }

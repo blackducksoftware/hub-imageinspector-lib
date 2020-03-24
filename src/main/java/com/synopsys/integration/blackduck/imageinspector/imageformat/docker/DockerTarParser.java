@@ -169,7 +169,7 @@ public class DockerTarParser {
             throw new IntegrationException(msg, e);
         }
         final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(gsonBuilder, tarExtractionSubDirectory, partialMapping.getImageConfigFilename());
-        if (externalLayerIds == null) {
+        if (externalLayerIds.size() == 0) {
             return partialMapping;
         }
         return new ManifestLayerMapping(partialMapping, externalLayerIds);
@@ -249,7 +249,7 @@ public class DockerTarParser {
 
     private List<ComponentDetails> getNetComponents(final List<ComponentDetails> grossComponents, final List<ComponentDetails> componentsToOmit) {
         logger.info(String.format("There are %d components to omit", componentsToOmit.size()));
-        if (componentsToOmit == null || componentsToOmit.isEmpty()) {
+        if (componentsToOmit.isEmpty()) {
             return grossComponents;
         }
         List<ComponentDetails> netComponents = ListUtils.subtract(grossComponents, componentsToOmit);
@@ -263,12 +263,11 @@ public class DockerTarParser {
             final String imageConfigFileContents = fileOperations
                                                        .readFileToString(imageConfigFile);
             logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            final List<String> externalLayerIds = imageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents);
-            return externalLayerIds;
+            return imageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents);
         } catch (Exception e) {
             logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
         }
-        return null;
+        return new ArrayList<>(0);
     }
 
     private Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {
@@ -351,7 +350,6 @@ public class DockerTarParser {
             logger.debug(String.format("Current (running on) OS not provided; cannot determine components present after adding layer %d", layerIndex));
             return null;
         }
-
         try {
             if (imageInfoParsed == null) {
                 logger.debug("Attempting to determine the target image package manager");
@@ -365,19 +363,15 @@ public class DockerTarParser {
             } else {
                 logger.debug(String.format("The target image package manager has previously been determined: %s", imageInfoParsed.getImagePkgMgrDatabase().getPackageManager().toString()));
             }
-            final List<ComponentDetails> comps;
-            try {
-                final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(executor, imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());
-                comps = imageInfoParsed.getPkgMgr().extractComponentsFromPkgMgrOutput(imageInfoParsed.getTargetImageFileSystem().getTargetImageFileSystemFull(), imageInfoParsed.getLinuxDistroName(), pkgMgrOutputLines);
-            } catch (IntegrationException e) {
-                logger.debug(String.format("Unable to log components present after layer %d: %s", layerIndex, e.getMessage()));
+            final List<ComponentDetails> comps = queryPkgMgrForDependencies(imageInfoParsed, layerIndex);
+            if (comps.size() == 0) {
                 return imageInfoParsed;
             }
             logger.info(String.format("Found %d components in file system after adding layer %d", comps.size(), layerIndex));
             for (ComponentDetails comp : comps) {
                 logger.trace(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }
-            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd, comps);
+            final LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd, comps);
             imageComponentHierarchy.addLayer(layer);
             if (isPlatformTopLayer) {
                 imageComponentHierarchy.setPlatformComponents(comps);
@@ -414,11 +408,23 @@ public class DockerTarParser {
                         linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystem.getTargetImageFileSystemFull()).orElse(null);
                         logger.trace(String.format("Target linux distro name derived from image file system: %s", linuxDistroName));
                     }
-                    final ImageInfoParsed imagePkgMgrInfo = new ImageInfoParsed(targetImageFileSystem, targetImagePkgMgr, linuxDistroName, pkgMgr);
-                    return imagePkgMgrInfo;
+                    return new ImageInfoParsed(targetImageFileSystem, targetImagePkgMgr, linuxDistroName, pkgMgr);
                 }
             }
         }
         throw new PkgMgrDataNotFoundException("No package manager database found in this Docker image.");
+    }
+
+    private List<ComponentDetails> queryPkgMgrForDependencies(final ImageInfoParsed imageInfoParsed, final int layerIndex) throws InterruptedException {
+        final List<ComponentDetails> comps;
+        try {
+            final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(executor, imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());
+            comps = imageInfoParsed.getPkgMgr().extractComponentsFromPkgMgrOutput(imageInfoParsed.getTargetImageFileSystem().getTargetImageFileSystemFull(), imageInfoParsed.getLinuxDistroName(), pkgMgrOutputLines);
+        } catch (IntegrationException e) {
+            logger.debug(String.format("Unable to log components present after layer %d: %s", layerIndex, e.getMessage()));
+            return new ArrayList<>(0);
+        }
+        logger.info(String.format("Found %d components in file system after adding layer %d", comps.size(), layerIndex));
+        return comps;
     }
 }

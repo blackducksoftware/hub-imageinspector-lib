@@ -92,8 +92,7 @@ public class BdioGenerator {
         try (final CharArrayWriter charArrayWriter = new CharArrayWriter()) {
             writeBdio(charArrayWriter, bdioDocument);
             final String bdioString = charArrayWriter.toString();
-            final String[] bdioLines = bdioString.split("\n");
-            return bdioLines;
+            return bdioString.split("\n");
         }
     }
 
@@ -121,10 +120,10 @@ public class BdioGenerator {
                 } else {
                     logger.trace(String.format("layer comp %s:%s is not in final component list", comp.getName(), comp.getVersion()));
                     if (includeRemovedComponents) {
-                        logger.trace(String.format("\tIncluding it in this layer"));
+                        logger.trace("\tIncluding it in this layer");
                         addDependency(graph, layerDependency, comp);
                     } else {
-                        logger.trace(String.format("\tExcluding it from this layer"));
+                        logger.trace("\tExcluding it from this layer");
                     }
                 }
             }

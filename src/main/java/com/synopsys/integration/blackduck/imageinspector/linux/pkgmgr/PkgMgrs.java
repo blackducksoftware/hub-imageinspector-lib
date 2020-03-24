@@ -24,4 +24,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr;
 
 public class PkgMgrs {
     public static final String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";
+
+    private PkgMgrs() {
+    }
 }

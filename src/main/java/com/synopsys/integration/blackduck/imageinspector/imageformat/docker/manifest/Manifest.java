@@ -78,7 +78,7 @@ public class Manifest extends Stringable {
         throw new IntegrationException(String.format("Layer mapping for repo:tag %s:%s not found in manifest.json", targetImageName, targetTagName));
     }
 
-    private String findRepoTag(final int numImages, final ImageInfo image, final String targetImageName, final String targetTagName) throws IntegrationException {
+    private String findRepoTag(final int numImages, final ImageInfo image, final String targetImageName, final String targetTagName) {
         // user didn't specify which image, and there is only one: return it
         if (numImages == 1 && StringUtils.isBlank(targetImageName) && StringUtils.isBlank(targetTagName)) {
             logger.debug(String.format("User did not specify a repo:tag, and there's only one image; inspecting that one: %s", getRepoTag(image)));
@@ -97,7 +97,7 @@ public class Manifest extends Stringable {
     }
 
     private String getRepoTag(final ImageInfo image) {
-        if (image.repoTags == null || image.repoTags.size() == 0) {
+        if (image.repoTags == null || image.repoTags.isEmpty()) {
             return "null:null";
         }
         return image.repoTags.get(0);
@@ -148,7 +148,6 @@ public class Manifest extends Stringable {
     private String extractManifestFileContent(final String dockerTarName) throws IOException {
         final File dockerTarDirectory = new File(tarExtractionDirectory, dockerTarName);
         final File manifest = new File(dockerTarDirectory, "manifest.json");
-        final String manifestFileContents = StringUtils.join(FileUtils.readLines(manifest, StandardCharsets.UTF_8), "\n");
-        return manifestFileContents;
+        return StringUtils.join(FileUtils.readLines(manifest, StandardCharsets.UTF_8), "\n");
     }
 }

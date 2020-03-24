@@ -23,7 +23,6 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Optional;
 
 public abstract class LayerEntryNoFileToDelete extends LayerEntry {

@@ -27,6 +27,9 @@ import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 
 public class PackageManagerToImageInspectorOsMapping {
 
+    private PackageManagerToImageInspectorOsMapping() {
+    }
+
     public static ImageInspectorOsEnum getImageInspectorOs(final PackageManagerEnum packageManagerType) {
         switch (packageManagerType) {
             case APK:

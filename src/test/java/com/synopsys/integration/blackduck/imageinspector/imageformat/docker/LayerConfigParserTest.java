@@ -1,5 +1,6 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
@@ -30,6 +31,6 @@ public class LayerConfigParserTest {
         final String layerConfigFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/app/layerConfig/layerWithoutCmd/json"), StandardCharsets.UTF_8);
         LayerConfigParser parser = new LayerConfigParser();
         List<String> layerCommandParts = parser.parseCmd(new GsonBuilder(), layerConfigFileContents);
-        assertEquals(null, layerCommandParts);
+        assertTrue(layerCommandParts.isEmpty());
     }
 }

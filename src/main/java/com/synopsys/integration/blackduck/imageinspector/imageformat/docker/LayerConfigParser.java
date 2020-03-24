@@ -41,7 +41,7 @@ public class LayerConfigParser {
     public List<String> parseCmd(final GsonBuilder gsonBuilder, final String layerConfigFileContents) {
         try {
             if (StringUtils.isBlank(layerConfigFileContents)) {
-                return null;
+                return new ArrayList<>(0);
             }
             logger.trace(String.format("layerConfigFileContents: %s", layerConfigFileContents));
             JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(layerConfigFileContents, JsonObject.class);
@@ -57,6 +57,6 @@ public class LayerConfigParser {
         } catch (Exception e) {
             logger.trace(String.format("Error parsing layer cmd from layer config file contents: %s", e.getMessage()));
         }
-        return null;
+        return new ArrayList<>(0);
     }
 }

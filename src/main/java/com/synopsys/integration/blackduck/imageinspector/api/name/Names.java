@@ -27,6 +27,9 @@ import org.apache.commons.lang3.StringUtils;
 public class Names {
     private static final String APP_ONLY_HINT = "app";
 
+    private Names() {
+    }
+
     public static String getTargetImageFileSystemRootDirName(final String imageName, final String imageTag) {
         return String.format("image_%s_v_%s", cleanImageName(imageName), imageTag);
     }

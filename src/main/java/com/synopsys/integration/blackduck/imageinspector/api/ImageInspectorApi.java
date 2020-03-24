@@ -79,10 +79,6 @@ public class ImageInspectorApi {
     }
 
     /**
-     * Get a BDIO object representing the packages found in the docker image in the given tarfile. If the tarfile contains
-     * more than one image, givenImageRepo and givenImageTag are used to select an image. If containerFileSystemOutputPath
-     * is provided, this method will also write the container filesystem (reconstructed as part of the processing
-     * required to read the image's packages) to that file as a .tar.gz file.
      * @param dockerTarfilePath                         Required. The path to the docker image tarfile (produced using the "docker save" command).
      * @param blackDuckProjectName                      Optional. The Black Duck project name.
      * @param blackDuckProjectVersion                   Optional. The Black Duck project version.
@@ -99,6 +95,11 @@ public class ImageInspectorApi {
      * @param platformTopLayerExternalId                Optional. (Ignored if either organizeComponentsByLayer or includeRemovedComponents is true.) If you want to ignore components from the underlying platform, set this to the ID of the top layer of the platform. Components from the platform layers will be excluded from the output.
      * @return The generated BDIO object representing the componets (packages) read from the images's package manager database.
      * @throws IntegrationException, InterruptedException
+     * @deprecated (use getBdio ( final ImageInspectionRequest imageInspectionRequest) instead)
+     * Get a BDIO object representing the packages found in the docker image in the given tarfile. If the tarfile contains
+     * more than one image, givenImageRepo and givenImageTag are used to select an image. If containerFileSystemOutputPath
+     * is provided, this method will also write the container filesystem (reconstructed as part of the processing
+     * required to read the image's packages) to that file as a .tar.gz file.
      */
     @Deprecated
     public SimpleBdioDocument getBdio(
@@ -136,12 +137,13 @@ public class ImageInspectorApi {
                                                                   .build();
         return getBdio(imageInspectionRequest);
     }
+
     /**
      * Get a BDIO object representing the packages found in the docker image in the given tarfile. If the tarfile contains
      * more than one image, givenImageRepo and givenImageTag are used to select an image. If containerFileSystemOutputPath
      * is provided, this method will also write the container filesystem (reconstructed as part of the processing
      * required to read the image's packages) to that file as a .tar.gz file.
-     * @param imageInspectionRequest                    Required. The request details.
+     * @param imageInspectionRequest Required. The request details.
      * @return The generated BDIO object representing the componets (packages) read from the images's package manager database.
      * @throws IntegrationException, InterruptedException
      */
@@ -215,8 +217,9 @@ public class ImageInspectorApi {
         }
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
         final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
-        final ImageInfoParsed imageInfoParsed = imageInspector.extractDockerLayers(gsonBuilder, currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping,
-            imageInspectionRequest.getPlatformTopLayerExternalId());
+        final ImageInfoParsed imageInfoParsed = imageInspector
+                                                    .extractDockerLayers(gsonBuilder, currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping,
+                                                        imageInspectionRequest.getPlatformTopLayerExternalId());
         validatePlatformResults(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
         logLayers(imageComponentHierarchy);
         cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), layerTars);
@@ -230,10 +233,8 @@ public class ImageInspectorApi {
     }
 
     private void validatePlatformResults(final String givenPlatformTopLayerExternalId, final ImageComponentHierarchy imageComponentHierarchy) throws IntegrationException {
-        if (StringUtils.isNotBlank(givenPlatformTopLayerExternalId)) {
-            if (!imageComponentHierarchy.isPlatformTopLayerFound()) {
-                throw new IntegrationException(String.format("Platform top layer id (%s) was specified but not found", givenPlatformTopLayerExternalId));
-            }
+        if ((StringUtils.isNotBlank(givenPlatformTopLayerExternalId)) && (!imageComponentHierarchy.isPlatformTopLayerFound())) {
+            throw new IntegrationException(String.format("Platform top layer id (%s) was specified but not found", givenPlatformTopLayerExternalId));
         }
     }
 
@@ -241,7 +242,7 @@ public class ImageInspectorApi {
         if (!logger.isTraceEnabled()) {
             return;
         }
-        logger.trace(String.format("layer dump:"));
+        logger.trace("layer dump:");
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             if (layer == null) {
                 logger.trace("Layer is null");
@@ -252,7 +253,7 @@ public class ImageInspectorApi {
             }
         }
         if (imageComponentHierarchy.getFinalComponents() == null) {
-            logger.trace(String.format("Final image components list not set"));
+            logger.trace("Final image components list not set");
         } else {
             logger.trace(String.format("Final image components list has %d components", imageComponentHierarchy.getFinalComponents().size()));
         }
@@ -267,7 +268,7 @@ public class ImageInspectorApi {
         }
     }
 
-    private void createContainerFileSystemTarIfRequested(final TargetImageFileSystem targetImageFileSystem, final String containerFileSystemOutputPath, final String containerFileSystemExcludedPathListString) throws IOException, CompressorException {
+    private void createContainerFileSystemTarIfRequested(final TargetImageFileSystem targetImageFileSystem, final String containerFileSystemOutputPath, final String containerFileSystemExcludedPathListString) {
         if (StringUtils.isNotBlank(containerFileSystemOutputPath)) {
             logger.info("Including container file system in output");
             final File outputDirectory = new File(containerFileSystemOutputPath);

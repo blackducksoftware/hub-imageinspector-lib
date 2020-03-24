@@ -53,6 +53,6 @@ public class ImageConfigParser {
         } catch (Exception e) {
             logger.warn(String.format("Error parsing external layer IDs from image config file contents: %s", e.getMessage()));
         }
-        return null;
+        return new ArrayList<>(0);
     }
 }

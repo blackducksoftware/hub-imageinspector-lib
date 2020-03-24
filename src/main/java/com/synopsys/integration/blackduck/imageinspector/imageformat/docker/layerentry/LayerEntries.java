@@ -34,6 +34,9 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 public class LayerEntries {
     private static final Logger logger = LoggerFactory.getLogger(LayerEntries.class);
 
+    private LayerEntries() {
+    }
+
     public static LayerEntry createLayerEntry(final FileOperations fileOperations, final TarArchiveInputStream layerInputStream, final TarArchiveEntry layerEntry, final File layerOutputDir) {
         final String fileSystemEntryName = layerEntry.getName();
         logger.trace(String.format("Processing layerEntry: name: %s", fileSystemEntryName));
