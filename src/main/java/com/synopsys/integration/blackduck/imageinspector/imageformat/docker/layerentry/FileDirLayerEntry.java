@@ -38,13 +38,12 @@ import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
-public class FileDirLayerEntry implements LayerEntry {
+public class FileDirLayerEntry extends LayerEntryNoFileToDelete {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final FileOperations fileOperations;
     private final TarArchiveInputStream layerInputStream;
     private final TarArchiveEntry archiveEntry;
     private final File layerOutputDir;
-    private final Optional<File> otherFileToDeleteNone = Optional.empty();
 
     public FileDirLayerEntry(final FileOperations fileOperations, final TarArchiveInputStream layerInputStream, final TarArchiveEntry archiveEntry, final File layerOutputDir) {
         this.fileOperations = fileOperations;
@@ -54,7 +53,7 @@ public class FileDirLayerEntry implements LayerEntry {
     }
 
     @Override
-    public Optional<File> process() {
+    public void processFiles() {
         final String fileSystemEntryName = archiveEntry.getName();
         logger.trace(String.format("Processing file/dir: %s", fileSystemEntryName));
 
@@ -70,13 +69,13 @@ public class FileDirLayerEntry implements LayerEntry {
                 outputFileStream = new FileOutputStream(outputFile);
             } catch (final FileNotFoundException e1) {
                 logger.error(String.format("Error creating output stream for %s", outputFile.getAbsolutePath()), e1);
-                return otherFileToDeleteNone;
+                return;
             }
             try {
                 fileOperations.copy(layerInputStream, outputFileStream);
             } catch (final IOException e) {
                 logger.error(String.format("Error copying file %s to %s: %s", fileSystemEntryName, outputFile.getAbsolutePath(), e.getMessage()));
-                return otherFileToDeleteNone;
+                return;
             } finally {
                 if (outputFileStream != null) {
                     try {
@@ -92,7 +91,7 @@ public class FileDirLayerEntry implements LayerEntry {
                 logger.trace(String.format("mkdir of %s didn't succeed, but it might have already existed", outputFile.getAbsolutePath()));
             }
         }
-        return otherFileToDeleteNone;
+        return;
     }
 
     @Override

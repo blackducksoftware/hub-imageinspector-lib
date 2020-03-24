@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
-public class LinkLayerEntry implements LayerEntry {
+public class LinkLayerEntry extends LayerEntryNoFileToDelete {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final FileOperations fileOperations;
     private final TarArchiveEntry layerEntry;
@@ -47,12 +47,10 @@ public class LinkLayerEntry implements LayerEntry {
         this.fileOperations = fileOperations;
         this.layerEntry = layerEntry;
         this.layerOutputDir = layerOutputDir;
-
     }
 
     @Override
-    public Optional<File> process() throws IOException {
-        final Optional<File> otherFileToDeleteNone = Optional.empty();
+    public void processFiles() throws IOException {
         final String fileSystemEntryName = layerEntry.getName();
         logger.trace(String.format("Processing link: %s", fileSystemEntryName));
         final Path layerOutputDirPath = layerOutputDir.toPath();
@@ -61,14 +59,14 @@ public class LinkLayerEntry implements LayerEntry {
             startLink = Paths.get(layerOutputDir.getAbsolutePath(), fileSystemEntryName);
         } catch (final InvalidPathException e) {
             logger.warn(String.format("Error extracting symbolic link %s: Error creating Path object: %s", fileSystemEntryName, e.getMessage()));
-            return otherFileToDeleteNone;
+            return;
         }
         if (layerEntry.isSymbolicLink()) {
             processSymbolicLink(layerOutputDirPath, startLink);
         } else if (layerEntry.isLink()) {
             processHardLink(layerOutputDirPath, startLink);
         }
-        return otherFileToDeleteNone;
+        return;
     }
 
     private void processSymbolicLink(final Path layerOutputDirPath, final Path startLink) throws IOException {

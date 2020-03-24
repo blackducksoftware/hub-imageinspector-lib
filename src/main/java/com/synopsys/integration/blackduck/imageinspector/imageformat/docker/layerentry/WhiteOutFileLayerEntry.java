@@ -34,12 +34,11 @@ import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
-public class WhiteOutFileLayerEntry implements LayerEntry {
+public class WhiteOutFileLayerEntry extends LayerEntryNoFileToDelete {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final FileOperations fileOperations;
     private final TarArchiveEntry layerEntry;
     private final File layerOutputDir;
-    private final Optional<File> otherFileToDeleteNone = Optional.empty();
 
     public WhiteOutFileLayerEntry(final FileOperations fileOperations, final TarArchiveEntry layerEntry, final File layerOutputDir) {
         this.fileOperations = fileOperations;
@@ -48,14 +47,14 @@ public class WhiteOutFileLayerEntry implements LayerEntry {
     }
 
     @Override
-    public Optional<File> process() {
+    public void processFiles() {
         final String fileSystemEntryName = layerEntry.getName();
         logger.trace(String.format("Found white-out file %s", fileSystemEntryName));
 
         final int whiteOutMarkIndex = fileSystemEntryName.indexOf(".wh.");
         if (whiteOutMarkIndex < 0) {
             logger.warn(String.format("%s is not a valid WhiteOutFileLayerEntry; does not contain '.wh.'", fileSystemEntryName));
-            return otherFileToDeleteNone;
+            return;
         }
         final String beforeWhiteOutMark = fileSystemEntryName.substring(0, whiteOutMarkIndex);
         final String afterWhiteOutMark = fileSystemEntryName.substring(whiteOutMarkIndex + ".wh.".length());
@@ -78,11 +77,12 @@ public class WhiteOutFileLayerEntry implements LayerEntry {
                 logger.warn(String.format("Error removing whited-out file %s", filePathToRemove));
             }
         }
-        return otherFileToDeleteNone;
+        return;
     }
 
     @Override
     public String toString() {
         return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE);
     }
+
 }
