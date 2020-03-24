@@ -39,9 +39,6 @@ public class ImageInspectionRequestBuilder {
     private String targetLinuxDistroOverride;
     private String platformTopLayerExternalId;
 
-    public ImageInspectionRequestBuilder() {
-    }
-
     public ImageInspectionRequestBuilder setLoggingLevel(final String loggingLevel) {
         this.loggingLevel = loggingLevel;
         return this;

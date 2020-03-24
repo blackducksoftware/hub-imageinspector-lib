@@ -131,8 +131,7 @@ public class DockerTarParser {
         fileOperations.logFileOwnerGroupPerms(dockerTar);
         final List<File> untaredLayerFiles = new ArrayList<>();
         final File outputDir = new File(tarExtractionDirectory, dockerTar.getName());
-        final TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(dockerTar));
-        try {
+        try (final TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(dockerTar))) {
             TarArchiveEntry tarArchiveEntry = null;
             while (null != (tarArchiveEntry = tarArchiveInputStream.getNextTarEntry())) {
                 final File outputFile = new File(outputDir, tarArchiveEntry.getName());
@@ -152,8 +151,6 @@ public class DockerTarParser {
                     }
                 }
             }
-        } finally {
-            IOUtils.closeQuietly(tarArchiveInputStream);
         }
         return untaredLayerFiles;
     }

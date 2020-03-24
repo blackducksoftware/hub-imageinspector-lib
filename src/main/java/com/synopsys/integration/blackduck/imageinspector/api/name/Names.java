@@ -60,10 +60,10 @@ public class Names {
     }
 
     private static String slashesToUnderscore(final String givenString) {
-        return givenString.replaceAll("/", "_");
+        return givenString.replace("/", "_");
     }
 
     private static String colonsToUnderscores(final String imageName) {
-        return imageName.replaceAll(":", "_");
+        return imageName.replace(":", "_");
     }
 }
