@@ -66,7 +66,10 @@ public class FileOperations {
                 deleteFilesOnly(subFile);
             }
         } else {
-            file.delete();
+            final boolean wasDeleted = file.delete();
+            if (!wasDeleted) {
+                logger.debug(String.format("Unable to delete %s", file.getAbsolutePath()));
+            }
         }
     }
 

@@ -42,8 +42,8 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrs;
 @Component
 public class DpkgPkgMgr implements PkgMgr {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    public static final List<String> UPGRADE_DATABASE_COMMAND = null;
-    public static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("dpkg", "-l");
+    private static final List<String> UPGRADE_DATABASE_COMMAND = null;
+    private static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("dpkg", "-l");
     private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
     private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
     private static final String STANDARD_PKG_MGR_DIR_PATH = "/var/lib/dpkg";

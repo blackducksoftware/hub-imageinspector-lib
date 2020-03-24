@@ -45,8 +45,8 @@ public class RpmPkgMgr implements PkgMgr {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String STANDARD_PKG_MGR_DIR_PATH = "/var/lib/rpm";
     private static final String PACKAGE_FORMAT_STRING = "\\{ epoch: \"%{E}\", name: \"%{N}\", version: \"%{V}-%{R}\", arch: \"%{ARCH}\" \\}\\n";
-    public static final List<String> UPGRADE_DATABASE_COMMAND = Arrays.asList("rpm", "--rebuilddb");
-    public static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("rpm", "-qa", "--qf", PACKAGE_FORMAT_STRING);
+    private static final List<String> UPGRADE_DATABASE_COMMAND = Arrays.asList("rpm", "--rebuilddb");
+    private static final List<String> LIST_COMPONENTS_COMMAND = Arrays.asList("rpm", "-qa", "--qf", PACKAGE_FORMAT_STRING);
     private static final String NO_VALUE = "(none)";
     private final Gson gson;
     private final File inspectorPkgMgrDir;
