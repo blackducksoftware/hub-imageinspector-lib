@@ -24,12 +24,10 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.man
 
 import java.util.List;
 
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 import com.google.gson.annotations.SerializedName;
+import com.synopsys.integration.util.Stringable;
 
-public class ImageInfo {
+public class ImageInfo extends Stringable {
 
     @SerializedName("Config")
     public String config;
@@ -39,9 +37,4 @@ public class ImageInfo {
 
     @SerializedName("Layers")
     public List<String> layers;
-
-    @Override
-    public String toString() {
-        return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE);
-    }
 }

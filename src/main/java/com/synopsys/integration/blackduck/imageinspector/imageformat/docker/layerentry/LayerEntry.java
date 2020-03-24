@@ -26,7 +26,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
-public abstract class LayerEntry {
+import com.synopsys.integration.util.Stringable;
+
+public abstract class LayerEntry extends Stringable {
     public Optional<File> process() throws IOException {
         processFiles();
         return fileToDelete();

@@ -57,7 +57,7 @@ public class LayerDetails {
         if (StringUtils.isBlank(layerExternalId)) {
             return String.format("Layer%02d", layerIndex);
         } else {
-            return String.format("Layer%02d_%s", layerIndex, layerExternalId.replaceAll(":", "_"));
+            return String.format("Layer%02d_%s", layerIndex, layerExternalId.replace(":", "_"));
         }
     }
 }

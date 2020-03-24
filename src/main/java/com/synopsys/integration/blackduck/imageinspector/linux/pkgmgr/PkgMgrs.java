@@ -20,22 +20,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest;
+package com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr;
 
-import java.io.File;
-
-import org.springframework.stereotype.Component;
-
-import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
-
-@Component
-public class ManifestFactory {
-
-    public Manifest createManifest(final File tarExtractionDirectory, final String dockerTarFileName) {
-        final Manifest manifest = new Manifest(tarExtractionDirectory, dockerTarFileName);
-        final ManifestLayerMappingFactory factory = new ManifestLayerMappingFactory();
-        manifest.setManifestLayerMappingFactory(factory);
-        return manifest;
-    }
-
+public class PkgMgrs {
+    public static String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";
 }

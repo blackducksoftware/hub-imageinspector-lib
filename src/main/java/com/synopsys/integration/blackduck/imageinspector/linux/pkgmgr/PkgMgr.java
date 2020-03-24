@@ -30,8 +30,6 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.exception.IntegrationException;
 
 public interface PkgMgr {
-    String EXTERNAL_ID_STRING_FORMAT = "%s/%s/%s";
-
     boolean isApplicable(final File targetImageFileSystemRootDir);
     PackageManagerEnum getType();
     PkgMgrInitializer getPkgMgrInitializer();

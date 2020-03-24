@@ -67,16 +67,12 @@ public class LinuxFileSystem extends Stringable {
         }
     }
 
-    public void writeToTarGz(final File outputTarFile, final String containerFileSystemExcludedPathListString) throws IOException {
+    public void writeToTarGz(final File outputTarFile, final String containerFileSystemExcludedPathListString) {
         outputTarFile.getParentFile().mkdirs();
         fileOperations.logFileOwnerGroupPerms(outputTarFile.getParentFile());
-        FileOutputStream fOut = null;
-        BufferedOutputStream bOut = null;
-        GzipCompressorOutputStream gzOut = null;
-        try {
-            fOut = new FileOutputStream(outputTarFile);
-            bOut = new BufferedOutputStream(fOut);
-            gzOut = new GzipCompressorOutputStream(bOut);
+        try (final FileOutputStream fOut = new FileOutputStream(outputTarFile);
+            final BufferedOutputStream bOut = new BufferedOutputStream(fOut);
+            final GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(bOut)) {
             try (TarArchiveOutputStream tOut = new TarArchiveOutputStream(gzOut)) {
                 tOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
                 final List<String> containerFileSystemExcludedPathList = cleanPaths(getListFromCommaSeparatedString(containerFileSystemExcludedPathListString));
@@ -85,16 +81,6 @@ public class LinuxFileSystem extends Stringable {
             }
         } catch (Exception unexpectedException) {
             logger.error(String.format("Unexpected error creating tar.gz file: %s", unexpectedException.getMessage()), unexpectedException);
-        } finally {
-            if (gzOut != null) {
-                gzOut.close();
-            }
-            if (bOut != null) {
-                bOut.close();
-            }
-            if (fOut != null) {
-                fOut.close();
-            }
         }
     }
 
@@ -103,21 +89,10 @@ public class LinuxFileSystem extends Stringable {
             logger.trace(String.format("Adding to tar.gz file: %s", fileToAdd.getAbsolutePath()));
             base = base == null ? "" : base;
             final String entryName = base + fileToAdd.getName();
-            final String entryNameMadeAbsolute = toAbsolute(rootName, entryName);
-            if (containerFileSystemExcludedPathList.contains(entryNameMadeAbsolute)) {
-                logger.info(String.format("Pruning %s from tar file because it maps to excluded path %s", fileToAdd.getAbsolutePath(), entryNameMadeAbsolute));
+            if (isExcluded(rootName, entryName, containerFileSystemExcludedPathList)) {
                 return;
             }
-            TarArchiveEntry tarEntry = null;
-            if (Files.isSymbolicLink(fileToAdd.toPath())) {
-                final String linkName = Files.readSymbolicLink(fileToAdd.toPath()).toString();
-                logger.trace(String.format("Creating TarArchiveEntry: %s with linkName: %s", entryName, linkName));
-                tarEntry = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK);
-                tarEntry.setLinkName(linkName);
-                logger.trace(String.format("Created TarArchiveEntry: %s; is symlink: %b: %s", tarEntry.getName(), tarEntry.isSymbolicLink(), tarEntry.getLinkName()));
-            } else {
-                tarEntry = new TarArchiveEntry(fileToAdd, entryName);
-            }
+            TarArchiveEntry tarEntry = createTarArchiveEntry(fileToAdd, entryName);
             logger.trace(String.format("Putting archive entry for %s into archive", fileToAdd.getAbsolutePath()));
             tOut.putArchiveEntry(tarEntry);
 
@@ -125,12 +100,7 @@ public class LinuxFileSystem extends Stringable {
                 logger.trace(String.format("Closing archive entry for symlink %s", fileToAdd.getAbsolutePath()));
                 tOut.closeArchiveEntry();
             } else if (fileToAdd.isFile()) {
-                logger.trace(String.format("Copying data for file %s", fileToAdd.getAbsolutePath()));
-                try (final InputStream fileToAddInputStream = new FileInputStream(fileToAdd)) {
-                    IOUtils.copy(fileToAddInputStream, tOut);
-                } catch (Exception copyException) {
-                    logger.warn(String.format("Unable to copy file to archive: %s: %s", fileToAdd.getAbsolutePath(), copyException.getMessage()), copyException);
-                }
+                copyFileData(tOut, fileToAdd);
                 logger.trace(String.format("Closing file entry for symlink %s", fileToAdd.getAbsolutePath()));
                 tOut.closeArchiveEntry();
             } else {
@@ -149,8 +119,40 @@ public class LinuxFileSystem extends Stringable {
                 tOut.closeArchiveEntry();
                 logger.trace("closeArchiveEntry succeeded");
             } catch (Exception closeArchiveEntryException) {
+                logger.trace("closeArchiveEntry failed");
             }
         }
+    }
+
+    private boolean isExcluded(final String rootName, final String entryName, final List<String> containerFileSystemExcludedPathList) throws IntegrationException {
+        final String entryNameMadeAbsolute = toAbsolute(rootName, entryName);
+        if (containerFileSystemExcludedPathList.contains(entryNameMadeAbsolute)) {
+            logger.info(String.format("Pruning %s from tar file because it maps to excluded path %s", entryName, entryNameMadeAbsolute));
+            return true;
+        }
+        return false;
+    }
+    private void copyFileData(final TarArchiveOutputStream tOut, final File fileToAdd) {
+        logger.trace(String.format("Copying data for file %s", fileToAdd.getAbsolutePath()));
+        try (final InputStream fileToAddInputStream = new FileInputStream(fileToAdd)) {
+            IOUtils.copy(fileToAddInputStream, tOut);
+        } catch (Exception copyException) {
+            logger.warn(String.format("Unable to copy file to archive: %s: %s", fileToAdd.getAbsolutePath(), copyException.getMessage()), copyException);
+        }
+    }
+
+    private TarArchiveEntry createTarArchiveEntry(final File fileToAdd, final String entryName) throws IOException {
+        TarArchiveEntry tarEntry;
+        if (Files.isSymbolicLink(fileToAdd.toPath())) {
+            final String linkName = Files.readSymbolicLink(fileToAdd.toPath()).toString();
+            logger.trace(String.format("Creating TarArchiveEntry: %s with linkName: %s", entryName, linkName));
+            tarEntry = new TarArchiveEntry(entryName, TarConstants.LF_SYMLINK);
+            tarEntry.setLinkName(linkName);
+            logger.trace(String.format("Created TarArchiveEntry: %s; is symlink: %b: %s", tarEntry.getName(), tarEntry.isSymbolicLink(), tarEntry.getLinkName()));
+        } else {
+            tarEntry = new TarArchiveEntry(fileToAdd, entryName);
+        }
+        return tarEntry;
     }
 
     private String toAbsolute(final String rootName, final String entryName) throws IntegrationException {

@@ -22,13 +22,11 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.util.Stringable;
 
 // Basic information about an image
-public class ImageInfoParsed {
+public class ImageInfoParsed extends Stringable {
     private final TargetImageFileSystem targetImageFileSystem;
     private final ImagePkgMgrDatabase imagePkgMgrDatabase;
     private final String linuxDistroName;
@@ -55,10 +53,5 @@ public class ImageInfoParsed {
 
     public PkgMgr getPkgMgr() {
         return pkgMgr;
-    }
-
-    @Override
-    public String toString() {
-        return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE);
     }
 }

@@ -37,6 +37,7 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrs;
 
 @Component
 public class DpkgPkgMgr implements PkgMgr {
@@ -99,33 +100,53 @@ public class DpkgPkgMgr implements PkgMgr {
         final List<ComponentDetails> components = new ArrayList<>();
         boolean startOfComponents = false;
         for (final String packageLine : pkgMgrListOutputLines) {
-
-            if (packageLine != null) {
-                if (packageLine.matches(PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST)) {
-                    startOfComponents = true;
-                } else if (startOfComponents) {
-                    // Expect: statusChar name version arch
-                    // Or: statusChar name:arch version arch
-                    final char packageStatus = packageLine.charAt(1);
-                    if (isInstalledStatus(packageStatus)) {
-                        final String componentInfo = packageLine.substring(3);
-                        final String[] componentInfoParts = componentInfo.trim().split(PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR);
-                        String name = componentInfoParts[0];
-                        final String version = componentInfoParts[1];
-                        final String archFromPkgMgrOutput = componentInfoParts[2];
-                        if (name.contains(":")) {
-                            name = name.substring(0, name.indexOf(":"));
-                        }
-                        final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, name, version, archFromPkgMgrOutput);
-                        logger.trace(String.format("Constructed externalId: %s", externalId));
-                        components.add(new ComponentDetails(name, version, externalId, archFromPkgMgrOutput, linuxDistroName));
-                    } else {
-                        logger.trace(String.format("Package \"%s\" is listed but not installed (package status: %s)", packageLine, packageStatus));
-                    }
+            if (packageLine == null) {
+                continue;
+            }
+            if (packageLine.matches(PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST)) {
+                startOfComponents = true;
+            } else if (startOfComponents) {
+                // Expect: statusChar name version arch
+                // Or: statusChar name:arch version arch
+                final char packageStatus = packageLine.charAt(1);
+                if (isInstalledStatus(packageStatus)) {
+                    final String[] componentInfoParts = extractComponentInfoParts(packageLine);
+                    final String component = extractComponent(componentInfoParts);
+                    final String version = extractVersion(componentInfoParts);
+                    final String archFromPkgMgrOutput = extractArch(componentInfoParts);
+                    final String externalId = String.format(PkgMgrs.EXTERNAL_ID_STRING_FORMAT, component, version, archFromPkgMgrOutput);
+                    logger.trace(String.format("Constructed externalId: %s", externalId));
+                    components.add(new ComponentDetails(component, version, externalId, archFromPkgMgrOutput, linuxDistroName));
+                } else {
+                    logger.trace(String.format("Package \"%s\" is listed but not installed (package status: %s)", packageLine, packageStatus));
                 }
             }
         }
         return components;
+    }
+
+    private String extractComponent(final String[] componentInfoParts) {
+        String name = componentInfoParts[0];
+        if (name.contains(":")) {
+            name = name.substring(0, name.indexOf(":"));
+        }
+        return name;
+    }
+
+    private String extractVersion(final String[] componentInfoParts) {
+        return componentInfoParts[1];
+    }
+
+    private String extractArch(final String[] componentInfoParts) {
+        return componentInfoParts[2];
+    }
+
+
+
+
+    private String[] extractComponentInfoParts(final String packageLine) {
+        final String componentInfo = packageLine.substring(3);
+        return componentInfo.trim().split(PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR);
     }
 
     private boolean isInstalledStatus(final Character packageStatus) {

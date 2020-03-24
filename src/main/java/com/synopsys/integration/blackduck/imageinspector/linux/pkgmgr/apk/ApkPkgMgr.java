@@ -38,11 +38,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
-import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrInitializer;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrs;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component
@@ -113,38 +114,49 @@ public class ApkPkgMgr implements PkgMgr {
     public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final File imageFileSystem, final String linuxDistroName,
         final String[] pkgMgrListOutputLines) throws IntegrationException {
         final List<ComponentDetails> components = new ArrayList<>();
-
         for (final String packageLine : pkgMgrListOutputLines) {
-            if (!packageLine.toLowerCase().startsWith("warning")) {
-                logger.trace(String.format("packageLine: %s", packageLine));
-                // Expected format: component-versionpart1-versionpart2
-                // component may contain dashes (often contains one).
-                final String[] parts = packageLine.split("-");
-                if (parts.length < 3) {
-                    logger.warn(String.format("apk output contains an invalid line: %s", packageLine));
-                    continue;
-                }
-                final String version = String.format("%s-%s", parts[parts.length - 2], parts[parts.length - 1]);
-                logger.trace(String.format("version: %s", version));
-                String component = "";
-                for (int i = 0; i < parts.length - 2; i++) {
-                    final String part = parts[i];
-                    if (StringUtils.isNotBlank(component)) {
-                        component += String.format("-%s", part);
-                    } else {
-                        component = part;
-                    }
-                }
-                logger.trace(String.format("component: %s", component));
-                // if a package starts with a period, ignore it. It's a virtual meta package and the version information is missing
-                if (!component.startsWith(".")) {
-                    final String externalId = String.format(EXTERNAL_ID_STRING_FORMAT, component, version, getImageArchitecture(imageFileSystem));
-                    logger.trace(String.format("Constructed externalId: %s", externalId));
-                    components.add(new ComponentDetails(component, version, externalId, getImageArchitecture(imageFileSystem), linuxDistroName));
-                }
+            if (packageLine.toLowerCase().startsWith("warning")) {
+                continue;
             }
+            logger.trace(String.format("packageLine: %s", packageLine));
+            // Expected format: component-versionpart1-versionpart2
+            // component may contain dashes (often contains one).
+            final String[] parts = packageLine.split("-");
+            if (parts.length < 3) {
+                logger.warn(String.format("apk output contains an invalid line: %s", packageLine));
+                continue;
+            }
+            final String version = extractVersion(parts);
+            final String component = extractComponent(parts);
+            // if a package starts with a period, ignore it. It's a virtual meta package and the version information is missing
+            if (component.startsWith(".")) {
+                continue;
+            }
+            final String externalId = String.format(PkgMgrs.EXTERNAL_ID_STRING_FORMAT, component, version, getImageArchitecture(imageFileSystem));
+            logger.trace(String.format("Constructed externalId: %s", externalId));
+            components.add(new ComponentDetails(component, version, externalId, getImageArchitecture(imageFileSystem), linuxDistroName));
         }
         return components;
+    }
+
+    private String extractVersion(final String[] parts) {
+        final String version = String.format("%s-%s", parts[parts.length - 2], parts[parts.length - 1]);
+        logger.trace(String.format("version: %s", version));
+        return version;
+    }
+
+    private String extractComponent(final String[] parts) {
+        String component = "";
+        for (int i = 0; i < parts.length - 2; i++) {
+            final String part = parts[i];
+            if (StringUtils.isNotBlank(component)) {
+                component += String.format("-%s", part);
+            } else {
+                component = part;
+            }
+        }
+        logger.trace(String.format("component: %s", component));
+        return component;
     }
 
     private String getImageArchitecture(final File imageFileSystem) throws IntegrationException {

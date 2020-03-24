@@ -30,8 +30,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +41,9 @@ import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResol
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
 import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.util.Stringable;
 
-public class Manifest {
+public class Manifest extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final File tarExtractionDirectory;
     private final String dockerTarFileName;
@@ -151,10 +150,5 @@ public class Manifest {
         final File manifest = new File(dockerTarDirectory, "manifest.json");
         final String manifestFileContents = StringUtils.join(FileUtils.readLines(manifest, StandardCharsets.UTF_8), "\n");
         return manifestFileContents;
-    }
-
-    @Override
-    public String toString() {
-        return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE);
     }
 }
