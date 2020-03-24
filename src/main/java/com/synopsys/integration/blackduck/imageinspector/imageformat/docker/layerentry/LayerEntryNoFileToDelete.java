@@ -26,13 +26,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
-public abstract class LayerEntry {
-    public Optional<File> process() throws IOException {
-        processFiles();
-        return fileToDelete();
+public abstract class LayerEntryNoFileToDelete extends LayerEntry {
+    @Override
+    protected Optional<File> fileToDelete() {
+        return Optional.empty();
     }
-
-    protected abstract void processFiles() throws IOException;
-    protected abstract Optional<File> fileToDelete();
 
 }
