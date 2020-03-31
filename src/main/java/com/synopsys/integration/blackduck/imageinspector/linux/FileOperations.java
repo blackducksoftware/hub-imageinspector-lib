@@ -70,6 +70,7 @@ public class FileOperations {
             try {
                 wasDeleted = Files.deleteIfExists(file.toPath());
             } catch (IOException e) {
+                logger.trace(String.format("Attempt to delete %s failed: %s", file.getAbsolutePath(), e.getMessage()));
             }
             if (!wasDeleted) {
                 logger.debug(String.format("Unable to delete %s", file.getAbsolutePath()));
