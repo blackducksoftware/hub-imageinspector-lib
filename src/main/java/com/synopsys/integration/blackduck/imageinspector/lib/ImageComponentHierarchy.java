@@ -63,10 +63,7 @@ public class ImageComponentHierarchy {
     }
 
     public boolean isPlatformTopLayerFound() {
-        if (platformTopLayerIndex >= 0) {
-            return true;
-        }
-        return false;
+        return (platformTopLayerIndex >= 0);
     }
 
     public void setPlatformComponents(final List<ComponentDetails> platformComponents) {

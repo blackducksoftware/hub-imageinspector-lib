@@ -62,10 +62,7 @@ public class Os {
         if ("os-release".equals(candidate.getName())) {
             return true;
         }
-        if ("redhat-release".equals(candidate.getName())) {
-            return true;
-        }
-        return false;
+        return "redhat-release".equals(candidate.getName());
     }
 
     public Optional<String> getLinxDistroName(final File etcDirFile) {
@@ -118,7 +115,7 @@ public class Os {
         try {
             List<String> lines = null;
             lines = FileUtils.readLines(etcDirFile, StandardCharsets.UTF_8);
-            if (lines.size() > 0) {
+            if (!lines.isEmpty()) {
                 String line = lines.get(0);
                 if (line.startsWith("Red Hat")) {
                     logger.trace("Contents of redhat-release indicate RHEL");

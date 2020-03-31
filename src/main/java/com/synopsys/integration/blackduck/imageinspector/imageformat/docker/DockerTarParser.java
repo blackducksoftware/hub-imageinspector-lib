@@ -169,7 +169,7 @@ public class DockerTarParser {
             throw new IntegrationException(msg, e);
         }
         final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(gsonBuilder, tarExtractionSubDirectory, partialMapping.getImageConfigFilename());
-        if (externalLayerIds.size() == 0) {
+        if (externalLayerIds.isEmpty()) {
             return partialMapping;
         }
         return new ManifestLayerMapping(partialMapping, externalLayerIds);
@@ -364,7 +364,7 @@ public class DockerTarParser {
                 logger.debug(String.format("The target image package manager has previously been determined: %s", imageInfoParsed.getImagePkgMgrDatabase().getPackageManager().toString()));
             }
             final List<ComponentDetails> comps = queryPkgMgrForDependencies(imageInfoParsed, layerIndex);
-            if (comps.size() == 0) {
+            if (comps.isEmpty()) {
                 return imageInfoParsed;
             }
             logger.info(String.format("Found %d components in file system after adding layer %d", comps.size(), layerIndex));
@@ -415,7 +415,7 @@ public class DockerTarParser {
         throw new PkgMgrDataNotFoundException("No package manager database found in this Docker image.");
     }
 
-    private List<ComponentDetails> queryPkgMgrForDependencies(final ImageInfoParsed imageInfoParsed, final int layerIndex) throws InterruptedException {
+    private List<ComponentDetails> queryPkgMgrForDependencies(final ImageInfoParsed imageInfoParsed, final int layerIndex) {
         final List<ComponentDetails> comps;
         try {
             final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(executor, imageInfoParsed.getPkgMgr(), imageInfoParsed.getImagePkgMgrDatabase());

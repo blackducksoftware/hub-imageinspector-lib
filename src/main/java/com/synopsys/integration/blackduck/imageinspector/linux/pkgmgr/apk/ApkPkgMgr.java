@@ -113,30 +113,37 @@ public class ApkPkgMgr implements PkgMgr {
     @Override
     public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final File imageFileSystem, final String linuxDistroName,
         final String[] pkgMgrListOutputLines) throws IntegrationException {
+        final String architectureName = getImageArchitecture(imageFileSystem);
         final List<ComponentDetails> components = new ArrayList<>();
         for (final String packageLine : pkgMgrListOutputLines) {
-            if (packageLine.toLowerCase().startsWith("warning")) {
-                continue;
-            }
-            logger.trace(String.format("packageLine: %s", packageLine));
-            // Expected format: component-versionpart1-versionpart2
-            // component may contain dashes (often contains one).
-            final String[] parts = packageLine.split("-");
-            if (parts.length < 3) {
-                logger.warn(String.format("apk output contains an invalid line: %s", packageLine));
-                continue;
-            }
-            final String version = extractVersion(parts);
-            final String component = extractComponent(parts);
-            // if a package starts with a period, ignore it. It's a virtual meta package and the version information is missing
-            if (component.startsWith(".")) {
-                continue;
-            }
-            final String externalId = String.format(PkgMgrs.EXTERNAL_ID_STRING_FORMAT, component, version, getImageArchitecture(imageFileSystem));
-            logger.trace(String.format("Constructed externalId: %s", externalId));
-            components.add(new ComponentDetails(component, version, externalId, getImageArchitecture(imageFileSystem), linuxDistroName));
+            Optional<ComponentDetails> comp = createComponentForPackage(linuxDistroName, architectureName, packageLine);
+            comp.ifPresent(components::add);
         }
         return components;
+    }
+
+    private Optional<ComponentDetails> createComponentForPackage(final String linuxDistroName, final String architectureName, final String packageLine) {
+        if (packageLine.toLowerCase().startsWith("warning")) {
+            return Optional.empty();
+        }
+        logger.trace(String.format("packageLine: %s", packageLine));
+        // Expected format: component-versionpart1-versionpart2
+        // component may contain dashes (often contains one).
+        final String[] parts = packageLine.split("-");
+        if (parts.length < 3) {
+            logger.warn(String.format("apk output contains an invalid line: %s", packageLine));
+            return Optional.empty();
+        }
+        final String version = extractVersion(parts);
+        final String component = extractComponent(parts);
+        // if a package starts with a period, ignore it. It's a virtual meta package and the version information is missing
+        if (component.startsWith(".")) {
+            return Optional.empty();
+        }
+        final String externalId = String.format(PkgMgrs.EXTERNAL_ID_STRING_FORMAT, component, version, architectureName);
+        logger.trace(String.format("Constructed externalId: %s", externalId));
+        final ComponentDetails componentDetails = new ComponentDetails(component, version, externalId, architectureName, linuxDistroName);
+        return Optional.of(componentDetails);
     }
 
     private String extractVersion(final String[] parts) {

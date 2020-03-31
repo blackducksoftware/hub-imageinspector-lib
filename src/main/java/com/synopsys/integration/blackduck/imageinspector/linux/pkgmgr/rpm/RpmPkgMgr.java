@@ -122,9 +122,6 @@ public class RpmPkgMgr implements PkgMgr {
     }
 
     private boolean valid(final String packageLine) {
-        if (packageLine.startsWith("{") && packageLine.endsWith("}") && packageLine.contains("epoch:") && packageLine.contains("name:") && packageLine.contains("version:") && packageLine.contains("arch:")) {
-            return true;
-        }
-        return false;
+        return packageLine.startsWith("{") && packageLine.endsWith("}") && packageLine.contains("epoch:") && packageLine.contains("name:") && packageLine.contains("version:") && packageLine.contains("arch:");
     }
 }

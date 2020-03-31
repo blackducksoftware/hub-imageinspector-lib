@@ -159,8 +159,7 @@ public class LinuxFileSystem extends Stringable {
         if (!entryName.startsWith(rootName)) {
             throw new IntegrationException(String.format("Error converting entryName %s to absolute path for rootName %s: entryName should start with rootName", entryName, rootName));
         }
-        final String absolutePath = entryName.substring(rootName.length());
-        return absolutePath;
+        return entryName.substring(rootName.length());
     }
 
     private List<String> getListFromCommaSeparatedString(final String containerFileSystemExcludedPathListString) {

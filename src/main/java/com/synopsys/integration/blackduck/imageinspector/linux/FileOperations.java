@@ -66,7 +66,11 @@ public class FileOperations {
                 deleteFilesOnly(subFile);
             }
         } else {
-            final boolean wasDeleted = file.delete();
+            boolean wasDeleted = false;
+            try {
+                wasDeleted = Files.deleteIfExists(file.toPath());
+            } catch (IOException e) {
+            }
             if (!wasDeleted) {
                 logger.debug(String.format("Unable to delete %s", file.getAbsolutePath()));
             }
@@ -186,7 +190,7 @@ public class FileOperations {
                 logger.trace(String.format("Found symlink %s -> %s [link value: %s]", dirEntry.getAbsolutePath(), symLinkTargetFile.getAbsolutePath(), symLinkTargetPath));
                 if (!symLinkTargetFile.exists()) {
                     logger.trace(String.format("Symlink target %s does not exist; deleting %s", symLinkTargetFile.getCanonicalPath(), dirEntry.getCanonicalPath()));
-                    final boolean deleteSucceeded = dirEntry.delete();
+                    final boolean deleteSucceeded = Files.deleteIfExists(dirEntry.toPath());
                     if (!deleteSucceeded) {
                         logger.warn(String.format("Delete of dangling symlink %s failed", dirEntry.getAbsolutePath()));
                     }

@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,7 +182,7 @@ public class ImageInspectorApi {
             imageInfoDerived = inspectUsingGivenWorkingDir(imageInspectionRequest,
                 tempDir,
                 effectivePlatformTopLayerExternalId);
-        } catch (IOException | CompressorException e) {
+        } catch (IOException e) {
             throw new IntegrationException(String.format("Error inspecting image: %s", e.getMessage()), e);
         } finally {
             if (imageInspectionRequest.isCleanupWorkingDir()) {
@@ -197,7 +196,7 @@ public class ImageInspectorApi {
     private ImageInfoDerived inspectUsingGivenWorkingDir(final ImageInspectionRequest imageInspectionRequest,
         final File tempDir,
         final String effectivePlatformTopLayerExternalId)
-        throws IOException, IntegrationException, CompressorException {
+        throws IOException, IntegrationException {
 
         final File workingDir = new File(tempDir, "working");
         final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
@@ -205,7 +204,7 @@ public class ImageInspectorApi {
         final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
         final List<File> layerTars = imageInspector.extractLayerTars(tarExtractionDirectory, dockerTarfile);
         final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
-        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(workingDir, tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
+        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
         final String imageRepo = manifestLayerMapping.getImageName();
         final String imageTag = manifestLayerMapping.getTagName();
 

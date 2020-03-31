@@ -68,12 +68,11 @@ public class CmdExecutor {
         } catch (final ExecuteException e) {
             exitValue = e.getExitValue();
             logger.trace(String.format("Execution of command: %s: ExecutionException: %s; exitCode: %d; Continuing anyway...", commandString, e.getMessage(), exitValue));
-            // throw new IntegrationException(String.format("Execution of command: %s: ExecutionException: %s", commandString, e.getMessage()));
         } catch (final IOException e) {
             throw new IntegrationException(String.format("Execution of command: %s: IOException: %s", commandString, e.getMessage()));
         }
         if (watchdog.killedProcess()) {
-            throw new IntegrationException(String.format("Execution of command: %s with timeout %d timed out", commandString, timeoutMillisec, exitValue));
+            throw new IntegrationException(String.format("Execution of command: %s with timeout %d timed out", commandString, timeoutMillisec));
         }
         if (exitValue == 0) {
             logger.debug(String.format("Success executing command: %s", commandString));

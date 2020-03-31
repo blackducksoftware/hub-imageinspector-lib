@@ -83,7 +83,7 @@ public class ImageInspectorApiTest {
     imageComponentHierarchy.addLayer(layerDetails);
     imageComponentHierarchy.setFinalComponents(components);
     Mockito.when(imageInspector
-        .createInitialImageComponentHierarchy(workingDir, tarExtractionDirectory, tarFilename,
+        .createInitialImageComponentHierarchy(tarExtractionDirectory, tarFilename,
             mapping)).thenReturn(imageComponentHierarchy);
 
     final ImageInfoParsed imageInfoParsed = new ImageInfoParsed(

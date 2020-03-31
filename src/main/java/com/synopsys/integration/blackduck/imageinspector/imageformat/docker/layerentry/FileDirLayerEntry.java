@@ -72,7 +72,6 @@ public class FileDirLayerEntry extends LayerEntryNoFileToDelete {
                 fileOperations.copy(layerInputStream, outputFileStream);
             } catch (final IOException e) {
                 logger.error(String.format("Error copying file %s to %s: %s", fileSystemEntryName, outputFile.getAbsolutePath(), e.getMessage()));
-                return;
             } finally {
                 try {
                     outputFileStream.close();

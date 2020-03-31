@@ -71,7 +71,7 @@ public class ImageInspector {
         return tarParser.getLayerMapping(gsonBuilder, tarExtractionDirectory, tarFileName, dockerImageName, dockerTagName);
     }
 
-    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File workingDirectory, final File tarExtractionDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
+    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File tarExtractionDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
         return tarParser.createInitialImageComponentHierarchy(tarExtractionDirectory, tarFileName, manifestLayerMapping);
     }
 

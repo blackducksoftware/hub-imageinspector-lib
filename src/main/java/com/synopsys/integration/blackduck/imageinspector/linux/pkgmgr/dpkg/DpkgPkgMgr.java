@@ -128,7 +128,7 @@ public class DpkgPkgMgr implements PkgMgr {
     private String extractComponent(final String[] componentInfoParts) {
         String name = componentInfoParts[0];
         if (name.contains(":")) {
-            name = name.substring(0, name.indexOf(":"));
+            name = name.substring(0, name.indexOf(':'));
         }
         return name;
     }
@@ -150,9 +150,6 @@ public class DpkgPkgMgr implements PkgMgr {
     }
 
     private boolean isInstalledStatus(final Character packageStatus) {
-        if (packageStatus == 'i' || packageStatus == 'W' || packageStatus == 't') {
-            return true;
-        }
-        return false;
+        return packageStatus == 'i' || packageStatus == 'W' || packageStatus == 't';
     }
 }
