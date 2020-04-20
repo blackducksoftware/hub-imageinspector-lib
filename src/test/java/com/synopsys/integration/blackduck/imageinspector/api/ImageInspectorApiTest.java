@@ -91,9 +91,9 @@ public class ImageInspectorApiTest {
         new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
             PackageManagerEnum.APK), "apline", new ApkPkgMgr(new FileOperations()));
     Mockito.when(imageInspector
-        .extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy,
+        .extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, "", imageComponentHierarchy,
             targetImageFileSystem,
-            layerTarFiles, mapping, null)).thenReturn(imageInfoParsed);
+            layerTarFiles, mapping, "")).thenReturn(imageInfoParsed);
 
     final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
     SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
@@ -126,6 +126,9 @@ public class ImageInspectorApiTest {
         .setCleanupWorkingDir(cleanupWorkingDir)
         .setContainerFileSystemOutputPath(containerFileSystemOutputPath)
         .setCurrentLinuxDistro(currentLinuxDistro)
+        .setContainerFileSystemExcludedPathListString("")
+        .setTargetLinuxDistroOverride("")
+        .setPlatformTopLayerExternalId("")
         .build();
     final SimpleBdioDocument result = api
         .getBdio(imageInspectionRequest);

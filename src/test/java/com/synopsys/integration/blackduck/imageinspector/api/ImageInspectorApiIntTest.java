@@ -93,6 +93,16 @@ public class ImageInspectorApiIntTest {
                                                .setOrganizeComponentsByLayer(false)
                                                .setIncludeRemovedComponents(false)
                                                .setCurrentLinuxDistro("CENTOS")
+                                               .setCodeLocationPrefix("")
+                                                                      //new:
+                                              .setCleanupWorkingDir(true)
+                                              .setContainerFileSystemExcludedPathListString("")
+                                              .setContainerFileSystemOutputPath("")
+                                              .setGivenImageRepo("")
+                                              .setGivenImageTag("")
+                                              .setPlatformTopLayerExternalId("")
+                                              .setTargetLinuxDistroOverride("")
+                                              .setCodeLocationPrefix("")
                                                .build();
             imageInspectorApi.getBdio(imageInspectionRequest);
             fail("Expected WrongInspectorOsException");
@@ -104,7 +114,7 @@ public class ImageInspectorApiIntTest {
 
     @Test
     public void testOnRightOs() throws IntegrationException, InterruptedException {
-        doTest(null);
+        doTest("");
     }
 
     @Test
@@ -128,6 +138,15 @@ public class ImageInspectorApiIntTest {
             .setBlackDuckProjectVersion(PROJECT_VERSION)
             .setCurrentLinuxDistro("ALPINE")
             .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
+                                                                  .setOrganizeComponentsByLayer(false)
+                                                                  .setIncludeRemovedComponents(false)
+          .setCleanupWorkingDir(true)
+          .setContainerFileSystemExcludedPathListString("")
+          .setContainerFileSystemOutputPath("")
+          .setGivenImageRepo("")
+          .setGivenImageTag("")
+          .setPlatformTopLayerExternalId("")
+          .setCodeLocationPrefix("")
             .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
@@ -166,6 +185,14 @@ public class ImageInspectorApiIntTest {
             .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
             .setCurrentLinuxDistro("CENTOS")
             .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
+            .setOrganizeComponentsByLayer(false)
+          .setIncludeRemovedComponents(false)
+          .setCleanupWorkingDir(true)
+          .setContainerFileSystemExcludedPathListString("")
+          .setGivenImageRepo("")
+          .setGivenImageTag("")
+          .setTargetLinuxDistroOverride("")
+          .setCodeLocationPrefix("")
             .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
 

@@ -22,6 +22,18 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.api;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
+import com.synopsys.integration.exception.IntegrationException;
+
+// One goal of the builder is to help ensure that when a new request parameter (field) is
+// added, that every part of the code that needs to deal with it gets updated.
+// To that end, the builder requires that all request parameters be set.
+// For String fields, set to "" to leave unset (to get the default behavior).
+// From the imageinspector-lib perspective: there are no defaults for Boolean fields,
+// the caller must set them all. (In other words, any defaults for Boolean fields
+// are enforced by the caller.)
 public class ImageInspectionRequestBuilder {
     private String loggingLevel;
     private String dockerTarfilePath;
@@ -30,9 +42,9 @@ public class ImageInspectionRequestBuilder {
     private String codeLocationPrefix;
     private String givenImageRepo;
     private String givenImageTag;
-    private boolean organizeComponentsByLayer;
-    private boolean includeRemovedComponents;
-    private boolean cleanupWorkingDir;
+    private Boolean organizeComponentsByLayer;
+    private Boolean includeRemovedComponents;
+    private Boolean cleanupWorkingDir;
     private String containerFileSystemOutputPath;
     private String containerFileSystemExcludedPathListString;
     private String currentLinuxDistro;
@@ -113,7 +125,8 @@ public class ImageInspectionRequestBuilder {
         return this;
     }
 
-    public ImageInspectionRequest build() {
+    public ImageInspectionRequest build() throws IntegrationException {
+        validate();
         return new ImageInspectionRequest(
             loggingLevel,
             dockerTarfilePath,
@@ -130,5 +143,28 @@ public class ImageInspectionRequestBuilder {
             currentLinuxDistro,
             targetLinuxDistroOverride,
             platformTopLayerExternalId);
+    }
+
+    private void validate() throws IntegrationException {
+        Field[] allFields = this.getClass().getDeclaredFields();
+        for (Field field : allFields) {
+            if (Modifier.isPrivate(field.getModifiers())) {
+                if ("loggingLevel".equals(field.getName())) {
+                    continue;
+                }
+                Object value = null;
+                try {
+                    value = field.get(this);
+                } catch (IllegalAccessException e) {
+                    throw new IntegrationException(
+                        String.format("Error validating ImageInspectionRequest: Error getting value for field %s: %s",
+                            field.getName(), e.getMessage()));
+                }
+                if (value == null) {
+                    throw new IntegrationException(
+                        String.format("Error building ImageInspectionRequest: Field %s was not set", field.getName()));
+                }
+            }
+        }
     }
 }
