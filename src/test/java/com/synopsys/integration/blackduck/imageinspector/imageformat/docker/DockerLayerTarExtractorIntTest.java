@@ -1,5 +1,8 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -33,9 +36,8 @@ public class DockerLayerTarExtractorIntTest {
         final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(tarFile, outputDir);
 
         final File fileThatShouldBeCreated = new File(outputDir, "opt/luciddg-server/modules/django/bin/100_assets.csv");
-//        assertFalse(fileThatShouldBeRemoved.exists());
-//        assertFalse(anotherFileThatShouldBeRemoved.exists());
-//        assertTrue(fileThatShouldBeCreated.exists());
-        System.out.println("Done");
+        assertFalse(fileThatShouldBeRemoved.exists());
+        assertFalse(anotherFileThatShouldBeRemoved.exists());
+        assertTrue(fileThatShouldBeCreated.exists());
     }
 }

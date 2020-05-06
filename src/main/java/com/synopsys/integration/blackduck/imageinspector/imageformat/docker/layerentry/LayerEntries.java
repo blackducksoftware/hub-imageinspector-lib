@@ -40,10 +40,15 @@ public class LayerEntries {
     public static LayerEntry createLayerEntry(final FileOperations fileOperations, final TarArchiveInputStream layerInputStream, final TarArchiveEntry layerEntry, final File layerOutputDir) {
         final String fileSystemEntryName = layerEntry.getName();
         logger.trace(String.format("Processing layerEntry: name: %s", fileSystemEntryName));
-        // plnk and opq whiteout files are found in directories we should omit from the container file system
-        if (fileSystemEntryName.equals(".wh..wh..plnk") || fileSystemEntryName.endsWith("/.wh..wh..plnk") ||
-                fileSystemEntryName.equals(".wh..wh..opq") || fileSystemEntryName.endsWith("/.wh..wh..opq")) {
+        // plnk whiteout files are found in directories we should omit from the container file system
+        // opq (opaque) whiteout files mean don't use any siblings from lower layers; start this dir from scratch
+        // NOTE: Current implementation assumes the .wh..wh..opq files is the first entry in the dir
+        // (for the current layer), because (a) that's the only way I've ever seen it, and
+        // (b) it seems crazy (very hard to handle) to do it any other way.
+        if (fileSystemEntryName.equals(".wh..wh..plnk") || fileSystemEntryName.endsWith("/.wh..wh..plnk")) {
             return new WhiteOutOmittedDirLayerEntry(layerEntry, layerOutputDir);
+        } else if (fileSystemEntryName.equals(".wh..wh..opq") || fileSystemEntryName.endsWith("/.wh..wh..opq")) {
+            return new WhiteOutOpaqueDirLayerEntry(layerEntry, layerOutputDir);
         } else if (fileSystemEntryName.startsWith(".wh.") || fileSystemEntryName.contains("/.wh.")) {
             return new WhiteOutFileLayerEntry(fileOperations, layerEntry, layerOutputDir);
         } else if (layerEntry.isSymbolicLink() || layerEntry.isLink()) {
