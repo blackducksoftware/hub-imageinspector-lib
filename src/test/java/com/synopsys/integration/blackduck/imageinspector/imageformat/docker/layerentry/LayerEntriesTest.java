@@ -84,7 +84,7 @@ public class LayerEntriesTest {
   @Test
   public void testWhiteOutOmittedDir() {
     final TarArchiveEntry archiveEntry = Mockito.mock(TarArchiveEntry.class);
-    Mockito.when(archiveEntry.getName()).thenReturn(".wh..wh..opq");
+    Mockito.when(archiveEntry.getName()).thenReturn(".wh..wh..plnk");
     Mockito.when(archiveEntry.isFile()).thenReturn(true);
     Mockito.when(archiveEntry.isSymbolicLink()).thenReturn(false);
     Mockito.when(archiveEntry.isLink()).thenReturn(false);

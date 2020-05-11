@@ -3,6 +3,7 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +27,9 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHiera
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 
 public class WhiteoutFileTest {
@@ -46,11 +47,25 @@ public class WhiteoutFileTest {
     }
 
     @Test
-    public void testExtractDockerLayerTarWhiteoutOpaqueDir() throws WrongInspectorOsException, IOException {
-        doLayerTest("whiteout");
+    public void testExtractDockerLayerTarOpaqueDir() throws WrongInspectorOsException, IOException {
+        final File targetImageFileSystemRootDir = doLayerTest("opaquedir");
+
+        final File opaqueDir = new File(targetImageFileSystemRootDir, "opaque");
+        assertTrue("Opaque dir was not created", opaqueDir.exists());
+
+        final File opaqueDirAddedFile = new File(opaqueDir, "keep.txt");
+        assertTrue("Opaque dir added file was not created", opaqueDirAddedFile.exists());
     }
 
-    private void doLayerTest(final String testFileDir) throws WrongInspectorOsException, IOException {
+    @Test
+    public void testExtractDockerLayerTarPlnkDir() throws WrongInspectorOsException, IOException {
+        final File targetImageFileSystemRootDir = doLayerTest("omitdir");
+
+        final File omitDir = new File(targetImageFileSystemRootDir, "omit");
+        assertFalse("Omit dir was created", omitDir.exists());
+    }
+
+    private File doLayerTest(final String testFileDir) throws WrongInspectorOsException, IOException {
         final File workingDirectory = TestUtils.createTempDirectory();
         final File tarExtractionDirectory = new File(workingDirectory, ImageInspector.TAR_EXTRACTION_DIRECTORY);
         final File layerDir = new File(tarExtractionDirectory, String.format("ubuntu_latest.tar/%s", LAYER_ID));
@@ -80,9 +95,10 @@ public class WhiteoutFileTest {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
+
         tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.UBUNTU, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
-        final File opaqueDir = new File(targetImageFileSystemRootDir, "opaque");
-        assertFalse("Whited-out opaque dir was created", opaqueDir.exists());
+
+        return targetImageFileSystemRootDir;
     }
 
 }

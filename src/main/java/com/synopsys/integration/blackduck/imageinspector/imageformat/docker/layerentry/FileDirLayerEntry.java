@@ -65,7 +65,8 @@ public class FileDirLayerEntry extends LayerEntryNoFileToDelete {
             try {
                 outputFileStream = new FileOutputStream(outputFile);
             } catch (final FileNotFoundException e1) {
-                logger.error(String.format("Error creating output stream for %s", outputFile.getAbsolutePath()), e1);
+                logger.warn(String.format("Error creating output stream for %s: %s", outputFile.getAbsolutePath(), e1.getMessage()));
+                logger.trace(String.format("Stacktrace for error creating output stream for %s", outputFile.getAbsolutePath()), e1);
                 return;
             }
             try {
