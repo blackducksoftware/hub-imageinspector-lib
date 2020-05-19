@@ -98,6 +98,7 @@ task unTarAlpine(type: Exec, dependsOn: [buildTestTarfiles, createAlpineDir]) {
 }
 
 testIntegration.dependsOn unTarAlpine
+testAll.dependsOn unTarAlpine
 
 // End of stuff for integration tests
 ////////////////////////////////////////////////
