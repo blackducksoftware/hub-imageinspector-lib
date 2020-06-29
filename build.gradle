@@ -6,7 +6,7 @@ buildscript {
 
     dependencies {
         classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
-        classpath 'com.bmuschko:gradle-docker-plugin:3.0.6'
+        classpath 'com.bmuschko:gradle-docker-plugin:6.4.0'
     }
 }
 
@@ -55,7 +55,6 @@ task createTestDockerfile(type: Dockerfile) {
 	destFile = project.file("${buildDir}/images/test/centos_minus_vim_plus_bacula/Dockerfile")
 	println "destFile: ${destFile}"
 	from 'centos:7.3.1611'
-	maintainer 'Black Duck Software'
 	environmentVariable('LANG', 'en_US.UTF-8')
 	
 	runCommand 'rpm -e vim-minimal && \
@@ -74,6 +73,28 @@ task buildTestDockerTarfile(type: Exec, dependsOn: buildTestDockerImage) {
         "blackducksoftware/centos_minus_vim_plus_bacula:1.0"
 }
 
+task createTestFile(type: Exec) {
+    commandLine "touch", "${buildDir}/images/test/nopkgmgr/testfile.txt"
+}
+
+task createTestDockerfileNoPkgMgr(type: Dockerfile) {
+    destFile = project.file("${buildDir}/images/test/nopkgmgr/Dockerfile")
+    println "destFile: ${destFile}"
+    from 'scratch'
+    addFile('testfile.txt', '/')
+}
+
+task buildTestDockerImageNoPkgMgr(type: Exec, dependsOn: [createTestDockerfileNoPkgMgr, createTestFile]) {
+    commandLine "docker", "build", "--no-cache", "--tag", "blackducksoftware/nopkgmgr:1.0", \
+        "${buildDir}/images/test/nopkgmgr"
+}
+
+task buildTestDockerTarfileNoPkgMgr(type: Exec, dependsOn: buildTestDockerImageNoPkgMgr) {
+    outputs.files file("${buildDir}/images/test/nopkgmgr.tar")
+    commandLine "docker", "save", "-o", "${buildDir}/images/test/nopkgmgr.tar", \
+        "blackducksoftware/nopkgmgr:1.0"
+}
+
 task pullAlpineLatest(type: Exec) {
     commandLine "docker", "pull", "alpine:latest"
 }
@@ -90,7 +111,7 @@ task createAlpineDir(type: Exec) {
     commandLine "mkdir", "-p", "build/images/test/alpine/tarExtraction/alpine.tar"
 }
 
-task buildTestTarfiles(dependsOn: [buildTestDockerTarfile, buildAlpineTestDockerTarfile]) {}
+task buildTestTarfiles(dependsOn: [buildTestDockerTarfile, buildAlpineTestDockerTarfile, buildTestDockerTarfileNoPkgMgr]) {}
 
 task unTarAlpine(type: Exec, dependsOn: [buildTestTarfiles, createAlpineDir]) {
     workingDir "build/images/test/alpine/tarExtraction/alpine.tar"

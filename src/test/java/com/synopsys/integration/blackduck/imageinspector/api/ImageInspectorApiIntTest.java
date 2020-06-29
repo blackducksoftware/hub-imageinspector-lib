@@ -47,7 +47,8 @@ public class ImageInspectorApiIntTest {
 
     private static final String SIMPLE_IMAGE_TARFILE = "build/images/test/alpine.tar";
     private static final String MULTILAYER_IMAGE_TARFILE = "build/images/test/centos_minus_vim_plus_bacula.tar";
-    
+    private static final String NOPKGMGR_IMAGE_TARFILE = "build/images/test/nopkgmgr.tar";
+
     private static Os os;
     private static ImageInspectorApi imageInspectorApi;
     private static List<PkgMgr> pkgMgrs;
@@ -87,19 +88,46 @@ public class ImageInspectorApiIntTest {
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
         try {
             final ImageInspectionRequest imageInspectionRequest = new ImageInspectionRequestBuilder()
-                                               .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
-                                               .setBlackDuckProjectName(PROJECT)
-                                               .setBlackDuckProjectVersion(PROJECT_VERSION)
-                                               .setOrganizeComponentsByLayer(false)
-                                               .setIncludeRemovedComponents(false)
-                                               .setCurrentLinuxDistro("CENTOS")
-                                               .build();
+                                                                      .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
+                                                                      .setBlackDuckProjectName(PROJECT)
+                                                                      .setBlackDuckProjectVersion(PROJECT_VERSION)
+                                                                      .setOrganizeComponentsByLayer(false)
+                                                                      .setIncludeRemovedComponents(false)
+                                                                      .setCurrentLinuxDistro("CENTOS")
+                                                                      .build();
             imageInspectorApi.getBdio(imageInspectionRequest);
             fail("Expected WrongInspectorOsException");
         } catch (final WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
             assertEquals(ImageInspectorOsEnum.ALPINE.name(), e.getcorrectInspectorOs().name());
         }
+    }
+
+    @Test
+    public void testOnNoPkgMgrImage() throws IntegrationException, InterruptedException, IOException {
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
+
+        final FileOperations fileOperations = new FileOperations();
+        final File tempDir = fileOperations.createTempDirectory();
+        final File destinationFile = new File(tempDir, "out.tar.gz");
+        final String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
+
+        final ImageInspectionRequest imageInspectionRequest = new ImageInspectionRequestBuilder()
+                                                                  .setDockerTarfilePath(NOPKGMGR_IMAGE_TARFILE)
+                                                                  .setBlackDuckProjectName(PROJECT)
+                                                                  .setBlackDuckProjectVersion(PROJECT_VERSION)
+                                                                  .setOrganizeComponentsByLayer(false)
+                                                                  .setIncludeRemovedComponents(false)
+                                                                  .setCurrentLinuxDistro("UBUNTU")
+                                                                  .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+                                                                  .build();
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
+        assertEquals(0, bdioDocument.getComponents().size());
+
+        final File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
+        System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());
+        assertTrue(containerFileSystemFile.length() > 0);
+        assertTrue(containerFileSystemFile.length() < 1000);
     }
 
     @Test
@@ -123,12 +151,12 @@ public class ImageInspectorApiIntTest {
         Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
         final ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
-            .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
-            .setBlackDuckProjectName(PROJECT)
-            .setBlackDuckProjectVersion(PROJECT_VERSION)
-            .setCurrentLinuxDistro("ALPINE")
-            .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
-            .build();
+                                                                  .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
+                                                                  .setBlackDuckProjectName(PROJECT)
+                                                                  .setBlackDuckProjectVersion(PROJECT_VERSION)
+                                                                  .setCurrentLinuxDistro("ALPINE")
+                                                                  .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
+                                                                  .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
         assertEquals(PROJECT, bdioDocument.getProject().name);
@@ -160,13 +188,13 @@ public class ImageInspectorApiIntTest {
         final File destinationFile = new File(tempDir, "out.tar.gz");
         final String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
         final ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
-            .setDockerTarfilePath(MULTILAYER_IMAGE_TARFILE)
-            .setBlackDuckProjectName(PROJECT)
-            .setBlackDuckProjectVersion(PROJECT_VERSION)
-            .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
-            .setCurrentLinuxDistro("CENTOS")
-            .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
-            .build();
+                                                                  .setDockerTarfilePath(MULTILAYER_IMAGE_TARFILE)
+                                                                  .setBlackDuckProjectName(PROJECT)
+                                                                  .setBlackDuckProjectVersion(PROJECT_VERSION)
+                                                                  .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+                                                                  .setCurrentLinuxDistro("CENTOS")
+                                                                  .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
+                                                                  .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
 
         final File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
