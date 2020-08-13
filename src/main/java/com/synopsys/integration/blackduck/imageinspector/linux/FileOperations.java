@@ -90,6 +90,11 @@ public class FileOperations {
 
     List<String> getFileOwnerGroupPermsMsgs(final File file) {
         final List<String> msgs = new ArrayList<>(8);
+        try {
+            if (file == null) {
+                logger.warn("File passed to getFileOwnerGroupPermsMsgs() is null");
+                return msgs;
+            }
         msgs.add(String.format("Current process owner: %s", System.getProperty("user.name")));
         if (!file.exists()) {
             msgs.add(String.format("File %s does not exist", file.getAbsolutePath()));
@@ -105,6 +110,9 @@ public class FileOperations {
             msgs.add(String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions())));
         } catch (final IOException e) {
             msgs.add(String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage()));
+        }
+        } catch (Exception e) {
+            logger.warn(String.format("getFileOwnerGroupPermsMsgs() threw an exception", e));
         }
         return msgs;
     }
