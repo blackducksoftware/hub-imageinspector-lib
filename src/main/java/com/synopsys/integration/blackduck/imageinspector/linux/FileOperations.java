@@ -95,22 +95,22 @@ public class FileOperations {
                 logger.warn("File passed to getFileOwnerGroupPermsMsgs() is null");
                 return msgs;
             }
-        msgs.add(String.format("Current process owner: %s", System.getProperty("user.name")));
-        if (!file.exists()) {
-            msgs.add(String.format("File %s does not exist", file.getAbsolutePath()));
-            return msgs;
-        }
-        if (file.isDirectory()) {
-            msgs.add(String.format("File %s is a directory", file.getAbsolutePath()));
-        }
-        PosixFileAttributes attrs;
-        try {
-            attrs = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class)
-                        .readAttributes();
-            msgs.add(String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions())));
-        } catch (final IOException e) {
-            msgs.add(String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage()));
-        }
+            msgs.add(String.format("Current process owner: %s", System.getProperty("user.name")));
+            if (!file.exists()) {
+                msgs.add(String.format("File %s does not exist", file.getAbsolutePath()));
+                return msgs;
+            }
+            if (file.isDirectory()) {
+                msgs.add(String.format("File %s is a directory", file.getAbsolutePath()));
+            }
+            PosixFileAttributes attrs;
+            try {
+                attrs = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class)
+                            .readAttributes();
+                msgs.add(String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions())));
+            } catch (final IOException e) {
+                msgs.add(String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage()));
+            }
         } catch (Exception e) {
             logger.warn(String.format("getFileOwnerGroupPermsMsgs() threw an exception", e));
         }
@@ -190,24 +190,38 @@ public class FileOperations {
         return newFile.createNewFile();
     }
 
-    public void pruneDanglingSymLinksRecursively(final File dir) throws IOException {
-        for (final File dirEntry : dir.listFiles()) {
-            final Path dirEntryAsPath = dirEntry.toPath();
-            if (Files.isSymbolicLink(dirEntryAsPath)) {
-                final Path symLinkTargetPath = Files.readSymbolicLink(dirEntryAsPath);
-                final File symLinkTargetFile = new File(dir, symLinkTargetPath.toString());
-                logger.trace(String.format("Found symlink %s -> %s [link value: %s]", dirEntry.getAbsolutePath(), symLinkTargetFile.getAbsolutePath(), symLinkTargetPath));
-                if (!symLinkTargetFile.exists()) {
-                    logger.trace(String.format("Symlink target %s does not exist; deleting %s", symLinkTargetFile.getCanonicalPath(), dirEntry.getCanonicalPath()));
-                    final boolean deleteSucceeded = Files.deleteIfExists(dirEntry.toPath());
-                    if (!deleteSucceeded) {
-                        logger.warn(String.format("Delete of dangling symlink %s failed", dirEntry.getAbsolutePath()));
-                    }
+    public void pruneProblematicSymLinksRecursively(final File dir) throws IOException {
+        logger.trace(String.format("pruneDanglingSymLinksRecursively: %s", dir.getAbsolutePath()));
+        for (File dirEntry : dir.listFiles()) {
+            if (mustPrune(dir, dirEntry)) {
+                final boolean deleteSucceeded = Files.deleteIfExists(dirEntry.toPath());
+                if (!deleteSucceeded) {
+                    logger.warn(String.format("Delete of dangling or circular symlink %s failed", dirEntry.getAbsolutePath()));
                 }
-            }
-            if (dirEntry.isDirectory()) {
-                pruneDanglingSymLinksRecursively(dirEntry);
+            } else if (dirEntry.isDirectory()) {
+                pruneProblematicSymLinksRecursively(dirEntry);
             }
         }
+    }
+
+    private boolean mustPrune(File dir, File dirEntry) throws IOException {
+        Path dirEntryAsPath = dirEntry.toPath();
+        if (!Files.isSymbolicLink(dirEntryAsPath)) {
+            return false;
+        }
+        final Path symLinkTargetPath = Files.readSymbolicLink(dirEntryAsPath);
+        final File symLinkTargetFile = new File(dir, symLinkTargetPath.toString());
+        Path symLinkTargetPathAdjusted = symLinkTargetFile.toPath();
+        logger.trace(String.format("Found symlink %s -> %s [link value: %s]", dirEntry.getAbsolutePath(), symLinkTargetFile.getAbsolutePath(), symLinkTargetPath));
+        logger.trace(String.format("Checking to see if %s starts with %s", dirEntryAsPath.normalize().toFile().getAbsolutePath(), symLinkTargetPathAdjusted.normalize().toFile().getAbsolutePath()));
+        if (dirEntryAsPath.normalize().startsWith(symLinkTargetPathAdjusted.normalize())) {
+            logger.debug(String.format("symlink %s lives under its target %s; this is a circular symlink that will/must be deleted", dirEntry.getAbsolutePath(), symLinkTargetFile.getAbsolutePath()));
+            return true;
+        }
+        if (!symLinkTargetFile.exists()) {
+            logger.debug(String.format("Symlink target %s does not exist; %s is a dangling symlink that will/must be deleted", symLinkTargetFile.getAbsolutePath(), dirEntry.getAbsolutePath()));
+            return true;
+        }
+        return false;
     }
 }
