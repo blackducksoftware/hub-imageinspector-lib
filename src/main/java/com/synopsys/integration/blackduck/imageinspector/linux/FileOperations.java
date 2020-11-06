@@ -103,18 +103,24 @@ public class FileOperations {
             if (file.isDirectory()) {
                 msgs.add(String.format("File %s is a directory", file.getAbsolutePath()));
             }
-            PosixFileAttributes attrs;
-            try {
-                attrs = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class)
-                            .readAttributes();
-                msgs.add(String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions())));
-            } catch (final IOException e) {
-                msgs.add(String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage()));
-            }
+            msgs.add(deriveAttributesMessage(file));
         } catch (Exception e) {
-            logger.warn(String.format("getFileOwnerGroupPermsMsgs() threw an exception", e));
+            logger.warn("getFileOwnerGroupPermsMsgs() threw an exception", e);
         }
         return msgs;
+    }
+
+    private String deriveAttributesMessage(final File file) {
+        String attrsMsg;
+        PosixFileAttributes attrs;
+        try {
+            attrs = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class)
+                        .readAttributes();
+            attrsMsg = String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions()));
+        } catch (final IOException e) {
+            attrsMsg = String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage());
+        }
+        return attrsMsg;
     }
 
     public void deleteDirPersistently(final File dir) throws InterruptedException {
