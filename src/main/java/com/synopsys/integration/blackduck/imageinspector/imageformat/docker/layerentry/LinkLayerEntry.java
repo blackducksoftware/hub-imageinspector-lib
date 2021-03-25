@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.slf4j.Logger;
@@ -32,7 +34,7 @@ public class LinkLayerEntry extends LayerEntryNoFileToDelete {
     }
 
     @Override
-    public void processFiles() throws IOException {
+    public List<File> processFiles() throws IOException {
         final String fileSystemEntryName = layerEntry.getName();
         logger.trace(String.format("Processing link: %s", fileSystemEntryName));
         final Path layerOutputDirPath = layerOutputDir.toPath();
@@ -41,13 +43,14 @@ public class LinkLayerEntry extends LayerEntryNoFileToDelete {
             startLink = Paths.get(layerOutputDir.getAbsolutePath(), fileSystemEntryName);
         } catch (final InvalidPathException e) {
             logger.warn(String.format("Error extracting symbolic link %s: Error creating Path object: %s", fileSystemEntryName, e.getMessage()));
-            return;
+            return Collections.emptyList();
         }
         if (layerEntry.isSymbolicLink()) {
             processSymbolicLink(layerOutputDirPath, startLink);
         } else if (layerEntry.isLink()) {
             processHardLink(layerOutputDirPath, startLink);
         }
+        return Collections.emptyList();
     }
 
     private void processSymbolicLink(final Path layerOutputDirPath, final Path startLink) throws IOException {

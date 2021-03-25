@@ -12,6 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -35,7 +37,7 @@ public class FileDirLayerEntry extends LayerEntryNoFileToDelete {
     }
 
     @Override
-    public void processFiles() {
+    public List<File> processFiles() {
         final String fileSystemEntryName = archiveEntry.getName();
         logger.trace(String.format("Processing file/dir: %s", fileSystemEntryName));
 
@@ -52,7 +54,7 @@ public class FileDirLayerEntry extends LayerEntryNoFileToDelete {
             } catch (final FileNotFoundException e1) {
                 logger.warn(String.format("Error creating output stream for %s: %s", outputFile.getAbsolutePath(), e1.getMessage()));
                 logger.trace(String.format("Stacktrace for error creating output stream for %s", outputFile.getAbsolutePath()), e1);
-                return;
+                return Collections.emptyList();
             }
             try {
                 fileOperations.copy(layerInputStream, outputFileStream);
@@ -71,5 +73,6 @@ public class FileDirLayerEntry extends LayerEntryNoFileToDelete {
                 logger.trace(String.format("mkdir of %s didn't succeed, but it might have already existed", outputFile.getAbsolutePath()));
             }
         }
+        return Collections.singletonList(outputFile);
     }
 }

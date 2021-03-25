@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LowerLayerFileDeleter;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class LayerEntriesTest {
@@ -31,7 +32,8 @@ public class LayerEntriesTest {
     Mockito.when(archiveEntry.isLink()).thenReturn(false);
     final TarArchiveInputStream layerInputStream = Mockito.mock(TarArchiveInputStream.class);
     final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir);
+    final LowerLayerFileDeleter fileDeleter = new LowerLayerFileDeleter();
+    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir, fileDeleter);
     assertTrue(layerEntry instanceof LinkLayerEntry);
   }
 
@@ -46,7 +48,8 @@ public class LayerEntriesTest {
     Mockito.when(archiveEntry.isLink()).thenReturn(true);
     final TarArchiveInputStream layerInputStream = Mockito.mock(TarArchiveInputStream.class);
     final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir);
+    final LowerLayerFileDeleter fileDeleter = new LowerLayerFileDeleter();
+    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir, fileDeleter);
     assertTrue(layerEntry instanceof LinkLayerEntry);
   }
 
@@ -60,7 +63,8 @@ public class LayerEntriesTest {
     Mockito.when(archiveEntry.isLink()).thenReturn(false);
     final TarArchiveInputStream layerInputStream = Mockito.mock(TarArchiveInputStream.class);
     final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir);
+    final LowerLayerFileDeleter fileDeleter = new LowerLayerFileDeleter();
+    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir, fileDeleter);
     assertTrue(layerEntry instanceof FileDirLayerEntry);
   }
 
@@ -75,7 +79,8 @@ public class LayerEntriesTest {
     Mockito.when(archiveEntry.isLink()).thenReturn(false);
     final TarArchiveInputStream layerInputStream = Mockito.mock(TarArchiveInputStream.class);
     final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir);
+    final LowerLayerFileDeleter fileDeleter = new LowerLayerFileDeleter();
+    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir, fileDeleter);
     assertTrue(layerEntry instanceof WhiteOutFileLayerEntry);
   }
 
@@ -90,7 +95,8 @@ public class LayerEntriesTest {
     Mockito.when(archiveEntry.isLink()).thenReturn(false);
     final TarArchiveInputStream layerInputStream = Mockito.mock(TarArchiveInputStream.class);
     final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir);
+    final LowerLayerFileDeleter fileDeleter = new LowerLayerFileDeleter();
+    final LayerEntry layerEntry = LayerEntries.createLayerEntry(fileOperations, layerInputStream, archiveEntry, layerOutputDir, fileDeleter);
     assertTrue(layerEntry instanceof WhiteOutOmittedDirLayerEntry);
   }
 

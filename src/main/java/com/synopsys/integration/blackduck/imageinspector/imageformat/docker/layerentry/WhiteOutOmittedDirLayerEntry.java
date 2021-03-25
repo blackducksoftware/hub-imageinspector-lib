@@ -10,6 +10,8 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker.lay
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -29,10 +31,11 @@ public class WhiteOutOmittedDirLayerEntry extends LayerEntry {
     }
 
     @Override
-    public void processFiles() {
+    public List<File> processFiles() {
         logger.debug(String.format("WhiteOutOmittedDirLayerEntry: %s", layerEntry.getName()));
         final Path whiteoutFilePath = Paths.get(layerOutputDir.getAbsolutePath(), layerEntry.getName());
         otherFileToDelete = whiteoutFilePath.toFile().getParentFile();
+        return Collections.emptyList();
     }
 
     @Override

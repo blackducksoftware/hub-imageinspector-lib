@@ -14,6 +14,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LowerLayerFileDeleter;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class LayerEntries {
@@ -22,7 +23,7 @@ public class LayerEntries {
     private LayerEntries() {
     }
 
-    public static LayerEntry createLayerEntry(final FileOperations fileOperations, final TarArchiveInputStream layerInputStream, final TarArchiveEntry layerEntry, final File layerOutputDir) {
+    public static LayerEntry createLayerEntry(final FileOperations fileOperations, final TarArchiveInputStream layerInputStream, final TarArchiveEntry layerEntry, final File layerOutputDir, final LowerLayerFileDeleter fileDeleter) {
         final String fileSystemEntryName = layerEntry.getName();
         logger.trace(String.format("Processing layerEntry: name: %s", fileSystemEntryName));
         // plnk whiteout files are found in directories we should omit from the container file system
@@ -33,9 +34,9 @@ public class LayerEntries {
         if (fileSystemEntryName.equals(".wh..wh..plnk") || fileSystemEntryName.endsWith("/.wh..wh..plnk")) {
             return new WhiteOutOmittedDirLayerEntry(layerEntry, layerOutputDir);
         } else if (fileSystemEntryName.equals(".wh..wh..opq") || fileSystemEntryName.endsWith("/.wh..wh..opq")) {
-            return new WhiteOutOpaqueDirLayerEntry(layerEntry, layerOutputDir);
+            return new WhiteOutOpaqueDirLayerEntry(layerEntry, layerOutputDir, fileDeleter);
         } else if (fileSystemEntryName.startsWith(".wh.") || fileSystemEntryName.contains("/.wh.")) {
-            return new WhiteOutFileLayerEntry(fileOperations, layerEntry, layerOutputDir);
+            return new WhiteOutFileLayerEntry(fileOperations, layerEntry, layerOutputDir, fileDeleter);
         } else if (layerEntry.isSymbolicLink() || layerEntry.isLink()) {
             return new LinkLayerEntry(fileOperations, layerEntry, layerOutputDir);
         } else {

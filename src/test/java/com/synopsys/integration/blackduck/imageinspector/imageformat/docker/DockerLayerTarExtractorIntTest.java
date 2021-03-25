@@ -5,11 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 
 @Tag("integration")
@@ -41,5 +45,30 @@ public class DockerLayerTarExtractorIntTest {
         assertFalse(fileThatShouldBeRemoved.exists());
         assertFalse(anotherFileThatShouldBeRemoved.exists());
         assertTrue(fileThatShouldBeCreated.exists());
+    }
+
+    @Test
+    public void testFilesInOpaqueLayerAddedToOutput() throws IOException {
+        File tarFile = new File("src/test/resources/layers/eapLayer/layer.tar");
+        File outputDir = new File("test/output/eapLayer");
+        outputDir.mkdirs();
+        FileUtils.deleteQuietly(outputDir);
+        outputDir.mkdirs();
+
+        File partitionDir = new File(outputDir, "opt/partition");
+        File fileThatShouldExist1 = new File(partitionDir, "logging.properties");
+        File fileThatShouldExist2 = new File(partitionDir, "osquery.py");
+        File fileThatShouldExist3 = new File(partitionDir, "queryosapi.py");
+        File fileThatShouldExist4 = new File(partitionDir, "partitionPV.sh");
+
+        DockerLayerTarExtractor dockerLayerTarExtractor = new DockerLayerTarExtractor();
+        TarArchiveInputStream inputStream = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(tarFile)), "UTF-8");
+        List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(inputStream, outputDir);
+
+        assertTrue(filesToRemove.isEmpty());
+        assertTrue(fileThatShouldExist1.exists());
+        assertTrue(fileThatShouldExist2.exists());
+        assertTrue(fileThatShouldExist3.exists());
+        assertTrue(fileThatShouldExist4.exists());
     }
 }

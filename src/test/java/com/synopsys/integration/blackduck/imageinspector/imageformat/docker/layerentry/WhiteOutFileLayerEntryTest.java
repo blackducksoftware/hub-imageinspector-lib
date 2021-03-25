@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LowerLayerFileDeleter;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class WhiteOutFileLayerEntryTest {
@@ -26,7 +27,8 @@ public class WhiteOutFileLayerEntryTest {
     final TarArchiveEntry archiveEntry = Mockito.mock(TarArchiveEntry.class);
     Mockito.when(archiveEntry.getName()).thenReturn(".wh.testWhitedOutFileName");
     final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = new WhiteOutFileLayerEntry(fileOperations, archiveEntry, layerOutputDir);
+    final LowerLayerFileDeleter fileDeleter = new LowerLayerFileDeleter();
+    final LayerEntry layerEntry = new WhiteOutFileLayerEntry(fileOperations, archiveEntry, layerOutputDir, fileDeleter);
     Optional<File> fileToRemove = layerEntry.process();
     assertEquals(Optional.empty(), fileToRemove);
     Mockito.verify(fileOperations).deleteFile(new File("test/output/testWhitedOutFileName"));
@@ -37,7 +39,8 @@ public class WhiteOutFileLayerEntryTest {
     final TarArchiveEntry archiveEntry = Mockito.mock(TarArchiveEntry.class);
     Mockito.when(archiveEntry.getName()).thenReturn("testInvalidWhitedOutFileName");
     final File layerOutputDir = new File("test/output");
-    final LayerEntry layerEntry = new WhiteOutFileLayerEntry(fileOperations, archiveEntry, layerOutputDir);
+    final LowerLayerFileDeleter fileDeleter = new LowerLayerFileDeleter();
+    final LayerEntry layerEntry = new WhiteOutFileLayerEntry(fileOperations, archiveEntry, layerOutputDir, fileDeleter);
     Optional<File> fileToRemove = layerEntry.process();
     assertEquals(Optional.empty(), fileToRemove);
   }
