@@ -51,7 +51,7 @@ public class WhiteOutFileLayerEntry extends LayerEntryNoFileToDelete {
         logger.trace(String.format("Removing %s from image (this layer whites it out)", filePathToRemove));
         if (fileToRemove.isDirectory()) {
             try {
-                fileDeleter.deleteFilesAddedByLowerLayers(fileToRemove, 5);
+                fileDeleter.deleteFilesAddedByLowerLayers(fileToRemove);
                 logger.trace(String.format("Directory %s successfully removed", filePathToRemove));
             } catch (final Exception e) {
                 logger.warn(String.format("Error removing whited-out directory %s", filePathToRemove));

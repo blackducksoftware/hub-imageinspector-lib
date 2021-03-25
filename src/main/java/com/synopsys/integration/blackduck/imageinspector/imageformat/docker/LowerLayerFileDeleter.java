@@ -17,9 +17,10 @@ import org.apache.commons.io.FileUtils;
 
 public class LowerLayerFileDeleter {
     private List<String> filesAddedByCurrentLayer = new LinkedList<>();
+    private int defaultSearchDepth = 5; //TODO - what default makes sense?
 
     public void deleteFilesAddedByLowerLayers(File file) {
-        deleteFilesAddedByLowerLayers(file, Integer.MAX_VALUE);
+        deleteFilesAddedByLowerLayers(file, defaultSearchDepth);
     }
 
     public void deleteFilesAddedByLowerLayers(File file, int depthToLookForFilesAddedByCurrentLayer) {

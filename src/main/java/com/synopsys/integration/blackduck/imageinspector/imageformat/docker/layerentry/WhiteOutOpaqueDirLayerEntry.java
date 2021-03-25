@@ -37,7 +37,7 @@ public class WhiteOutOpaqueDirLayerEntry extends LayerEntryNoFileToDelete {
         final Path whiteoutFilePath = Paths.get(layerOutputDir.getAbsolutePath(), layerEntry.getName());
         final File opaqueDir = whiteoutFilePath.getParent().toFile();
         logger.debug(String.format("Deleting/re-creating opaque dir %s", opaqueDir.getAbsolutePath()));
-        fileDeleter.deleteFilesAddedByLowerLayers(opaqueDir, 5);
+        fileDeleter.deleteFilesAddedByLowerLayers(opaqueDir);
         opaqueDir.mkdirs();
         return Collections.emptyList();
     }
