@@ -58,7 +58,7 @@ public class WhiteOutFileLayerEntry extends LayerEntryNoFileToDelete {
             }
         } else {
             try {
-                fileOperations.deleteFile(fileToRemove); // TODO - should fileDeleter handle this deletion?
+                fileDeleter.deleteFilesAddedByLowerLayers(fileToRemove); // TODO - should FileOperations handle this deletion?
                 logger.trace(String.format("File %s successfully removed", filePathToRemove));
             } catch (final Exception e) {
                 logger.warn(String.format("Error removing whited-out file %s", filePathToRemove));
