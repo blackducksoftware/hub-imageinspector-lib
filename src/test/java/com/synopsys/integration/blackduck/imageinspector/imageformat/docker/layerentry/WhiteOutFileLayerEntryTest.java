@@ -27,11 +27,11 @@ public class WhiteOutFileLayerEntryTest {
     final TarArchiveEntry archiveEntry = Mockito.mock(TarArchiveEntry.class);
     Mockito.when(archiveEntry.getName()).thenReturn(".wh.testWhitedOutFileName");
     final File layerOutputDir = new File("test/output");
-    final LowerLayerFileDeleter fileDeleter = new LowerLayerFileDeleter();
+    final LowerLayerFileDeleter fileDeleter = Mockito.mock(LowerLayerFileDeleter.class);
     final LayerEntry layerEntry = new WhiteOutFileLayerEntry(fileOperations, archiveEntry, layerOutputDir, fileDeleter);
     Optional<File> fileToRemove = layerEntry.process();
     assertEquals(Optional.empty(), fileToRemove);
-    Mockito.verify(fileOperations).deleteFile(new File("test/output/testWhitedOutFileName"));
+    Mockito.verify(fileDeleter).deleteFilesAddedByLowerLayers(new File("test/output/testWhitedOutFileName"));
   }
 
   @Test
