@@ -8,28 +8,43 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LowerLayerFileDeleter {
     private List<String> filesAddedByCurrentLayer = new LinkedList<>();
-    private int defaultSearchDepth = 5; //TODO - what default makes sense?
+    private int defaultSearchDepth = 20;
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    public void addFilesAddedByCurrentLayer(List<String> files) {
+        filesAddedByCurrentLayer.addAll(files);
+    }
 
     public void deleteFilesAddedByLowerLayers(File file) {
         deleteFilesAddedByLowerLayers(file, defaultSearchDepth);
     }
 
     public void deleteFilesAddedByLowerLayers(File file, int depthToLookForFilesAddedByCurrentLayer) {
-        if (null == file || !file.exists() || depthToLookForFilesAddedByCurrentLayer < 0 || filesAddedByCurrentLayer.isEmpty() ) {
+        if (null == file || !file.exists() || filesAddedByCurrentLayer.isEmpty() ) {
+            FileUtils.deleteQuietly(file);
+            return;
+        }
+
+        if (depthToLookForFilesAddedByCurrentLayer < 0) {
+            logger.debug("Hit depth limit when searching for files added by the current layer.");
             FileUtils.deleteQuietly(file);
             return;
         }
 
         List<File> children = getChildrenSafely(file);
+
         for (File child : children) {
             deleteFilesAddedByLowerLayers(child, depthToLookForFilesAddedByCurrentLayer - 1);
         }
@@ -40,7 +55,11 @@ public class LowerLayerFileDeleter {
     }
 
     private List<File> getChildrenSafely(File file) {
-        if (!file.isDirectory()) {
+        try {
+            if (!file.isDirectory() || FileUtils.isSymlink(file)) {
+                return Collections.emptyList();
+            }
+        } catch (IOException e) {
             return Collections.emptyList();
         }
 
@@ -49,9 +68,5 @@ public class LowerLayerFileDeleter {
             return Collections.emptyList();
         }
         return Arrays.asList(children);
-    }
-
-    public void addFilesAddedByCurrentLayer(List<String> files) {
-        filesAddedByCurrentLayer.addAll(files);
     }
 }
