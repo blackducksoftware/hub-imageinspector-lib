@@ -149,6 +149,7 @@ public class BdioGenerator {
     private Dependency addLayerDependency(final MutableDependencyGraph graph, final String name) {
         final Forge forge = ForgeGenerator.createLayerForge();
         final Dependency layerDep = dependencyFactory.createPathDependency(forge, name);
+        layerDep.setVersion("");
         logger.trace(String.format("adding layer node %s as child to dependency node tree; dataId: %s", layerDep.getName(), layerDep.getExternalId().createBdioId()));
         graph.addChildToRoot(layerDep);
         return layerDep;
