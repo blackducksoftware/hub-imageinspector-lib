@@ -7,9 +7,12 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
+import com.synopsys.integration.bdio.SimpleBdioFactory;
+import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+
 public class TestUtils {
     public static File createTempDirectory() throws IOException {
-        final File temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
+        File temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
         if (!(temp.delete())) {
             throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
         }
@@ -19,23 +22,23 @@ public class TestUtils {
         return (temp);
     }
 
-    public static boolean contentEquals(final File file1, final File file2, final List<String> exceptLinesContainingThese) throws IOException {
+    public static boolean contentEquals(File file1, File file2, List<String> exceptLinesContainingThese) throws IOException {
         System.out.println(String.format("Comparing %s %s", file1.getAbsolutePath(), file2.getAbsolutePath()));
         int ignoredLineCount = 0;
         int matchedLineCount = 0;
-        final List<String> lines1 = FileUtils.readLines(file1, StandardCharsets.UTF_8);
-        final List<String> lines2 = FileUtils.readLines(file2, StandardCharsets.UTF_8);
+        List<String> lines1 = FileUtils.readLines(file1, StandardCharsets.UTF_8);
+        List<String> lines2 = FileUtils.readLines(file2, StandardCharsets.UTF_8);
 
         if (lines1.size() != lines2.size()) {
             System.out.println("Files' line counts are different");
             return false;
         }
         for (int i = 0; i < lines1.size(); i++) {
-            final String line1 = lines1.get(i);
-            final String line2 = lines2.get(i);
+            String line1 = lines1.get(i);
+            String line2 = lines2.get(i);
             boolean skip = false;
             if (exceptLinesContainingThese != null) {
-                for (final String ignoreMe : exceptLinesContainingThese) {
+                for (String ignoreMe : exceptLinesContainingThese) {
                     if (line1.contains(ignoreMe) || line2.contains(ignoreMe)) {
                         skip = true;
                         ignoredLineCount++;
@@ -55,4 +58,10 @@ public class TestUtils {
         System.out.println(String.format("These files match (%d lines matched; %d lines ignored)", matchedLineCount, ignoredLineCount));
         return true;
     }
+
+    public static BdioGenerator createBdioGenerator() {
+        SimpleBdioFactory simpleBdioFactory = new SimpleBdioFactory();
+        return new BdioGenerator(simpleBdioFactory, simpleBdioFactory.getDependencyFactory());
+    }
+
 }

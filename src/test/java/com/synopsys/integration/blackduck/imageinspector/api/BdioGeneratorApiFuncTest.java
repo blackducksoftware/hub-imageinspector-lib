@@ -16,20 +16,19 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.gson.Gson;
+import com.synopsys.integration.bdio.BdioReader;
 import com.synopsys.integration.bdio.model.BdioComponent;
-import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.bdio.BdioReader;
-import com.synopsys.integration.bdio.SimpleBdioFactory;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 
 public class BdioGeneratorApiFuncTest {
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     @Test
     public void testPkgListToBdioFileUbuntu() throws IOException, IntegrationException {
-        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), new BdioGenerator(new SimpleBdioFactory()));
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), TestUtils.createBdioGenerator());
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/dpkg/ubuntu_dpkg_output.txt";
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         String bdioOutputFilePath = "test/output/bdioFromDpkgOutput.jsonld";
@@ -58,7 +57,7 @@ public class BdioGeneratorApiFuncTest {
 
     @Test
     public void testPkgListToBdioFileAlpine() throws IOException, IntegrationException {
-        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), new BdioGenerator(new SimpleBdioFactory()));
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), TestUtils.createBdioGenerator());
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/apk/alpine_apk_output.txt";
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         String bdioOutputFilePath = "test/output/bdioFromApkOutput.jsonld";
@@ -81,7 +80,7 @@ public class BdioGeneratorApiFuncTest {
     @Test
     public void testPkgListToBdioLinesAlpineUsingNonApkMethod() throws IntegrationException, IOException {
         String pkgMgrOutputFilePath = "src/test/resources/pkgMgrOutput/apk/alpine_apk_output.txt";
-        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), new BdioGenerator(new SimpleBdioFactory()));
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), TestUtils.createBdioGenerator());
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         List<String> pkgMgrOutputLinesList = FileUtils.readLines(pkgMgrOutputFile, StandardCharsets.UTF_8);
         String[] pkgMgrOutputLines = pkgMgrOutputLinesList.toArray(new String[pkgMgrOutputLinesList.size()]);
@@ -94,8 +93,8 @@ public class BdioGeneratorApiFuncTest {
         }
     }
 
-    private SimpleBdioDocument testPkgListToBdioLines(final String pkgMgrOutputFilePath, final String linuxDistroName, final PackageManagerEnum pkgMgrType) throws IOException, IntegrationException {
-        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), new BdioGenerator(new SimpleBdioFactory()));
+    private SimpleBdioDocument testPkgListToBdioLines(String pkgMgrOutputFilePath, String linuxDistroName, PackageManagerEnum pkgMgrType) throws IOException, IntegrationException {
+        BdioGeneratorApi api = new BdioGeneratorApi(gson, new PkgMgrFactory(), TestUtils.createBdioGenerator());
         File pkgMgrOutputFile = new File(pkgMgrOutputFilePath);
         List<String> pkgMgrOutputLinesList = FileUtils.readLines(pkgMgrOutputFile, StandardCharsets.UTF_8);
         String[] pkgMgrOutputLines = pkgMgrOutputLinesList.toArray(new String[pkgMgrOutputLinesList.size()]);
@@ -111,7 +110,7 @@ public class BdioGeneratorApiFuncTest {
         return bdioDoc;
     }
 
-    private void verifyBdioDocUbuntu(final SimpleBdioDocument bdioDoc) {
+    private void verifyBdioDocUbuntu(SimpleBdioDocument bdioDoc) {
         assertEquals("test-blackDuckProjectName", bdioDoc.getProject().name);
         assertEquals("test-blackDuckProjectVersion", bdioDoc.getProject().version);
         assertEquals("Project", bdioDoc.getProject().type);
@@ -121,7 +120,7 @@ public class BdioGeneratorApiFuncTest {
         verifyContainsComp(bdioDoc, "jblas", "1.2.4-1", "jblas/1.2.4-1/amd64");
     }
 
-    private void verifyBdioDocCentosMinusVimPlusBacula(final SimpleBdioDocument bdioDoc) {
+    private void verifyBdioDocCentosMinusVimPlusBacula(SimpleBdioDocument bdioDoc) {
         assertEquals("test-blackDuckProjectName", bdioDoc.getProject().name);
         assertEquals("test-blackDuckProjectVersion", bdioDoc.getProject().version);
         assertEquals("Project", bdioDoc.getProject().type);
@@ -130,7 +129,7 @@ public class BdioGeneratorApiFuncTest {
         verifyContainsComp(bdioDoc, "perl-Sys-MemInfo", "0.91-7.el7", "perl-Sys-MemInfo/0.91-7.el7/x86_64");
     }
 
-    private void verifyBdioDocAlpine(final SimpleBdioDocument bdioDoc) {
+    private void verifyBdioDocAlpine(SimpleBdioDocument bdioDoc) {
         assertEquals("test-blackDuckProjectName", bdioDoc.getProject().name);
         assertEquals("test-blackDuckProjectVersion", bdioDoc.getProject().version);
         assertEquals("Project", bdioDoc.getProject().type);
@@ -139,7 +138,7 @@ public class BdioGeneratorApiFuncTest {
         verifyContainsComp(bdioDoc, "boost-python", "1.62.0-r5", "boost-python/1.62.0-r5/x86_64");
     }
 
-    private void verifyContainsComp(final SimpleBdioDocument bdioDoc, final String compName, final String compVersion, final String compExternalId) {
+    private void verifyContainsComp(SimpleBdioDocument bdioDoc, String compName, String compVersion, String compExternalId) {
         boolean foundComp = false;
         for (BdioComponent comp : bdioDoc.getComponents()) {
             if (comp.name.equals(compName)) {
@@ -151,21 +150,22 @@ public class BdioGeneratorApiFuncTest {
         assertTrue(foundComp);
     }
 
-    private SimpleBdioDocument toBdioDocument(final String[] bdioLines) throws IOException {
-        final Reader reader = new StringReader(String.join("\n", bdioLines));
+    private SimpleBdioDocument toBdioDocument(String[] bdioLines) throws IOException {
+        Reader reader = new StringReader(String.join("\n", bdioLines));
         return generateSimpleBdioDocument(reader);
     }
 
-    private SimpleBdioDocument toBdioDocument(final File bdioFile) throws IOException {
-        final Reader reader = new FileReader(bdioFile);
+    private SimpleBdioDocument toBdioDocument(File bdioFile) throws IOException {
+        Reader reader = new FileReader(bdioFile);
         return generateSimpleBdioDocument(reader);
     }
 
-    private SimpleBdioDocument generateSimpleBdioDocument(final Reader reader) throws IOException {
+    private SimpleBdioDocument generateSimpleBdioDocument(Reader reader) throws IOException {
         SimpleBdioDocument doc = null;
         try (BdioReader bdioReader = new BdioReader(gson, reader)) {
             doc = bdioReader.readSimpleBdioDocument();
             return doc;
         }
     }
+
 }

@@ -31,33 +31,28 @@ import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 
 @Component
 public class BdioGenerator {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final SimpleBdioFactory simpleBdioFactory;
     private final DependencyFactory dependencyFactory;
 
-    public BdioGenerator() {
-        this.simpleBdioFactory = new SimpleBdioFactory();
-        this.dependencyFactory = simpleBdioFactory.getDependencyFactory();
-    }
-
-    public BdioGenerator(final SimpleBdioFactory simpleBdioFactory) {
+    public BdioGenerator(SimpleBdioFactory simpleBdioFactory, DependencyFactory dependencyFactory) {
         this.simpleBdioFactory = simpleBdioFactory;
-        this.dependencyFactory = simpleBdioFactory.getDependencyFactory();
+        this.dependencyFactory = dependencyFactory;
     }
 
-    public SimpleBdioDocument generateBdioDocumentFromImageComponentHierarchy(final String codeLocationName, final String projectName,
-        final String projectVersion,
-        final String linuxDistroName, ImageComponentHierarchy imageComponentHierarchy,
-        final boolean organizeComponentsByLayer,
-        final boolean includeRemovedComponents) {
+    public SimpleBdioDocument generateBdioDocumentFromImageComponentHierarchy(String codeLocationName, String projectName,
+        String projectVersion,
+        String linuxDistroName, ImageComponentHierarchy imageComponentHierarchy,
+        boolean organizeComponentsByLayer,
+        boolean includeRemovedComponents) {
 
         if (organizeComponentsByLayer) {
-            final MutableDependencyGraph graph = generateLayeredGraphFromHierarchy(imageComponentHierarchy, includeRemovedComponents);
+            MutableDependencyGraph graph = generateLayeredGraphFromHierarchy(imageComponentHierarchy, includeRemovedComponents);
             return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
         } else {
             if (includeRemovedComponents) {
-                final MutableDependencyGraph graph = generateFlatGraphFromAllComponentsAllLayers(imageComponentHierarchy);
+                MutableDependencyGraph graph = generateFlatGraphFromAllComponentsAllLayers(imageComponentHierarchy);
                 return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
             } else {
                 return generateFlatBdioDocumentFromComponents(codeLocationName, projectName, projectVersion, linuxDistroName, imageComponentHierarchy.getFinalComponents());
@@ -65,46 +60,46 @@ public class BdioGenerator {
         }
     }
 
-    public SimpleBdioDocument generateFlatBdioDocumentFromComponents(final String codeLocationName, final String projectName,
-        final String projectVersion,
-        final String linuxDistroName, List<ComponentDetails> comps) {
-        final MutableDependencyGraph graph = generateFlatGraphFromComponents(comps);
+    public SimpleBdioDocument generateFlatBdioDocumentFromComponents(String codeLocationName, String projectName,
+        String projectVersion,
+        String linuxDistroName, List<ComponentDetails> comps) {
+        MutableDependencyGraph graph = generateFlatGraphFromComponents(comps);
         return generateBdioDocumentFromGraph(codeLocationName, projectName, projectVersion, linuxDistroName, graph);
     }
 
-    public void writeBdio(final Writer writer, final SimpleBdioDocument bdioDocument) throws IOException {
-        try (final BdioWriter bdioWriter = simpleBdioFactory.createBdioWriter(writer)) {
+    public void writeBdio(Writer writer, SimpleBdioDocument bdioDocument) throws IOException {
+        try (BdioWriter bdioWriter = simpleBdioFactory.createBdioWriter(writer)) {
             simpleBdioFactory.writeSimpleBdioDocument(bdioWriter, bdioDocument);
         }
     }
 
-    public String[] getBdioAsStringArray(final SimpleBdioDocument bdioDocument) throws IOException {
-        try (final CharArrayWriter charArrayWriter = new CharArrayWriter()) {
+    public String[] getBdioAsStringArray(SimpleBdioDocument bdioDocument) throws IOException {
+        try (CharArrayWriter charArrayWriter = new CharArrayWriter()) {
             writeBdio(charArrayWriter, bdioDocument);
-            final String bdioString = charArrayWriter.toString();
+            String bdioString = charArrayWriter.toString();
             return bdioString.split("\n");
         }
     }
 
-    private final SimpleBdioDocument generateBdioDocumentFromGraph(final String codeLocationName, final String projectName,
-        final String projectVersion,
-        final String linuxDistroName, final MutableDependencyGraph graph) {
+    private SimpleBdioDocument generateBdioDocumentFromGraph(String codeLocationName, String projectName,
+        String projectVersion,
+        String linuxDistroName, MutableDependencyGraph graph) {
 
-        final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
+        Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
         ExternalIdFactory externalIdFactory = simpleBdioFactory.getExternalIdFactory();
         ExternalId projectExternalId = externalIdFactory.createNameVersionExternalId(forge, projectName, projectVersion);
-        final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
+        SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
         logger.info(String.format("Returning %d components", graph.getRootDependencies().size()));
         simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, graph);
         return bdioDocument;
     }
 
-    private MutableDependencyGraph generateLayeredGraphFromHierarchy(final ImageComponentHierarchy imageComponentHierarchy, final boolean includeRemovedComponents) {
-        final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
+    private MutableDependencyGraph generateLayeredGraphFromHierarchy(ImageComponentHierarchy imageComponentHierarchy, boolean includeRemovedComponents) {
+        MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
             Dependency layerDependency = addLayerDependency(graph, layer.getLayerIndexedName());
             logger.trace(String.format("Created layer node: %s", layerDependency.getName()));
-            for (final ComponentDetails comp : layer.getComponents()) {
+            for (ComponentDetails comp : layer.getComponents()) {
                 if (imageComponentHierarchy.getFinalComponents().contains(comp)) {
                     logger.trace(String.format("layer comp %s:%s is in final components list; including it in this layer", comp.getName(), comp.getVersion()));
                     addDependency(graph, layerDependency, comp);
@@ -122,41 +117,40 @@ public class BdioGenerator {
         return graph;
     }
 
-    private MutableDependencyGraph generateFlatGraphFromComponents(final List<ComponentDetails> comps) {
-        final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
-        for (final ComponentDetails comp : comps) {
+    private MutableDependencyGraph generateFlatGraphFromComponents(List<ComponentDetails> comps) {
+        MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
+        for (ComponentDetails comp : comps) {
             addDependency(graph, null, comp);
         }
         return graph;
     }
 
-    private MutableDependencyGraph generateFlatGraphFromAllComponentsAllLayers(final ImageComponentHierarchy imageComponentHierarchy) {
-        final MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
+    private MutableDependencyGraph generateFlatGraphFromAllComponentsAllLayers(ImageComponentHierarchy imageComponentHierarchy) {
+        MutableDependencyGraph graph = simpleBdioFactory.createMutableDependencyGraph();
         for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
-            for (final ComponentDetails comp : layer.getComponents()) {
+            for (ComponentDetails comp : layer.getComponents()) {
                 addDependency(graph, null, comp);
             }
         }
         return graph;
     }
 
-    private void addDependency(final MutableDependencyGraph graph, final Dependency parent, final ComponentDetails comp) {
-        final Forge componentForge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
+    private void addDependency(MutableDependencyGraph graph, Dependency parent, ComponentDetails comp) {
+        Forge componentForge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
         logger.trace(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge.getName()));
         addCompDependencyWithGivenForge(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge, parent);
     }
 
-    private Dependency addLayerDependency(final MutableDependencyGraph graph, final String name) {
-        final Forge forge = ForgeGenerator.createLayerForge();
-        final Dependency layerDep = dependencyFactory.createPathDependency(forge, name);
-        layerDep.setVersion("");
+    private Dependency addLayerDependency(MutableDependencyGraph graph, String name) {
+        Forge forge = ForgeGenerator.createLayerForge();
+        Dependency layerDep = dependencyFactory.createNameVersionDependency(forge, name, "");
         logger.trace(String.format("adding layer node %s as child to dependency node tree; dataId: %s", layerDep.getName(), layerDep.getExternalId().createBdioId()));
         graph.addChildToRoot(layerDep);
         return layerDep;
     }
 
-    private Dependency addCompDependencyWithGivenForge(final MutableDependencyGraph graph, final String name, final String version, final String arch, final Forge forge, Dependency parent) {
-        final Dependency dep = dependencyFactory.createArchitectureDependency(forge, name, version, arch);
+    private Dependency addCompDependencyWithGivenForge(MutableDependencyGraph graph, String name, String version, String arch, Forge forge, Dependency parent) {
+        Dependency dep = dependencyFactory.createArchitectureDependency(forge, name, version, arch);
         logger.trace(String.format("adding %s as child to dependency node tree; dataId: %s", dep.getName(), dep.getExternalId().createBdioId()));
         if (parent == null) {
             graph.addChildToRoot(dep);
@@ -165,4 +159,5 @@ public class BdioGenerator {
         }
         return dep;
     }
+
 }
