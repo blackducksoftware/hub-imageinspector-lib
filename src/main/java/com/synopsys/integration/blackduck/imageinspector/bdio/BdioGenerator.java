@@ -22,7 +22,9 @@ import com.synopsys.integration.bdio.graph.MutableDependencyGraph;
 import com.synopsys.integration.bdio.model.Forge;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.bdio.model.dependency.Dependency;
+import com.synopsys.integration.bdio.model.dependency.DependencyFactory;
 import com.synopsys.integration.bdio.model.externalid.ExternalId;
+import com.synopsys.integration.bdio.model.externalid.ExternalIdFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
@@ -32,13 +34,16 @@ public class BdioGenerator {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final SimpleBdioFactory simpleBdioFactory;
+    private final DependencyFactory dependencyFactory;
 
     public BdioGenerator() {
         this.simpleBdioFactory = new SimpleBdioFactory();
+        this.dependencyFactory = simpleBdioFactory.getDependencyFactory();
     }
 
     public BdioGenerator(final SimpleBdioFactory simpleBdioFactory) {
         this.simpleBdioFactory = simpleBdioFactory;
+        this.dependencyFactory = simpleBdioFactory.getDependencyFactory();
     }
 
     public SimpleBdioDocument generateBdioDocumentFromImageComponentHierarchy(final String codeLocationName, final String projectName,
@@ -86,7 +91,8 @@ public class BdioGenerator {
         final String linuxDistroName, final MutableDependencyGraph graph) {
 
         final Forge forge = ForgeGenerator.createProjectForge(linuxDistroName);
-        final ExternalId projectExternalId = simpleBdioFactory.createNameVersionExternalId(forge, projectName, projectVersion);
+        ExternalIdFactory externalIdFactory = simpleBdioFactory.getExternalIdFactory();
+        ExternalId projectExternalId = externalIdFactory.createNameVersionExternalId(forge, projectName, projectVersion);
         final SimpleBdioDocument bdioDocument = simpleBdioFactory.createSimpleBdioDocument(codeLocationName, projectName, projectVersion, projectExternalId);
         logger.info(String.format("Returning %d components", graph.getRootDependencies().size()));
         simpleBdioFactory.populateComponents(bdioDocument, projectExternalId, graph);
@@ -142,16 +148,14 @@ public class BdioGenerator {
 
     private Dependency addLayerDependency(final MutableDependencyGraph graph, final String name) {
         final Forge forge = ForgeGenerator.createLayerForge();
-        final ExternalId extId = simpleBdioFactory.createPathExternalId(forge, name);
-        final Dependency layerDep = simpleBdioFactory.createDependency(name, "", extId);
+        final Dependency layerDep = dependencyFactory.createPathDependency(forge, name);
         logger.trace(String.format("adding layer node %s as child to dependency node tree; dataId: %s", layerDep.getName(), layerDep.getExternalId().createBdioId()));
         graph.addChildToRoot(layerDep);
         return layerDep;
     }
 
     private Dependency addCompDependencyWithGivenForge(final MutableDependencyGraph graph, final String name, final String version, final String arch, final Forge forge, Dependency parent) {
-        final ExternalId extId = simpleBdioFactory.createArchitectureExternalId(forge, name, version, arch);
-        final Dependency dep = simpleBdioFactory.createDependency(name, version, extId);
+        final Dependency dep = dependencyFactory.createArchitectureDependency(forge, name, version, arch);
         logger.trace(String.format("adding %s as child to dependency node tree; dataId: %s", dep.getName(), dep.getExternalId().createBdioId()));
         if (parent == null) {
             graph.addChildToRoot(dep);

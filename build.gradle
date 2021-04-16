@@ -5,7 +5,7 @@ buildscript {
     apply from: "https://raw.githubusercontent.com/blackducksoftware/integration-resources/master/gradle_common/buildscript-dependencies.gradle", to: buildscript
 
     dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
         classpath 'com.bmuschko:gradle-docker-plugin:6.4.0'
     }
 }
@@ -26,11 +26,12 @@ apply plugin: 'com.synopsys.integration.library'
 dependencyManagement {
     imports {
     	mavenBom 'io.spring.platform:platform-bom:Brussels-SR7'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.10.3'
     }
 }
 
 dependencies {
-    api 'com.synopsys.integration:integration-bdio:21.0.0'
+    api 'com.synopsys.integration:integration-bdio:22.1.1'
     api 'org.springframework.boot:spring-boot-starter'
     api 'org.springframework:spring-context'
     api 'org.apache.commons:commons-exec:1.3'
