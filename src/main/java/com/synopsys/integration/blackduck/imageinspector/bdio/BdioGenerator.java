@@ -36,6 +36,11 @@ public class BdioGenerator {
     private final SimpleBdioFactory simpleBdioFactory;
     private final DependencyFactory dependencyFactory;
 
+    public BdioGenerator() {
+        simpleBdioFactory = new SimpleBdioFactory();
+        dependencyFactory = new DependencyFactory(new ExternalIdFactory());
+    }
+
     public BdioGenerator(SimpleBdioFactory simpleBdioFactory, DependencyFactory dependencyFactory) {
         this.simpleBdioFactory = simpleBdioFactory;
         this.dependencyFactory = dependencyFactory;
