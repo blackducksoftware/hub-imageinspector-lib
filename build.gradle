@@ -5,12 +5,13 @@ buildscript {
     apply from: "https://raw.githubusercontent.com/blackducksoftware/integration-resources/master/gradle_common/buildscript-dependencies.gradle", to: buildscript
 
     dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
         classpath 'com.bmuschko:gradle-docker-plugin:6.4.0'
     }
 }
 
-plugins { id 'groovy' }
+plugins {
+    id 'org.springframework.boot' version '2.4.5' apply false
+}
 
 project.ext.moduleName = 'com.synopsys.integration.hub-imageinspector-lib'
 project.ext.javaUseAutoModuleName = 'true'
@@ -25,7 +26,7 @@ apply plugin: 'com.synopsys.integration.library'
 
 dependencyManagement {
     imports {
-    	mavenBom 'io.spring.platform:platform-bom:Brussels-SR7'
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.10.3'
     }
 }
@@ -53,25 +54,25 @@ task removeTestBaseImage(type: Exec) {
 }
 
 task createTestDockerfile(type: Dockerfile) {
-	destFile = project.file("${buildDir}/images/test/centos_minus_vim_plus_bacula/Dockerfile")
-	println "destFile: ${destFile}"
-	from 'centos:7.3.1611'
-	environmentVariable('LANG', 'en_US.UTF-8')
-	
-	runCommand 'rpm -e vim-minimal && \
+    destFile = project.file("${buildDir}/images/test/centos_minus_vim_plus_bacula/Dockerfile")
+    println "destFile: ${destFile}"
+    from 'centos:7.3.1611'
+    environmentVariable('LANG', 'en_US.UTF-8')
+
+    runCommand 'rpm -e vim-minimal && \
         yum install -y bacula-director-5.2.13-23.1.el7 bacula-storage-5.2.13-23.1.el7 bacula-client-5.2.13-23.1.el7 \
         bacula-console-5.2.13-23.1.el7'
 }
 
 task buildTestDockerImage(type: Exec, dependsOn: [removeTestBaseImage, removeTestImage, createTestDockerfile]) {
-	commandLine "docker", "build", "--no-cache", "--tag", "blackducksoftware/centos_minus_vim_plus_bacula:1.0", \
-        "${buildDir}/images/test/centos_minus_vim_plus_bacula"
+    commandLine "docker", "build", "--no-cache", "--tag", "blackducksoftware/centos_minus_vim_plus_bacula:1.0",     \
+            "${buildDir}/images/test/centos_minus_vim_plus_bacula"
 }
 
 task buildTestDockerTarfile(type: Exec, dependsOn: buildTestDockerImage) {
     outputs.files file("${buildDir}/images/test/centos_minus_vim_plus_bacula.tar")
-	commandLine "docker", "save", "-o", "${buildDir}/images/test/centos_minus_vim_plus_bacula.tar", \
-        "blackducksoftware/centos_minus_vim_plus_bacula:1.0"
+    commandLine "docker", "save", "-o", "${buildDir}/images/test/centos_minus_vim_plus_bacula.tar",     \
+            "blackducksoftware/centos_minus_vim_plus_bacula:1.0"
 }
 
 task createTestFile(type: Exec) {
@@ -86,14 +87,14 @@ task createTestDockerfileNoPkgMgr(type: Dockerfile) {
 }
 
 task buildTestDockerImageNoPkgMgr(type: Exec, dependsOn: [createTestDockerfileNoPkgMgr, createTestFile]) {
-    commandLine "docker", "build", "--no-cache", "--tag", "blackducksoftware/nopkgmgr:1.0", \
-        "${buildDir}/images/test/nopkgmgr"
+    commandLine "docker", "build", "--no-cache", "--tag", "blackducksoftware/nopkgmgr:1.0",     \
+            "${buildDir}/images/test/nopkgmgr"
 }
 
 task buildTestDockerTarfileNoPkgMgr(type: Exec, dependsOn: buildTestDockerImageNoPkgMgr) {
     outputs.files file("${buildDir}/images/test/nopkgmgr.tar")
-    commandLine "docker", "save", "-o", "${buildDir}/images/test/nopkgmgr.tar", \
-        "blackducksoftware/nopkgmgr:1.0"
+    commandLine "docker", "save", "-o", "${buildDir}/images/test/nopkgmgr.tar",     \
+            "blackducksoftware/nopkgmgr:1.0"
 }
 
 task pullAlpineLatest(type: Exec) {
@@ -101,7 +102,7 @@ task pullAlpineLatest(type: Exec) {
 }
 
 task createImagesDir(type: Exec) {
-	commandLine "mkdir", "-p", "${buildDir}/images/test"
+    commandLine "mkdir", "-p", "${buildDir}/images/test"
 }
 
 task buildAlpineTestDockerTarfile(type: Exec, dependsOn: [createImagesDir, pullAlpineLatest]) {
