@@ -8,7 +8,6 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -19,9 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LowerLayerFileDeleter {
-    private List<String> filesAddedByCurrentLayer = new LinkedList<>();
-    private int defaultSearchDepth = 20;
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final List<String> filesAddedByCurrentLayer = new LinkedList<>();
+    private final int defaultSearchDepth = 20;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public void addFilesAddedByCurrentLayer(List<String> files) {
         filesAddedByCurrentLayer.addAll(files);
@@ -32,7 +31,7 @@ public class LowerLayerFileDeleter {
     }
 
     public void deleteFilesAddedByLowerLayers(File file, int depthToLookForFilesAddedByCurrentLayer) {
-        if (null == file || !file.exists() || filesAddedByCurrentLayer.isEmpty() ) {
+        if (null == file || !file.exists() || filesAddedByCurrentLayer.isEmpty()) {
             FileUtils.deleteQuietly(file);
             return;
         }
@@ -55,11 +54,7 @@ public class LowerLayerFileDeleter {
     }
 
     private List<File> getChildrenSafely(File file) {
-        try {
-            if (!file.isDirectory() || FileUtils.isSymlink(file)) {
-                return Collections.emptyList();
-            }
-        } catch (IOException e) {
+        if (!file.isDirectory() || FileUtils.isSymlink(file)) {
             return Collections.emptyList();
         }
 
