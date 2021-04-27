@@ -37,7 +37,7 @@ public class PkgMgrExecutor {
             }
             logger.debug(String.format("Copying %s to %s", imagePkgMgrDatabase.getExtractedPackageManagerDirectory().getAbsolutePath(), packageManagerDirectory.getAbsolutePath()));
             FileUtils
-                .copyDirectory(imagePkgMgrDatabase.getExtractedPackageManagerDirectory(), packageManagerDirectory);
+                .copyDirectory(imagePkgMgrDatabase.getExtractedPackageManagerDirectory(), packageManagerDirectory, false);
             final String[] pkgMgrListOutputLines = listPackages(executor, pkgMgr);
             logger.trace(String.format("Package count: %d", pkgMgrListOutputLines.length));
             return pkgMgrListOutputLines;
