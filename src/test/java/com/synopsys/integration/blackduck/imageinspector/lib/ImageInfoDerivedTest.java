@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.bdio.model.BdioProject;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;

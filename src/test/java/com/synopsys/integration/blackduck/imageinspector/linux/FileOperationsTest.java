@@ -1,27 +1,27 @@
 package com.synopsys.integration.blackduck.imageinspector.linux;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class FileOperationsTest {
     private static FileOperations fileOperations;
 
-    @BeforeClass
-    public static void setUpBeforeClass() {
+    @BeforeAll
+    public static void setUpBeforeAll() {
         fileOperations = new FileOperations();
     }
 
-    @AfterClass
-    public static void tearDownAfterClass() {
+    @AfterAll
+    public static void tearDownAfterAll() {
     }
 
     @Test

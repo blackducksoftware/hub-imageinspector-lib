@@ -1,11 +1,11 @@
 package com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;

@@ -1,6 +1,6 @@
 package com.synopsys.integration.blackduck.imageinspector.api;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -12,8 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.BdioReader;
@@ -87,7 +87,7 @@ public class BdioGeneratorApiFuncTest {
         try {
             api.pkgListToBdio(PackageManagerEnum.APK, BdioGeneratorApi.LINUX_DISTRO_NAME_ALPINE, pkgMgrOutputLines, "test-blackDuckProjectName", "test-blackDuckProjectVersion",
                 "test-codeLocationName");
-            Assert.fail("Expected UnsupportedOperationException");
+            Assertions.fail("Expected UnsupportedOperationException");
         } catch (UnsupportedOperationException e) {
             // expected
         }

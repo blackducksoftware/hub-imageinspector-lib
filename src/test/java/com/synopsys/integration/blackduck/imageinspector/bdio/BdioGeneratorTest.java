@@ -1,7 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.bdio;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.BdioComponent;
@@ -249,7 +249,7 @@ public class BdioGeneratorTest {
                 assertEquals("cracklib-dicts/2.9.0-11.el7/x86_64", comp.bdioExternalIdentifier.externalId);
             }
         }
-        assertTrue(String.format("component %s/%s/%s not found", comp1Name, comp1Version, comp1Arch), foundComp1);
+        assertTrue(foundComp1, String.format("component %s/%s/%s not found", comp1Name, comp1Version, comp1Arch));
         assertTrue(foundComp2);
         assertEquals(189, bdio.getComponents().size());
     }

@@ -1,9 +1,9 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +13,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
@@ -38,12 +38,12 @@ public class WhiteoutFileTest {
     private static final String IMAGE_TAG = "1.0";
     private static final String LAYER_ID = "layerId1";
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
+    @BeforeAll
+    public static void setUpBeforeAll() throws Exception {
     }
 
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception {
+    @AfterAll
+    public static void tearDownAfterAll() throws Exception {
     }
 
     @Test
@@ -51,10 +51,10 @@ public class WhiteoutFileTest {
         final File targetImageFileSystemRootDir = doLayerTest("opaquedir");
 
         final File opaqueDir = new File(targetImageFileSystemRootDir, "opaque");
-        assertTrue("Opaque dir was not created", opaqueDir.exists());
+        assertTrue(opaqueDir.exists(), "Opaque dir was not created");
 
         final File opaqueDirAddedFile = new File(opaqueDir, "keep.txt");
-        assertTrue("Opaque dir added file was not created", opaqueDirAddedFile.exists());
+        assertTrue(opaqueDirAddedFile.exists(), "Opaque dir added file was not created");
     }
 
     @Test
@@ -62,7 +62,7 @@ public class WhiteoutFileTest {
         final File targetImageFileSystemRootDir = doLayerTest("omitdir");
 
         final File omitDir = new File(targetImageFileSystemRootDir, "omit");
-        assertFalse("Omit dir was created", omitDir.exists());
+        assertFalse(omitDir.exists(), "Omit dir was created");
     }
 
     private File doLayerTest(final String testFileDir) throws WrongInspectorOsException, IOException {
