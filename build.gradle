@@ -120,8 +120,7 @@ task unTarAlpine(type: Exec, dependsOn: [buildTestTarfiles, createAlpineDir]) {
     commandLine "tar", "xvf", "../../../alpine.tar"
 }
 
-testIntegration.dependsOn unTarAlpine
-testAll.dependsOn unTarAlpine
+test.dependsOn unTarAlpine
 
 // End of stuff for integration tests
 ////////////////////////////////////////////////
