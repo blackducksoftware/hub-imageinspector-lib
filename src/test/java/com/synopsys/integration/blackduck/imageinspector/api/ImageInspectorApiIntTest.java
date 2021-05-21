@@ -144,8 +144,7 @@ public class ImageInspectorApiIntTest {
         } else {
             expectedForgeName = "@alpine";
         }
-        Mockito.when(os.isLinuxDistroFile(Mockito.any(File.class))).thenReturn(Boolean.TRUE);
-        Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
+        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
         ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
                                                             .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
@@ -176,8 +175,7 @@ public class ImageInspectorApiIntTest {
 
     @Test
     public void testAppOnlyFileSystem() throws IntegrationException, IOException, InterruptedException {
-        Mockito.when(os.isLinuxDistroFile(Mockito.any(File.class))).thenReturn(Boolean.TRUE);
-        Mockito.when(os.getLinxDistroName(Mockito.any(File.class))).thenReturn(Optional.of("centos"));
+        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("centos"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
 
         FileOperations fileOperations = new FileOperations();

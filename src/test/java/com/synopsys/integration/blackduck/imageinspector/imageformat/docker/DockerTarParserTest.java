@@ -189,7 +189,9 @@ public class DockerTarParserTest {
             new File("thisdirdoesnotexist/os-release"),
                                     new File("src/test/resources/osdetection/fedora/redhat-release")
         };
-        Optional<String> distroFound = tarParserWithRealOsObject.extractLinuxDistroNameFromFiles(etcFiles);
+        File etcDir = new File("src/test/resources/osdetection/fedora");
+        Mockito.when(fileOperations.listFilesInDir(etcDir)).thenReturn(etcFiles);
+        Optional<String> distroFound = tarParserWithRealOsObject.extractLinuxDistroNameFromEtcDir(etcDir);
         assertEquals("fedora", distroFound.get());
     }
 
@@ -235,8 +237,7 @@ public class DockerTarParserTest {
         final File osReleaseFile = new File("test/containerFileSystemRoot/etc/os-release");
         final File[] etcDirFiles = { osReleaseFile };
         Mockito.when(fileOperations.listFilesInDir(imageEtcDir)).thenReturn(etcDirFiles);
-        Mockito.when(os.isLinuxDistroFile(osReleaseFile)).thenReturn(Boolean.TRUE);
-        Mockito.when(os.getLinxDistroName(osReleaseFile)).thenReturn(Optional.of("alpine"));
+        Mockito.when(os.getLinuxDistroNameFromEtcDir(imageEtcDir)).thenReturn(Optional.of("alpine"));
         ImageInfoParsed imageInfoParsed = tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy,
         targetImageFileSystem, layerTars, fullManifestLayerMapping, platformTopLayerId);
         return imageComponentHierarchy;

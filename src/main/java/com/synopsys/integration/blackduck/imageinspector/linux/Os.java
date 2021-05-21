@@ -10,8 +10,10 @@ package com.synopsys.integration.blackduck.imageinspector.linux;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -40,17 +42,32 @@ public class Os {
         logger.debug(String.format("Heap: total: %d; free: %d", total, free));
     }
 
-    public boolean isLinuxDistroFile(final File candidate) {
-        if ("lsb-release".equals(candidate.getName())) {
-            return true;
+    public Optional<String> getLinuxDistroNameFromEtcDir(File etcDirFile) {
+        List<File> etcDirFiles = Arrays.asList(etcDirFile.listFiles());
+        List<String> etcDirFilenames = etcDirFiles.stream().map(File::getName).collect(Collectors.toList());
+
+        Optional<String> distroName = Optional.empty();
+        distroName = tryToDetermineDistro(etcDirFile, etcDirFilenames, distroName, "redhat-release");
+        if (!distroName.isPresent()) {
+            distroName = tryToDetermineDistro(etcDirFile, etcDirFilenames, distroName, "lsb-release");
         }
-        if ("os-release".equals(candidate.getName())) {
-            return true;
+        if (!distroName.isPresent()) {
+            distroName = tryToDetermineDistro(etcDirFile, etcDirFilenames, distroName, "os-release");
         }
-        return "redhat-release".equals(candidate.getName());
+
+        return distroName;
     }
 
-    public Optional<String> getLinxDistroName(final File etcDirFile) {
+    private Optional<String> tryToDetermineDistro(File etcDirFile, List<String> etcDirFilenames, Optional<String> distroName, String targetReleaseFilename) {
+        logger.trace("Trying release file candidate: /etc/{}", targetReleaseFilename);
+        if (etcDirFilenames.contains(targetReleaseFilename)) {
+            File releaseFile = new File(etcDirFile, targetReleaseFilename);
+            distroName = getLinxDistroName(releaseFile);
+        }
+        return distroName;
+    }
+
+    private Optional<String> getLinxDistroName(final File etcDirFile) {
         try {
             if ("redhat-release".equals(etcDirFile.getName())) {
                 return getLinuxDistroNameFromRedHatReleaseFile(etcDirFile);

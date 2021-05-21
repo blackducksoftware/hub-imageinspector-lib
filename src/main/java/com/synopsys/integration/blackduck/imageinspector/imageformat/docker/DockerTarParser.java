@@ -264,24 +264,12 @@ public class DockerTarParser {
         return extractLinuxDistroNameFromEtcDir(etcDir.get());
     }
 
-    private Optional<String> extractLinuxDistroNameFromEtcDir(final File etcDir) {
+    Optional<String> extractLinuxDistroNameFromEtcDir(final File etcDir) {
         logger.trace(String.format("/etc directory: %s", etcDir.getAbsolutePath()));
         if (fileOperations.listFilesInDir(etcDir).length == 0) {
             logger.warn(String.format("Could not determine the Operating System because the /etc dir (%s) is empty", etcDir.getAbsolutePath()));
         }
-        return extractLinuxDistroNameFromFiles(fileOperations.listFilesInDir(etcDir));
-    }
-
-    Optional<String> extractLinuxDistroNameFromFiles(final File[] etcFiles) {
-        for (final File etcFile : etcFiles) {
-            if (os.isLinuxDistroFile(etcFile)) {
-                final Optional<String> distroAccordingToThisFile = os.getLinxDistroName(etcFile);
-                if (distroAccordingToThisFile.isPresent()) {
-                    return distroAccordingToThisFile;
-                }
-            }
-        }
-        return Optional.empty();
+        return os.getLinuxDistroNameFromEtcDir(etcDir);
     }
 
     private void extractLayerTarToDir(final File destinationDir, final File layerTar) throws IOException {
