@@ -120,7 +120,9 @@ task unTarAlpine(type: Exec, dependsOn: [buildTestTarfiles, createAlpineDir]) {
     commandLine "tar", "xvf", "../../../alpine.tar"
 }
 
-testIntegration.dependsOn unTarAlpine
+// Having trouble finding the best way to do this since the cgp change
+// This builds the test images every time, but nothing else I've tried works across all builds
+build.dependsOn unTarAlpine
 
 // End of stuff for integration tests
 ////////////////////////////////////////////////
