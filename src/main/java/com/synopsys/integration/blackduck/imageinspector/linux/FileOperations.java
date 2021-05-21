@@ -60,10 +60,6 @@ public class FileOperations {
             }
             if (!wasDeleted) {
                 logger.debug(String.format("Unable to delete %s", file.getAbsolutePath()));
-                ////////// TEMP
-                Exception e = new IntegrationException("Unable to delete file");
-                logger.error("Unable to delete file", e);
-                /////////////
             }
         }
     }

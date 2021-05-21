@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -56,6 +57,10 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgP
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
+// TODO
+// The code exercised by this test attempts to remove package manager files
+// when run on a linux system (since pkg mgr runs after each layer); need to prevent that
+@Disabled
 @Tag("integration")
 public class DockerTarParserIntTest {
     private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
