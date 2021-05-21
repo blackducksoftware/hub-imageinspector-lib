@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.synopsys.integration.exception.IntegrationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -59,6 +60,10 @@ public class FileOperations {
             }
             if (!wasDeleted) {
                 logger.debug(String.format("Unable to delete %s", file.getAbsolutePath()));
+                ////////// TEMP
+                Exception e = new IntegrationException("Unable to delete file");
+                logger.error("Unable to delete file", e);
+                /////////////
             }
         }
     }
