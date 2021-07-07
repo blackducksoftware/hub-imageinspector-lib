@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.junit.jupiter.api.BeforeAll;
@@ -42,11 +43,6 @@ import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundE
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
-import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
@@ -56,11 +52,8 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkg
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
+import org.mockito.Mockito;
 
-// TODO
-// The code exercised by this test attempts to remove package manager files
-// when run on a linux system (since pkg mgr runs after each layer); need to prevent that
-@Disabled
 @Tag("integration")
 public class DockerTarParserIntTest {
     private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
@@ -110,12 +103,22 @@ public class DockerTarParserIntTest {
         final File tarExtractionDirectory = new File(workingDirectory, ImageInspector.TAR_EXTRACTION_DIRECTORY);
         System.out.println("workingDirectory: ${workingDirectory.getAbsolutePath()}");
 
+        // Mock the PkgMgrExecutor so it doesn't try to overwrite this machine's pkg mgr db
+        // (it runs the pkg mgr after unpacking each layer
+        PkgMgrExecutor pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);
+        String[] pkgMgrOutput = {
+                "{ epoch: \"(none)\", name: \"centos-release\", version: \"7-3.1611.el7.centos\", arch: \"x86_64\" }",
+                "{ epoch: \"(none)\", name: \"filesystem\", version: \"3.2-21.el7\", arch: \"x86_64\" }",
+                "{ epoch: \"(none)\", name: \"basesystem\", version: \"10.0-7.el7.centos\", arch: \"noarch\" }"
+        };
+        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(CmdExecutor.class), Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutput);
+
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
         tarParser.setOs(new Os());
         tarParser.setFileOperations(new FileOperations());
         tarParser.setPkgMgrs(pkgMgrs);
-        tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
+        tarParser.setPkgMgrExecutor(pkgMgrExecutor);
         tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
         tarParser.setImageConfigParser(new ImageConfigParser());
         tarParser.setLayerConfigParser(new LayerConfigParser());
