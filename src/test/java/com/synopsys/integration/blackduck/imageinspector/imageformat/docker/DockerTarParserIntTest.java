@@ -130,8 +130,9 @@ public class DockerTarParserIntTest {
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
         tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.CENTOS, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
-        tarParser.parseImageInfo(targetImageFileSystem, null);
-        assertEquals("/var/lib/rpm", rpmPkgMgr.getInspectorPackageManagerDirectory().getAbsolutePath());
+        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem, null);
+        assertEquals("image_blackducksoftware_centos_minus_vim_plus_bacula_v_1.0", imageInfoParsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
+        assertEquals("RPM", imageInfoParsed.getPkgMgr().getType().name());
 
         boolean varLibRpmNameFound = false;
         final Collection<File> files = FileUtils.listFiles(workingDirectory, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
@@ -146,6 +147,7 @@ public class DockerTarParserIntTest {
                 assertTrue(stringsOutput.contains("bacula-console"));
                 assertTrue(stringsOutput.contains("bacula-client"));
                 assertTrue(stringsOutput.contains("bacula-director"));
+                break;
             }
         }
         assertTrue(varLibRpmNameFound);
