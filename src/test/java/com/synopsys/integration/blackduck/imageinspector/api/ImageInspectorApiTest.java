@@ -64,9 +64,12 @@ public class ImageInspectorApiTest {
         Mockito.when(imageInspector.getTarExtractionDirectory(Mockito.any(File.class)))
             .thenReturn(tarExtractionDirectory);
 
+        File extractionDir = Mockito.mock(File.class);
         List<File> layerTarFiles = new ArrayList<>();
-        Mockito.when(imageInspector.extractLayerTars(Mockito.any(File.class), Mockito.any(File.class)))
-            .thenReturn(layerTarFiles);
+        Mockito.when(imageInspector.extractImageTar(Mockito.any(File.class), Mockito.any(File.class)))
+            .thenReturn(extractionDir);
+        Mockito.when(imageInspector.getLayerArchives(extractionDir))
+                .thenReturn(layerTarFiles);
         List<String> layers = new ArrayList<>();
         ManifestLayerMapping mapping = (new ManifestLayerMappingFactory())
                                            .createManifestLayerMapping(dockerImageName, dockerTagName, "testConfig", layers);

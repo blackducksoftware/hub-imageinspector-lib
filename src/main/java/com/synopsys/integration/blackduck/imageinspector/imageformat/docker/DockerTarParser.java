@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,29 +111,16 @@ public class DockerTarParser {
         this.dockerLayerTarExtractor = dockerLayerTarExtractor;
     }
 
-    public List<File> unPackImageTar(final File tarExtractionDirectory, final File dockerTar) throws IOException {
-        logger.debug(String.format("tarExtractionDirectory: %s", tarExtractionDirectory));
-        fileOperations.logFileOwnerGroupPerms(dockerTar.getParentFile());
-        fileOperations.logFileOwnerGroupPerms(dockerTar);
+    public List<File> getLayerArchives(final File unpackedImageDir) throws IOException {
+        logger.debug(String.format("Searching for layer archive files in unpackedImageDir: %s", unpackedImageDir.getAbsolutePath()));
         final List<File> untaredLayerFiles = new ArrayList<>();
-        final File outputDir = new File(tarExtractionDirectory, dockerTar.getName());
-        try (final TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(dockerTar))) {
-            TarArchiveEntry tarArchiveEntry = null;
-            while (null != (tarArchiveEntry = tarArchiveInputStream.getNextTarEntry())) {
-                final File outputFile = new File(outputDir, tarArchiveEntry.getName());
-                if (tarArchiveEntry.isFile()) {
-                    if (!outputFile.getParentFile().exists()) {
-                        outputFile.getParentFile().mkdirs();
-                    }
-                    final OutputStream outputFileStream = new FileOutputStream(outputFile);
-                    try {
-                        logger.trace(String.format("Untarring %s", outputFile.getAbsolutePath()));
-                        IOUtils.copy(tarArchiveInputStream, outputFileStream);
-                        if (tarArchiveEntry.getName().contains(DOCKER_LAYER_TAR_FILENAME)) {
-                            untaredLayerFiles.add(outputFile);
-                        }
-                    } finally {
-                        outputFileStream.close();
+        List<File> unpackedImageTopLevelFiles = Arrays.asList(unpackedImageDir.listFiles());
+        for (File unpackedImageTopLevelFile : unpackedImageTopLevelFiles) {
+            if (unpackedImageTopLevelFile.isDirectory()) {
+                List<File> unpackedImageSecondLevelFiles = Arrays.asList(unpackedImageTopLevelFile.listFiles());
+                for (File unpackedImageSecondLevelFile : unpackedImageSecondLevelFiles) {
+                    if (unpackedImageSecondLevelFile.isFile() && unpackedImageSecondLevelFile.getName().equals(DOCKER_LAYER_TAR_FILENAME)) {
+                        untaredLayerFiles.add(unpackedImageSecondLevelFile);
                     }
                 }
             }

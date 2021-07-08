@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,17 +35,23 @@ public class ImageInspector {
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final DockerTarParser tarParser;
+    private final TarOperations tarOperations;
 
-    public ImageInspector(final DockerTarParser tarParser) {
+    public ImageInspector(final DockerTarParser tarParser, TarOperations tarOperations) {
         this.tarParser = tarParser;
+        this.tarOperations = tarOperations;
     }
 
     public File getTarExtractionDirectory(final File workingDirectory) {
         return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
     }
 
-    public List<File> extractLayerTars(final File tarExtractionDirectory, final File dockerTar) throws IOException {
-        return tarParser.unPackImageTar(tarExtractionDirectory, dockerTar);
+    public File extractImageTar(final File tarExtractionDirectory, final File dockerTar) throws IOException {
+        return tarOperations.extractTarToGivenBaseDir(tarExtractionDirectory, dockerTar);
+    }
+
+    public List<File> getLayerArchives(final File extractionDir) throws IOException {
+        return tarParser.getLayerArchives(extractionDir);
     }
 
     public ImageInfoParsed extractDockerLayers(final GsonBuilder gsonBuilder, final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy, final TargetImageFileSystem targetImageFileSystem, final List<File> layerTars,

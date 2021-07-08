@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
+import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -123,7 +123,11 @@ public class DockerTarParserIntTest {
         tarParser.setImageConfigParser(new ImageConfigParser());
         tarParser.setLayerConfigParser(new LayerConfigParser());
 
-        final List<File> layerTars = tarParser.unPackImageTar(tarExtractionDirectory, dockerTar);
+        TarOperations tarOperations = new TarOperations();
+        tarOperations.setFileOperations(new FileOperations());
+
+        File extractionDir = tarOperations.extractTarToGivenBaseDir(tarExtractionDirectory, dockerTar);
+        final List<File> layerTars = tarParser.getLayerArchives(extractionDir);
         final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
         assertEquals(2, layerMapping.getLayerInternalIds().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);

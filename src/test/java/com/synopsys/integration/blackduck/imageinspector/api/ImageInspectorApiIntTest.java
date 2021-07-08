@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -74,7 +75,9 @@ public class ImageInspectorApiIntTest {
         dockerTarParser.setImageConfigParser(new ImageConfigParser());
         dockerTarParser.setLayerConfigParser(new LayerConfigParser());
         PkgMgrFactory pkgMgrFactory = new PkgMgrFactory();
-        ImageInspector imageInspector = new ImageInspector(dockerTarParser);
+        TarOperations tarOperations = new TarOperations();
+        tarOperations.setFileOperations(fileOperations);
+        ImageInspector imageInspector = new ImageInspector(dockerTarParser, tarOperations);
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());
         imageInspectorApi.setBdioGenerator(TestUtils.createBdioGenerator());

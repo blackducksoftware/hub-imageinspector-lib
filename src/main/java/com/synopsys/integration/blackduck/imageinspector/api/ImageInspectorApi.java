@@ -187,7 +187,8 @@ public class ImageInspectorApi {
         final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
-        final List<File> layerTars = imageInspector.extractLayerTars(tarExtractionDirectory, dockerTarfile);
+        final File extractionDir = imageInspector.extractImageTar(tarExtractionDirectory, dockerTarfile);
+        final List<File> layerTars = imageInspector.getLayerArchives(extractionDir);
         final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
         final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
         final String imageRepo = manifestLayerMapping.getImageName();

@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,12 +30,14 @@ import com.synopsys.integration.exception.IntegrationException;
 
 class ImageInspectorTest {
     private DockerTarParser tarParser;
+    private TarOperations tarOperations;
     private ImageInspector imageInspector;
 
     @BeforeEach
     public void setUpEach() {
         tarParser = Mockito.mock(DockerTarParser.class);
-        imageInspector = new ImageInspector(tarParser);
+        tarOperations = Mockito.mock(TarOperations.class);
+        imageInspector = new ImageInspector(tarParser, tarOperations);
     }
 
     @Test
@@ -45,11 +48,20 @@ class ImageInspectorTest {
     }
 
     @Test
-    void testExtractLayerTars() throws IOException {
+    void testExtractImageTar() throws IOException {
         File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
         File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-        imageInspector.extractLayerTars(tarExtractionDirectory, dockerTarfile);
-        Mockito.verify(tarParser).unPackImageTar(tarExtractionDirectory, dockerTarfile);
+        imageInspector.extractImageTar(tarExtractionDirectory, dockerTarfile);
+        Mockito.verify(tarOperations).extractTarToGivenBaseDir(tarExtractionDirectory, dockerTarfile);
+    }
+
+    @Test
+    void testGetLayerArchives() throws IOException {
+        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
+        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
+        File extractionDir = new File(tarExtractionDirectory, dockerTarfile.getName());
+        List<File> layerTars = imageInspector.getLayerArchives(extractionDir);
+        Mockito.verify(tarParser).getLayerArchives(extractionDir);
     }
 
     @Test

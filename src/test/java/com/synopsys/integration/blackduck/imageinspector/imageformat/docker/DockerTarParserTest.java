@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,7 @@ public class DockerTarParserTest {
     private DockerLayerTarExtractor dockerLayerTarExtractor;
     private List<PkgMgr> pkgMgrs;
     private DockerTarParser tarParser;
+    private TarOperations tarOperations;
 
     @BeforeEach
     public void setUpEach() {
@@ -79,6 +81,9 @@ public class DockerTarParserTest {
         tarParser.setLayerConfigParser(layerConfigParser);
         tarParser.setPkgMgrExecutor(pkgMgrExecutor);
         tarParser.setDockerLayerTarExtractor(dockerLayerTarExtractor);
+
+        tarOperations = new TarOperations();
+        tarOperations.setFileOperations(fileOperations);
     }
 
     @Test
@@ -88,8 +93,9 @@ public class DockerTarParserTest {
         final File tarExtractionDirectory = new File("test/extraction");
         FileUtils.deleteDirectory(tarExtractionDirectory);
         tarExtractionDirectory.mkdir();
-
-        List<File> layerTars = tarParser.unPackImageTar(tarExtractionDirectory, dockerTar);
+        // TODO Should test these separately?
+        File extractionDir = tarOperations.extractTarToGivenBaseDir(tarExtractionDirectory, dockerTar);
+        List<File> layerTars = tarParser.getLayerArchives(extractionDir);
         assertEquals(1, layerTars.size());
         assertEquals("layer.tar", layerTars.get(0).getName());
     }
