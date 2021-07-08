@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -65,7 +66,7 @@ public class ImageInspectorApiTest {
             .thenReturn(tarExtractionDirectory);
 
         File extractionDir = Mockito.mock(File.class);
-        List<File> layerTarFiles = new ArrayList<>();
+        List<TypedArchiveFile> layerTarFiles = new ArrayList<>();
         Mockito.when(imageInspector.extractImageTar(Mockito.any(File.class), Mockito.any(File.class)))
             .thenReturn(extractionDir);
         Mockito.when(imageInspector.getLayerArchives(extractionDir))

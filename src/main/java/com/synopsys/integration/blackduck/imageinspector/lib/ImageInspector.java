@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -50,11 +51,11 @@ public class ImageInspector {
         return tarOperations.extractTarToGivenBaseDir(tarExtractionDirectory, dockerTar);
     }
 
-    public List<File> getLayerArchives(final File extractionDir) throws IOException {
+    public List<TypedArchiveFile> getLayerArchives(final File extractionDir) throws IOException {
         return tarParser.getLayerArchives(extractionDir);
     }
 
-    public ImageInfoParsed extractDockerLayers(final GsonBuilder gsonBuilder, final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy, final TargetImageFileSystem targetImageFileSystem, final List<File> layerTars,
+    public ImageInfoParsed extractDockerLayers(final GsonBuilder gsonBuilder, final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy, final TargetImageFileSystem targetImageFileSystem, final List<TypedArchiveFile> layerTars,
         final ManifestLayerMapping layerMapping, final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
         return tarParser.extractImageLayers(gsonBuilder, currentOs, targetLinuxDistroOverride, imageComponentHierarchy, targetImageFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
     }

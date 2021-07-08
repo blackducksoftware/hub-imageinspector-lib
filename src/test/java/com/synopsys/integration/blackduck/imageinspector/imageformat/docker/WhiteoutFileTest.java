@@ -13,6 +13,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -75,8 +77,8 @@ public class WhiteoutFileTest {
 
         final File dockerTar = new File(layerDir, "layer.tar");
         Files.copy(new File(String.format("src/test/resources/%s/layer.tar", testFileDir)).toPath(), dockerTar.toPath(), REPLACE_EXISTING);
-        final List<File> layerTars = new ArrayList<>();
-        layerTars.add(dockerTar);
+        final List<TypedArchiveFile> layerTars = new ArrayList<>();
+        layerTars.add(new TypedArchiveFile(ArchiveFileType.TAR, dockerTar));
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());

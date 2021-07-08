@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -60,8 +62,9 @@ class ImageInspectorTest {
         File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
         File dockerTarfile = new File("src/test/resources/testDockerTarfile");
         File extractionDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-        List<File> layerTars = imageInspector.getLayerArchives(extractionDir);
+        List<TypedArchiveFile> layerTars = imageInspector.getLayerArchives(extractionDir);
         Mockito.verify(tarParser).getLayerArchives(extractionDir);
+        // TODO verify value of layerTars?
     }
 
     @Test
@@ -98,9 +101,9 @@ class ImageInspectorTest {
         String imageConfigFileContents = "testConfig";
         List<String> layers = getLayers();
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(imageRepo, imageTag, imageConfigFileContents, layers);
-        List<File> layerTars = new ArrayList<>();
+        List<TypedArchiveFile> layerTars = new ArrayList<>();
         File layerTar = new File(tarExtractionDirectory, String.format("%s/aaa/layer.tar", dockerTarfile.getName()));
-        layerTars.add(layerTar);
+        layerTars.add(new TypedArchiveFile(ArchiveFileType.TAR, layerTar));
 
         File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,7 +189,7 @@ public class ImageInspectorApi {
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
         final File extractionDir = imageInspector.extractImageTar(tarExtractionDirectory, dockerTarfile);
-        final List<File> layerTars = imageInspector.getLayerArchives(extractionDir);
+        final List<TypedArchiveFile> layerTars = imageInspector.getLayerArchives(extractionDir);
         final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
         final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
         final String imageRepo = manifestLayerMapping.getImageName();
@@ -244,11 +245,11 @@ public class ImageInspectorApi {
         }
     }
 
-    private void cleanUpLayerTars(final boolean cleanupWorkingDir, final List<File> layerTars) {
+    private void cleanUpLayerTars(final boolean cleanupWorkingDir, final List<TypedArchiveFile> layerTars) {
         if (cleanupWorkingDir) {
-            for (final File layerTar : layerTars) {
-                logger.trace(String.format("Deleting %s", layerTar.getAbsolutePath()));
-                fileOperations.deleteQuietly(layerTar);
+            for (final TypedArchiveFile layerTar : layerTars) {
+                logger.trace(String.format("Deleting %s", layerTar.getFile().getAbsolutePath()));
+                fileOperations.deleteQuietly(layerTar.getFile());
             }
         }
     }

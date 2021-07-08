@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -111,16 +113,17 @@ public class DockerTarParser {
         this.dockerLayerTarExtractor = dockerLayerTarExtractor;
     }
 
-    public List<File> getLayerArchives(final File unpackedImageDir) throws IOException {
+    public List<TypedArchiveFile> getLayerArchives(final File unpackedImageDir) throws IOException {
         logger.debug(String.format("Searching for layer archive files in unpackedImageDir: %s", unpackedImageDir.getAbsolutePath()));
-        final List<File> untaredLayerFiles = new ArrayList<>();
+        final List<TypedArchiveFile> untaredLayerFiles = new ArrayList<>();
         List<File> unpackedImageTopLevelFiles = Arrays.asList(unpackedImageDir.listFiles());
         for (File unpackedImageTopLevelFile : unpackedImageTopLevelFiles) {
             if (unpackedImageTopLevelFile.isDirectory()) {
                 List<File> unpackedImageSecondLevelFiles = Arrays.asList(unpackedImageTopLevelFile.listFiles());
                 for (File unpackedImageSecondLevelFile : unpackedImageSecondLevelFiles) {
                     if (unpackedImageSecondLevelFile.isFile() && unpackedImageSecondLevelFile.getName().equals(DOCKER_LAYER_TAR_FILENAME)) {
-                        untaredLayerFiles.add(unpackedImageSecondLevelFile);
+                        TypedArchiveFile typedArchiveFile = new TypedArchiveFile(ArchiveFileType.TAR, unpackedImageSecondLevelFile);
+                        untaredLayerFiles.add(typedArchiveFile);
                     }
                 }
             }
@@ -128,11 +131,11 @@ public class DockerTarParser {
         return untaredLayerFiles;
     }
 
-    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
+    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionBaseDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
-        logger.debug(String.format("tarExtractionDirectory: %s", tarExtractionDirectory));
-        final File tarExtractionSubDirectory = new File(tarExtractionDirectory, tarFileName);
-        final Manifest manifest = manifestFactory.createManifest(tarExtractionDirectory, tarFileName);
+        logger.debug(String.format("tarExtractionBaseDirectory: %s", tarExtractionBaseDirectory));
+        final File tarExtractionSubDirectory = new File(tarExtractionBaseDirectory, tarFileName);
+        final Manifest manifest = manifestFactory.createManifest(tarExtractionBaseDirectory, tarFileName);
         ManifestLayerMapping partialMapping;
         try {
             partialMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
@@ -172,14 +175,14 @@ public class DockerTarParser {
     }
 
     public ImageInfoParsed extractImageLayers(final GsonBuilder gsonBuilder, final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy,
-        final TargetImageFileSystem targetImageFileSystem, final List<File> layerTars, final ManifestLayerMapping manifestLayerMapping,
+        final TargetImageFileSystem targetImageFileSystem, final List<TypedArchiveFile> layerTars, final ManifestLayerMapping manifestLayerMapping,
         final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
         boolean inApplicationLayers = false;
         for (final String layerDotTarDirname : manifestLayerMapping.getLayerInternalIds()) {
             logger.trace(String.format("Looking for tar for layer: %s", layerDotTarDirname));
-            final File layerTar = getLayerTar(layerTars, layerDotTarDirname);
+            final TypedArchiveFile layerTar = getLayerTar(layerTars, layerDotTarDirname);
             if (layerTar != null) {
                 extractLayerTarToDir(targetImageFileSystem.getTargetImageFileSystemFull(), layerTar);
                 if (inApplicationLayers && targetImageFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
@@ -260,9 +263,9 @@ public class DockerTarParser {
         return os.getLinuxDistroNameFromEtcDir(etcDir);
     }
 
-    private void extractLayerTarToDir(final File destinationDir, final File layerTar) throws IOException {
-        logger.trace(String.format("Extracting layer: %s into %s", layerTar.getAbsolutePath(), destinationDir.getAbsolutePath()));
-        final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(fileOperations, layerTar, destinationDir);
+    private void extractLayerTarToDir(final File destinationDir, final TypedArchiveFile layerTar) throws IOException {
+        logger.trace(String.format("Extracting layer: %s into %s", layerTar.getFile().getAbsolutePath(), destinationDir.getAbsolutePath()));
+        final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(fileOperations, layerTar.getFile(), destinationDir);
         for (final File fileToRemove : filesToRemove) {
             if (fileToRemove.isDirectory()) {
                 logger.trace(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));
@@ -274,10 +277,10 @@ public class DockerTarParser {
         }
     }
 
-    private File getLayerTar(final List<File> layerTars, final String layer) {
-        File layerTar = null;
-        for (final File candidateLayerTar : layerTars) {
-            if (layer.equals(candidateLayerTar.getParentFile().getName())) {
+    private TypedArchiveFile getLayerTar(final List<TypedArchiveFile> layerTars, final String layer) {
+        TypedArchiveFile layerTar = null;
+        for (final TypedArchiveFile candidateLayerTar : layerTars) {
+            if (layer.equals(candidateLayerTar.getFile().getParentFile().getName())) {
                 logger.trace(String.format("Found layer tar for layer %s", layer));
                 layerTar = candidateLayerTar;
                 break;
@@ -286,9 +289,9 @@ public class DockerTarParser {
         return layerTar;
     }
 
-    private String getLayerMetadataFileContents(final File layerTarFile) {
+    private String getLayerMetadataFileContents(final TypedArchiveFile layerTarFile) {
         String layerMetadataFileContents = null;
-        File dir = layerTarFile.getParentFile();
+        File dir = layerTarFile.getFile().getParentFile();
         File metadataFile = new File(dir, DOCKER_LAYER_METADATA_FILENAME);
         try {
             if (metadataFile.exists()) {

@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -95,9 +97,9 @@ public class DockerTarParserTest {
         tarExtractionDirectory.mkdir();
         // TODO Should test these separately?
         File extractionDir = tarOperations.extractTarToGivenBaseDir(tarExtractionDirectory, dockerTar);
-        List<File> layerTars = tarParser.getLayerArchives(extractionDir);
+        List<TypedArchiveFile> layerTars = tarParser.getLayerArchives(extractionDir);
         assertEquals(1, layerTars.size());
-        assertEquals("layer.tar", layerTars.get(0).getName());
+        assertEquals("layer.tar", layerTars.get(0).getFile().getName());
     }
 
     @Test
@@ -228,7 +230,7 @@ public class DockerTarParserTest {
         final File containerFileSystemRootDir = new File("test/containerFileSystemRoot");
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFileSystemRootDir);
         final File dockerLayerTar = new File("src/test/resources/mockDockerTarContents/03b951adf840798cb236a62db6705df7fb2f1e60e6f5fb93499ee8a566bd4114/layer.tar");
-        final List<File> layerTars = Arrays.asList(dockerLayerTar);
+        final List<TypedArchiveFile> layerTars = Arrays.asList(new TypedArchiveFile(ArchiveFileType.TAR, dockerLayerTar));
 
         Mockito.when(dockerLayerTarExtractor.extractLayerTarToDir(Mockito.any(FileOperations.class), Mockito.any(File.class), Mockito.any(File.class))).thenReturn(new ArrayList<>(0));
 

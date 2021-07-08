@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
@@ -127,7 +129,7 @@ public class DockerTarParserIntTest {
         tarOperations.setFileOperations(new FileOperations());
 
         File extractionDir = tarOperations.extractTarToGivenBaseDir(tarExtractionDirectory, dockerTar);
-        final List<File> layerTars = tarParser.getLayerArchives(extractionDir);
+        final List<TypedArchiveFile> layerTars = tarParser.getLayerArchives(extractionDir);
         final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
         assertEquals(2, layerMapping.getLayerInternalIds().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
@@ -177,8 +179,8 @@ public class DockerTarParserIntTest {
 
         final File dockerTar = new File(layerDir, "layer.tar");
         Files.copy(new File(String.format("src/test/resources/%s/layer.tar", testFileDir)).toPath(), dockerTar.toPath(), REPLACE_EXISTING);
-        final List<File> layerTars = new ArrayList<>();
-        layerTars.add(dockerTar);
+        final List<TypedArchiveFile> layerTars = new ArrayList<>();
+        layerTars.add(new TypedArchiveFile(ArchiveFileType.TAR, dockerTar));
 
         final DockerTarParser tarParser = new DockerTarParser();
         tarParser.setManifestFactory(new ManifestFactory());
