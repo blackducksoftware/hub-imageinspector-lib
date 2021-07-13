@@ -158,8 +158,9 @@ public class DockerTarParserTest {
         final File manifestFile = new File(mockedImageTarContentsDir, "manifest.json");
         final File configFile = new File(mockedImageTarContentsDir, imageConfigFileName);
         final File[] filesInImageTar = { manifestFile, configFile };
+        File destinationDir = new File(tarExtractionDirectory, imageTarFilename);
         Mockito.when(fileOperations.listFilesInDir(new File(tarExtractionDirectory, imageTarFilename))).thenReturn(filesInImageTar);
-        final ImageComponentHierarchy imageComponentHierarchy = tarParser.createInitialImageComponentHierarchy(tarExtractionDirectory, imageTarFilename, fullManifestLayerMapping);
+        final ImageComponentHierarchy imageComponentHierarchy = tarParser.createInitialImageComponentHierarchy(destinationDir, fullManifestLayerMapping);
         assertTrue(imageComponentHierarchy.getManifestFileContents().contains(String.format("%s:%s", imageName, imageTag)));
         assertTrue(imageComponentHierarchy.getImageConfigFileContents().contains("sha256:503e53e365f34399c4d58d8f4e23c161106cfbce4400e3d0a0357967bad69390"));
     }

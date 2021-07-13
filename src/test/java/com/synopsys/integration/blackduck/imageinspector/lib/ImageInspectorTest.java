@@ -84,14 +84,15 @@ class ImageInspectorTest {
     void testCreateInitialImageComponentHierarchy() throws IntegrationException {
         File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
         File dockerTarfile = new File("src/test/resources/testDockerTarfile");
+        File destinationDir = new File(tarExtractionDirectory, dockerTarfile.getName());
         String imageRepo = "alpine";
         String imageTag = "latest";
 
         String imageConfigFileContents = "testConfig";
         List<String> layers = getLayers();
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(imageRepo, imageTag, imageConfigFileContents, layers);
-        imageInspector.createInitialImageComponentHierarchy(tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
-        Mockito.verify(tarParser).createInitialImageComponentHierarchy(tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
+        imageInspector.createInitialImageComponentHierarchy(destinationDir, manifestLayerMapping);
+        Mockito.verify(tarParser).createInitialImageComponentHierarchy(destinationDir, manifestLayerMapping);
     }
 
     @Test

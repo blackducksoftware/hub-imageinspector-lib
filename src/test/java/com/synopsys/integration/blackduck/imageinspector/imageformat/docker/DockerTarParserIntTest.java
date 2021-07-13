@@ -225,7 +225,7 @@ public class DockerTarParserIntTest {
         assertEquals("alpine", mapping.getImageName());
         assertEquals("latest", mapping.getTagName());
         assertTrue(mapping.getLayerExternalId(0).startsWith("sha256:"));
-        ImageComponentHierarchy h = tarParser.createInitialImageComponentHierarchy(tarExtractionDirectory, tarFilename, mapping);
+        ImageComponentHierarchy h = tarParser.createInitialImageComponentHierarchy(destinationDir, mapping);
         System.out.printf("Image config file contents: %s\n", h.getImageConfigFileContents());
         System.out.printf("Manifest file contents: %s\n", h.getManifestFileContents());
         assertTrue(h.getImageConfigFileContents().contains("architecture"));

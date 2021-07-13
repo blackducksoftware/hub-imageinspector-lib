@@ -150,11 +150,10 @@ public class DockerTarParser {
         return new ManifestLayerMapping(partialMapping, externalLayerIds);
     }
 
-    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File tarExtractionDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
+    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File unpackedImageDir, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
         String manifestFileContents = null;
         String configFileContents = null;
-        File tarContentsDirectory = new File(tarExtractionDirectory, tarFileName);
-        for (File tarFileContentsFile : fileOperations.listFilesInDir(tarContentsDirectory)) {
+        for (File tarFileContentsFile : fileOperations.listFilesInDir(unpackedImageDir)) {
             logger.trace(String.format("File %s", tarFileContentsFile.getName()));
             if ("manifest.json".equals(tarFileContentsFile.getName())) {
                 try {
