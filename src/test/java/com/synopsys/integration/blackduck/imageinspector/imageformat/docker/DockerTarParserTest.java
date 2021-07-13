@@ -114,7 +114,7 @@ public class DockerTarParserTest {
         tarExtractionDirectory.mkdir();
 
         Manifest manifest = Mockito.mock(Manifest.class);
-        Mockito.when(manifestFactory.createManifest(Mockito.any(File.class), Mockito.anyString())).thenReturn(manifest);
+        Mockito.when(manifestFactory.createManifest(Mockito.any(File.class))).thenReturn(manifest);
         final String imageConfigFilename = "caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json";
         final List<String> layerInternalIds = Arrays.asList("testLayer1", "testLayer2");
         final List<String> layerExternalIds = Arrays.asList("sha:Layer1", "sha:Layer2");

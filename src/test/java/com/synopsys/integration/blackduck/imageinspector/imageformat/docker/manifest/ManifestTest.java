@@ -17,7 +17,7 @@ public class ManifestTest {
     public void test() throws IOException, IntegrationException {
         final File tarExtractionDirectory = new File("src/test/resources/extraction");
         final String dockerTarFileName = "alpine.tar";
-        Manifest manifest = new Manifest(tarExtractionDirectory, dockerTarFileName);
+        Manifest manifest = new Manifest(new File(tarExtractionDirectory, dockerTarFileName));
         final ManifestLayerMappingFactory manifestLayerMappingFactory = new ManifestLayerMappingFactory();
         manifest.setManifestLayerMappingFactory(manifestLayerMappingFactory);
         final String targetImageName = "alpine";

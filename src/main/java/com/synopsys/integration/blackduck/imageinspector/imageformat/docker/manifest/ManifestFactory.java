@@ -16,8 +16,8 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappin
 @Component
 public class ManifestFactory {
 
-    public Manifest createManifest(final File tarExtractionDirectory, final String dockerTarFileName) {
-        final Manifest manifest = new Manifest(tarExtractionDirectory, dockerTarFileName);
+    public Manifest createManifest(final File tarExtractionDirectory) {
+        final Manifest manifest = new Manifest(tarExtractionDirectory);
         final ManifestLayerMappingFactory factory = new ManifestLayerMappingFactory();
         manifest.setManifestLayerMappingFactory(factory);
         return manifest;

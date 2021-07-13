@@ -31,13 +31,11 @@ import com.synopsys.integration.util.Stringable;
 public class Manifest extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final File tarExtractionDirectory;
-    private final String dockerTarFileName;
 
     private ManifestLayerMappingFactory manifestLayerMappingFactory;
 
-    public Manifest(final File tarExtractionDirectory, final String dockerTarFileName) {
+    public Manifest(final File tarExtractionDirectory) {
         this.tarExtractionDirectory = tarExtractionDirectory;
-        this.dockerTarFileName = dockerTarFileName;
     }
 
     public void setManifestLayerMappingFactory(final ManifestLayerMappingFactory manifestLayerMappingFactory) {
@@ -118,7 +116,7 @@ public class Manifest extends Stringable {
         logger.trace("getManifestContents()");
         final List<ImageInfo> images = new ArrayList<>();
         logger.debug("getManifestContents(): extracting manifest file content");
-        final String manifestContentString = extractManifestFileContent(dockerTarFileName);
+        final String manifestContentString = extractManifestFileContent();
         logger.trace(String.format("getManifestContents(): parsing: %s", manifestContentString));
         final JsonParser parser = new JsonParser();
         final JsonArray manifestContent = parser.parse(manifestContentString).getAsJsonArray();
@@ -130,9 +128,8 @@ public class Manifest extends Stringable {
         return images;
     }
 
-    private String extractManifestFileContent(final String dockerTarName) throws IOException {
-        final File dockerTarDirectory = new File(tarExtractionDirectory, dockerTarName);
-        final File manifest = new File(dockerTarDirectory, "manifest.json");
+    private String extractManifestFileContent() throws IOException {
+        final File manifest = new File(tarExtractionDirectory, "manifest.json");
         return StringUtils.join(FileUtils.readLines(manifest, StandardCharsets.UTF_8), "\n");
     }
 }

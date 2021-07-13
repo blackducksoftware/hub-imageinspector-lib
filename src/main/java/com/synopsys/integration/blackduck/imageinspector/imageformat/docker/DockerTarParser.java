@@ -135,7 +135,7 @@ public class DockerTarParser {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
         logger.debug(String.format("tarExtractionBaseDirectory: %s", tarExtractionBaseDirectory));
         final File tarExtractionSubDirectory = new File(tarExtractionBaseDirectory, tarFileName);
-        final Manifest manifest = manifestFactory.createManifest(tarExtractionBaseDirectory, tarFileName);
+        final Manifest manifest = manifestFactory.createManifest(tarExtractionSubDirectory);
         ManifestLayerMapping partialMapping;
         try {
             partialMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
