@@ -27,16 +27,14 @@ public class TarOperations {
         this.fileOperations = fileOperations;
     }
 
-    // Creates a subdir in destinationBaseDir named sourceTarFile.getName(), extracts into that dir, and returns it
-    public File extractTarToGivenBaseDir(final File destinationBaseDir, final File sourceTarFile) throws IOException {
-        logger.debug(String.format("tarExtractionDirectory: %s", destinationBaseDir));
+    public File extractTarToGivenDir(final File destinationDir, final File sourceTarFile) throws IOException {
+        logger.debug(String.format("destinationDir: %s", destinationDir));
         fileOperations.logFileOwnerGroupPerms(sourceTarFile.getParentFile());
         fileOperations.logFileOwnerGroupPerms(sourceTarFile);
-        final File outputDir = new File(destinationBaseDir, sourceTarFile.getName());
         try (final TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(sourceTarFile))) {
             TarArchiveEntry tarArchiveEntry = null;
             while (null != (tarArchiveEntry = tarArchiveInputStream.getNextTarEntry())) {
-                final File outputFile = new File(outputDir, tarArchiveEntry.getName());
+                final File outputFile = new File(destinationDir, tarArchiveEntry.getName());
                 if (tarArchiveEntry.isFile()) {
                     if (!outputFile.getParentFile().exists()) {
                         outputFile.getParentFile().mkdirs();
@@ -51,6 +49,6 @@ public class TarOperations {
                 }
             }
         }
-        return outputDir;
+        return destinationDir;
     }
 }

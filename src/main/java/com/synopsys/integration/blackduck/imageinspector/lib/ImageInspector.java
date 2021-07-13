@@ -48,7 +48,7 @@ public class ImageInspector {
     }
 
     public File extractImageTar(final File tarExtractionDirectory, final File dockerTar) throws IOException {
-        return tarOperations.extractTarToGivenBaseDir(tarExtractionDirectory, dockerTar);
+        return tarOperations.extractTarToGivenDir(tarExtractionDirectory, dockerTar);
     }
 
     public List<TypedArchiveFile> getLayerArchives(final File extractionDir) throws IOException {
@@ -60,8 +60,8 @@ public class ImageInspector {
         return tarParser.extractImageLayers(gsonBuilder, currentOs, targetLinuxDistroOverride, imageComponentHierarchy, targetImageFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
     }
 
-    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
-        return tarParser.getLayerMapping(gsonBuilder, tarExtractionDirectory, tarFileName, dockerImageName, dockerTagName);
+    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String dockerImageName, final String dockerTagName) throws IntegrationException {
+        return tarParser.getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerImageName, dockerTagName);
     }
 
     public ImageComponentHierarchy createInitialImageComponentHierarchy(final File tarExtractionDirectory, final String tarFileName, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {

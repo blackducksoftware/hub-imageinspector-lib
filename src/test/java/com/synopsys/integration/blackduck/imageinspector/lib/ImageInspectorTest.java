@@ -53,8 +53,9 @@ class ImageInspectorTest {
     void testExtractImageTar() throws IOException {
         File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
         File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-        imageInspector.extractImageTar(tarExtractionDirectory, dockerTarfile);
-        Mockito.verify(tarOperations).extractTarToGivenBaseDir(tarExtractionDirectory, dockerTarfile);
+        File destinationDir = new File(tarExtractionDirectory, dockerTarfile.getName());
+        imageInspector.extractImageTar(destinationDir, dockerTarfile);
+        Mockito.verify(tarOperations).extractTarToGivenDir(destinationDir, dockerTarfile);
     }
 
     @Test
@@ -71,11 +72,12 @@ class ImageInspectorTest {
     void testGetLayerMapping() throws IntegrationException {
         File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
         File dockerTarfile = new File("src/test/resources/testDockerTarfile");
+        File destinationDir = new File(tarExtractionDirectory, dockerTarfile.getName());
         GsonBuilder gsonBuilder = new GsonBuilder();
         String imageRepo = "alpine";
         String imageTag = "latest";
-        imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), imageRepo, imageTag);
-        Mockito.verify(tarParser).getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), imageRepo, imageTag);
+        imageInspector.getLayerMapping(gsonBuilder, destinationDir, imageRepo, imageTag);
+        Mockito.verify(tarParser).getLayerMapping(gsonBuilder, destinationDir, imageRepo, imageTag);
     }
 
     @Test

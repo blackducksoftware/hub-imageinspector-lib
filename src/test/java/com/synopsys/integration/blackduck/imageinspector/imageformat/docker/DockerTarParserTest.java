@@ -95,8 +95,9 @@ public class DockerTarParserTest {
         final File tarExtractionDirectory = new File("test/extraction");
         FileUtils.deleteDirectory(tarExtractionDirectory);
         tarExtractionDirectory.mkdir();
+        File destinationDir = new File(tarExtractionDirectory, dockerTar.getName());
         // TODO Should test these separately?
-        File extractionDir = tarOperations.extractTarToGivenBaseDir(tarExtractionDirectory, dockerTar);
+        File extractionDir = tarOperations.extractTarToGivenDir(destinationDir, dockerTar);
         List<TypedArchiveFile> layerTars = tarParser.getLayerArchives(extractionDir);
         assertEquals(1, layerTars.size());
         assertEquals("layer.tar", layerTars.get(0).getFile().getName());
@@ -128,7 +129,8 @@ public class DockerTarParserTest {
         Mockito.when(fileOperations
                          .readFileToString(imageConfigMockedFile)).thenReturn(imageConfigFileContents);
         Mockito.when(imageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
-        ManifestLayerMapping mapping = tarParser.getLayerMapping(gsonBuilder, tarExtractionDirectory, imageTarFilename, imageName, imageTag);
+        File destinationDir = new File(tarExtractionDirectory, imageTarFilename);
+        ManifestLayerMapping mapping = tarParser.getLayerMapping(gsonBuilder, destinationDir, imageName, imageTag);
         assertEquals(imageName, mapping.getImageName());
         assertEquals(imageTag, mapping.getTagName());
         assertEquals(layerInternalIds.get(0), mapping.getLayerInternalIds().get(0));

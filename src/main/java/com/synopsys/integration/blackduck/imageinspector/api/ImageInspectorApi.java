@@ -185,17 +185,18 @@ public class ImageInspectorApi {
         throws IOException, IntegrationException {
 
         final File workingDir = new File(tempDir, "working");
-        final File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
+        final File tarExtractionBaseDirectory = imageInspector.getTarExtractionDirectory(workingDir);
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
+        File tarExtractionDirectory = new File(tarExtractionBaseDirectory, dockerTarfile.getName());
         final File extractionDir = imageInspector.extractImageTar(tarExtractionDirectory, dockerTarfile);
         final List<TypedArchiveFile> layerTars = imageInspector.getLayerArchives(extractionDir);
-        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, dockerTarfile.getName(), imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
-        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(tarExtractionDirectory, dockerTarfile.getName(), manifestLayerMapping);
+        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
+        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(tarExtractionBaseDirectory, dockerTarfile.getName(), manifestLayerMapping);
         final String imageRepo = manifestLayerMapping.getImageName();
         final String imageTag = manifestLayerMapping.getTagName();
 
-        final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+        final File targetImageFileSystemParentDir = new File(tarExtractionBaseDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         File targetImageFileSystemAppLayersRootDir = null;
         if (StringUtils.isNotBlank(effectivePlatformTopLayerExternalId)) {

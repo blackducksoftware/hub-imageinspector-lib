@@ -46,6 +46,7 @@ public class ImageInspectorApiTest {
         TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFileSystemRootDir);
         String tarFilename = "alpine_latest.tar";
         File dockerTarfile = new File(targetDir, tarFilename);
+        File destinationDir = new File(tarExtractionDirectory, tarFilename);
         String dockerImageName = "testImageRepo";
         String dockerTagName = "testTag";
 
@@ -75,7 +76,7 @@ public class ImageInspectorApiTest {
         ManifestLayerMapping mapping = (new ManifestLayerMappingFactory())
                                            .createManifestLayerMapping(dockerImageName, dockerTagName, "testConfig", layers);
         Mockito.when(imageInspector
-                         .getLayerMapping(gsonBuilder, tarExtractionDirectory, tarFilename, dockerImageName,
+                         .getLayerMapping(gsonBuilder, destinationDir, dockerImageName,
                              dockerTagName)).thenReturn(mapping);
 
         ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy(

@@ -131,11 +131,10 @@ public class DockerTarParser {
         return untaredLayerFiles;
     }
 
-    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionBaseDirectory, final String tarFileName, final String dockerImageName, final String dockerTagName) throws IntegrationException {
+    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File unpackedImageDir, final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
-        logger.debug(String.format("tarExtractionBaseDirectory: %s", tarExtractionBaseDirectory));
-        final File tarExtractionSubDirectory = new File(tarExtractionBaseDirectory, tarFileName);
-        final Manifest manifest = manifestFactory.createManifest(tarExtractionSubDirectory);
+        logger.debug(String.format("unpackedImageDir: %s", unpackedImageDir));
+        final Manifest manifest = manifestFactory.createManifest(unpackedImageDir);
         ManifestLayerMapping partialMapping;
         try {
             partialMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
@@ -144,7 +143,7 @@ public class DockerTarParser {
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(gsonBuilder, tarExtractionSubDirectory, partialMapping.getImageConfigFilename());
+        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(gsonBuilder, unpackedImageDir, partialMapping.getImageConfigFilename());
         if (externalLayerIds.isEmpty()) {
             return partialMapping;
         }

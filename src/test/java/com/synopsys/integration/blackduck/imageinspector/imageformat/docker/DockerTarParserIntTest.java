@@ -103,6 +103,7 @@ public class DockerTarParserIntTest {
         final File dockerTar = new File("build/images/test/centos_minus_vim_plus_bacula.tar");
         final File workingDirectory = TestUtils.createTempDirectory();
         final File tarExtractionDirectory = new File(workingDirectory, ImageInspector.TAR_EXTRACTION_DIRECTORY);
+        File destinationDir = new File(tarExtractionDirectory, dockerTar.getName());
         System.out.println("workingDirectory: ${workingDirectory.getAbsolutePath()}");
 
         // Mock the PkgMgrExecutor so it doesn't try to overwrite this machine's pkg mgr db
@@ -128,9 +129,9 @@ public class DockerTarParserIntTest {
         TarOperations tarOperations = new TarOperations();
         tarOperations.setFileOperations(new FileOperations());
 
-        File extractionDir = tarOperations.extractTarToGivenBaseDir(tarExtractionDirectory, dockerTar);
+        File extractionDir = tarOperations.extractTarToGivenDir(destinationDir, dockerTar);
         final List<TypedArchiveFile> layerTars = tarParser.getLayerArchives(extractionDir);
-        final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, dockerTar.getName(), IMAGE_NAME, IMAGE_TAG);
+        final ManifestLayerMapping layerMapping = tarParser.getLayerMapping(new GsonBuilder(), destinationDir, IMAGE_NAME, IMAGE_TAG);
         assertEquals(2, layerMapping.getLayerInternalIds().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
@@ -219,7 +220,8 @@ public class DockerTarParserIntTest {
         ImageConfigParser imageConfigParser = new ImageConfigParser();
         tarParser.setImageConfigParser(imageConfigParser);
         tarParser.setLayerConfigParser(new LayerConfigParser());
-        ManifestLayerMapping mapping = tarParser.getLayerMapping(new GsonBuilder(), tarExtractionDirectory, tarFilename, "alpine", "latest");
+        File destinationDir = new File(tarExtractionDirectory, tarFilename);
+        ManifestLayerMapping mapping = tarParser.getLayerMapping(new GsonBuilder(), destinationDir, "alpine", "latest");
         assertEquals("alpine", mapping.getImageName());
         assertEquals("latest", mapping.getTagName());
         assertTrue(mapping.getLayerExternalId(0).startsWith("sha256:"));
