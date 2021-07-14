@@ -16,12 +16,16 @@ public class ImageInfoParsed extends Stringable {
     private final ImagePkgMgrDatabase imagePkgMgrDatabase;
     private final String linuxDistroName;
     private final PkgMgr pkgMgr;
+    // TODO not sure this belongs here
+    private ImageComponentHierarchy imageComponentHierarchy;
 
-    public ImageInfoParsed(final TargetImageFileSystem targetImageFileSystem, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName, PkgMgr pkgMgr) {
+    public ImageInfoParsed(final TargetImageFileSystem targetImageFileSystem, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName, PkgMgr pkgMgr,
+                           ImageComponentHierarchy imageComponentHierarchy) {
         this.targetImageFileSystem = targetImageFileSystem;
         this.imagePkgMgrDatabase = imagePkgMgrDatabase;
         this.linuxDistroName = linuxDistroName;
         this.pkgMgr = pkgMgr;
+        this.imageComponentHierarchy = imageComponentHierarchy;
     }
 
     public TargetImageFileSystem getTargetImageFileSystem() {
@@ -38,5 +42,9 @@ public class ImageInfoParsed extends Stringable {
 
     public PkgMgr getPkgMgr() {
         return pkgMgr;
+    }
+
+    public ImageComponentHierarchy getImageComponentHierarchy() {
+        return imageComponentHierarchy;
     }
 }

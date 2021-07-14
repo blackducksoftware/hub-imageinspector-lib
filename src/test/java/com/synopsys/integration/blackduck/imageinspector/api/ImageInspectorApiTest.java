@@ -78,8 +78,7 @@ public class ImageInspectorApiTest {
                          .getLayerMapping(dockerImageName,
                              dockerTagName)).thenReturn(mapping);
 
-        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy(
-            "testManifestFileContents", "testImageConfigFileContents");
+        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
         List<ComponentDetails> components = new ArrayList<>();
         ComponentDetails comp = new ComponentDetails("testCompName", "testCompVersion",
             "testCompExternalId", "testCompArchitecture", "testLinuxDistroName");
@@ -87,16 +86,13 @@ public class ImageInspectorApiTest {
         LayerDetails layerDetails = new LayerDetails(0, "layer00", "layerMetaData", Arrays.asList("layerCmd", "layerCmdArg"), components);
         imageComponentHierarchy.addLayer(layerDetails);
         imageComponentHierarchy.setFinalComponents(components);
-        Mockito.when(imageInspector
-                         .createInitialImageComponentHierarchy(imageDir,
-                             mapping)).thenReturn(imageComponentHierarchy);
 
         ImageInfoParsed imageInfoParsed = new ImageInfoParsed(
             targetImageFileSystem,
             new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
-                PackageManagerEnum.APK), "apline", new ApkPkgMgr(new FileOperations()));
+                PackageManagerEnum.APK), "apline", new ApkPkgMgr(new FileOperations()), new ImageComponentHierarchy());
         Mockito.when(imageInspector
-                         .extractDockerLayers(ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy,
+                         .extractDockerLayers(ImageInspectorOsEnum.ALPINE, null,
                              targetImageFileSystem,
                              layerTarFiles, mapping, null)).thenReturn(imageInfoParsed);
 
@@ -107,7 +103,7 @@ public class ImageInspectorApiTest {
         bdioDoc.getProject().version = blackDuckProjectVersion;
         imageInfoDerived.setBdioDocument(bdioDoc);
         Mockito.when(imageInspector
-                         .generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy,
+                         .generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed,
                              mapping, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix,
                              organizeComponentsByLayer, includeRemovedComponents, false)).thenReturn(imageInfoDerived);
         Os os = Mockito.mock(Os.class);

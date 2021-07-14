@@ -11,16 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImageComponentHierarchy {
-    private final String manifestFileContents;
-    private final String imageConfigFileContents;
     private final List<LayerDetails> layers;
     private int platformTopLayerIndex;
     private List<ComponentDetails> platformComponents;
     private List<ComponentDetails> finalComponents;
 
-    public ImageComponentHierarchy(final String manifestFileContents, final String imageConfigFileContents) {
-        this.manifestFileContents = manifestFileContents;
-        this.imageConfigFileContents = imageConfigFileContents;
+    public ImageComponentHierarchy() {
         this.layers = new ArrayList<>();
         platformTopLayerIndex = -1;
         this.platformComponents = new ArrayList<>();
@@ -29,14 +25,6 @@ public class ImageComponentHierarchy {
 
     public void addLayer(final LayerDetails layer) {
         layers.add(layer);
-    }
-
-    public String getManifestFileContents() {
-        return manifestFileContents;
-    }
-
-    public String getImageConfigFileContents() {
-        return imageConfigFileContents;
     }
 
     public List<LayerDetails> getLayers() {

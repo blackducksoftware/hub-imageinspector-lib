@@ -84,21 +84,6 @@ class ImageInspectorTest {
 //    }
 
     @Test
-    void testCreateInitialImageComponentHierarchy() throws IntegrationException {
-        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
-        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-        File imageDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-        String imageRepo = "alpine";
-        String imageTag = "latest";
-
-        String imageConfigFileContents = "testConfig";
-        List<String> layers = getLayers();
-        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(imageRepo, imageTag, imageConfigFileContents, layers);
-        imageInspector.createInitialImageComponentHierarchy(imageDir, manifestLayerMapping);
-        Mockito.verify(tarParser).createInitialImageComponentHierarchy(imageDir, manifestLayerMapping);
-    }
-
-    @Test
     void testExtractDockerLayers() throws IOException, WrongInspectorOsException {
         File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
         File dockerTarfile = new File("src/test/resources/testDockerTarfile");
@@ -114,11 +99,9 @@ class ImageInspectorTest {
         File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-        String manifestFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/alpine.tar/manifest.json"), StandardCharsets.UTF_8);
-        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy(manifestFileContents, imageConfigFileContents);
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, null);
-        Mockito.verify(tarParser).extractImageLayers(ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping, null);
+        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
+        imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, null, targetImageFileSystem, layerTars, manifestLayerMapping, null);
+        Mockito.verify(tarParser).extractImageLayers(ImageInspectorOsEnum.ALPINE, null, targetImageFileSystem, layerTars, manifestLayerMapping, null);
     }
 
     @Test
@@ -146,7 +129,7 @@ class ImageInspectorTest {
 
         ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(TestUtils.createBdioGenerator(),
             testScenario.getImageInfoParsed(),
-            testScenario.getImageComponentHierarchy(), testScenario.getManifestLayerMapping(),
+            testScenario.getManifestLayerMapping(),
             testScenario.getBlackDuckProjectName(), testScenario.getBlackDuckProjectVersion(),
             codeLocationPrefix, true, true, platformComponentsExcluded);
 
@@ -169,13 +152,13 @@ class ImageInspectorTest {
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(distro, tag, imageConfigFileContents, layers);
 
         String manifestFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/alpine.tar/manifest.json"), StandardCharsets.UTF_8);
-        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy(manifestFileContents, imageConfigFileContents);
+        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
         String blackDuckProjectName = "testProjectName";
         String blackDuckProjectVersion = "testProjectVersion";
         File extractedPackageManagerDirectory = new File("src/test/resources/imageDir/alpine/lib/apk");
         ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(extractedPackageManagerDirectory, PackageManagerEnum.APK);
         PkgMgr pkgMgr = new ApkPkgMgr(new FileOperations());
-        ImageInfoParsed imageInfoParsed = new ImageInfoParsed(generateTargetImageFileSystem(tarExtractionDirectory, distro, tag), imagePkgMgrDatabase, distro, pkgMgr);
+        ImageInfoParsed imageInfoParsed = new ImageInfoParsed(generateTargetImageFileSystem(tarExtractionDirectory, distro, tag), imagePkgMgrDatabase, distro, pkgMgr, imageComponentHierarchy);
 
         return new TestScenario(blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, distro, tag, pkgMgrId, imageConfigFileContents, layers, manifestLayerMapping, manifestFileContents, imageComponentHierarchy, imageInfoParsed);
 

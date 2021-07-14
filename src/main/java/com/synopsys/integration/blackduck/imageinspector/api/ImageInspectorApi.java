@@ -193,7 +193,6 @@ public class ImageInspectorApi {
         final DockerImageDirectory dockerImageDirectory = imageInspector.extractImageTar(tarExtractionDirectory, dockerTarfile);
         final List<TypedArchiveFile> layerTars = dockerImageDirectory.getLayerArchives();
         final ManifestLayerMapping manifestLayerMapping = dockerImageDirectory.getLayerMapping(imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
-        final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(tarExtractionDirectory, manifestLayerMapping);
         final String imageRepo = manifestLayerMapping.getImageName();
         final String imageTag = manifestLayerMapping.getTagName();
 
@@ -206,12 +205,12 @@ public class ImageInspectorApi {
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
         final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
         final ImageInfoParsed imageInfoParsed = imageInspector
-                                                    .extractDockerLayers(currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping,
+                                                    .extractDockerLayers(currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), targetImageFileSystem, layerTars, manifestLayerMapping,
                                                         imageInspectionRequest.getPlatformTopLayerExternalId());
-        validatePlatformResults(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
-        logLayers(imageComponentHierarchy);
+        validatePlatformResults(effectivePlatformTopLayerExternalId, imageInfoParsed.getImageComponentHierarchy());
+        logLayers(imageInfoParsed.getImageComponentHierarchy());
         cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), layerTars);
-        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, imageComponentHierarchy, manifestLayerMapping,
+        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, manifestLayerMapping,
             imageInspectionRequest.getBlackDuckProjectName(), imageInspectionRequest.getBlackDuckProjectVersion(),
             imageInspectionRequest.getCodeLocationPrefix(), imageInspectionRequest.isOrganizeComponentsByLayer(), imageInspectionRequest.isIncludeRemovedComponents(),
             StringUtils.isNotBlank(effectivePlatformTopLayerExternalId));

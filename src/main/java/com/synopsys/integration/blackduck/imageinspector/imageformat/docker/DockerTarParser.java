@@ -103,33 +103,10 @@ public class DockerTarParser {
         this.dockerLayerTarExtractor = dockerLayerTarExtractor;
     }
 
-
-
-    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File unpackedImageDir, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
-        String manifestFileContents = null;
-        String configFileContents = null;
-        for (File tarFileContentsFile : fileOperations.listFilesInDir(unpackedImageDir)) {
-            logger.trace(String.format("File %s", tarFileContentsFile.getName()));
-            if ("manifest.json".equals(tarFileContentsFile.getName())) {
-                try {
-                    manifestFileContents = FileUtils.readFileToString(tarFileContentsFile, StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    throw new IntegrationException(String.format("Error reading manifest file %s", tarFileContentsFile.getAbsolutePath()));
-                }
-            } else if (tarFileContentsFile.getName().equals(manifestLayerMapping.getImageConfigFilename())) {
-                try {
-                    configFileContents = FileUtils.readFileToString(tarFileContentsFile, StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    throw new IntegrationException(String.format("Error reading config file %s", tarFileContentsFile.getAbsolutePath()));
-                }
-            }
-        }
-        return new ImageComponentHierarchy(manifestFileContents, configFileContents);
-    }
-
-    public ImageInfoParsed extractImageLayers(ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy,
+    public ImageInfoParsed extractImageLayers(ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride,
         final TargetImageFileSystem targetImageFileSystem, final List<TypedArchiveFile> layerTars, final ManifestLayerMapping manifestLayerMapping,
         final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
+        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
         ImageInfoParsed imageInfoParsed = null;
         int layerIndex = 0;
         boolean inApplicationLayers = false;
@@ -164,7 +141,7 @@ public class DockerTarParser {
             imageComponentHierarchy.setFinalComponents(netComponents);
         }
         if (imageInfoParsed == null) {
-            imageInfoParsed = new ImageInfoParsed(targetImageFileSystem, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), targetLinuxDistroOverride, null);
+            imageInfoParsed = new ImageInfoParsed(targetImageFileSystem, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), targetLinuxDistroOverride, null, imageComponentHierarchy);
         }
         return imageInfoParsed;
     }
@@ -257,7 +234,7 @@ public class DockerTarParser {
         try {
             if (imageInfoParsed == null) {
                 logger.debug("Attempting to determine the target image package manager");
-                imageInfoParsed = parseImageInfo(targetImageFileSystem, targetLinuxDistroOverride);
+                imageInfoParsed = parseImageInfo(targetImageFileSystem, targetLinuxDistroOverride, imageComponentHierarchy);
                 final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
                                         .getImageInspectorOs(imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
                 if (!neededInspectorOs.equals(currentOs)) {
@@ -294,7 +271,7 @@ public class DockerTarParser {
         return imageInfoParsed;
     }
 
-    ImageInfoParsed parseImageInfo(final TargetImageFileSystem targetImageFileSystem, final String targetLinuxDistroOverride) throws PkgMgrDataNotFoundException {
+    ImageInfoParsed parseImageInfo(final TargetImageFileSystem targetImageFileSystem, final String targetLinuxDistroOverride, ImageComponentHierarchy imageComponentHierarchy) throws PkgMgrDataNotFoundException {
         if (pkgMgrs == null) {
             logger.error("No pmgMgrs configured");
         } else {
@@ -312,7 +289,7 @@ public class DockerTarParser {
                         linuxDistroName = extractLinuxDistroNameFromFileSystem(targetImageFileSystem.getTargetImageFileSystemFull()).orElse(null);
                         logger.trace(String.format("Target linux distro name derived from image file system: %s", linuxDistroName));
                     }
-                    return new ImageInfoParsed(targetImageFileSystem, targetImagePkgMgr, linuxDistroName, pkgMgr);
+                    return new ImageInfoParsed(targetImageFileSystem, targetImagePkgMgr, linuxDistroName, pkgMgr, imageComponentHierarchy);
                 }
             }
         }

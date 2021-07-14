@@ -144,32 +144,6 @@ public class DockerTarParserTest {
     }
 
     @Test
-    public void testCreateInitialImageComponentHierarchy() throws IntegrationException {
-
-        final String imageTarFilename = "alpine.tar";
-        final String imageName = "alpine";
-        final String imageTag = "latest";
-        final String imageConfigFileName = "caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json";
-
-        final File tarExtractionDirectory = new File("test/extraction");
-        final File mockedImageTarContentsDir = new File("src/test/resources/mockDockerTarContents");
-        final List<String> layerInternalIds = Arrays.asList("testLayer1", "testLayer2");
-        final List<String> layerExternalIds = Arrays.asList("sha:Layer1", "sha:Layer2");
-
-        final ManifestLayerMapping partialManifestLayerMapping = new ManifestLayerMapping(imageName, imageTag, imageConfigFileName, layerInternalIds);
-        final ManifestLayerMapping fullManifestLayerMapping = new ManifestLayerMapping(partialManifestLayerMapping, layerExternalIds);
-
-        final File manifestFile = new File(mockedImageTarContentsDir, "manifest.json");
-        final File configFile = new File(mockedImageTarContentsDir, imageConfigFileName);
-        final File[] filesInImageTar = { manifestFile, configFile };
-        File imageDir = new File(tarExtractionDirectory, imageTarFilename);
-        Mockito.when(fileOperations.listFilesInDir(new File(tarExtractionDirectory, imageTarFilename))).thenReturn(filesInImageTar);
-        final ImageComponentHierarchy imageComponentHierarchy = tarParser.createInitialImageComponentHierarchy(imageDir, fullManifestLayerMapping);
-        assertTrue(imageComponentHierarchy.getManifestFileContents().contains(String.format("%s:%s", imageName, imageTag)));
-        assertTrue(imageComponentHierarchy.getImageConfigFileContents().contains("sha256:503e53e365f34399c4d58d8f4e23c161106cfbce4400e3d0a0357967bad69390"));
-    }
-
-    @Test
     public void testExtractImageLayersFull() throws IOException, IntegrationException, InterruptedException {
         final ImageComponentHierarchy imageComponentHierarchy = doExtractImageLayersTest(false);
         assertEquals("testCompName", imageComponentHierarchy.getFinalComponents().get(0).getName());
@@ -226,14 +200,7 @@ public class DockerTarParserTest {
         }
         final ManifestLayerMapping partialManifestLayerMapping = new ManifestLayerMapping(imageName, imageTag, imageConfigFileName, layerInternalIds);
         final ManifestLayerMapping fullManifestLayerMapping = new ManifestLayerMapping(partialManifestLayerMapping, layerExternalIds);
-
-        final PkgMgrFactory pkgMgrFactory = Mockito.mock(PkgMgrFactory.class);
-
-        final File manifestFile = new File(mockedImageTarContentsDir, "manifest.json");
-        final File configFile = new File(mockedImageTarContentsDir, imageConfigFileName);
-        final String manifestFileContents = FileUtils.readFileToString(manifestFile, StandardCharsets.UTF_8);
-        final String imageConfigFileContents = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);
-        final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy(manifestFileContents, imageConfigFileContents);
+        final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
         final File containerFileSystemRootDir = new File("test/containerFileSystemRoot");
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFileSystemRootDir);
         final File dockerLayerTar = new File("src/test/resources/mockDockerTarContents/03b951adf840798cb236a62db6705df7fb2f1e60e6f5fb93499ee8a566bd4114/layer.tar");
@@ -253,8 +220,8 @@ public class DockerTarParserTest {
         final File[] etcDirFiles = { osReleaseFile };
         Mockito.when(fileOperations.listFilesInDir(imageEtcDir)).thenReturn(etcDirFiles);
         Mockito.when(os.getLinuxDistroNameFromEtcDir(imageEtcDir)).thenReturn(Optional.of("alpine"));
-        ImageInfoParsed imageInfoParsed = tarParser.extractImageLayers(ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy,
+        ImageInfoParsed imageInfoParsed = tarParser.extractImageLayers(ImageInspectorOsEnum.ALPINE, null,
         targetImageFileSystem, layerTars, fullManifestLayerMapping, platformTopLayerId);
-        return imageComponentHierarchy;
+        return imageInfoParsed.getImageComponentHierarchy();
     }
 }

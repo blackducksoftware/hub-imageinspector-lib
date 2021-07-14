@@ -24,7 +24,7 @@ public class ImageInfoDerivedTest {
     final File targetImageFileSystemRootDir = new File("src/test/resources/imageDir");
     final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
     ImageInfoParsed parsed = new ImageInfoParsed(targetImageFileSystem,
-        pkgMgrDb, "alpine", new ApkPkgMgr(new FileOperations()));
+        pkgMgrDb, "alpine", new ApkPkgMgr(new FileOperations()), new ImageComponentHierarchy());
 
     assertEquals("imageDir", parsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
     assertEquals("alpine", parsed.getLinuxDistroName());

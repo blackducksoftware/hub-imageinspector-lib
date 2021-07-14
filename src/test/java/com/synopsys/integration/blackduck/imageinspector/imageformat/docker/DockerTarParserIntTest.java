@@ -138,8 +138,8 @@ public class DockerTarParserIntTest {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractImageLayers(ImageInspectorOsEnum.CENTOS, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
-        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem, null);
+        tarParser.extractImageLayers(ImageInspectorOsEnum.CENTOS, null, targetImageFileSystem, layerTars, layerMapping, null);
+        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem, null, new ImageComponentHierarchy());
         assertEquals("image_blackducksoftware_centos_minus_vim_plus_bacula_v_1.0", imageInfoParsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
         assertEquals("RPM", imageInfoParsed.getPkgMgr().getType().name());
 
@@ -200,7 +200,7 @@ public class DockerTarParserIntTest {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
+        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, null, targetImageFileSystem, layerTars, layerMapping, null);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));
@@ -229,11 +229,6 @@ public class DockerTarParserIntTest {
         assertEquals("alpine", mapping.getImageName());
         assertEquals("latest", mapping.getTagName());
         assertTrue(mapping.getLayerExternalId(0).startsWith("sha256:"));
-        ImageComponentHierarchy h = tarParser.createInitialImageComponentHierarchy(imageDir, mapping);
-        System.out.printf("Image config file contents: %s\n", h.getImageConfigFileContents());
-        System.out.printf("Manifest file contents: %s\n", h.getManifestFileContents());
-        assertTrue(h.getImageConfigFileContents().contains("architecture"));
-        assertTrue(h.getManifestFileContents().contains("Config"));
     }
 
     private void testParseImageInfo(String imageInspectorDistro, PackageManagerEnum packageManagerType, String pkgMgrDirName)
@@ -247,7 +242,7 @@ public class DockerTarParserIntTest {
 
         final File containerFilesystemRoot = new File(String.format("src/test/resources/imageDir/%s", imageInspectorDistro));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFilesystemRoot);
-        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem, null);
+        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem, null, new ImageComponentHierarchy());
         assertEquals(imageInspectorDistro, imageInfoParsed.getLinuxDistroName());
         assertEquals(packageManagerType, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
         assertEquals(pkgMgrDirName, imageInfoParsed.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());

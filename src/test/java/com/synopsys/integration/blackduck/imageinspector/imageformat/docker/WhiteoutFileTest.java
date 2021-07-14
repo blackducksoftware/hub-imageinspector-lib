@@ -98,7 +98,7 @@ public class WhiteoutFileTest {
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
 
-        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
+        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, null, targetImageFileSystem, layerTars, layerMapping, null);
 
         return targetImageFileSystemRootDir;
     }

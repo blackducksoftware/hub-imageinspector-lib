@@ -266,7 +266,7 @@ public class BdioGeneratorTest {
     }
 
     private ImageComponentHierarchy createImageComponentHierarchy() {
-        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy("manifestFileContents", "imageConfigFileContents");
+        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
         List<ComponentDetails> allComponents = new ArrayList<>();
         addLayer1(imageComponentHierarchy, allComponents);
         List<ComponentDetails> layer2Components = addLayer2(imageComponentHierarchy, allComponents);

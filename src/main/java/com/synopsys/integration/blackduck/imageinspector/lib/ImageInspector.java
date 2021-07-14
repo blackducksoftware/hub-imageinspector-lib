@@ -65,16 +65,12 @@ public class ImageInspector {
         return new DockerImageDirectory(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
     }
 
-    public ImageInfoParsed extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy, final TargetImageFileSystem targetImageFileSystem, final List<TypedArchiveFile> layerTars,
+    public ImageInfoParsed extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final TargetImageFileSystem targetImageFileSystem, final List<TypedArchiveFile> layerTars,
         final ManifestLayerMapping layerMapping, final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
-        return tarParser.extractImageLayers(currentOs, targetLinuxDistroOverride, imageComponentHierarchy, targetImageFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
+        return tarParser.extractImageLayers(currentOs, targetLinuxDistroOverride, targetImageFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
     }
 
-    public ImageComponentHierarchy createInitialImageComponentHierarchy(final File tarExtractionDirectory, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
-        return tarParser.createInitialImageComponentHierarchy(tarExtractionDirectory, manifestLayerMapping);
-    }
-
-    public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final ImageComponentHierarchy imageComponentHierarchy, final ManifestLayerMapping mapping,
+    public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final ManifestLayerMapping mapping,
         final String projectName,
         final String versionName,
         final String codeLocationPrefix,
@@ -83,7 +79,7 @@ public class ImageInspector {
         final boolean platformComponentsExcluded) {
         final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed, platformComponentsExcluded);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(imageInfoDerived.getCodeLocationName(),
-            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy, organizeComponentsByLayer,
+            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageInfoParsed.getImageComponentHierarchy(), organizeComponentsByLayer,
             includeRemovedComponents);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
