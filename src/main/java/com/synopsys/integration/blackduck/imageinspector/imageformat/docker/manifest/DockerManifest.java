@@ -44,10 +44,10 @@ public class DockerManifest extends Stringable {
 
     public ManifestLayerMapping getLayerMapping(final String targetImageName, final String targetTagName) throws IntegrationException, IOException {
         logger.debug(String.format("getLayerMappings(): targetImageName: %s; targetTagName: %s", targetImageName, targetTagName));
-        final List<ImageInfo> images = getManifestContents();
+        final List<DockerImageInfo> images = getManifestContents();
         logger.debug(String.format("getLayerMappings(): images.size(): %d", images.size()));
         validateImageSpecificity(images, targetImageName, targetTagName);
-        for (final ImageInfo image : images) {
+        for (final DockerImageInfo image : images) {
             logger.trace(String.format("getLayerMappings(): image: %s", image));
             final String foundRepoTag = findRepoTag(images.size(), image, targetImageName, targetTagName);
             if (foundRepoTag == null) {
@@ -61,7 +61,7 @@ public class DockerManifest extends Stringable {
         throw new IntegrationException(String.format("Layer mapping for repo:tag %s:%s not found in manifest.json", targetImageName, targetTagName));
     }
 
-    private String findRepoTag(final int numImages, final ImageInfo image, final String targetImageName, final String targetTagName) {
+    private String findRepoTag(final int numImages, final DockerImageInfo image, final String targetImageName, final String targetTagName) {
         // user didn't specify which image, and there is only one: return it
         if (numImages == 1 && StringUtils.isBlank(targetImageName) && StringUtils.isBlank(targetTagName)) {
             logger.debug(String.format("User did not specify a repo:tag, and there's only one image; inspecting that one: %s", getRepoTag(image)));
@@ -79,14 +79,14 @@ public class DockerManifest extends Stringable {
         return null;
     }
 
-    private String getRepoTag(final ImageInfo image) {
+    private String getRepoTag(final DockerImageInfo image) {
         if (image.repoTags == null || image.repoTags.isEmpty()) {
             return "null:null";
         }
         return image.repoTags.get(0);
     }
 
-    private ManifestLayerMapping createMapping(final ImageInfo image, final String imageName, final String tagName) {
+    private ManifestLayerMapping createMapping(final DockerImageInfo image, final String imageName, final String tagName) {
         final List<String> layerIds = new ArrayList<>();
         for (final String layer : image.layers) {
             layerIds.add(layer.substring(0, layer.indexOf('/')));
@@ -104,7 +104,7 @@ public class DockerManifest extends Stringable {
         return specifiedRepoTag;
     }
 
-    private void validateImageSpecificity(final List<ImageInfo> images, final String targetImageName, final String targetTagName) throws IntegrationException {
+    private void validateImageSpecificity(final List<DockerImageInfo> images, final String targetImageName, final String targetTagName) throws IntegrationException {
         if (images.size() > 1 && (StringUtils.isBlank(targetImageName) || StringUtils.isBlank(targetTagName))) {
             final String msg = "When the manifest contains multiple images or tags, the target image and tag to inspect must be specified";
             logger.debug(msg);
@@ -112,9 +112,9 @@ public class DockerManifest extends Stringable {
         }
     }
 
-    private List<ImageInfo> getManifestContents() throws IOException {
+    private List<DockerImageInfo> getManifestContents() throws IOException {
         logger.trace("getManifestContents()");
-        final List<ImageInfo> images = new ArrayList<>();
+        final List<DockerImageInfo> images = new ArrayList<>();
         logger.debug("getManifestContents(): extracting manifest file content");
         final String manifestContentString = extractManifestFileContent();
         logger.trace(String.format("getManifestContents(): parsing: %s", manifestContentString));
@@ -123,7 +123,7 @@ public class DockerManifest extends Stringable {
         final Gson gson = new Gson();
         for (final JsonElement element : manifestContent) {
             logger.trace(String.format("getManifestContents(): element: %s", element.toString()));
-            images.add(gson.fromJson(element, ImageInfo.class));
+            images.add(gson.fromJson(element, DockerImageInfo.class));
         }
         return images;
     }

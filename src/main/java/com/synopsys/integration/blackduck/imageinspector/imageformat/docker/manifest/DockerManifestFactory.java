@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
 
 @Component
-public class ManifestFactory {
+public class DockerManifestFactory {
 
     public DockerManifest createManifest(final File tarExtractionDirectory) {
         final DockerManifest manifest = new DockerManifest(tarExtractionDirectory);

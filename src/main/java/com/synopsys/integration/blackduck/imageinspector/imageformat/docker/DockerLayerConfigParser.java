@@ -20,7 +20,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @Component
-public class LayerConfigParser {
+public class DockerLayerConfigParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public List<String> parseCmd(final GsonBuilder gsonBuilder, final String layerConfigFileContents) {

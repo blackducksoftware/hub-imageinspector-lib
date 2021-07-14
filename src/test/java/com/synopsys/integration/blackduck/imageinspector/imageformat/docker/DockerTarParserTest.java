@@ -23,7 +23,7 @@ import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
@@ -42,11 +42,11 @@ public class DockerTarParserTest {
     private FileOperations fileOperations;
     private Os os;
     private PkgMgr pkgMgr;
-    private ManifestFactory manifestFactory;
+    private DockerManifestFactory dockerManifestFactory;
     private CmdExecutor cmdExecutor;
     private PkgMgrExecutor pkgMgrExecutor;
-    private ImageConfigParser imageConfigParser;
-    private LayerConfigParser layerConfigParser;
+    private DockerImageConfigParser dockerImageConfigParser;
+    private DockerLayerConfigParser dockerLayerConfigParser;
     private DockerLayerTarExtractor dockerLayerTarExtractor;
     private List<PkgMgr> pkgMgrs;
     private DockerTarParser tarParser;
@@ -62,13 +62,13 @@ public class DockerTarParserTest {
         Mockito.when(pkgMgr.getImagePackageManagerDirectory(Mockito.any(File.class))).thenReturn(mockApkDir);
         Mockito.when(pkgMgr.getType()).thenReturn(PackageManagerEnum.APK);
 
-        manifestFactory = Mockito.mock(ManifestFactory.class);
+        dockerManifestFactory = Mockito.mock(DockerManifestFactory.class);
         cmdExecutor = Mockito.mock(CmdExecutor.class);
         pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);
 
-        imageConfigParser = Mockito.mock(ImageConfigParser.class);
-        layerConfigParser = Mockito.mock(LayerConfigParser.class);
-        Mockito.when(layerConfigParser.parseCmd(Mockito.any(GsonBuilder.class), Mockito.anyString())).thenReturn(Arrays.asList("testLayerCmd", "testLayerCmdArg"));
+        dockerImageConfigParser = Mockito.mock(DockerImageConfigParser.class);
+        dockerLayerConfigParser = Mockito.mock(DockerLayerConfigParser.class);
+        Mockito.when(dockerLayerConfigParser.parseCmd(Mockito.any(GsonBuilder.class), Mockito.anyString())).thenReturn(Arrays.asList("testLayerCmd", "testLayerCmdArg"));
         dockerLayerTarExtractor = Mockito.mock(DockerLayerTarExtractor.class);
         pkgMgrs = new ArrayList<>(1);
         pkgMgrs.add(pkgMgr);
@@ -76,11 +76,11 @@ public class DockerTarParserTest {
         tarParser = new DockerTarParser();
         tarParser.setPkgMgrs(pkgMgrs);
         tarParser.setOs(os);
-        tarParser.setManifestFactory(manifestFactory);
+        tarParser.setManifestFactory(dockerManifestFactory);
         tarParser.setExecutor(cmdExecutor);
         tarParser.setFileOperations(fileOperations);
-        tarParser.setImageConfigParser(imageConfigParser);
-        tarParser.setLayerConfigParser(layerConfigParser);
+        tarParser.setImageConfigParser(dockerImageConfigParser);
+        tarParser.setLayerConfigParser(dockerLayerConfigParser);
         tarParser.setPkgMgrExecutor(pkgMgrExecutor);
         tarParser.setDockerLayerTarExtractor(dockerLayerTarExtractor);
 
@@ -98,8 +98,8 @@ public class DockerTarParserTest {
         File imageDir = new File(tarExtractionDirectory, dockerTar.getName());
         // TODO Should test these separately?
         File extractionDir = tarOperations.extractTarToGivenDir(imageDir, dockerTar);
-        DockerImageReader dockerImageReader = new DockerImageReader(new GsonBuilder(), new FileOperations(), new ImageConfigParser(),
-                new ManifestFactory(), extractionDir);
+        DockerImageReader dockerImageReader = new DockerImageReader(new GsonBuilder(), new FileOperations(), new DockerImageConfigParser(),
+                new DockerManifestFactory(), extractionDir);
         List<TypedArchiveFile> layerTars = dockerImageReader.getLayerArchives();
         assertEquals(1, layerTars.size());
         assertEquals("layer.tar", layerTars.get(0).getFile().getName());
@@ -118,7 +118,7 @@ public class DockerTarParserTest {
         tarExtractionDirectory.mkdir();
 
         DockerManifest manifest = Mockito.mock(DockerManifest.class);
-        Mockito.when(manifestFactory.createManifest(Mockito.any(File.class))).thenReturn(manifest);
+        Mockito.when(dockerManifestFactory.createManifest(Mockito.any(File.class))).thenReturn(manifest);
         final String imageConfigFilename = "caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json";
         final List<String> layerInternalIds = Arrays.asList("testLayer1", "testLayer2");
         final List<String> layerExternalIds = Arrays.asList("sha:Layer1", "sha:Layer2");
@@ -131,9 +131,9 @@ public class DockerTarParserTest {
         final String imageConfigFileContents = FileUtils.readFileToString(imageConfigTestDataFile, StandardCharsets.UTF_8);
         Mockito.when(fileOperations
                          .readFileToString(imageConfigMockedFile)).thenReturn(imageConfigFileContents);
-        Mockito.when(imageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
+        Mockito.when(dockerImageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
         File imageDir = new File(tarExtractionDirectory, imageTarFilename);
-        DockerImageReader dockerImageReader = new DockerImageReader(gsonBuilder, fileOperations, imageConfigParser, manifestFactory, imageDir);
+        DockerImageReader dockerImageReader = new DockerImageReader(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
         ManifestLayerMapping mapping = dockerImageReader.getLayerMapping(imageName, imageTag);
         assertEquals(imageName, mapping.getImageName());
         assertEquals(imageTag, mapping.getTagName());
@@ -192,11 +192,11 @@ public class DockerTarParserTest {
         tarParserWithRealOsObject = new DockerTarParser();
         tarParserWithRealOsObject.setPkgMgrs(pkgMgrs);
         tarParserWithRealOsObject.setOs(new Os());
-        tarParserWithRealOsObject.setManifestFactory(manifestFactory);
+        tarParserWithRealOsObject.setManifestFactory(dockerManifestFactory);
         tarParserWithRealOsObject.setExecutor(cmdExecutor);
         tarParserWithRealOsObject.setFileOperations(fileOperations);
-        tarParserWithRealOsObject.setImageConfigParser(imageConfigParser);
-        tarParserWithRealOsObject.setLayerConfigParser(layerConfigParser);
+        tarParserWithRealOsObject.setImageConfigParser(dockerImageConfigParser);
+        tarParserWithRealOsObject.setLayerConfigParser(dockerLayerConfigParser);
         tarParserWithRealOsObject.setPkgMgrExecutor(pkgMgrExecutor);
         tarParserWithRealOsObject.setDockerLayerTarExtractor(dockerLayerTarExtractor);
 

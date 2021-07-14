@@ -12,7 +12,7 @@ import java.util.List;
 import com.google.gson.annotations.SerializedName;
 import com.synopsys.integration.util.Stringable;
 
-public class ImageInfo extends Stringable {
+public class DockerImageInfo extends Stringable {
 
     @SerializedName("Config")
     public String config;

@@ -13,8 +13,8 @@ import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageReader;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
@@ -43,17 +43,17 @@ public class ImageInspector {
     private final TarOperations tarOperations;
     private final GsonBuilder gsonBuilder;
     private final FileOperations fileOperations;
-    private final ImageConfigParser imageConfigParser;
-    private final ManifestFactory manifestFactory;
+    private final DockerImageConfigParser dockerImageConfigParser;
+    private final DockerManifestFactory dockerManifestFactory;
 
     public ImageInspector(final DockerTarParser tarParser, TarOperations tarOperations, GsonBuilder gsonBuilder,
-                          FileOperations fileOperations, ImageConfigParser imageConfigParser, ManifestFactory manifestFactory) {
+                          FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory) {
         this.tarParser = tarParser;
         this.tarOperations = tarOperations;
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
-        this.imageConfigParser = imageConfigParser;
-        this.manifestFactory = manifestFactory;
+        this.dockerImageConfigParser = dockerImageConfigParser;
+        this.dockerManifestFactory = dockerManifestFactory;
     }
 
     public File getTarExtractionDirectory(final File workingDirectory) {
@@ -66,7 +66,7 @@ public class ImageInspector {
 
     public List<TypedArchiveFile> getLayerArchives(final File extractionDir) throws IOException {
         // TODO can we reuse these?
-        DockerImageReader dockerImageReader = new DockerImageReader(gsonBuilder, fileOperations, imageConfigParser, manifestFactory, extractionDir);
+        DockerImageReader dockerImageReader = new DockerImageReader(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, extractionDir);
         return dockerImageReader.getLayerArchives();
     }
 
@@ -77,7 +77,7 @@ public class ImageInspector {
 // TODO gsonBuilder shouldn't be an arg, but a class field
     public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String dockerImageName, final String dockerTagName) throws IntegrationException {
         // TODO can we reuse these?
-        DockerImageReader dockerImageReader = new DockerImageReader(gsonBuilder, fileOperations, imageConfigParser, manifestFactory, tarExtractionDirectory);
+        DockerImageReader dockerImageReader = new DockerImageReader(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, tarExtractionDirectory);
         return dockerImageReader.getLayerMapping(dockerImageName, dockerTagName);
     }
 

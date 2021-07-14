@@ -29,7 +29,7 @@ import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnu
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
@@ -50,10 +50,10 @@ public class DockerTarParser {
     private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private CmdExecutor executor;
-    private ManifestFactory manifestFactory;
+    private DockerManifestFactory dockerManifestFactory;
     private Os os;
-    private ImageConfigParser imageConfigParser;
-    private LayerConfigParser layerConfigParser;
+    private DockerImageConfigParser dockerImageConfigParser;
+    private DockerLayerConfigParser dockerLayerConfigParser;
     private FileOperations fileOperations;
     private List<PkgMgr> pkgMgrs;
     private PkgMgrExecutor pkgMgrExecutor;
@@ -79,18 +79,18 @@ public class DockerTarParser {
     }
 
     @Autowired
-    public void setManifestFactory(final ManifestFactory manifestFactory) {
-        this.manifestFactory = manifestFactory;
+    public void setManifestFactory(final DockerManifestFactory dockerManifestFactory) {
+        this.dockerManifestFactory = dockerManifestFactory;
     }
 
     @Autowired
-    public void setImageConfigParser(final ImageConfigParser imageConfigParser) {
-        this.imageConfigParser = imageConfigParser;
+    public void setImageConfigParser(final DockerImageConfigParser dockerImageConfigParser) {
+        this.dockerImageConfigParser = dockerImageConfigParser;
     }
 
     @Autowired
-    public void setLayerConfigParser(final LayerConfigParser layerConfigParser) {
-        this.layerConfigParser = layerConfigParser;
+    public void setLayerConfigParser(final DockerLayerConfigParser dockerLayerConfigParser) {
+        this.dockerLayerConfigParser = dockerLayerConfigParser;
     }
 
     @Autowired
@@ -142,7 +142,7 @@ public class DockerTarParser {
                     extractLayerTarToDir(targetImageFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
                 }
                 final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-                final List<String> layerCmd = layerConfigParser.parseCmd(gsonBuilder, layerMetadataFileContents);
+                final List<String> layerCmd = dockerLayerConfigParser.parseCmd(gsonBuilder, layerMetadataFileContents);
                 final boolean isPlatformTopLayer = isThisThePlatformTopLayer(manifestLayerMapping, platformTopLayerExternalId, layerIndex);
                 if (isPlatformTopLayer) {
                     imageComponentHierarchy.setPlatformTopLayerIndex(layerIndex);

@@ -19,7 +19,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @Component
-public class ImageConfigParser {
+public class DockerImageConfigParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public List<String> parseExternalLayerIds(final GsonBuilder gsonBuilder, final String imageConfigFileContents) {

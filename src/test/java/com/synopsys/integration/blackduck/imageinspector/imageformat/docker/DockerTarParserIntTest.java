@@ -44,7 +44,7 @@ import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
@@ -117,21 +117,21 @@ public class DockerTarParserIntTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(CmdExecutor.class), Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(pkgMgrOutput);
 
         final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setManifestFactory(new DockerManifestFactory());
         tarParser.setOs(new Os());
         tarParser.setFileOperations(new FileOperations());
         tarParser.setPkgMgrs(pkgMgrs);
         tarParser.setPkgMgrExecutor(pkgMgrExecutor);
         tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
-        tarParser.setImageConfigParser(new ImageConfigParser());
-        tarParser.setLayerConfigParser(new LayerConfigParser());
+        tarParser.setImageConfigParser(new DockerImageConfigParser());
+        tarParser.setLayerConfigParser(new DockerLayerConfigParser());
 
         TarOperations tarOperations = new TarOperations();
         tarOperations.setFileOperations(new FileOperations());
 
         File extractionDir = tarOperations.extractTarToGivenDir(imageDir, dockerTar);
         DockerImageReader dockerImageReader = new DockerImageReader(new GsonBuilder(), new FileOperations(),
-                new ImageConfigParser(), new ManifestFactory(), extractionDir);
+                new DockerImageConfigParser(), new DockerManifestFactory(), extractionDir);
         final List<TypedArchiveFile> layerTars = dockerImageReader.getLayerArchives();
         final ManifestLayerMapping layerMapping = dockerImageReader.getLayerMapping(IMAGE_NAME, IMAGE_TAG);
         assertEquals(2, layerMapping.getLayerInternalIds().size());
@@ -186,12 +186,12 @@ public class DockerTarParserIntTest {
         layerTars.add(new TypedArchiveFile(ArchiveFileType.TAR, dockerTar));
 
         final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setManifestFactory(new DockerManifestFactory());
         tarParser.setFileOperations(new FileOperations());
         tarParser.setPkgMgrs(pkgMgrs);
         tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
         tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
-        tarParser.setLayerConfigParser(new LayerConfigParser());
+        tarParser.setLayerConfigParser(new DockerLayerConfigParser());
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);
@@ -216,14 +216,14 @@ public class DockerTarParserIntTest {
         String tarFilename = "alpine.tar";
 
         final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setManifestFactory(new DockerManifestFactory());
         tarParser.setFileOperations(new FileOperations());
         tarParser.setPkgMgrs(pkgMgrs);
-        ImageConfigParser imageConfigParser = new ImageConfigParser();
-        tarParser.setImageConfigParser(imageConfigParser);
-        tarParser.setLayerConfigParser(new LayerConfigParser());
+        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
+        tarParser.setImageConfigParser(dockerImageConfigParser);
+        tarParser.setLayerConfigParser(new DockerLayerConfigParser());
         File imageDir = new File(tarExtractionDirectory, tarFilename);
-        DockerImageReader dockerImageReader = new DockerImageReader(new GsonBuilder(), new FileOperations(), new ImageConfigParser(), new ManifestFactory(), imageDir);
+        DockerImageReader dockerImageReader = new DockerImageReader(new GsonBuilder(), new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageDir);
         ManifestLayerMapping mapping = dockerImageReader.getLayerMapping("alpine", "latest");
         assertEquals("alpine", mapping.getImageName());
         assertEquals("latest", mapping.getTagName());
@@ -239,7 +239,7 @@ public class DockerTarParserIntTest {
         throws PkgMgrDataNotFoundException {
 
         final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setManifestFactory(new DockerManifestFactory());
         tarParser.setOs(new Os());
         tarParser.setFileOperations(new FileOperations());
         tarParser.setPkgMgrs(pkgMgrs);

@@ -24,9 +24,9 @@ import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerTarExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LayerConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerConfigParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
@@ -67,19 +67,19 @@ public class ImageInspectorApiIntTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(CmdExecutor.class), Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkOutput);
 
         DockerTarParser dockerTarParser = new DockerTarParser();
-        dockerTarParser.setManifestFactory(new ManifestFactory());
+        dockerTarParser.setManifestFactory(new DockerManifestFactory());
         dockerTarParser.setOs(os);
         dockerTarParser.setFileOperations(new FileOperations());
         dockerTarParser.setPkgMgrs(pkgMgrs);
         dockerTarParser.setPkgMgrExecutor(pkgMgrExecutor);
         dockerTarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
-        dockerTarParser.setImageConfigParser(new ImageConfigParser());
-        dockerTarParser.setLayerConfigParser(new LayerConfigParser());
+        dockerTarParser.setImageConfigParser(new DockerImageConfigParser());
+        dockerTarParser.setLayerConfigParser(new DockerLayerConfigParser());
         PkgMgrFactory pkgMgrFactory = new PkgMgrFactory();
         TarOperations tarOperations = new TarOperations();
         tarOperations.setFileOperations(fileOperations);
         ImageInspector imageInspector = new ImageInspector(dockerTarParser, tarOperations, new GsonBuilder(),
-                new FileOperations(), new ImageConfigParser(), new ManifestFactory());
+                new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory());
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());
         imageInspectorApi.setBdioGenerator(TestUtils.createBdioGenerator());

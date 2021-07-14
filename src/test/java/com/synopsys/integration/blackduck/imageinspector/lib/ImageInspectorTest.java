@@ -11,8 +11,8 @@ import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ class ImageInspectorTest {
         tarOperations = Mockito.mock(TarOperations.class);
         // TODO should some of these be mocked?
         imageInspector = new ImageInspector(tarParser, tarOperations, new GsonBuilder(),
-                new FileOperations(), new ImageConfigParser(), new ManifestFactory());
+                new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory());
     }
 
     @Test

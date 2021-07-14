@@ -11,7 +11,7 @@ import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.exception.IntegrationException;
@@ -29,15 +29,15 @@ public class DockerImageReader {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final GsonBuilder gsonBuilder;
     private final FileOperations fileOperations;
-    private final ImageConfigParser imageConfigParser;
-    private final ManifestFactory manifestFactory;
+    private final DockerImageConfigParser dockerImageConfigParser;
+    private final DockerManifestFactory dockerManifestFactory;
     private final File imageDir;
 
-    public DockerImageReader(GsonBuilder gsonBuilder, FileOperations fileOperations, ImageConfigParser imageConfigParser, ManifestFactory manifestFactory, File imageDir) {
+    public DockerImageReader(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory, File imageDir) {
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
-        this.imageConfigParser = imageConfigParser;
-        this.manifestFactory = manifestFactory;
+        this.dockerImageConfigParser = dockerImageConfigParser;
+        this.dockerManifestFactory = dockerManifestFactory;
         this.imageDir = imageDir;
     }
 
@@ -63,7 +63,7 @@ public class DockerImageReader {
     public ManifestLayerMapping getLayerMapping(final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
         logger.debug(String.format("unpackedImageDir: %s", imageDir));
-        final DockerManifest manifest = manifestFactory.createManifest(imageDir);
+        final DockerManifest manifest = dockerManifestFactory.createManifest(imageDir);
         ManifestLayerMapping partialMapping;
         try {
             partialMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
@@ -85,7 +85,7 @@ public class DockerImageReader {
             final String imageConfigFileContents = fileOperations
                     .readFileToString(imageConfigFile);
             logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            return imageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents);
+            return dockerImageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents);
         } catch (Exception e) {
             logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
         }

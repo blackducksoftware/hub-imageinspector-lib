@@ -24,7 +24,7 @@ import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
@@ -81,10 +81,10 @@ public class WhiteoutFileTest {
         layerTars.add(new TypedArchiveFile(ArchiveFileType.TAR, dockerTar));
 
         final DockerTarParser tarParser = new DockerTarParser();
-        tarParser.setManifestFactory(new ManifestFactory());
+        tarParser.setManifestFactory(new DockerManifestFactory());
         tarParser.setFileOperations(new FileOperations());
-        tarParser.setImageConfigParser(new ImageConfigParser());
-        tarParser.setLayerConfigParser(new LayerConfigParser());
+        tarParser.setImageConfigParser(new DockerImageConfigParser());
+        tarParser.setLayerConfigParser(new DockerLayerConfigParser());
         tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
         tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
         tarParser.setExecutor(new CmdExecutor());

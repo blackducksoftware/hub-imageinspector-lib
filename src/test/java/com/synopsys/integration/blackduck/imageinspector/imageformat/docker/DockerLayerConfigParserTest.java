@@ -13,12 +13,12 @@ import org.junit.jupiter.api.Test;
 
 import com.google.gson.GsonBuilder;
 
-public class LayerConfigParserTest {
+public class DockerLayerConfigParserTest {
 
     @Test
     public void testImageConfigParser() throws IOException {
         final String layerConfigFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/app/layerConfig/layerWithCmd/json"), StandardCharsets.UTF_8);
-        LayerConfigParser parser = new LayerConfigParser();
+        DockerLayerConfigParser parser = new DockerLayerConfigParser();
         List<String> layerCommandParts = parser.parseCmd(new GsonBuilder(), layerConfigFileContents);
         assertEquals(3, layerCommandParts.size());
         assertEquals("/bin/sh", layerCommandParts.get(0));
@@ -29,7 +29,7 @@ public class LayerConfigParserTest {
     @Test
     public void testImageConfigParserNoCmd() throws IOException {
         final String layerConfigFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/app/layerConfig/layerWithoutCmd/json"), StandardCharsets.UTF_8);
-        LayerConfigParser parser = new LayerConfigParser();
+        DockerLayerConfigParser parser = new DockerLayerConfigParser();
         List<String> layerCommandParts = parser.parseCmd(new GsonBuilder(), layerConfigFileContents);
         assertTrue(layerCommandParts.isEmpty());
     }
