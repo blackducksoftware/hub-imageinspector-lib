@@ -75,6 +75,10 @@ public class DockerManifest extends Stringable {
                 logger.trace(String.format("Found the targetRepoTag %s", targetRepoTag));
                 return repoTag;
             }
+            if (targetRepoTag.endsWith("/" + repoTag)) {
+                logger.trace(String.format("Matched the targetRepoTag %s to %s by ignoring the repository prefix", targetRepoTag, repoTag));
+                return repoTag;
+            }
         }
         return null;
     }
