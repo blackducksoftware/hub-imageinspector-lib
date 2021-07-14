@@ -8,7 +8,6 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class DockerManifestTest {
@@ -18,8 +17,6 @@ public class DockerManifestTest {
         final File tarExtractionDirectory = new File("src/test/resources/extraction");
         final String dockerTarFileName = "alpine.tar";
         DockerManifest manifest = new DockerManifest(new File(tarExtractionDirectory, dockerTarFileName));
-        final ManifestLayerMappingFactory manifestLayerMappingFactory = new ManifestLayerMappingFactory();
-        manifest.setManifestLayerMappingFactory(manifestLayerMappingFactory);
         final String targetImageName = "alpine";
         final String targetTagName = "latest";
         ManifestLayerMapping manifestLayerMapping = manifest.getLayerMapping(targetImageName, targetTagName);
@@ -38,8 +35,6 @@ public class DockerManifestTest {
         final File tarExtractionDirectory = new File("src/test/resources/extraction");
         final String dockerTarFileName = "alpine.tar";
         DockerManifest manifest = new DockerManifest(new File(tarExtractionDirectory, dockerTarFileName));
-        final ManifestLayerMappingFactory manifestLayerMappingFactory = new ManifestLayerMappingFactory();
-        manifest.setManifestLayerMappingFactory(manifestLayerMappingFactory);
         final String targetImageName = "docker.io/alpine";
         final String targetTagName = "latest";
         ManifestLayerMapping manifestLayerMapping = manifest.getLayerMapping(targetImageName, targetTagName);

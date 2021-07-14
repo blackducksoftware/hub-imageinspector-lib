@@ -25,7 +25,6 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
@@ -73,8 +72,7 @@ public class ImageInspectorApiTest {
         Mockito.when(imageInspector.getLayerArchives(extractionDir))
                 .thenReturn(layerTarFiles);
         List<String> layers = new ArrayList<>();
-        ManifestLayerMapping mapping = (new ManifestLayerMappingFactory())
-                                           .createManifestLayerMapping(dockerImageName, dockerTagName, "testConfig", layers);
+        ManifestLayerMapping mapping = new ManifestLayerMapping(dockerImageName, dockerTagName, "testConfig", layers);
         Mockito.when(imageInspector
                          .getLayerMapping(gsonBuilder, imageDir, dockerImageName,
                              dockerTagName)).thenReturn(mapping);

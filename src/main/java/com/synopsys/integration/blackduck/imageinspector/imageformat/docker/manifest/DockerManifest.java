@@ -24,7 +24,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.util.Stringable;
 
@@ -32,14 +31,8 @@ public class DockerManifest extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final File tarExtractionDirectory;
 
-    private ManifestLayerMappingFactory manifestLayerMappingFactory;
-
     public DockerManifest(final File tarExtractionDirectory) {
         this.tarExtractionDirectory = tarExtractionDirectory;
-    }
-
-    public void setManifestLayerMappingFactory(final ManifestLayerMappingFactory manifestLayerMappingFactory) {
-        this.manifestLayerMappingFactory = manifestLayerMappingFactory;
     }
 
     public ManifestLayerMapping getLayerMapping(final String targetImageName, final String targetTagName) throws IntegrationException, IOException {
@@ -95,7 +88,7 @@ public class DockerManifest extends Stringable {
         for (final String layer : image.layers) {
             layerIds.add(layer.substring(0, layer.indexOf('/')));
         }
-        final ManifestLayerMapping mapping = manifestLayerMappingFactory.createManifestLayerMapping(imageName, tagName, image.config, layerIds);
+        final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, image.config, layerIds);
         logger.trace(String.format("Found layer mapping: Image %s, Tag %s, Layers: %s", mapping.getImageName(), mapping.getTagName(), mapping.getLayerInternalIds()));
         return mapping;
     }

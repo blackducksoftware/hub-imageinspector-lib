@@ -11,6 +11,8 @@ import java.util.List;
 
 import com.synopsys.integration.util.Stringable;
 
+// TODO I'm not sure the imageConfigFilename should be here; without it, this is more likely to
+// be format independent
 public class ManifestLayerMapping extends Stringable {
     private final String imageName;
     private final String tagName;
@@ -18,6 +20,8 @@ public class ManifestLayerMapping extends Stringable {
     private final List<String> layerInternalIds;
     private final List<String> layerExternalIds;
 
+    // TODO this looks Docker specific?
+    // TODO should be two classes, not one
     public ManifestLayerMapping(final String imageName, final String tagName, final String imageConfigFilename, final List<String> layers) {
         this.imageName = imageName;
         this.tagName = tagName;
@@ -26,11 +30,11 @@ public class ManifestLayerMapping extends Stringable {
         this.layerExternalIds = null;
     }
 
-    public ManifestLayerMapping(final ManifestLayerMapping partialManafestLayerMapping, final List<String> layerExternalIds) {
-        this.imageName = partialManafestLayerMapping.getImageName();
-        this.tagName = partialManafestLayerMapping.getTagName();
-        this.imageConfigFilename = partialManafestLayerMapping.getImageConfigFilename();
-        this.layerInternalIds = partialManafestLayerMapping.getLayerInternalIds();
+    public ManifestLayerMapping(final ManifestLayerMapping partialManifestLayerMapping, final List<String> layerExternalIds) {
+        this.imageName = partialManifestLayerMapping.getImageName();
+        this.tagName = partialManifestLayerMapping.getTagName();
+        this.imageConfigFilename = partialManifestLayerMapping.getImageConfigFilename();
+        this.layerInternalIds = partialManifestLayerMapping.getLayerInternalIds();
         this.layerExternalIds = layerExternalIds;
     }
 
