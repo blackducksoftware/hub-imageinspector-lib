@@ -11,13 +11,13 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappin
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappingFactory;
 import com.synopsys.integration.exception.IntegrationException;
 
-public class ManifestTest {
+public class DockerManifestTest {
 
     @Test
     public void test() throws IOException, IntegrationException {
         final File tarExtractionDirectory = new File("src/test/resources/extraction");
         final String dockerTarFileName = "alpine.tar";
-        Manifest manifest = new Manifest(new File(tarExtractionDirectory, dockerTarFileName));
+        DockerManifest manifest = new DockerManifest(new File(tarExtractionDirectory, dockerTarFileName));
         final ManifestLayerMappingFactory manifestLayerMappingFactory = new ManifestLayerMappingFactory();
         manifest.setManifestLayerMappingFactory(manifestLayerMappingFactory);
         final String targetImageName = "alpine";

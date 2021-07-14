@@ -28,13 +28,13 @@ import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMappin
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.util.Stringable;
 
-public class Manifest extends Stringable {
+public class DockerManifest extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final File tarExtractionDirectory;
 
     private ManifestLayerMappingFactory manifestLayerMappingFactory;
 
-    public Manifest(final File tarExtractionDirectory) {
+    public DockerManifest(final File tarExtractionDirectory) {
         this.tarExtractionDirectory = tarExtractionDirectory;
     }
 

@@ -22,7 +22,7 @@ import org.mockito.Mockito;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
@@ -117,7 +117,7 @@ public class DockerTarParserTest {
         FileUtils.deleteDirectory(tarExtractionDirectory);
         tarExtractionDirectory.mkdir();
 
-        Manifest manifest = Mockito.mock(Manifest.class);
+        DockerManifest manifest = Mockito.mock(DockerManifest.class);
         Mockito.when(manifestFactory.createManifest(Mockito.any(File.class))).thenReturn(manifest);
         final String imageConfigFilename = "caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json";
         final List<String> layerInternalIds = Arrays.asList("testLayer1", "testLayer2");

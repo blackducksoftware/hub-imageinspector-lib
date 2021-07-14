@@ -8,23 +8,15 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import org.apache.commons.collections.ListUtils;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +29,6 @@ import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnu
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;

@@ -7,11 +7,10 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.Manifest;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
@@ -64,7 +63,7 @@ public class DockerImageReader {
     public ManifestLayerMapping getLayerMapping(final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
         logger.debug(String.format("unpackedImageDir: %s", imageDir));
-        final Manifest manifest = manifestFactory.createManifest(imageDir);
+        final DockerManifest manifest = manifestFactory.createManifest(imageDir);
         ManifestLayerMapping partialMapping;
         try {
             partialMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
