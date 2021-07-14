@@ -95,14 +95,17 @@ public class DockerTarParserTest {
         final File tarExtractionDirectory = new File("test/extraction");
         FileUtils.deleteDirectory(tarExtractionDirectory);
         tarExtractionDirectory.mkdir();
-        File destinationDir = new File(tarExtractionDirectory, dockerTar.getName());
+        File imageDir = new File(tarExtractionDirectory, dockerTar.getName());
         // TODO Should test these separately?
-        File extractionDir = tarOperations.extractTarToGivenDir(destinationDir, dockerTar);
-        List<TypedArchiveFile> layerTars = tarParser.getLayerArchives(extractionDir);
+        File extractionDir = tarOperations.extractTarToGivenDir(imageDir, dockerTar);
+        DockerImageReader dockerImageReader = new DockerImageReader(new GsonBuilder(), new FileOperations(), new ImageConfigParser(),
+                new ManifestFactory(), extractionDir);
+        List<TypedArchiveFile> layerTars = dockerImageReader.getLayerArchives();
         assertEquals(1, layerTars.size());
         assertEquals("layer.tar", layerTars.get(0).getFile().getName());
     }
 
+    // TODO some of these tests, like this one, are testing methods that have moved to DockerImageReader
     @Test
     public void testGetLayerMapping() throws IOException, IntegrationException {
         final String imageTarFilename = "alpine.tar";
@@ -129,8 +132,9 @@ public class DockerTarParserTest {
         Mockito.when(fileOperations
                          .readFileToString(imageConfigMockedFile)).thenReturn(imageConfigFileContents);
         Mockito.when(imageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
-        File destinationDir = new File(tarExtractionDirectory, imageTarFilename);
-        ManifestLayerMapping mapping = tarParser.getLayerMapping(gsonBuilder, destinationDir, imageName, imageTag);
+        File imageDir = new File(tarExtractionDirectory, imageTarFilename);
+        DockerImageReader dockerImageReader = new DockerImageReader(gsonBuilder, fileOperations, imageConfigParser, manifestFactory, imageDir);
+        ManifestLayerMapping mapping = dockerImageReader.getLayerMapping(imageName, imageTag);
         assertEquals(imageName, mapping.getImageName());
         assertEquals(imageTag, mapping.getTagName());
         assertEquals(layerInternalIds.get(0), mapping.getLayerInternalIds().get(0));
@@ -158,9 +162,9 @@ public class DockerTarParserTest {
         final File manifestFile = new File(mockedImageTarContentsDir, "manifest.json");
         final File configFile = new File(mockedImageTarContentsDir, imageConfigFileName);
         final File[] filesInImageTar = { manifestFile, configFile };
-        File destinationDir = new File(tarExtractionDirectory, imageTarFilename);
+        File imageDir = new File(tarExtractionDirectory, imageTarFilename);
         Mockito.when(fileOperations.listFilesInDir(new File(tarExtractionDirectory, imageTarFilename))).thenReturn(filesInImageTar);
-        final ImageComponentHierarchy imageComponentHierarchy = tarParser.createInitialImageComponentHierarchy(destinationDir, fullManifestLayerMapping);
+        final ImageComponentHierarchy imageComponentHierarchy = tarParser.createInitialImageComponentHierarchy(imageDir, fullManifestLayerMapping);
         assertTrue(imageComponentHierarchy.getManifestFileContents().contains(String.format("%s:%s", imageName, imageTag)));
         assertTrue(imageComponentHierarchy.getImageConfigFileContents().contains("sha256:503e53e365f34399c4d58d8f4e23c161106cfbce4400e3d0a0357967bad69390"));
     }

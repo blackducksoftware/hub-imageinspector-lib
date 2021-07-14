@@ -11,6 +11,8 @@ import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageConfigParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +41,9 @@ class ImageInspectorTest {
     public void setUpEach() {
         tarParser = Mockito.mock(DockerTarParser.class);
         tarOperations = Mockito.mock(TarOperations.class);
-        imageInspector = new ImageInspector(tarParser, tarOperations);
+        // TODO should some of these be mocked?
+        imageInspector = new ImageInspector(tarParser, tarOperations, new GsonBuilder(),
+                new FileOperations(), new ImageConfigParser(), new ManifestFactory());
     }
 
     @Test
@@ -53,46 +57,45 @@ class ImageInspectorTest {
     void testExtractImageTar() throws IOException {
         File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
         File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-        File destinationDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-        imageInspector.extractImageTar(destinationDir, dockerTarfile);
-        Mockito.verify(tarOperations).extractTarToGivenDir(destinationDir, dockerTarfile);
+        File imageDir = new File(tarExtractionDirectory, dockerTarfile.getName());
+        imageInspector.extractImageTar(imageDir, dockerTarfile);
+        Mockito.verify(tarOperations).extractTarToGivenDir(imageDir, dockerTarfile);
     }
 
-    @Test
-    void testGetLayerArchives() throws IOException {
-        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
-        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-        File extractionDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-        List<TypedArchiveFile> layerTars = imageInspector.getLayerArchives(extractionDir);
-        Mockito.verify(tarParser).getLayerArchives(extractionDir);
-        // TODO verify value of layerTars?
-    }
-
-    @Test
-    void testGetLayerMapping() throws IntegrationException {
-        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
-        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-        File destinationDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        String imageRepo = "alpine";
-        String imageTag = "latest";
-        imageInspector.getLayerMapping(gsonBuilder, destinationDir, imageRepo, imageTag);
-        Mockito.verify(tarParser).getLayerMapping(gsonBuilder, destinationDir, imageRepo, imageTag);
-    }
+    // TODO these seems pointless
+//    @Test
+//    void testGetLayerArchives() throws IOException {
+//        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
+//        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
+//        File extractionDir = new File(tarExtractionDirectory, dockerTarfile.getName());
+//        List<TypedArchiveFile> layerTars = imageInspector.getLayerArchives(extractionDir);
+//        Mockito.verify(tarParser).getLayerArchives(extractionDir);
+//    }
+//    @Test
+//    void testGetLayerMapping() throws IntegrationException {
+//        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
+//        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
+//        File imageDir = new File(tarExtractionDirectory, dockerTarfile.getName());
+//        GsonBuilder gsonBuilder = new GsonBuilder();
+//        String imageRepo = "alpine";
+//        String imageTag = "latest";
+//        imageInspector.getLayerMapping(gsonBuilder, imageDir, imageRepo, imageTag);
+//        Mockito.verify(tarParser).getLayerMapping(gsonBuilder, imageDir, imageRepo, imageTag);
+//    }
 
     @Test
     void testCreateInitialImageComponentHierarchy() throws IntegrationException {
         File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
         File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-        File destinationDir = new File(tarExtractionDirectory, dockerTarfile.getName());
+        File imageDir = new File(tarExtractionDirectory, dockerTarfile.getName());
         String imageRepo = "alpine";
         String imageTag = "latest";
 
         String imageConfigFileContents = "testConfig";
         List<String> layers = getLayers();
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(imageRepo, imageTag, imageConfigFileContents, layers);
-        imageInspector.createInitialImageComponentHierarchy(destinationDir, manifestLayerMapping);
-        Mockito.verify(tarParser).createInitialImageComponentHierarchy(destinationDir, manifestLayerMapping);
+        imageInspector.createInitialImageComponentHierarchy(imageDir, manifestLayerMapping);
+        Mockito.verify(tarParser).createInitialImageComponentHierarchy(imageDir, manifestLayerMapping);
     }
 
     @Test

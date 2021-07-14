@@ -56,7 +56,6 @@ import com.synopsys.integration.exception.IntegrationException;
 
 @Component
 public class DockerTarParser {
-    private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private CmdExecutor executor;
@@ -113,42 +112,7 @@ public class DockerTarParser {
         this.dockerLayerTarExtractor = dockerLayerTarExtractor;
     }
 
-    public List<TypedArchiveFile> getLayerArchives(final File unpackedImageDir) throws IOException {
-        logger.debug(String.format("Searching for layer archive files in unpackedImageDir: %s", unpackedImageDir.getAbsolutePath()));
-        final List<TypedArchiveFile> untaredLayerFiles = new ArrayList<>();
-        List<File> unpackedImageTopLevelFiles = Arrays.asList(unpackedImageDir.listFiles());
-        for (File unpackedImageTopLevelFile : unpackedImageTopLevelFiles) {
-            if (unpackedImageTopLevelFile.isDirectory()) {
-                List<File> unpackedImageSecondLevelFiles = Arrays.asList(unpackedImageTopLevelFile.listFiles());
-                for (File unpackedImageSecondLevelFile : unpackedImageSecondLevelFiles) {
-                    if (unpackedImageSecondLevelFile.isFile() && unpackedImageSecondLevelFile.getName().equals(DOCKER_LAYER_TAR_FILENAME)) {
-                        TypedArchiveFile typedArchiveFile = new TypedArchiveFile(ArchiveFileType.TAR, unpackedImageSecondLevelFile);
-                        untaredLayerFiles.add(typedArchiveFile);
-                    }
-                }
-            }
-        }
-        return untaredLayerFiles;
-    }
 
-    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File unpackedImageDir, final String dockerImageName, final String dockerTagName) throws IntegrationException {
-        logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
-        logger.debug(String.format("unpackedImageDir: %s", unpackedImageDir));
-        final Manifest manifest = manifestFactory.createManifest(unpackedImageDir);
-        ManifestLayerMapping partialMapping;
-        try {
-            partialMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
-        } catch (final Exception e) {
-            final String msg = String.format("Could not parse the image manifest file : %s", e.getMessage());
-            logger.error(msg);
-            throw new IntegrationException(msg, e);
-        }
-        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(gsonBuilder, unpackedImageDir, partialMapping.getImageConfigFilename());
-        if (externalLayerIds.isEmpty()) {
-            return partialMapping;
-        }
-        return new ManifestLayerMapping(partialMapping, externalLayerIds);
-    }
 
     public ImageComponentHierarchy createInitialImageComponentHierarchy(final File unpackedImageDir, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
         String manifestFileContents = null;
@@ -229,19 +193,6 @@ public class DockerTarParser {
         List<ComponentDetails> netComponents = ListUtils.subtract(grossComponents, componentsToOmit);
         logger.debug(String.format("grossComponents: %d, componentsToOmit: %d, netComponents: %d", grossComponents.size(), componentsToOmit.size(), netComponents.size()));
         return netComponents;
-    }
-
-    private List<String> getExternalLayerIdsFromImageConfigFile(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String imageConfigFileName) {
-        try {
-            final File imageConfigFile = new File(tarExtractionDirectory, imageConfigFileName);
-            final String imageConfigFileContents = fileOperations
-                                                       .readFileToString(imageConfigFile);
-            logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            return imageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents);
-        } catch (Exception e) {
-            logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
-        }
-        return new ArrayList<>(0);
     }
 
     private Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {
