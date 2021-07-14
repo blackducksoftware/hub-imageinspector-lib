@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DockerImageReader {
+public class DockerImageDirectory {
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final GsonBuilder gsonBuilder;
@@ -33,7 +33,7 @@ public class DockerImageReader {
     private final DockerManifestFactory dockerManifestFactory;
     private final File imageDir;
 
-    public DockerImageReader(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory, File imageDir) {
+    public DockerImageDirectory(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory, File imageDir) {
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
         this.dockerImageConfigParser = dockerImageConfigParser;

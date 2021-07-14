@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageReader;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
@@ -60,25 +60,14 @@ public class ImageInspector {
         return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
     }
 
-    public File extractImageTar(final File tarExtractionDirectory, final File dockerTar) throws IOException {
-        return tarOperations.extractTarToGivenDir(tarExtractionDirectory, dockerTar);
+    public DockerImageDirectory extractImageTar(final File tarExtractionDirectory, final File dockerTar) throws IOException {
+        File imageDir = tarOperations.extractTarToGivenDir(tarExtractionDirectory, dockerTar);
+        return new DockerImageDirectory(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
     }
 
-    public List<TypedArchiveFile> getLayerArchives(final File extractionDir) throws IOException {
-        // TODO can we reuse these?
-        DockerImageReader dockerImageReader = new DockerImageReader(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, extractionDir);
-        return dockerImageReader.getLayerArchives();
-    }
-
-    public ImageInfoParsed extractDockerLayers(final GsonBuilder gsonBuilder, final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy, final TargetImageFileSystem targetImageFileSystem, final List<TypedArchiveFile> layerTars,
+    public ImageInfoParsed extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy, final TargetImageFileSystem targetImageFileSystem, final List<TypedArchiveFile> layerTars,
         final ManifestLayerMapping layerMapping, final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
-        return tarParser.extractImageLayers(gsonBuilder, currentOs, targetLinuxDistroOverride, imageComponentHierarchy, targetImageFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
-    }
-// TODO gsonBuilder shouldn't be an arg, but a class field
-    public ManifestLayerMapping getLayerMapping(final GsonBuilder gsonBuilder, final File tarExtractionDirectory, final String dockerImageName, final String dockerTagName) throws IntegrationException {
-        // TODO can we reuse these?
-        DockerImageReader dockerImageReader = new DockerImageReader(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, tarExtractionDirectory);
-        return dockerImageReader.getLayerMapping(dockerImageName, dockerTagName);
+        return tarParser.extractImageLayers(currentOs, targetLinuxDistroOverride, imageComponentHierarchy, targetImageFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
     }
 
     public ImageComponentHierarchy createInitialImageComponentHierarchy(final File tarExtractionDirectory, final ManifestLayerMapping manifestLayerMapping) throws IntegrationException {

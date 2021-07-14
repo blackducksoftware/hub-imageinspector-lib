@@ -127,7 +127,7 @@ public class DockerTarParser {
         return new ImageComponentHierarchy(manifestFileContents, configFileContents);
     }
 
-    public ImageInfoParsed extractImageLayers(final GsonBuilder gsonBuilder, final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy,
+    public ImageInfoParsed extractImageLayers(ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ImageComponentHierarchy imageComponentHierarchy,
         final TargetImageFileSystem targetImageFileSystem, final List<TypedArchiveFile> layerTars, final ManifestLayerMapping manifestLayerMapping,
         final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
         ImageInfoParsed imageInfoParsed = null;
@@ -142,7 +142,7 @@ public class DockerTarParser {
                     extractLayerTarToDir(targetImageFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
                 }
                 final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-                final List<String> layerCmd = dockerLayerConfigParser.parseCmd(gsonBuilder, layerMetadataFileContents);
+                final List<String> layerCmd = dockerLayerConfigParser.parseCmd(layerMetadataFileContents);
                 final boolean isPlatformTopLayer = isThisThePlatformTopLayer(manifestLayerMapping, platformTopLayerExternalId, layerIndex);
                 if (isPlatformTopLayer) {
                     imageComponentHierarchy.setPlatformTopLayerIndex(layerIndex);

@@ -124,21 +124,21 @@ public class DockerTarParserIntTest {
         tarParser.setPkgMgrExecutor(pkgMgrExecutor);
         tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
         tarParser.setImageConfigParser(new DockerImageConfigParser());
-        tarParser.setLayerConfigParser(new DockerLayerConfigParser());
+        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
 
         TarOperations tarOperations = new TarOperations();
         tarOperations.setFileOperations(new FileOperations());
 
         File extractionDir = tarOperations.extractTarToGivenDir(imageDir, dockerTar);
-        DockerImageReader dockerImageReader = new DockerImageReader(new GsonBuilder(), new FileOperations(),
+        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new GsonBuilder(), new FileOperations(),
                 new DockerImageConfigParser(), new DockerManifestFactory(), extractionDir);
-        final List<TypedArchiveFile> layerTars = dockerImageReader.getLayerArchives();
-        final ManifestLayerMapping layerMapping = dockerImageReader.getLayerMapping(IMAGE_NAME, IMAGE_TAG);
+        final List<TypedArchiveFile> layerTars = dockerImageDirectory.getLayerArchives();
+        final ManifestLayerMapping layerMapping = dockerImageDirectory.getLayerMapping(IMAGE_NAME, IMAGE_TAG);
         assertEquals(2, layerMapping.getLayerInternalIds().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.CENTOS, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
+        tarParser.extractImageLayers(ImageInspectorOsEnum.CENTOS, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
         ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem, null);
         assertEquals("image_blackducksoftware_centos_minus_vim_plus_bacula_v_1.0", imageInfoParsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
         assertEquals("RPM", imageInfoParsed.getPkgMgr().getType().name());
@@ -191,7 +191,7 @@ public class DockerTarParserIntTest {
         tarParser.setPkgMgrs(pkgMgrs);
         tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
         tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
-        tarParser.setLayerConfigParser(new DockerLayerConfigParser());
+        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);
@@ -200,7 +200,7 @@ public class DockerTarParserIntTest {
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.UBUNTU, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
+        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));
@@ -221,10 +221,11 @@ public class DockerTarParserIntTest {
         tarParser.setPkgMgrs(pkgMgrs);
         DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
         tarParser.setImageConfigParser(dockerImageConfigParser);
-        tarParser.setLayerConfigParser(new DockerLayerConfigParser());
+        // TODO reuse a GsonBuilder
+        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
         File imageDir = new File(tarExtractionDirectory, tarFilename);
-        DockerImageReader dockerImageReader = new DockerImageReader(new GsonBuilder(), new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageDir);
-        ManifestLayerMapping mapping = dockerImageReader.getLayerMapping("alpine", "latest");
+        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new GsonBuilder(), new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageDir);
+        ManifestLayerMapping mapping = dockerImageDirectory.getLayerMapping("alpine", "latest");
         assertEquals("alpine", mapping.getImageName());
         assertEquals("latest", mapping.getTagName());
         assertTrue(mapping.getLayerExternalId(0).startsWith("sha256:"));

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectory;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,9 +190,9 @@ public class ImageInspectorApi {
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
         File tarExtractionDirectory = new File(tarExtractionBaseDirectory, dockerTarfile.getName());
-        final File extractionDir = imageInspector.extractImageTar(tarExtractionDirectory, dockerTarfile);
-        final List<TypedArchiveFile> layerTars = imageInspector.getLayerArchives(extractionDir);
-        final ManifestLayerMapping manifestLayerMapping = imageInspector.getLayerMapping(gsonBuilder, tarExtractionDirectory, imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
+        final DockerImageDirectory dockerImageDirectory = imageInspector.extractImageTar(tarExtractionDirectory, dockerTarfile);
+        final List<TypedArchiveFile> layerTars = dockerImageDirectory.getLayerArchives();
+        final ManifestLayerMapping manifestLayerMapping = dockerImageDirectory.getLayerMapping(imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
         final ImageComponentHierarchy imageComponentHierarchy = imageInspector.createInitialImageComponentHierarchy(tarExtractionDirectory, manifestLayerMapping);
         final String imageRepo = manifestLayerMapping.getImageName();
         final String imageTag = manifestLayerMapping.getTagName();
@@ -205,7 +206,7 @@ public class ImageInspectorApi {
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
         final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
         final ImageInfoParsed imageInfoParsed = imageInspector
-                                                    .extractDockerLayers(gsonBuilder, currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping,
+                                                    .extractDockerLayers(currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), imageComponentHierarchy, targetImageFileSystem, layerTars, manifestLayerMapping,
                                                         imageInspectionRequest.getPlatformTopLayerExternalId());
         validatePlatformResults(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
         logLayers(imageComponentHierarchy);

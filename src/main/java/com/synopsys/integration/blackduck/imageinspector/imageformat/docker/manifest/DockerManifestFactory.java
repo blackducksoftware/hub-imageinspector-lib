@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DockerManifestFactory {
-// TODO this class should be removed
+
     public DockerManifest createManifest(final File tarExtractionDirectory) {
         final DockerManifest manifest = new DockerManifest(tarExtractionDirectory);
         return manifest;

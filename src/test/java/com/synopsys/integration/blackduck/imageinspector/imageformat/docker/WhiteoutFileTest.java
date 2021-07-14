@@ -84,7 +84,7 @@ public class WhiteoutFileTest {
         tarParser.setManifestFactory(new DockerManifestFactory());
         tarParser.setFileOperations(new FileOperations());
         tarParser.setImageConfigParser(new DockerImageConfigParser());
-        tarParser.setLayerConfigParser(new DockerLayerConfigParser());
+        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
         tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
         tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
         tarParser.setExecutor(new CmdExecutor());
@@ -98,7 +98,7 @@ public class WhiteoutFileTest {
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
 
-        tarParser.extractImageLayers(new GsonBuilder(), ImageInspectorOsEnum.UBUNTU, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
+        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, null, new ImageComponentHierarchy(null, null), targetImageFileSystem, layerTars, layerMapping, null);
 
         return targetImageFileSystemRootDir;
     }

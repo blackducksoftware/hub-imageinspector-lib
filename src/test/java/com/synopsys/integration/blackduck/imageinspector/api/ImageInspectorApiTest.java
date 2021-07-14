@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectory;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -65,16 +66,16 @@ public class ImageInspectorApiTest {
         Mockito.when(imageInspector.getTarExtractionDirectory(Mockito.any(File.class)))
             .thenReturn(tarExtractionDirectory);
 
-        File extractionDir = Mockito.mock(File.class);
+        DockerImageDirectory dockerImageDirectory = Mockito.mock(DockerImageDirectory.class);
         List<TypedArchiveFile> layerTarFiles = new ArrayList<>();
         Mockito.when(imageInspector.extractImageTar(Mockito.any(File.class), Mockito.any(File.class)))
-            .thenReturn(extractionDir);
-        Mockito.when(imageInspector.getLayerArchives(extractionDir))
+            .thenReturn(dockerImageDirectory);
+        Mockito.when(dockerImageDirectory.getLayerArchives())
                 .thenReturn(layerTarFiles);
         List<String> layers = new ArrayList<>();
         ManifestLayerMapping mapping = new ManifestLayerMapping(dockerImageName, dockerTagName, "testConfig", layers);
-        Mockito.when(imageInspector
-                         .getLayerMapping(gsonBuilder, imageDir, dockerImageName,
+        Mockito.when(dockerImageDirectory
+                         .getLayerMapping(dockerImageName,
                              dockerTagName)).thenReturn(mapping);
 
         ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy(
@@ -95,7 +96,7 @@ public class ImageInspectorApiTest {
             new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
                 PackageManagerEnum.APK), "apline", new ApkPkgMgr(new FileOperations()));
         Mockito.when(imageInspector
-                         .extractDockerLayers(gsonBuilder, ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy,
+                         .extractDockerLayers(ImageInspectorOsEnum.ALPINE, null, imageComponentHierarchy,
                              targetImageFileSystem,
                              layerTarFiles, mapping, null)).thenReturn(imageInfoParsed);
 

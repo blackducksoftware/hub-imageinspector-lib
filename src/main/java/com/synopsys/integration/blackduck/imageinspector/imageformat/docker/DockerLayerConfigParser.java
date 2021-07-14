@@ -22,8 +22,13 @@ import com.google.gson.JsonObject;
 @Component
 public class DockerLayerConfigParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final GsonBuilder gsonBuilder;
 
-    public List<String> parseCmd(final GsonBuilder gsonBuilder, final String layerConfigFileContents) {
+    public DockerLayerConfigParser(GsonBuilder gsonBuilder) {
+        this.gsonBuilder = gsonBuilder;
+    }
+
+    public List<String> parseCmd(String layerConfigFileContents) {
         try {
             if (StringUtils.isBlank(layerConfigFileContents)) {
                 return new ArrayList<>(0);

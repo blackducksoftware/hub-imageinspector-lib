@@ -18,8 +18,8 @@ public class DockerLayerConfigParserTest {
     @Test
     public void testImageConfigParser() throws IOException {
         final String layerConfigFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/app/layerConfig/layerWithCmd/json"), StandardCharsets.UTF_8);
-        DockerLayerConfigParser parser = new DockerLayerConfigParser();
-        List<String> layerCommandParts = parser.parseCmd(new GsonBuilder(), layerConfigFileContents);
+        DockerLayerConfigParser parser = new DockerLayerConfigParser(new GsonBuilder());
+        List<String> layerCommandParts = parser.parseCmd(layerConfigFileContents);
         assertEquals(3, layerCommandParts.size());
         assertEquals("/bin/sh", layerCommandParts.get(0));
         assertEquals("-c", layerCommandParts.get(1));
@@ -29,8 +29,8 @@ public class DockerLayerConfigParserTest {
     @Test
     public void testImageConfigParserNoCmd() throws IOException {
         final String layerConfigFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/app/layerConfig/layerWithoutCmd/json"), StandardCharsets.UTF_8);
-        DockerLayerConfigParser parser = new DockerLayerConfigParser();
-        List<String> layerCommandParts = parser.parseCmd(new GsonBuilder(), layerConfigFileContents);
+        DockerLayerConfigParser parser = new DockerLayerConfigParser(new GsonBuilder());
+        List<String> layerCommandParts = parser.parseCmd(layerConfigFileContents);
         assertTrue(layerCommandParts.isEmpty());
     }
 }
