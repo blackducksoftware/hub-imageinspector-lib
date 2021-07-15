@@ -30,7 +30,6 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Dock
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
-import com.synopsys.integration.exception.IntegrationException;
 
 class ImageInspectorTest {
     private DockerTarParser tarParser;
@@ -98,10 +97,10 @@ class ImageInspectorTest {
 
         File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
-        TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
+        ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
         ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
-        imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, null, targetImageFileSystem, layerTars, manifestLayerMapping, null);
-        Mockito.verify(tarParser).extractImageLayers(ImageInspectorOsEnum.ALPINE, null, targetImageFileSystem, layerTars, manifestLayerMapping, null);
+        imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, null, containerFileSystem, layerTars, manifestLayerMapping, null);
+        Mockito.verify(tarParser).extractPkgMgrDb(ImageInspectorOsEnum.ALPINE, null, containerFileSystem, layerTars, manifestLayerMapping, null);
     }
 
     @Test
@@ -158,9 +157,9 @@ class ImageInspectorTest {
         File extractedPackageManagerDirectory = new File("src/test/resources/imageDir/alpine/lib/apk");
         ImagePkgMgrDatabase imagePkgMgrDatabase = new ImagePkgMgrDatabase(extractedPackageManagerDirectory, PackageManagerEnum.APK);
         PkgMgr pkgMgr = new ApkPkgMgr(new FileOperations());
-        ImageInfoParsed imageInfoParsed = new ImageInfoParsed(generateTargetImageFileSystem(tarExtractionDirectory, distro, tag), imagePkgMgrDatabase, distro, pkgMgr, imageComponentHierarchy);
+        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(generateTargetImageFileSystem(tarExtractionDirectory, distro, tag), imagePkgMgrDatabase, distro, pkgMgr, imageComponentHierarchy);
 
-        return new TestScenario(blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, distro, tag, pkgMgrId, imageConfigFileContents, layers, manifestLayerMapping, manifestFileContents, imageComponentHierarchy, imageInfoParsed);
+        return new TestScenario(blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, distro, tag, pkgMgrId, imageConfigFileContents, layers, manifestLayerMapping, manifestFileContents, imageComponentHierarchy, containerFileSystemWithPkgMgrDb);
 
     }
 
@@ -173,10 +172,10 @@ class ImageInspectorTest {
     }
 
     @NotNull
-    private TargetImageFileSystem generateTargetImageFileSystem(File tarExtractionDirectory, String imageRepo, String imageTag) {
+    private ContainerFileSystem generateTargetImageFileSystem(File tarExtractionDirectory, String imageRepo, String imageTag) {
         File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
-        return new TargetImageFileSystem(targetImageFileSystemRootDir);
+        return new ContainerFileSystem(targetImageFileSystemRootDir);
     }
 
     private static class TestScenario {
@@ -191,10 +190,10 @@ class ImageInspectorTest {
         private final ManifestLayerMapping manifestLayerMapping;
         private final String manifestFileContents;
         private final ImageComponentHierarchy imageComponentHierarchy;
-        private final ImageInfoParsed imageInfoParsed;
+        private final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb;
 
         public TestScenario(String blackDuckProjectName, String blackDuckProjectVersion, String codeLocationPrefix, final String repo, final String tag, String pkgMgrId, final String configFileContents, final List<String> layers, final ManifestLayerMapping manifestLayerMapping, final String manifestFileContents,
-            final ImageComponentHierarchy imageComponentHierarchy, final ImageInfoParsed imageInfoParsed) {
+            final ImageComponentHierarchy imageComponentHierarchy, final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb) {
             this.blackDuckProjectName = blackDuckProjectName;
             this.blackDuckProjectVersion = blackDuckProjectVersion;
             this.codeLocationPrefix = codeLocationPrefix;
@@ -206,7 +205,7 @@ class ImageInspectorTest {
             this.manifestLayerMapping = manifestLayerMapping;
             this.manifestFileContents = manifestFileContents;
             this.imageComponentHierarchy = imageComponentHierarchy;
-            this.imageInfoParsed = imageInfoParsed;
+            this.containerFileSystemWithPkgMgrDb = containerFileSystemWithPkgMgrDb;
         }
 
         public String getBlackDuckProjectName() {
@@ -253,8 +252,8 @@ class ImageInspectorTest {
             return imageComponentHierarchy;
         }
 
-        public ImageInfoParsed getImageInfoParsed() {
-            return imageInfoParsed;
+        public ContainerFileSystemWithPkgMgrDb getImageInfoParsed() {
+            return containerFileSystemWithPkgMgrDb;
         }
     }
 }

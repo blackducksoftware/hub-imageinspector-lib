@@ -137,11 +137,15 @@ public class DockerTarParserIntTest {
         assertEquals(2, layerMapping.getLayerInternalIds().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractImageLayers(ImageInspectorOsEnum.CENTOS, null, targetImageFileSystem, layerTars, layerMapping, null);
-        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem, null, new ImageComponentHierarchy());
-        assertEquals("image_blackducksoftware_centos_minus_vim_plus_bacula_v_1.0", imageInfoParsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
-        assertEquals("RPM", imageInfoParsed.getPkgMgr().getType().name());
+        final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
+        tarParser.extractPkgMgrDb(ImageInspectorOsEnum.CENTOS, null, containerFileSystem, layerTars, layerMapping, null);
+
+        // TODO this should be tested in a new ContainerFileSystemWithPkgMgrTest
+        LinuxDistroExtractor linuxDistroExtractor = new LinuxDistroExtractor(new FileOperations(), new Os());
+        PkgMgrExtractor pkgMgrExtractor = new PkgMgrExtractor(pkgMgrs, linuxDistroExtractor);
+        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = pkgMgrExtractor.extract(containerFileSystem, null, new ImageComponentHierarchy());
+        assertEquals("image_blackducksoftware_centos_minus_vim_plus_bacula_v_1.0", containerFileSystemWithPkgMgrDb.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
+        assertEquals("RPM", containerFileSystemWithPkgMgrDb.getPkgMgr().getType().name());
 
         boolean varLibRpmNameFound = false;
         final Collection<File> files = FileUtils.listFiles(workingDirectory, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
@@ -199,8 +203,8 @@ public class DockerTarParserIntTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, null, targetImageFileSystem, layerTars, layerMapping, null);
+        final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
+        tarParser.extractPkgMgrDb(ImageInspectorOsEnum.UBUNTU, null, containerFileSystem, layerTars, layerMapping, null);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));
@@ -241,11 +245,15 @@ public class DockerTarParserIntTest {
         tarParser.setPkgMgrs(pkgMgrs);
 
         final File containerFilesystemRoot = new File(String.format("src/test/resources/imageDir/%s", imageInspectorDistro));
-        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFilesystemRoot);
-        ImageInfoParsed imageInfoParsed = tarParser.parseImageInfo(targetImageFileSystem, null, new ImageComponentHierarchy());
-        assertEquals(imageInspectorDistro, imageInfoParsed.getLinuxDistroName());
-        assertEquals(packageManagerType, imageInfoParsed.getImagePkgMgrDatabase().getPackageManager());
-        assertEquals(pkgMgrDirName, imageInfoParsed.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());
-        assertEquals(imageInspectorDistro, imageInfoParsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
+        final ContainerFileSystem containerFileSystem = new ContainerFileSystem(containerFilesystemRoot);
+
+        // TODO this should be tested elsewhere
+        LinuxDistroExtractor linuxDistroExtractor = new LinuxDistroExtractor(new FileOperations(), new Os());
+        PkgMgrExtractor pkgMgrExtractor = new PkgMgrExtractor(pkgMgrs, linuxDistroExtractor);
+        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = pkgMgrExtractor.extract(containerFileSystem, null, new ImageComponentHierarchy());
+        assertEquals(imageInspectorDistro, containerFileSystemWithPkgMgrDb.getLinuxDistroName());
+        assertEquals(packageManagerType, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
+        assertEquals(pkgMgrDirName, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());
+        assertEquals(imageInspectorDistro, containerFileSystemWithPkgMgrDb.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
     }
 }

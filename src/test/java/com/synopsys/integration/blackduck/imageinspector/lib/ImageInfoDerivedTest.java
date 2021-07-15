@@ -22,8 +22,8 @@ public class ImageInfoDerivedTest {
     ImagePkgMgrDatabase pkgMgrDb = new ImagePkgMgrDatabase(new File("src/test/resources/imageDir/etc/apk"),
         PackageManagerEnum.APK);
     final File targetImageFileSystemRootDir = new File("src/test/resources/imageDir");
-    final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
-    ImageInfoParsed parsed = new ImageInfoParsed(targetImageFileSystem,
+    final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
+    ContainerFileSystemWithPkgMgrDb parsed = new ContainerFileSystemWithPkgMgrDb(containerFileSystem,
         pkgMgrDb, "alpine", new ApkPkgMgr(new FileOperations()), new ImageComponentHierarchy());
 
     assertEquals("imageDir", parsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());

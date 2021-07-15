@@ -25,11 +25,11 @@ import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
+import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystemWithPkgMgrDb;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
+import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
@@ -189,8 +189,8 @@ public class ImageInspectorApi {
         final File tarExtractionBaseDirectory = imageInspector.getTarExtractionDirectory(workingDir);
         logger.debug(String.format("imageInspector: %s; workingDir: %s", imageInspector, workingDir.getAbsolutePath()));
         final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
-        File tarExtractionDirectory = new File(tarExtractionBaseDirectory, dockerTarfile.getName());
-        final DockerImageDirectory dockerImageDirectory = imageInspector.extractImageTar(tarExtractionDirectory, dockerTarfile);
+        File imageDir = new File(tarExtractionBaseDirectory, dockerTarfile.getName());
+        final DockerImageDirectory dockerImageDirectory = imageInspector.extractImageTar(imageDir, dockerTarfile);
         final List<TypedArchiveFile> layerTars = dockerImageDirectory.getLayerArchives();
         final ManifestLayerMapping manifestLayerMapping = dockerImageDirectory.getLayerMapping(imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
         final String imageRepo = manifestLayerMapping.getImageName();
@@ -202,19 +202,19 @@ public class ImageInspectorApi {
         if (StringUtils.isNotBlank(effectivePlatformTopLayerExternalId)) {
             targetImageFileSystemAppLayersRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemAppLayersRootDirName(imageRepo, imageTag));
         }
-        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
+        final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
         final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
-        final ImageInfoParsed imageInfoParsed = imageInspector
-                                                    .extractDockerLayers(currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), targetImageFileSystem, layerTars, manifestLayerMapping,
+        final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = imageInspector
+                                                    .extractDockerLayers(currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, layerTars, manifestLayerMapping,
                                                         imageInspectionRequest.getPlatformTopLayerExternalId());
-        validatePlatformResults(effectivePlatformTopLayerExternalId, imageInfoParsed.getImageComponentHierarchy());
-        logLayers(imageInfoParsed.getImageComponentHierarchy());
+        validatePlatformResults(effectivePlatformTopLayerExternalId, containerFileSystemWithPkgMgrDb.getImageComponentHierarchy());
+        logLayers(containerFileSystemWithPkgMgrDb.getImageComponentHierarchy());
         cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), layerTars);
-        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed, manifestLayerMapping,
+        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb, manifestLayerMapping,
             imageInspectionRequest.getBlackDuckProjectName(), imageInspectionRequest.getBlackDuckProjectVersion(),
             imageInspectionRequest.getCodeLocationPrefix(), imageInspectionRequest.isOrganizeComponentsByLayer(), imageInspectionRequest.isIncludeRemovedComponents(),
             StringUtils.isNotBlank(effectivePlatformTopLayerExternalId));
-        createContainerFileSystemTarIfRequested(targetImageFileSystem, imageInspectionRequest.getContainerFileSystemOutputPath(),
+        createContainerFileSystemTarIfRequested(containerFileSystem, imageInspectionRequest.getContainerFileSystemOutputPath(),
             imageInspectionRequest.getContainerFileSystemExcludedPathListString());
         return imageInfoDerived;
     }
@@ -255,12 +255,12 @@ public class ImageInspectorApi {
         }
     }
 
-    private void createContainerFileSystemTarIfRequested(final TargetImageFileSystem targetImageFileSystem, final String containerFileSystemOutputPath, final String containerFileSystemExcludedPathListString) {
+    private void createContainerFileSystemTarIfRequested(final ContainerFileSystem containerFileSystem, final String containerFileSystemOutputPath, final String containerFileSystemExcludedPathListString) {
         if (StringUtils.isNotBlank(containerFileSystemOutputPath)) {
             logger.info("Including container file system in output");
             final File outputDirectory = new File(containerFileSystemOutputPath);
             final File containerFileSystemTarFile = new File(containerFileSystemOutputPath);
-            final File returnedTargetImageFileSystem = targetImageFileSystem.getTargetImageFileSystemAppOnly().orElse(targetImageFileSystem.getTargetImageFileSystemFull());
+            final File returnedTargetImageFileSystem = containerFileSystem.getTargetImageFileSystemAppOnly().orElse(containerFileSystem.getTargetImageFileSystemFull());
             logger.debug(String.format("Creating container filesystem tarfile %s from %s into %s", containerFileSystemTarFile.getAbsolutePath(), returnedTargetImageFileSystem.getAbsolutePath(), outputDirectory.getAbsolutePath()));
             final LinuxFileSystem containerFileSys = new LinuxFileSystem(returnedTargetImageFileSystem, fileOperations);
             containerFileSys.writeToTarGz(containerFileSystemTarFile, containerFileSystemExcludedPathListString);

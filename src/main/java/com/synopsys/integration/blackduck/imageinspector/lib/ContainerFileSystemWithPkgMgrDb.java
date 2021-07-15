@@ -10,26 +10,25 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.util.Stringable;
 
-// Basic information about an image
-public class ImageInfoParsed extends Stringable {
-    private final TargetImageFileSystem targetImageFileSystem;
+public class ContainerFileSystemWithPkgMgrDb extends Stringable {
+    private final ContainerFileSystem containerFileSystem;
     private final ImagePkgMgrDatabase imagePkgMgrDatabase;
     private final String linuxDistroName;
     private final PkgMgr pkgMgr;
-    // TODO not sure this belongs here
+    // TODO There ought to be a separate class that adds this:
     private ImageComponentHierarchy imageComponentHierarchy;
 
-    public ImageInfoParsed(final TargetImageFileSystem targetImageFileSystem, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName, PkgMgr pkgMgr,
-                           ImageComponentHierarchy imageComponentHierarchy) {
-        this.targetImageFileSystem = targetImageFileSystem;
+    public ContainerFileSystemWithPkgMgrDb(final ContainerFileSystem containerFileSystem, final ImagePkgMgrDatabase imagePkgMgrDatabase, final String linuxDistroName, PkgMgr pkgMgr,
+                                           ImageComponentHierarchy imageComponentHierarchy) {
+        this.containerFileSystem = containerFileSystem;
         this.imagePkgMgrDatabase = imagePkgMgrDatabase;
         this.linuxDistroName = linuxDistroName;
         this.pkgMgr = pkgMgr;
         this.imageComponentHierarchy = imageComponentHierarchy;
     }
 
-    public TargetImageFileSystem getTargetImageFileSystem() {
-        return targetImageFileSystem;
+    public ContainerFileSystem getTargetImageFileSystem() {
+        return containerFileSystem;
     }
 
     public ImagePkgMgrDatabase getImagePkgMgrDatabase() {

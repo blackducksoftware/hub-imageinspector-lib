@@ -12,15 +12,15 @@ import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 // Comprehensive info about an image, including
 // the harder-to-derive bits
 public class ImageInfoDerived {
-    private final ImageInfoParsed imageInfoParsed;
+    private final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb;
     private ManifestLayerMapping manifestLayerMapping = null;
     private String codeLocationName = null;
     private String finalProjectName = null;
     private String finalProjectVersionName = null;
     private SimpleBdioDocument bdioDocument = null;
 
-    public ImageInfoDerived(final ImageInfoParsed imageInfoParsed) {
-        this.imageInfoParsed = imageInfoParsed;
+    public ImageInfoDerived(final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb) {
+        this.containerFileSystemWithPkgMgrDb = containerFileSystemWithPkgMgrDb;
     }
 
     public ManifestLayerMapping getManifestLayerMapping() {
@@ -31,8 +31,8 @@ public class ImageInfoDerived {
         this.manifestLayerMapping = manifestLayerMapping;
     }
 
-    public ImageInfoParsed getImageInfoParsed() {
-        return imageInfoParsed;
+    public ContainerFileSystemWithPkgMgrDb getImageInfoParsed() {
+        return containerFileSystemWithPkgMgrDb;
     }
 
     public String getCodeLocationName() {

@@ -12,17 +12,17 @@ import java.util.Optional;
 
 import com.synopsys.integration.util.Stringable;
 
-public class TargetImageFileSystem extends Stringable {
+public class ContainerFileSystem extends Stringable {
 
     private final File targetImageFileSystemFull;
     private final File targetImageFileSystemAppOnly;
 
-    public TargetImageFileSystem(final File targetImageFileSystemFull) {
+    public ContainerFileSystem(final File targetImageFileSystemFull) {
         this.targetImageFileSystemFull = targetImageFileSystemFull;
         this.targetImageFileSystemAppOnly = null;
     }
 
-    public TargetImageFileSystem(final File targetImageFileSystemFull, final File targetImageFileSystemAppOnly) {
+    public ContainerFileSystem(final File targetImageFileSystemFull, final File targetImageFileSystemAppOnly) {
         this.targetImageFileSystemFull = targetImageFileSystemFull;
         this.targetImageFileSystemAppOnly = targetImageFileSystemAppOnly;
     }

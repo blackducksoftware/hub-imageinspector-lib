@@ -25,10 +25,9 @@ import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnu
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
+import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
@@ -96,9 +95,9 @@ public class WhiteoutFileTest {
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
-        final TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(targetImageFileSystemRootDir);
+        final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
 
-        tarParser.extractImageLayers(ImageInspectorOsEnum.UBUNTU, null, targetImageFileSystem, layerTars, layerMapping, null);
+        tarParser.extractPkgMgrDb(ImageInspectorOsEnum.UBUNTU, null, containerFileSystem, layerTars, layerMapping, null);
 
         return targetImageFileSystemRootDir;
     }

@@ -30,7 +30,6 @@ import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsExc
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
-import com.synopsys.integration.exception.IntegrationException;
 
 // As support for other image formats is added, this class will manage the list of TarParsers
 @Component
@@ -65,30 +64,30 @@ public class ImageInspector {
         return new DockerImageDirectory(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
     }
 
-    public ImageInfoParsed extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final TargetImageFileSystem targetImageFileSystem, final List<TypedArchiveFile> layerTars,
-        final ManifestLayerMapping layerMapping, final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
-        return tarParser.extractImageLayers(currentOs, targetLinuxDistroOverride, targetImageFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
+    public ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> layerTars,
+                                                               final ManifestLayerMapping layerMapping, final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
+        return tarParser.extractPkgMgrDb(currentOs, targetLinuxDistroOverride, containerFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
     }
 
-    public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ImageInfoParsed imageInfoParsed, final ManifestLayerMapping mapping,
-        final String projectName,
-        final String versionName,
-        final String codeLocationPrefix,
-        final boolean organizeComponentsByLayer,
-        final boolean includeRemovedComponents,
-        final boolean platformComponentsExcluded) {
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, imageInfoParsed, platformComponentsExcluded);
+    public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final ManifestLayerMapping mapping,
+                                                            final String projectName,
+                                                            final String versionName,
+                                                            final String codeLocationPrefix,
+                                                            final boolean organizeComponentsByLayer,
+                                                            final boolean includeRemovedComponents,
+                                                            final boolean platformComponentsExcluded) {
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, containerFileSystemWithPkgMgrDb, platformComponentsExcluded);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(imageInfoDerived.getCodeLocationName(),
-            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageInfoParsed.getImageComponentHierarchy(), organizeComponentsByLayer,
+            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), containerFileSystemWithPkgMgrDb.getImageComponentHierarchy(), organizeComponentsByLayer,
             includeRemovedComponents);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
 
     private ImageInfoDerived deriveImageInfo(final ManifestLayerMapping mapping, final String projectName, final String versionName,
-        final String codeLocationPrefix, final ImageInfoParsed imageInfoParsed, final boolean platformComponentsExcluded) {
+                                             final String codeLocationPrefix, final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final boolean platformComponentsExcluded) {
         logger.debug(String.format("deriveImageInfo(): projectName: %s, versionName: %s", projectName, versionName));
-        final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
+        final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(containerFileSystemWithPkgMgrDb);
         imageInfoDerived.setManifestLayerMapping(mapping);
         imageInfoDerived.setCodeLocationName(deriveCodeLocationName(codeLocationPrefix, imageInfoDerived, platformComponentsExcluded));
         imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName, platformComponentsExcluded));

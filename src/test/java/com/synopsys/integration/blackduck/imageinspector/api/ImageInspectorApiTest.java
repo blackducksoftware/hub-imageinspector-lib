@@ -21,12 +21,12 @@ import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoParsed;
+import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystemWithPkgMgrDb;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.TargetImageFileSystem;
+import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
@@ -43,7 +43,7 @@ public class ImageInspectorApiTest {
         File tarExtractionDirectory = new File(workingDir, "extractionDir");
         File containerFileSystemRootDir = new File(tarExtractionDirectory,
             "imageFiles/image_testImageRepo_v_testTag");
-        TargetImageFileSystem targetImageFileSystem = new TargetImageFileSystem(containerFileSystemRootDir);
+        ContainerFileSystem containerFileSystem = new ContainerFileSystem(containerFileSystemRootDir);
         String tarFilename = "alpine_latest.tar";
         File dockerTarfile = new File(targetDir, tarFilename);
         File imageDir = new File(tarExtractionDirectory, tarFilename);
@@ -87,23 +87,23 @@ public class ImageInspectorApiTest {
         imageComponentHierarchy.addLayer(layerDetails);
         imageComponentHierarchy.setFinalComponents(components);
 
-        ImageInfoParsed imageInfoParsed = new ImageInfoParsed(
-            targetImageFileSystem,
+        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(
+                containerFileSystem,
             new ImagePkgMgrDatabase(new File("test/working/containerfilesystem/etc/apk"),
                 PackageManagerEnum.APK), "apline", new ApkPkgMgr(new FileOperations()), new ImageComponentHierarchy());
         Mockito.when(imageInspector
                          .extractDockerLayers(ImageInspectorOsEnum.ALPINE, null,
-                             targetImageFileSystem,
-                             layerTarFiles, mapping, null)).thenReturn(imageInfoParsed);
+                                 containerFileSystem,
+                             layerTarFiles, mapping, null)).thenReturn(containerFileSystemWithPkgMgrDb);
 
-        ImageInfoDerived imageInfoDerived = new ImageInfoDerived(imageInfoParsed);
+        ImageInfoDerived imageInfoDerived = new ImageInfoDerived(containerFileSystemWithPkgMgrDb);
         SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
         bdioDoc.setProject(new BdioProject());
         bdioDoc.getProject().name = blackDuckProjectName;
         bdioDoc.getProject().version = blackDuckProjectVersion;
         imageInfoDerived.setBdioDocument(bdioDoc);
         Mockito.when(imageInspector
-                         .generateBdioFromGivenComponents(bdioGenerator, imageInfoParsed,
+                         .generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb,
                              mapping, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix,
                              organizeComponentsByLayer, includeRemovedComponents, false)).thenReturn(imageInfoDerived);
         Os os = Mockito.mock(Os.class);

@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.GsonBuilder;
+import com.synopsys.integration.blackduck.imageinspector.lib.LinuxDistroExtractor;
+import com.synopsys.integration.blackduck.imageinspector.lib.PkgMgrExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
@@ -67,9 +69,10 @@ public class ImageInspectorApiIntTest {
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(CmdExecutor.class), Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkOutput);
 
         DockerTarParser dockerTarParser = new DockerTarParser();
+        dockerTarParser.setPkgMgrExtractor(new PkgMgrExtractor(pkgMgrs, new LinuxDistroExtractor(fileOperations, os)));
         dockerTarParser.setManifestFactory(new DockerManifestFactory());
         dockerTarParser.setOs(os);
-        dockerTarParser.setFileOperations(new FileOperations());
+        dockerTarParser.setFileOperations(fileOperations);
         dockerTarParser.setPkgMgrs(pkgMgrs);
         dockerTarParser.setPkgMgrExecutor(pkgMgrExecutor);
         dockerTarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
