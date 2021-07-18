@@ -65,11 +65,11 @@ public class ImageInspector {
     }
 
     public ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> layerTars,
-                                                               final ManifestLayerMapping layerMapping, final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
+                                                               final FullLayerMapping layerMapping, final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
         return tarParser.extractPkgMgrDb(currentOs, targetLinuxDistroOverride, containerFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
     }
 
-    public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final ManifestLayerMapping mapping,
+    public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final FullLayerMapping mapping,
                                                             final String projectName,
                                                             final String versionName,
                                                             final String codeLocationPrefix,
@@ -84,21 +84,21 @@ public class ImageInspector {
         return imageInfoDerived;
     }
 
-    private ImageInfoDerived deriveImageInfo(final ManifestLayerMapping mapping, final String projectName, final String versionName,
+    private ImageInfoDerived deriveImageInfo(final FullLayerMapping mapping, final String projectName, final String versionName,
                                              final String codeLocationPrefix, final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final boolean platformComponentsExcluded) {
         logger.debug(String.format("deriveImageInfo(): projectName: %s, versionName: %s", projectName, versionName));
         final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(containerFileSystemWithPkgMgrDb);
-        imageInfoDerived.setManifestLayerMapping(mapping);
+        imageInfoDerived.setFullLayerMapping(mapping);
         imageInfoDerived.setCodeLocationName(deriveCodeLocationName(codeLocationPrefix, imageInfoDerived, platformComponentsExcluded));
-        imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getManifestLayerMapping().getImageName(), projectName, platformComponentsExcluded));
-        imageInfoDerived.setFinalProjectVersionName(deriveBlackDuckProjectVersion(imageInfoDerived.getManifestLayerMapping(), versionName));
+        imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getImageName(), projectName, platformComponentsExcluded));
+        imageInfoDerived.setFinalProjectVersionName(deriveBlackDuckProjectVersion(imageInfoDerived.getFullLayerMapping(), versionName));
         logger.info(String.format("Black Duck project: %s, version: %s; Code location : %s", imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getCodeLocationName()));
         return imageInfoDerived;
     }
 
     private String deriveCodeLocationName(final String codeLocationPrefix, final ImageInfoDerived imageInfoDerived, final boolean platformComponentsExcluded) {
         final String pkgMgrName = derivePackageManagerName(imageInfoDerived);
-        return Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getManifestLayerMapping().getImageName(), imageInfoDerived.getManifestLayerMapping().getTagName(),
+        return Names.getCodeLocationName(codeLocationPrefix, imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getImageName(), imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getTagName(),
                 pkgMgrName, platformComponentsExcluded);
     }
 
@@ -125,10 +125,10 @@ public class ImageInspector {
         return blackDuckProjectName;
     }
 
-    private String deriveBlackDuckProjectVersion(final ManifestLayerMapping mapping, final String versionName) {
+    private String deriveBlackDuckProjectVersion(final FullLayerMapping mapping, final String versionName) {
         String blackDuckVersionName;
         if (StringUtils.isBlank(versionName)) {
-            blackDuckVersionName = mapping.getTagName();
+            blackDuckVersionName = mapping.getManifestLayerMapping().getTagName();
         } else {
             logger.debug("Using project version from config property");
             blackDuckVersionName = versionName;

@@ -91,6 +91,7 @@ class ImageInspectorTest {
         String imageConfigFileContents = "testConfig";
         List<String> layers = getLayers();
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(imageRepo, imageTag, imageConfigFileContents, layers);
+        FullLayerMapping fullLayerMapping = new FullLayerMapping(manifestLayerMapping, new ArrayList<>(0));
         List<TypedArchiveFile> layerTars = new ArrayList<>();
         File layerTar = new File(tarExtractionDirectory, String.format("%s/aaa/layer.tar", dockerTarfile.getName()));
         layerTars.add(new TypedArchiveFile(ArchiveFileType.TAR, layerTar));
@@ -99,8 +100,8 @@ class ImageInspectorTest {
         File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
         ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
-        imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, null, containerFileSystem, layerTars, manifestLayerMapping, null);
-        Mockito.verify(tarParser).extractPkgMgrDb(ImageInspectorOsEnum.ALPINE, null, containerFileSystem, layerTars, manifestLayerMapping, null);
+        imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, null, containerFileSystem, layerTars, fullLayerMapping, null);
+        Mockito.verify(tarParser).extractPkgMgrDb(ImageInspectorOsEnum.ALPINE, null, containerFileSystem, layerTars, fullLayerMapping, null);
     }
 
     @Test
@@ -128,16 +129,16 @@ class ImageInspectorTest {
 
         ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(TestUtils.createBdioGenerator(),
             testScenario.getImageInfoParsed(),
-            testScenario.getManifestLayerMapping(),
+            testScenario.getFullLayerMapping(),
             testScenario.getBlackDuckProjectName(), testScenario.getBlackDuckProjectVersion(),
             codeLocationPrefix, true, true, platformComponentsExcluded);
 
         assertEquals(testScenario.getBlackDuckProjectName(), imageInfoDerived.getFinalProjectName());
         assertEquals(testScenario.getBlackDuckProjectVersion(), imageInfoDerived.getFinalProjectVersionName());
         assertEquals(testScenario.getPkgMgrId(), imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().name());
-        assertEquals(testScenario.getRepo(), imageInfoDerived.getManifestLayerMapping().getImageName());
-        assertEquals(testScenario.getLayers().get(0), imageInfoDerived.getManifestLayerMapping().getLayerInternalIds().get(0));
-        assertEquals(testScenario.getLayers().get(1), imageInfoDerived.getManifestLayerMapping().getLayerInternalIds().get(1));
+        assertEquals(testScenario.getRepo(), imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getImageName());
+        assertEquals(testScenario.getLayers().get(0), imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getLayerInternalIds().get(0));
+        assertEquals(testScenario.getLayers().get(1), imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getLayerInternalIds().get(1));
         assertEquals(String.format("%s/%s", testScenario.getBlackDuckProjectName(), testScenario.getBlackDuckProjectVersion()),
             imageInfoDerived.getBdioDocument().getProject().bdioExternalIdentifier.externalId);
         return imageInfoDerived;
@@ -149,6 +150,7 @@ class ImageInspectorTest {
         String imageConfigFileContents = "testConfig";
         List<String> layers = getLayers();
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(distro, tag, imageConfigFileContents, layers);
+        FullLayerMapping fullLayerMapping = new FullLayerMapping(manifestLayerMapping, new ArrayList<>(0));
 
         String manifestFileContents = FileUtils.readFileToString(new File("src/test/resources/extraction/alpine.tar/manifest.json"), StandardCharsets.UTF_8);
         ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
@@ -159,7 +161,7 @@ class ImageInspectorTest {
         PkgMgr pkgMgr = new ApkPkgMgr(new FileOperations());
         ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(generateTargetImageFileSystem(tarExtractionDirectory, distro, tag), imagePkgMgrDatabase, distro, pkgMgr, imageComponentHierarchy);
 
-        return new TestScenario(blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, distro, tag, pkgMgrId, imageConfigFileContents, layers, manifestLayerMapping, manifestFileContents, imageComponentHierarchy, containerFileSystemWithPkgMgrDb);
+        return new TestScenario(blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix, distro, tag, pkgMgrId, imageConfigFileContents, layers, fullLayerMapping, manifestFileContents, imageComponentHierarchy, containerFileSystemWithPkgMgrDb);
 
     }
 
@@ -187,12 +189,12 @@ class ImageInspectorTest {
         private final String pkgMgrId;
         private final String configFileContents;
         private final List<String> layers;
-        private final ManifestLayerMapping manifestLayerMapping;
+        private final FullLayerMapping fullLayerMapping;
         private final String manifestFileContents;
         private final ImageComponentHierarchy imageComponentHierarchy;
         private final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb;
 
-        public TestScenario(String blackDuckProjectName, String blackDuckProjectVersion, String codeLocationPrefix, final String repo, final String tag, String pkgMgrId, final String configFileContents, final List<String> layers, final ManifestLayerMapping manifestLayerMapping, final String manifestFileContents,
+        public TestScenario(String blackDuckProjectName, String blackDuckProjectVersion, String codeLocationPrefix, final String repo, final String tag, String pkgMgrId, final String configFileContents, final List<String> layers, final FullLayerMapping fullLayerMapping, final String manifestFileContents,
             final ImageComponentHierarchy imageComponentHierarchy, final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb) {
             this.blackDuckProjectName = blackDuckProjectName;
             this.blackDuckProjectVersion = blackDuckProjectVersion;
@@ -202,7 +204,7 @@ class ImageInspectorTest {
             this.pkgMgrId = pkgMgrId;
             this.configFileContents = configFileContents;
             this.layers = layers;
-            this.manifestLayerMapping = manifestLayerMapping;
+            this.fullLayerMapping = fullLayerMapping;
             this.manifestFileContents = manifestFileContents;
             this.imageComponentHierarchy = imageComponentHierarchy;
             this.containerFileSystemWithPkgMgrDb = containerFileSystemWithPkgMgrDb;
@@ -240,8 +242,8 @@ class ImageInspectorTest {
             return layers;
         }
 
-        public ManifestLayerMapping getManifestLayerMapping() {
-            return manifestLayerMapping;
+        public FullLayerMapping getFullLayerMapping() {
+            return fullLayerMapping;
         }
 
         public String getManifestFileContents() {

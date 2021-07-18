@@ -12,6 +12,7 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.common.Arch
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.lib.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.exception.IntegrationException;
@@ -60,23 +61,20 @@ public class DockerImageDirectory {
     }
 
 
-    public ManifestLayerMapping getLayerMapping(final String dockerImageName, final String dockerTagName) throws IntegrationException {
+    public FullLayerMapping getLayerMapping(final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
         logger.debug(String.format("unpackedImageDir: %s", imageDir));
         final DockerManifest manifest = dockerManifestFactory.createManifest(imageDir);
-        ManifestLayerMapping partialMapping;
+        ManifestLayerMapping manifestLayerMapping;
         try {
-            partialMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
+            manifestLayerMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
         } catch (final Exception e) {
             final String msg = String.format("Could not parse the image manifest file : %s", e.getMessage());
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(partialMapping.getImageConfigFilename());
-        if (externalLayerIds.isEmpty()) {
-            return partialMapping;
-        }
-        return new ManifestLayerMapping(partialMapping, externalLayerIds);
+        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(manifestLayerMapping.getImageConfigFilename());
+        return new FullLayerMapping(manifestLayerMapping, externalLayerIds);
     }
 
     private List<String> getExternalLayerIdsFromImageConfigFile(String imageConfigFileName) {

@@ -13,7 +13,7 @@ import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 // the harder-to-derive bits
 public class ImageInfoDerived {
     private final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb;
-    private ManifestLayerMapping manifestLayerMapping = null;
+    private FullLayerMapping fullLayerMapping = null;
     private String codeLocationName = null;
     private String finalProjectName = null;
     private String finalProjectVersionName = null;
@@ -23,12 +23,12 @@ public class ImageInfoDerived {
         this.containerFileSystemWithPkgMgrDb = containerFileSystemWithPkgMgrDb;
     }
 
-    public ManifestLayerMapping getManifestLayerMapping() {
-        return manifestLayerMapping;
+    public FullLayerMapping getFullLayerMapping() {
+        return fullLayerMapping;
     }
 
-    public void setManifestLayerMapping(final ManifestLayerMapping manifestLayerMapping) {
-        this.manifestLayerMapping = manifestLayerMapping;
+    public void setFullLayerMapping(final FullLayerMapping fullLayerMapping) {
+        this.fullLayerMapping = fullLayerMapping;
     }
 
     public ContainerFileSystemWithPkgMgrDb getImageInfoParsed() {

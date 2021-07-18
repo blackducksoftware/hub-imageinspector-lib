@@ -133,12 +133,12 @@ public class DockerTarParserIntTest {
         DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new GsonBuilder(), new FileOperations(),
                 new DockerImageConfigParser(), new DockerManifestFactory(), extractionDir);
         final List<TypedArchiveFile> layerTars = dockerImageDirectory.getLayerArchives();
-        final ManifestLayerMapping layerMapping = dockerImageDirectory.getLayerMapping(IMAGE_NAME, IMAGE_TAG);
-        assertEquals(2, layerMapping.getLayerInternalIds().size());
+        final FullLayerMapping fullLayerMapping = dockerImageDirectory.getLayerMapping(IMAGE_NAME, IMAGE_TAG);
+        assertEquals(2, fullLayerMapping.getManifestLayerMapping().getLayerInternalIds().size());
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractPkgMgrDb(ImageInspectorOsEnum.CENTOS, null, containerFileSystem, layerTars, layerMapping, null);
+        tarParser.extractPkgMgrDb(ImageInspectorOsEnum.CENTOS, null, containerFileSystem, layerTars, fullLayerMapping, null);
 
         // TODO this should be tested in a new ContainerFileSystemWithPkgMgrTest
         LinuxDistroExtractor linuxDistroExtractor = new LinuxDistroExtractor(new FileOperations(), new Os());
@@ -199,12 +199,13 @@ public class DockerTarParserIntTest {
 
         final List<String> layerIds = new ArrayList<>();
         layerIds.add(LAYER_ID);
-        final ManifestLayerMapping layerMapping = new ManifestLayerMapping(IMAGE_NAME, IMAGE_TAG, "test config filename", layerIds);
+        final ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(IMAGE_NAME, IMAGE_TAG, "test config filename", layerIds);
+        FullLayerMapping fullLayerMapping = new FullLayerMapping(manifestLayerMapping, new ArrayList<>());
 
         final File targetImageFileSystemParentDir = new File(tarExtractionDirectory, TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(IMAGE_NAME, IMAGE_TAG));
         final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
-        tarParser.extractPkgMgrDb(ImageInspectorOsEnum.UBUNTU, null, containerFileSystem, layerTars, layerMapping, null);
+        tarParser.extractPkgMgrDb(ImageInspectorOsEnum.UBUNTU, null, containerFileSystem, layerTars, fullLayerMapping, null);
         assertEquals(tarExtractionDirectory.getAbsolutePath() + String.format("/imageFiles/%s", targetImageFileSystemRootDir.getName()), targetImageFileSystemRootDir.getAbsolutePath());
 
         final File dpkgStatusFile = new File(workingDirectory.getAbsolutePath() + String.format("/tarExtraction/imageFiles/%s/var/lib/dpkg/status", targetImageFileSystemRootDir.getName()));
@@ -229,9 +230,9 @@ public class DockerTarParserIntTest {
         tarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
         File imageDir = new File(tarExtractionDirectory, tarFilename);
         DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new GsonBuilder(), new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageDir);
-        ManifestLayerMapping mapping = dockerImageDirectory.getLayerMapping("alpine", "latest");
-        assertEquals("alpine", mapping.getImageName());
-        assertEquals("latest", mapping.getTagName());
+        FullLayerMapping mapping = dockerImageDirectory.getLayerMapping("alpine", "latest");
+        assertEquals("alpine", mapping.getManifestLayerMapping().getImageName());
+        assertEquals("latest", mapping.getManifestLayerMapping().getTagName());
         assertTrue(mapping.getLayerExternalId(0).startsWith("sha256:"));
     }
 

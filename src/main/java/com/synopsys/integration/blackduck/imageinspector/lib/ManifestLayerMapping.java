@@ -16,22 +16,12 @@ public class ManifestLayerMapping extends Stringable {
     private final String tagName;
     private final String imageConfigFilename;
     private final List<String> layerInternalIds;
-    private final List<String> layerExternalIds;
 
-    public ManifestLayerMapping(final String imageName, final String tagName, final String imageConfigFilename, final List<String> layers) {
+    public ManifestLayerMapping(String imageName, String tagName, String imageConfigFilename, List<String> layerInternalIds) {
         this.imageName = imageName;
         this.tagName = tagName;
         this.imageConfigFilename = imageConfigFilename;
-        this.layerInternalIds = layers;
-        this.layerExternalIds = null;
-    }
-
-    public ManifestLayerMapping(final ManifestLayerMapping partialManifestLayerMapping, final List<String> layerExternalIds) {
-        this.imageName = partialManifestLayerMapping.getImageName();
-        this.tagName = partialManifestLayerMapping.getTagName();
-        this.imageConfigFilename = partialManifestLayerMapping.getImageConfigFilename();
-        this.layerInternalIds = partialManifestLayerMapping.getLayerInternalIds();
-        this.layerExternalIds = layerExternalIds;
+        this.layerInternalIds = layerInternalIds;
     }
 
     public String getImageName() {
@@ -48,12 +38,5 @@ public class ManifestLayerMapping extends Stringable {
 
     public List<String> getLayerInternalIds() {
         return layerInternalIds;
-    }
-
-    public String getLayerExternalId(final int layerIndex) {
-        if ((layerExternalIds == null) || (layerExternalIds.size() < layerIndex + 1)) {
-            return null;
-        }
-        return layerExternalIds.get(layerIndex);
     }
 }

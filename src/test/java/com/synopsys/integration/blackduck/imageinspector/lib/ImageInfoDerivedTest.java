@@ -3,6 +3,7 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
@@ -42,9 +43,10 @@ public class ImageInfoDerivedTest {
     derived.setFinalProjectVersionName("testFinalProjectVersionName");
     ManifestLayerMapping mapping = new ManifestLayerMapping("testImageName", "testTagName", "testConfig", Arrays
         .asList("testLayer"));
-    derived.setManifestLayerMapping(mapping);
+    FullLayerMapping fullLayerMapping = new FullLayerMapping(mapping, new ArrayList<>());
+    derived.setFullLayerMapping(fullLayerMapping);
 
-    assertEquals("testLayer", derived.getManifestLayerMapping().getLayerInternalIds().get(0));
+    assertEquals("testLayer", derived.getFullLayerMapping().getManifestLayerMapping().getLayerInternalIds().get(0));
     assertEquals("testCodelocationName", derived.getCodeLocationName());
     assertEquals("testFinalProjectName", derived.getFinalProjectName());
     assertEquals("testFinalProjectVersionName", derived.getFinalProjectVersionName());

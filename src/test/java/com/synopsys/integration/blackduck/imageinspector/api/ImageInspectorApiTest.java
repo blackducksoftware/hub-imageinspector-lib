@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectory;
+import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -18,15 +19,6 @@ import com.synopsys.integration.bdio.model.BdioProject;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
-import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystemWithPkgMgrDb;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
-import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
@@ -74,9 +66,10 @@ public class ImageInspectorApiTest {
                 .thenReturn(layerTarFiles);
         List<String> layers = new ArrayList<>();
         ManifestLayerMapping mapping = new ManifestLayerMapping(dockerImageName, dockerTagName, "testConfig", layers);
+        FullLayerMapping fullLayerMapping = new FullLayerMapping(mapping, new ArrayList<>(0));
         Mockito.when(dockerImageDirectory
                          .getLayerMapping(dockerImageName,
-                             dockerTagName)).thenReturn(mapping);
+                             dockerTagName)).thenReturn(fullLayerMapping);
 
         ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
         List<ComponentDetails> components = new ArrayList<>();
@@ -94,7 +87,7 @@ public class ImageInspectorApiTest {
         Mockito.when(imageInspector
                          .extractDockerLayers(ImageInspectorOsEnum.ALPINE, null,
                                  containerFileSystem,
-                             layerTarFiles, mapping, null)).thenReturn(containerFileSystemWithPkgMgrDb);
+                             layerTarFiles, fullLayerMapping, null)).thenReturn(containerFileSystemWithPkgMgrDb);
 
         ImageInfoDerived imageInfoDerived = new ImageInfoDerived(containerFileSystemWithPkgMgrDb);
         SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
@@ -104,7 +97,7 @@ public class ImageInspectorApiTest {
         imageInfoDerived.setBdioDocument(bdioDoc);
         Mockito.when(imageInspector
                          .generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb,
-                             mapping, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix,
+                             fullLayerMapping, blackDuckProjectName, blackDuckProjectVersion, codeLocationPrefix,
                              organizeComponentsByLayer, includeRemovedComponents, false)).thenReturn(imageInfoDerived);
         Os os = Mockito.mock(Os.class);
         Mockito.when(os.deriveOs("alpine")).thenReturn(ImageInspectorOsEnum.ALPINE);

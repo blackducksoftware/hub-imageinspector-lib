@@ -105,14 +105,21 @@ public class DockerTarParser {
         this.packageGetter = packageGetter;
     }
 
+    // TODO Strategy for splitting this up:
+    // The layer loop moves up to the caller
+    // x It calls one method to select the layer tar
+    // x It calls one method to extract a given layer tar to a given dir
+    // It calls one method to extract layer metadata
+    // Another method to determine if this is the top platform layer
+    // And anothter method (lives TBD) to get the components from the current container filesystem
     public ContainerFileSystemWithPkgMgrDb extractPkgMgrDb(ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride,
-                                                           final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> layerTars, final ManifestLayerMapping manifestLayerMapping,
+                                                           final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> layerTars, final FullLayerMapping fullLayerMapping,
                                                            final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
         ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
         ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = null;
         int layerIndex = 0;
         boolean inApplicationLayers = false;
-        for (final String layerDotTarDirname : manifestLayerMapping.getLayerInternalIds()) {
+        for (final String layerDotTarDirname : fullLayerMapping.getManifestLayerMapping().getLayerInternalIds()) {
             logger.trace(String.format("Looking for tar for layer: %s", layerDotTarDirname));
             final TypedArchiveFile layerTar = getLayerTar(layerTars, layerDotTarDirname);
             if (layerTar != null) {
@@ -122,14 +129,14 @@ public class DockerTarParser {
                 }
                 final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
                 final List<String> layerCmd = dockerLayerConfigParser.parseCmd(layerMetadataFileContents);
-                final boolean isPlatformTopLayer = isThisThePlatformTopLayer(manifestLayerMapping, platformTopLayerExternalId, layerIndex);
+                final boolean isPlatformTopLayer = isThisThePlatformTopLayer(fullLayerMapping, platformTopLayerExternalId, layerIndex);
                 if (isPlatformTopLayer) {
                     imageComponentHierarchy.setPlatformTopLayerIndex(layerIndex);
                     inApplicationLayers = true; // will be true next iteration
                     logger.info(String.format("Layer %d is the top layer of the platform. Components present after adding this layer will be omitted from results", layerIndex));
                 }
                 containerFileSystemWithPkgMgrDb = addPostLayerComponents(layerIndex, currentOs, targetLinuxDistroOverride, containerFileSystemWithPkgMgrDb, imageComponentHierarchy, containerFileSystem, layerMetadataFileContents, layerCmd,
-                    manifestLayerMapping.getLayerExternalId(layerIndex), isPlatformTopLayer);
+                    fullLayerMapping.getLayerExternalId(layerIndex), isPlatformTopLayer);
             } else {
                 logger.error(String.format("Could not find the tar for layer %s", layerDotTarDirname));
             }
@@ -148,7 +155,19 @@ public class DockerTarParser {
         return containerFileSystemWithPkgMgrDb;
     }
 
-    private boolean isThisThePlatformTopLayer(final ManifestLayerMapping manifestLayerMapping, final String platformTopLayerExternalId, final int layerIndex) {
+    // TODO make sure there's test coverage for these new methods:
+
+    public TypedArchiveFile selectLayerTar(List<TypedArchiveFile> layerTars, ManifestLayerMapping manifestLayerMapping, int layerIndex) {
+        String layerInternalId = manifestLayerMapping.getLayerInternalIds().get(layerIndex);
+        return getLayerTar(layerTars, layerInternalId);
+    }
+
+    public void extractLayerTar(File destinationDir, final TypedArchiveFile layerTar) throws IOException, WrongInspectorOsException {
+        // TODO eventually inline this method:
+                extractLayerTarToDir(destinationDir, layerTar);
+    }
+
+    private boolean isThisThePlatformTopLayer(final FullLayerMapping manifestLayerMapping, final String platformTopLayerExternalId, final int layerIndex) {
         final String currentLayerExternalId = manifestLayerMapping.getLayerExternalId(layerIndex);
         boolean isTop = (platformTopLayerExternalId != null) && platformTopLayerExternalId.equals(currentLayerExternalId);
         logger.trace(String.format("Results of test for top of platform: layerIndex: %d, platformTopLayerExternalId: %s, currentLayerExternalId: %s, isTop: %b", layerIndex, platformTopLayerExternalId, currentLayerExternalId, isTop));

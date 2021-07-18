@@ -13,6 +13,7 @@ import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectory;
+import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +24,6 @@ import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInfoDerived;
-import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystemWithPkgMgrDb;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
-import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
-import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
@@ -192,9 +186,9 @@ public class ImageInspectorApi {
         File imageDir = new File(tarExtractionBaseDirectory, dockerTarfile.getName());
         final DockerImageDirectory dockerImageDirectory = imageInspector.extractImageTar(imageDir, dockerTarfile);
         final List<TypedArchiveFile> layerTars = dockerImageDirectory.getLayerArchives();
-        final ManifestLayerMapping manifestLayerMapping = dockerImageDirectory.getLayerMapping(imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
-        final String imageRepo = manifestLayerMapping.getImageName();
-        final String imageTag = manifestLayerMapping.getTagName();
+        final FullLayerMapping fullLayerMapping = dockerImageDirectory.getLayerMapping(imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
+        final String imageRepo = fullLayerMapping.getManifestLayerMapping().getImageName();
+        final String imageTag = fullLayerMapping.getManifestLayerMapping().getTagName();
 
         final File targetImageFileSystemParentDir = new File(tarExtractionBaseDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
@@ -205,12 +199,12 @@ public class ImageInspectorApi {
         final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
         final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
         final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = imageInspector
-                                                    .extractDockerLayers(currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, layerTars, manifestLayerMapping,
+                                                    .extractDockerLayers(currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, layerTars, fullLayerMapping,
                                                         imageInspectionRequest.getPlatformTopLayerExternalId());
         validatePlatformResults(effectivePlatformTopLayerExternalId, containerFileSystemWithPkgMgrDb.getImageComponentHierarchy());
         logLayers(containerFileSystemWithPkgMgrDb.getImageComponentHierarchy());
         cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), layerTars);
-        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb, manifestLayerMapping,
+        ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb, fullLayerMapping,
             imageInspectionRequest.getBlackDuckProjectName(), imageInspectionRequest.getBlackDuckProjectVersion(),
             imageInspectionRequest.getCodeLocationPrefix(), imageInspectionRequest.isOrganizeComponentsByLayer(), imageInspectionRequest.isIncludeRemovedComponents(),
             StringUtils.isNotBlank(effectivePlatformTopLayerExternalId));

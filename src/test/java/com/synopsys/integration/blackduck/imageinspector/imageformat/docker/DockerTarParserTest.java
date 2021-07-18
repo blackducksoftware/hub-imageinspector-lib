@@ -120,8 +120,8 @@ public class DockerTarParserTest {
         final String imageConfigFilename = "caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json";
         final List<String> layerInternalIds = Arrays.asList("testLayer1", "testLayer2");
         final List<String> layerExternalIds = Arrays.asList("sha:Layer1", "sha:Layer2");
-        ManifestLayerMapping layerMapping = new ManifestLayerMapping(imageName, imageTag, imageConfigFilename, layerInternalIds);
-        Mockito.when(manifest.getLayerMapping(Mockito.anyString(), Mockito.anyString())).thenReturn(layerMapping);
+        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(imageName, imageTag, imageConfigFilename, layerInternalIds);
+        Mockito.when(manifest.getLayerMapping(Mockito.anyString(), Mockito.anyString())).thenReturn(manifestLayerMapping);
         final String imageConfigFileTestDataPath = String.format("src/test/resources/mockDockerTarContents/%s", imageConfigFilename);
         final String imageConfigFileMockedPath = String.format("test/extraction/alpine.tar/%s", imageConfigFilename);
         final File imageConfigTestDataFile = new File(imageConfigFileTestDataPath);
@@ -132,12 +132,12 @@ public class DockerTarParserTest {
         Mockito.when(dockerImageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
         File imageDir = new File(tarExtractionDirectory, imageTarFilename);
         DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
-        ManifestLayerMapping mapping = dockerImageDirectory.getLayerMapping(imageName, imageTag);
-        assertEquals(imageName, mapping.getImageName());
-        assertEquals(imageTag, mapping.getTagName());
-        assertEquals(layerInternalIds.get(0), mapping.getLayerInternalIds().get(0));
+        FullLayerMapping mapping = dockerImageDirectory.getLayerMapping(imageName, imageTag);
+        assertEquals(imageName, mapping.getManifestLayerMapping().getImageName());
+        assertEquals(imageTag, mapping.getManifestLayerMapping().getTagName());
+        assertEquals(layerInternalIds.get(0), mapping.getManifestLayerMapping().getLayerInternalIds().get(0));
         assertEquals(layerExternalIds.get(0), mapping.getLayerExternalId(0));
-        assertEquals(layerInternalIds.get(1), mapping.getLayerInternalIds().get(1));
+        assertEquals(layerInternalIds.get(1), mapping.getManifestLayerMapping().getLayerInternalIds().get(1));
         assertEquals(layerExternalIds.get(1), mapping.getLayerExternalId(1));
     }
 
@@ -201,7 +201,7 @@ public class DockerTarParserTest {
             platformTopLayerId = null;
         }
         final ManifestLayerMapping partialManifestLayerMapping = new ManifestLayerMapping(imageName, imageTag, imageConfigFileName, layerInternalIds);
-        final ManifestLayerMapping fullManifestLayerMapping = new ManifestLayerMapping(partialManifestLayerMapping, layerExternalIds);
+        final FullLayerMapping fullManifestLayerMapping = new FullLayerMapping(partialManifestLayerMapping, layerExternalIds);
         final ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
         final File containerFileSystemRootDir = new File("test/containerFileSystemRoot");
         final ContainerFileSystem containerFileSystem = new ContainerFileSystem(containerFileSystemRootDir);
