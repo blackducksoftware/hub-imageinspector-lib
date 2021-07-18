@@ -32,6 +32,8 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
+// TODO rethink this whole class
+
 public class DockerTarParserTest {
     private FileOperations fileOperations;
     private Os os;
@@ -69,6 +71,7 @@ public class DockerTarParserTest {
 
         tarParser = new DockerTarParser();
         tarParser.setPkgMgrExtractor(new PkgMgrExtractor(pkgMgrs, new LinuxDistroExtractor(fileOperations, os)));
+        tarParser.setPackageGetter(new PackageGetter(pkgMgrExecutor, cmdExecutor));
         tarParser.setPkgMgrs(pkgMgrs);
         tarParser.setOs(os);
         tarParser.setManifestFactory(dockerManifestFactory);
@@ -161,6 +164,7 @@ public class DockerTarParserTest {
         tarParserWithRealOsObject = new DockerTarParser();
         // TODO make sure this goes away: passing pkgMgrs, fileOperations, os into two places:
         tarParserWithRealOsObject.setPkgMgrExtractor(new PkgMgrExtractor(pkgMgrs, new LinuxDistroExtractor(fileOperations, new Os())));
+        tarParserWithRealOsObject.setPackageGetter(new PackageGetter(pkgMgrExecutor, cmdExecutor));
         tarParserWithRealOsObject.setPkgMgrs(pkgMgrs);
         tarParserWithRealOsObject.setOs(new Os());
         tarParserWithRealOsObject.setManifestFactory(dockerManifestFactory);

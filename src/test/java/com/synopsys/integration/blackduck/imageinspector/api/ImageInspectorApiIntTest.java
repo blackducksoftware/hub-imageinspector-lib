@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.GsonBuilder;
-import com.synopsys.integration.blackduck.imageinspector.lib.LinuxDistroExtractor;
-import com.synopsys.integration.blackduck.imageinspector.lib.PkgMgrExtractor;
+import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,8 +28,6 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.Dock
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
@@ -66,10 +63,12 @@ public class ImageInspectorApiIntTest {
         os = Mockito.mock(Os.class);
 
         PkgMgrExecutor pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);
+        CmdExecutor cmdExecutor = Mockito.mock(CmdExecutor.class);
         Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(CmdExecutor.class), Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkOutput);
 
         DockerTarParser dockerTarParser = new DockerTarParser();
         dockerTarParser.setPkgMgrExtractor(new PkgMgrExtractor(pkgMgrs, new LinuxDistroExtractor(fileOperations, os)));
+        dockerTarParser.setPackageGetter(new PackageGetter(pkgMgrExecutor, cmdExecutor));
         dockerTarParser.setManifestFactory(new DockerManifestFactory());
         dockerTarParser.setOs(os);
         dockerTarParser.setFileOperations(fileOperations);

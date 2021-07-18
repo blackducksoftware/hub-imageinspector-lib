@@ -49,6 +49,7 @@ public class DockerTarParser {
     private PkgMgrExecutor pkgMgrExecutor;
     private DockerLayerTarExtractor dockerLayerTarExtractor;
     private PkgMgrExtractor pkgMgrExtractor;
+    private PackageGetter packageGetter;
 
     @Autowired
     public void setExecutor(final CmdExecutor executor) {
@@ -97,6 +98,11 @@ public class DockerTarParser {
     @Autowired
     public void setPkgMgrExtractor(PkgMgrExtractor pkgMgrExtractor) {
         this.pkgMgrExtractor = pkgMgrExtractor;
+    }
+
+    @Autowired
+    public void setPackageGetter(PackageGetter packageGetter) {
+        this.packageGetter = packageGetter;
     }
 
     public ContainerFileSystemWithPkgMgrDb extractPkgMgrDb(ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride,
@@ -158,23 +164,6 @@ public class DockerTarParser {
         logger.debug(String.format("grossComponents: %d, componentsToOmit: %d, netComponents: %d", grossComponents.size(), componentsToOmit.size(), netComponents.size()));
         return netComponents;
     }
-
-//    private Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {
-//        final LinuxFileSystem extractedFileSys = new LinuxFileSystem(targetImageFileSystemRootDir, fileOperations);
-//        final Optional<File> etcDir = extractedFileSys.getEtcDir();
-//        if (!etcDir.isPresent()) {
-//            return Optional.empty();
-//        }
-//        return extractLinuxDistroNameFromEtcDir(etcDir.get());
-//    }
-
-//    Optional<String> extractLinuxDistroNameFromEtcDir(final File etcDir) {
-//        logger.trace(String.format("/etc directory: %s", etcDir.getAbsolutePath()));
-//        if (fileOperations.listFilesInDir(etcDir).length == 0) {
-//            logger.warn(String.format("Could not determine the Operating System because the /etc dir (%s) is empty", etcDir.getAbsolutePath()));
-//        }
-//        return os.getLinuxDistroNameFromEtcDir(etcDir);
-//    }
 
     private void extractLayerTarToDir(final File destinationDir, final TypedArchiveFile layerTar) throws IOException {
         logger.trace(String.format("Extracting layer: %s into %s", layerTar.getFile().getAbsolutePath(), destinationDir.getAbsolutePath()));
@@ -240,7 +229,8 @@ public class DockerTarParser {
             } else {
                 logger.debug(String.format("The target image package manager has previously been determined: %s", containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager().toString()));
             }
-            final List<ComponentDetails> comps = queryPkgMgrForDependencies(containerFileSystemWithPkgMgrDb, layerIndex);
+            logger.info("Querying pkg mgr for components after adding layer {}", layerIndex);
+            final List<ComponentDetails> comps = packageGetter.queryPkgMgrForDependencies(containerFileSystemWithPkgMgrDb);
             if (comps.isEmpty()) {
                 return containerFileSystemWithPkgMgrDb;
             }
@@ -265,44 +255,5 @@ public class DockerTarParser {
             imageComponentHierarchy.addLayer(layer);
         }
         return containerFileSystemWithPkgMgrDb;
-    }
-//
-//    // TODO this is image format independent
-//    ContainerFileSystemWithPkgMgr parseImageInfo(final ContainerFileSystem containerFileSystem, final String targetLinuxDistroOverride, ImageComponentHierarchy imageComponentHierarchy) throws PkgMgrDataNotFoundException {
-//        if (pkgMgrs == null) {
-//            logger.error("No pmgMgrs configured");
-//        } else {
-//            logger.trace(String.format("pkgMgrs.size(): %d", pkgMgrs.size()));
-//            for (PkgMgr pkgMgr : pkgMgrs) {
-//                if (pkgMgr.isApplicable(containerFileSystem.getTargetImageFileSystemFull())) {
-//                    logger.trace(String.format("Package manager %s applies", pkgMgr.getType().toString()));
-//                    final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(pkgMgr.getImagePackageManagerDirectory(containerFileSystem.getTargetImageFileSystemFull()),
-//                        pkgMgr.getType());
-//                    final String linuxDistroName;
-//                    if (StringUtils.isNotBlank(targetLinuxDistroOverride)) {
-//                        linuxDistroName = targetLinuxDistroOverride;
-//                        logger.trace(String.format("Target linux distro name overridden by caller to: %s", linuxDistroName));
-//                    } else {
-//                        linuxDistroName = extractLinuxDistroNameFromFileSystem(containerFileSystem.getTargetImageFileSystemFull()).orElse(null);
-//                        logger.trace(String.format("Target linux distro name derived from image file system: %s", linuxDistroName));
-//                    }
-//                    return new ContainerFileSystemWithPkgMgr(containerFileSystem, targetImagePkgMgr, linuxDistroName, pkgMgr, imageComponentHierarchy);
-//                }
-//            }
-//        }
-//        throw new PkgMgrDataNotFoundException("No package manager database found in this Docker image.");
-//    }
-
-    private List<ComponentDetails> queryPkgMgrForDependencies(final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final int layerIndex) {
-        final List<ComponentDetails> comps;
-        try {
-            final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(executor, containerFileSystemWithPkgMgrDb.getPkgMgr(), containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase());
-            comps = containerFileSystemWithPkgMgrDb.getPkgMgr().extractComponentsFromPkgMgrOutput(containerFileSystemWithPkgMgrDb.getTargetImageFileSystem().getTargetImageFileSystemFull(), containerFileSystemWithPkgMgrDb.getLinuxDistroName(), pkgMgrOutputLines);
-        } catch (IntegrationException e) {
-            logger.debug(String.format("Unable to log components present after layer %d: %s", layerIndex, e.getMessage()));
-            return new ArrayList<>(0);
-        }
-        logger.info(String.format("Found %d components in file system after adding layer %d", comps.size(), layerIndex));
-        return comps;
     }
 }

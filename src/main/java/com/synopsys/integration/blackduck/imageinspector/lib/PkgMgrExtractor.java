@@ -30,7 +30,7 @@ public class PkgMgrExtractor {
         this.pkgMgrs = pkgMgrs;
         this.linuxDistroExtractor = linuxDistroExtractor;
     }
-// TODO rename this method
+
     public ContainerFileSystemWithPkgMgrDb extract(final ContainerFileSystem containerFileSystem, final String targetLinuxDistroOverride, ImageComponentHierarchy imageComponentHierarchy) throws PkgMgrDataNotFoundException {
         if (pkgMgrs == null) {
             logger.error("No pmgMgrs configured");
@@ -46,7 +46,7 @@ public class PkgMgrExtractor {
                         linuxDistroName = targetLinuxDistroOverride;
                         logger.trace(String.format("Target linux distro name overridden by caller to: %s", linuxDistroName));
                     } else {
-                        linuxDistroName = linuxDistroExtractor.extractLinuxDistroNameFromFileSystem(containerFileSystem.getTargetImageFileSystemFull()).orElse(null);
+                        linuxDistroName = linuxDistroExtractor.extract(containerFileSystem.getTargetImageFileSystemFull()).orElse(null);
                         logger.trace(String.format("Target linux distro name derived from image file system: %s", linuxDistroName));
                     }
                     return new ContainerFileSystemWithPkgMgrDb(containerFileSystem, targetImagePkgMgr, linuxDistroName, pkgMgr, imageComponentHierarchy);

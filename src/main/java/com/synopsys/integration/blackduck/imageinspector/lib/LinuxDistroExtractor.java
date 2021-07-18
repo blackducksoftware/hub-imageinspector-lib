@@ -32,8 +32,7 @@ public class LinuxDistroExtractor {
         this.os = os;
     }
 
-    // TODO rename?
-    public Optional<String> extractLinuxDistroNameFromFileSystem(final File targetImageFileSystemRootDir) {
+    public Optional<String> extract(final File targetImageFileSystemRootDir) {
         final LinuxFileSystem extractedFileSys = new LinuxFileSystem(targetImageFileSystemRootDir, fileOperations);
         final Optional<File> etcDir = extractedFileSys.getEtcDir();
         if (!etcDir.isPresent()) {
