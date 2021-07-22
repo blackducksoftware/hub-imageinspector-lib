@@ -12,11 +12,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
-import com.synopsys.integration.exception.IntegrationException;
 
 @Component
 public class DockerTarParser {
@@ -48,7 +49,7 @@ public class DockerTarParser {
     private List<PkgMgr> pkgMgrs;
     private PkgMgrExecutor pkgMgrExecutor;
     private DockerLayerTarExtractor dockerLayerTarExtractor;
-    private PkgMgrExtractor pkgMgrExtractor;
+    private PkgMgrDbExtractor pkgMgrDbExtractor;
     private PackageGetter packageGetter;
 
     @Autowired
@@ -96,8 +97,8 @@ public class DockerTarParser {
     }
 
     @Autowired
-    public void setPkgMgrExtractor(PkgMgrExtractor pkgMgrExtractor) {
-        this.pkgMgrExtractor = pkgMgrExtractor;
+    public void setPkgMgrExtractor(PkgMgrDbExtractor pkgMgrDbExtractor) {
+        this.pkgMgrDbExtractor = pkgMgrDbExtractor;
     }
 
     @Autowired
@@ -107,11 +108,12 @@ public class DockerTarParser {
 
     // TODO Strategy for splitting this up:
     // The layer loop moves up to the caller
-    // x It calls one method to select the layer tar
-    // x It calls one method to extract a given layer tar to a given dir
-    // It calls one method to extract layer metadata
-    // Another method to determine if this is the top platform layer
-    // And anothter method (lives TBD) to get the components from the current container filesystem
+    // x It calls one method to get the ORDERED list of layer tars: getOrderedLayerTars()
+    // x It calls one method to extract a given layer tar to a given dir: extractLayerTar()
+    // x It calls one method to extract layer metadata: getLayerMetadata()
+    // x Another method to determine if this is the top platform layer: getPlatformTopLayerIndex()
+    // x And another method (lives TBD) to get the components from the current container filesystem ==> ComponentHierarchyBuilder
+    // x Need something that'll take a ContainerFileSystem and produce a ContainerFileSystemWithPkgMgrDb ==> PkgMgrExtractor
     public ContainerFileSystemWithPkgMgrDb extractPkgMgrDb(ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride,
                                                            final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> layerTars, final FullLayerMapping fullLayerMapping,
                                                            final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
@@ -150,23 +152,82 @@ public class DockerTarParser {
             imageComponentHierarchy.setFinalComponents(netComponents);
         }
         if (containerFileSystemWithPkgMgrDb == null) {
-            containerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(containerFileSystem, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), targetLinuxDistroOverride, null, imageComponentHierarchy);
+            containerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(containerFileSystem, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), targetLinuxDistroOverride, null);
         }
         return containerFileSystemWithPkgMgrDb;
     }
 
     // TODO make sure there's test coverage for these new methods:
 
-    public TypedArchiveFile selectLayerTar(List<TypedArchiveFile> layerTars, ManifestLayerMapping manifestLayerMapping, int layerIndex) {
+    // TODO this is Docker format specific
+    // but it was dumb; method below it makes more sense; remove this one
+    public TypedArchiveFile selectLayerTar(List<TypedArchiveFile> unOrderedLayerTars, ManifestLayerMapping manifestLayerMapping, int layerIndex) {
         String layerInternalId = manifestLayerMapping.getLayerInternalIds().get(layerIndex);
-        return getLayerTar(layerTars, layerInternalId);
+        return getLayerTar(unOrderedLayerTars, layerInternalId);
     }
 
+    // TODO this is Docker format specific
+    public List<TypedArchiveFile> getOrderedLayerTars(List<TypedArchiveFile> unOrderedLayerTars, ManifestLayerMapping manifestLayerMapping) {
+        List<TypedArchiveFile> orderedLayerTars = new ArrayList<>(manifestLayerMapping.getLayerInternalIds().size());
+        for (String layerInternalId : manifestLayerMapping.getLayerInternalIds()) {
+            orderedLayerTars.add(getLayerTar(unOrderedLayerTars, layerInternalId));
+        }
+        return orderedLayerTars;
+    }
+
+    // TODO image format independent
     public void extractLayerTar(File destinationDir, final TypedArchiveFile layerTar) throws IOException, WrongInspectorOsException {
         // TODO eventually inline this method:
                 extractLayerTarToDir(destinationDir, layerTar);
     }
 
+    // TODO this should be image format independent
+    public Optional<Integer> getPlatformTopLayerIndex(FullLayerMapping fullLayerMapping, @Nullable String platformTopLayerExternalId) {
+        if (platformTopLayerExternalId != null) {
+            int curLayerIndex = 0;
+            for (String candidateLayerExternalId : fullLayerMapping.getLayerExternalIds()) {
+                if ((candidateLayerExternalId != null) && (candidateLayerExternalId.equals(platformTopLayerExternalId))) {
+                    logger.trace("Found platform top layer ({}) at layerIndex: {}", platformTopLayerExternalId, curLayerIndex);
+                    return Optional.of(curLayerIndex);
+                }
+                curLayerIndex++;
+            }
+        }
+        return Optional.empty();
+    }
+
+    // TODO should be image format independent
+    public LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, TypedArchiveFile layerTar, int layerIndex) {
+        final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
+        final List<String> layerCmd = dockerLayerConfigParser.parseCmd(layerMetadataFileContents);
+        String layerExternalId = fullLayerMapping.getLayerExternalId(layerIndex);
+        return new LayerMetadata(layerExternalId, layerCmd);
+    }
+
+    public LayerComponents getLayerComponents(ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, LayerMetadata layerMetadata) {
+        final List<ComponentDetails> components = packageGetter.queryPkgMgrForDependencies(containerFileSystemWithPkgMgrDb);
+        return new LayerComponents(layerMetadata, components);
+    }
+
+    public Optional<ImageInspectorOsEnum> determineNeededImageInspectorOs(ContainerFileSystem containerFileSystem,
+                                                                          String targetLinuxDistroOverride) {
+        logger.debug("Attempting to determine the target image package manager");
+        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = null;
+        try {
+            containerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, targetLinuxDistroOverride);
+        } catch (PkgMgrDataNotFoundException e) {
+            return Optional.empty();
+        }
+        final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
+                .getImageInspectorOs(containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
+        return Optional.of(neededInspectorOs);
+        // TODO Caller needs to do this:
+//        if (!neededInspectorOs.equals(currentOs)) {
+//            final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs.toString());
+//            throw new WrongInspectorOsException(neededInspectorOs, msg);
+//        }
+    }
+    ////////////////////////
     private boolean isThisThePlatformTopLayer(final FullLayerMapping manifestLayerMapping, final String platformTopLayerExternalId, final int layerIndex) {
         final String currentLayerExternalId = manifestLayerMapping.getLayerExternalId(layerIndex);
         boolean isTop = (platformTopLayerExternalId != null) && platformTopLayerExternalId.equals(currentLayerExternalId);
@@ -198,6 +259,7 @@ public class DockerTarParser {
         }
     }
 
+    // TODO this is Docker format specific
     private TypedArchiveFile getLayerTar(final List<TypedArchiveFile> layerTars, final String layer) {
         TypedArchiveFile layerTar = null;
         for (final TypedArchiveFile candidateLayerTar : layerTars) {
@@ -208,6 +270,16 @@ public class DockerTarParser {
             }
         }
         return layerTar;
+    }
+
+    // TODO this is not Docker specific
+    public void checkInspectorOs(ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageInspectorOsEnum currentOs) throws WrongInspectorOsException {
+        final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
+                .getImageInspectorOs(containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
+        if (!neededInspectorOs.equals(currentOs)) {
+            final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
+            throw new WrongInspectorOsException(neededInspectorOs, msg);
+        }
     }
 
     private String getLayerMetadataFileContents(final TypedArchiveFile layerTarFile) {
@@ -238,7 +310,7 @@ public class DockerTarParser {
         try {
             if (containerFileSystemWithPkgMgrDb == null) {
                 logger.debug("Attempting to determine the target image package manager");
-                containerFileSystemWithPkgMgrDb = pkgMgrExtractor.extract(containerFileSystem, targetLinuxDistroOverride, imageComponentHierarchy);
+                containerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, targetLinuxDistroOverride);
                 final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
                                         .getImageInspectorOs(containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
                 if (!neededInspectorOs.equals(currentOs)) {
@@ -257,7 +329,7 @@ public class DockerTarParser {
             for (ComponentDetails comp : comps) {
                 logger.trace(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
             }
-            final LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd, comps);
+            final LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerCmd, comps);
             imageComponentHierarchy.addLayer(layer);
             if (isPlatformTopLayer) {
                 imageComponentHierarchy.setPlatformComponents(comps);
@@ -266,11 +338,11 @@ public class DockerTarParser {
             throw wrongOsException;
         } catch (final PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
             logger.debug(String.format("Unable to collect components present after layer %d: The file system is not yet populated with the linux distro and package manager files: %s", layerIndex, pkgMgrDataNotFoundException.getMessage()));
-            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd,  null);
+            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerCmd,  null);
             imageComponentHierarchy.addLayer(layer);
         } catch (final Exception otherException) {
             logger.debug(String.format("Unable to collect components present after layer %d", layerIndex));
-            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerMetadataFileContents, layerCmd,  null);
+            LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerCmd,  null);
             imageComponentHierarchy.addLayer(layer);
         }
         return containerFileSystemWithPkgMgrDb;

@@ -12,6 +12,7 @@ import java.io.File;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.util.Stringable;
 
+// TODO rename to PkgMgrDatabase
 public class ImagePkgMgrDatabase extends Stringable {
     private final File extractedPackageManagerDirectory;
     private final PackageManagerEnum packageManager;

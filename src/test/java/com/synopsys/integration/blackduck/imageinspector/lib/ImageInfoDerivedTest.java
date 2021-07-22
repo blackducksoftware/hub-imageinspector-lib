@@ -25,14 +25,15 @@ public class ImageInfoDerivedTest {
     final File targetImageFileSystemRootDir = new File("src/test/resources/imageDir");
     final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
     ContainerFileSystemWithPkgMgrDb parsed = new ContainerFileSystemWithPkgMgrDb(containerFileSystem,
-        pkgMgrDb, "alpine", new ApkPkgMgr(new FileOperations()), new ImageComponentHierarchy());
+        pkgMgrDb, "alpine", new ApkPkgMgr(new FileOperations()));
 
     assertEquals("imageDir", parsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
     assertEquals("alpine", parsed.getLinuxDistroName());
     assertEquals(PackageManagerEnum.APK, parsed.getImagePkgMgrDatabase().getPackageManager());
     assertEquals("apk", parsed.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());
 
-    ImageInfoDerived derived = new ImageInfoDerived(parsed);
+    // TODO also test the imageComponentHierarchy part?
+    ImageInfoDerived derived = new ImageInfoDerived(parsed, null);
     derived.setCodeLocationName("testCodelocationName");
     SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
     bdioDoc.setProject(new BdioProject());

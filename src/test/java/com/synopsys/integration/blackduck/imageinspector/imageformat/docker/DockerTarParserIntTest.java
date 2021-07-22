@@ -142,8 +142,8 @@ public class DockerTarParserIntTest {
 
         // TODO this should be tested in a new ContainerFileSystemWithPkgMgrTest
         LinuxDistroExtractor linuxDistroExtractor = new LinuxDistroExtractor(new FileOperations(), new Os());
-        PkgMgrExtractor pkgMgrExtractor = new PkgMgrExtractor(pkgMgrs, linuxDistroExtractor);
-        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = pkgMgrExtractor.extract(containerFileSystem, null, new ImageComponentHierarchy());
+        PkgMgrDbExtractor pkgMgrDbExtractor = new PkgMgrDbExtractor(pkgMgrs, linuxDistroExtractor);
+        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, null);
         assertEquals("image_blackducksoftware_centos_minus_vim_plus_bacula_v_1.0", containerFileSystemWithPkgMgrDb.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
         assertEquals("RPM", containerFileSystemWithPkgMgrDb.getPkgMgr().getType().name());
 
@@ -250,8 +250,8 @@ public class DockerTarParserIntTest {
 
         // TODO this should be tested elsewhere
         LinuxDistroExtractor linuxDistroExtractor = new LinuxDistroExtractor(new FileOperations(), new Os());
-        PkgMgrExtractor pkgMgrExtractor = new PkgMgrExtractor(pkgMgrs, linuxDistroExtractor);
-        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = pkgMgrExtractor.extract(containerFileSystem, null, new ImageComponentHierarchy());
+        PkgMgrDbExtractor pkgMgrDbExtractor = new PkgMgrDbExtractor(pkgMgrs, linuxDistroExtractor);
+        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, null);
         assertEquals(imageInspectorDistro, containerFileSystemWithPkgMgrDb.getLinuxDistroName());
         assertEquals(packageManagerType, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
         assertEquals(pkgMgrDirName, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());

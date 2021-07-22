@@ -13,14 +13,16 @@ import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 // the harder-to-derive bits
 public class ImageInfoDerived {
     private final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb;
+    private final ImageComponentHierarchy imageComponentHierarchy;
     private FullLayerMapping fullLayerMapping = null;
     private String codeLocationName = null;
     private String finalProjectName = null;
     private String finalProjectVersionName = null;
     private SimpleBdioDocument bdioDocument = null;
 
-    public ImageInfoDerived(final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb) {
+    public ImageInfoDerived(final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageComponentHierarchy imageComponentHierarchy) {
         this.containerFileSystemWithPkgMgrDb = containerFileSystemWithPkgMgrDb;
+        this.imageComponentHierarchy = imageComponentHierarchy;
     }
 
     public FullLayerMapping getFullLayerMapping() {
@@ -33,6 +35,10 @@ public class ImageInfoDerived {
 
     public ContainerFileSystemWithPkgMgrDb getImageInfoParsed() {
         return containerFileSystemWithPkgMgrDb;
+    }
+
+    public ImageComponentHierarchy getImageComponentHierarchy() {
+        return this.imageComponentHierarchy;
     }
 
     public String getCodeLocationName() {

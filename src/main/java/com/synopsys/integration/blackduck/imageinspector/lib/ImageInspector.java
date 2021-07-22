@@ -10,13 +10,20 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +45,25 @@ public class ImageInspector {
     public static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Os os;
+    private final PkgMgrExecutor pkgMgrExecutor;
+    private final CmdExecutor cmdExecutor;
     private final DockerTarParser tarParser;
     private final TarOperations tarOperations;
     private final GsonBuilder gsonBuilder;
     private final FileOperations fileOperations;
     private final DockerImageConfigParser dockerImageConfigParser;
     private final DockerManifestFactory dockerManifestFactory;
+    private final List<PkgMgr> pkgMgrs;
+    private final PkgMgrDbExtractor pkgMgrDbExtractor;
 
-    public ImageInspector(final DockerTarParser tarParser, TarOperations tarOperations, GsonBuilder gsonBuilder,
+    public ImageInspector(Os os, List<PkgMgr> pkgMgrs, PkgMgrDbExtractor pkgMgrDbExtractor, PkgMgrExecutor pkgMgrExecutor, CmdExecutor cmdExecutor, DockerTarParser tarParser, TarOperations tarOperations, GsonBuilder gsonBuilder,
                           FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory) {
+        this.os = os;
+        this.pkgMgrs = pkgMgrs;
+        this.pkgMgrDbExtractor = pkgMgrDbExtractor;
+        this.pkgMgrExecutor = pkgMgrExecutor;
+        this.cmdExecutor = cmdExecutor;
         this.tarParser = tarParser;
         this.tarOperations = tarOperations;
         this.gsonBuilder = gsonBuilder;
@@ -64,30 +81,70 @@ public class ImageInspector {
         return new DockerImageDirectory(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
     }
 
-    public ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> layerTars,
-                                                               final FullLayerMapping layerMapping, final String platformTopLayerExternalId) throws IOException, WrongInspectorOsException {
-        return tarParser.extractPkgMgrDb(currentOs, targetLinuxDistroOverride, containerFileSystem, layerTars, layerMapping, platformTopLayerExternalId);
+    public ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> unOrderedLayerTars,
+                                                               final FullLayerMapping layerMapping, final String platformTopLayerExternalId,
+                                                               ComponentHierarchyBuilder componentHierarchyBuilder) throws IOException, WrongInspectorOsException {
+        // TODO pass in some action that'll collect component hierarchy; a "call this after every layer" action; a post-layer action?
+        // The action we'll pass in is a component hierarchy builder
+        // This code can later query it for the component hierarchy
+        LinuxDistroExtractor linuxDistroExtractor = new LinuxDistroExtractor(fileOperations, os);
+        PackageGetter packageGetter = new PackageGetter(pkgMgrExecutor, cmdExecutor);
+        Optional<Integer> platformTopLayerIndex = tarParser.getPlatformTopLayerIndex(layerMapping, platformTopLayerExternalId);
+        if (platformTopLayerIndex.isPresent()) {
+            componentHierarchyBuilder.setPlatformTopLayerIndex(platformTopLayerIndex.get());
+        }
+        ContainerFileSystemWithPkgMgrDb postLayerContainerFileSystemWithPkgMgrDb = null;
+        boolean inApplicationLayers = false;
+        int layerIndex = 0;
+        for (TypedArchiveFile layerTar : tarParser.getOrderedLayerTars(unOrderedLayerTars, layerMapping.getManifestLayerMapping())) {
+            tarParser.extractLayerTar(containerFileSystem.getTargetImageFileSystemFull(), layerTar);
+            if (inApplicationLayers && containerFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
+                tarParser.extractLayerTar(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
+            }
+            LayerMetadata layerMetadata = tarParser.getLayerMetadata(layerMapping, layerTar, layerIndex);
+            try {
+                postLayerContainerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, targetLinuxDistroOverride);
+                componentHierarchyBuilder.addLayer(postLayerContainerFileSystemWithPkgMgrDb, layerIndex, layerMetadata.getLayerExternalId(), layerMetadata.getLayerCmd());
+            } catch (PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
+                logger.debug(String.format("Unable to collect components present after layer %d: The file system is not yet populated with the linux distro and package manager files: %s", layerIndex, pkgMgrDataNotFoundException.getMessage()));
+            }
+            if (platformTopLayerIndex.isPresent() && (layerIndex == platformTopLayerIndex.get())) {
+                inApplicationLayers = true; // for subsequent iterations
+            }
+            layerIndex++;
+        }
+        // Never did find a pkg mgr, so create the result without one
+        if (postLayerContainerFileSystemWithPkgMgrDb == null) {
+            postLayerContainerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(containerFileSystem, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), targetLinuxDistroOverride, null);
+        } else {
+            tarParser.checkInspectorOs(postLayerContainerFileSystemWithPkgMgrDb, currentOs);
+        }
+        // TODO This has always returned null in some cases, like a scratch image or a windows image, so should be OK w/out a null check
+        return postLayerContainerFileSystemWithPkgMgrDb;
+        //OLD: return tarParser.extractPkgMgrDb(currentOs, targetLinuxDistroOverride, containerFileSystem, unOrderedLayerTars, layerMapping, platformTopLayerExternalId);
     }
 
     public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final FullLayerMapping mapping,
+                                                            ImageComponentHierarchy imageComponentHierarchy,
                                                             final String projectName,
                                                             final String versionName,
                                                             final String codeLocationPrefix,
                                                             final boolean organizeComponentsByLayer,
                                                             final boolean includeRemovedComponents,
                                                             final boolean platformComponentsExcluded) {
-        final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, containerFileSystemWithPkgMgrDb, platformComponentsExcluded);
+        final ImageInfoDerived imageInfoDerived = deriveImageInfo(mapping, projectName, versionName, codeLocationPrefix, containerFileSystemWithPkgMgrDb, imageComponentHierarchy, platformComponentsExcluded);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(imageInfoDerived.getCodeLocationName(),
-            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), containerFileSystemWithPkgMgrDb.getImageComponentHierarchy(), organizeComponentsByLayer,
+            imageInfoDerived.getFinalProjectName(), imageInfoDerived.getFinalProjectVersionName(), imageInfoDerived.getImageInfoParsed().getLinuxDistroName(), imageComponentHierarchy, organizeComponentsByLayer,
             includeRemovedComponents);
         imageInfoDerived.setBdioDocument(bdioDocument);
         return imageInfoDerived;
     }
 
     private ImageInfoDerived deriveImageInfo(final FullLayerMapping mapping, final String projectName, final String versionName,
-                                             final String codeLocationPrefix, final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final boolean platformComponentsExcluded) {
+                                             final String codeLocationPrefix, final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageComponentHierarchy imageComponentHierarchy,
+                                             final boolean platformComponentsExcluded) {
         logger.debug(String.format("deriveImageInfo(): projectName: %s, versionName: %s", projectName, versionName));
-        final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(containerFileSystemWithPkgMgrDb);
+        final ImageInfoDerived imageInfoDerived = new ImageInfoDerived(containerFileSystemWithPkgMgrDb, imageComponentHierarchy);
         imageInfoDerived.setFullLayerMapping(mapping);
         imageInfoDerived.setCodeLocationName(deriveCodeLocationName(codeLocationPrefix, imageInfoDerived, platformComponentsExcluded));
         imageInfoDerived.setFinalProjectName(deriveBlackDuckProject(imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getImageName(), projectName, platformComponentsExcluded));

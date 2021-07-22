@@ -20,18 +20,20 @@ import java.util.List;
 // TODO need a test for this
 
 @Component
-public class PkgMgrExtractor {
+public class PkgMgrDbExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final List<PkgMgr> pkgMgrs;
     private final LinuxDistroExtractor linuxDistroExtractor;
 
+    // TODO need to decide when to use Autowired / whether to ditch it
+
     @Autowired
-    public PkgMgrExtractor(final List<PkgMgr> pkgMgrs, LinuxDistroExtractor linuxDistroExtractor) {
+    public PkgMgrDbExtractor(final List<PkgMgr> pkgMgrs, LinuxDistroExtractor linuxDistroExtractor) {
         this.pkgMgrs = pkgMgrs;
         this.linuxDistroExtractor = linuxDistroExtractor;
     }
 
-    public ContainerFileSystemWithPkgMgrDb extract(final ContainerFileSystem containerFileSystem, final String targetLinuxDistroOverride, ImageComponentHierarchy imageComponentHierarchy) throws PkgMgrDataNotFoundException {
+    public ContainerFileSystemWithPkgMgrDb extract(final ContainerFileSystem containerFileSystem, final String targetLinuxDistroOverride) throws PkgMgrDataNotFoundException {
         if (pkgMgrs == null) {
             logger.error("No pmgMgrs configured");
         } else {
@@ -46,10 +48,11 @@ public class PkgMgrExtractor {
                         linuxDistroName = targetLinuxDistroOverride;
                         logger.trace(String.format("Target linux distro name overridden by caller to: %s", linuxDistroName));
                     } else {
+                        // TODO this doesn't belong here
                         linuxDistroName = linuxDistroExtractor.extract(containerFileSystem.getTargetImageFileSystemFull()).orElse(null);
                         logger.trace(String.format("Target linux distro name derived from image file system: %s", linuxDistroName));
                     }
-                    return new ContainerFileSystemWithPkgMgrDb(containerFileSystem, targetImagePkgMgr, linuxDistroName, pkgMgr, imageComponentHierarchy);
+                    return new ContainerFileSystemWithPkgMgrDb(containerFileSystem, targetImagePkgMgr, linuxDistroName, pkgMgr);
                 }
             }
         }

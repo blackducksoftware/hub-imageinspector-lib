@@ -281,7 +281,7 @@ public class BdioGeneratorTest {
         components.add(new ComponentDetails("comp1a", "version1a", "comp1aExternalId", "arch", "ubuntu"));
         components.add(new ComponentDetails("comp2a", "version2a", "comp2aExternalId", "arch", "ubuntu"));
         allComponents.addAll(components);
-        LayerDetails layer2 = new LayerDetails(1, "sha:layer2", "layerMetadataFileContents", Arrays.asList("layerCmd", "layerCmdArg"), components);
+        LayerDetails layer2 = new LayerDetails(1, "sha:layer2", Arrays.asList("layerCmd", "layerCmdArg"), components);
         imageComponentHierarchy.addLayer(layer2);
         return components;
     }
@@ -292,7 +292,7 @@ public class BdioGeneratorTest {
         components.add(new ComponentDetails("comp1", "version1", "comp1ExternalId", "arch", "ubuntu"));
         components.add(new ComponentDetails("comp2", "version2", "comp2ExternalId", "arch", "ubuntu"));
         allComponents.addAll(components);
-        LayerDetails layer1 = new LayerDetails(0, "sha:layer1", "layerMetadataFileContents", Arrays.asList("layerCmd", "layerCmdArg"), components);
+        LayerDetails layer1 = new LayerDetails(0, "sha:layer1", Arrays.asList("layerCmd", "layerCmdArg"), components);
         imageComponentHierarchy.addLayer(layer1);
         return components;
     }

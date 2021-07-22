@@ -11,7 +11,7 @@ public class LayerDetailsTest {
 
   @Test
   public void test() {
-    LayerDetails layer = new LayerDetails(3, "sha:testLayer", "test metadata file contents", Arrays.asList("layerCmd", "layerCmdArg"), new ArrayList<>());
+    LayerDetails layer = new LayerDetails(3, "sha:testLayer", Arrays.asList("layerCmd", "layerCmdArg"), new ArrayList<>());
     assertEquals("Layer03_sha_testLayer", layer.getLayerIndexedName());
   }
 
