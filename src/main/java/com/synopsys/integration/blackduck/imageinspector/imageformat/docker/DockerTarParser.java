@@ -41,8 +41,6 @@ public class DockerTarParser {
     private DockerLayerConfigParser dockerLayerConfigParser;
     private FileOperations fileOperations;
     private DockerLayerTarExtractor dockerLayerTarExtractor;
-    private PkgMgrDbExtractor pkgMgrDbExtractor;
-    private PackageGetter packageGetter;
 
     @Autowired
     public void setLayerConfigParser(final DockerLayerConfigParser dockerLayerConfigParser) {
@@ -59,26 +57,16 @@ public class DockerTarParser {
         this.dockerLayerTarExtractor = dockerLayerTarExtractor;
     }
 
-    @Autowired
-    public void setPkgMgrExtractor(PkgMgrDbExtractor pkgMgrDbExtractor) {
-        this.pkgMgrDbExtractor = pkgMgrDbExtractor;
-    }
-
-    @Autowired
-    public void setPackageGetter(PackageGetter packageGetter) {
-        this.packageGetter = packageGetter;
-    }
-
     // TODO make sure there's test coverage for these new methods:
 
-    // TODO this is Docker format specific
-    // but it was dumb; method below it makes more sense; remove this one
-    public TypedArchiveFile selectLayerTar(List<TypedArchiveFile> unOrderedLayerTars, ManifestLayerMapping manifestLayerMapping, int layerIndex) {
-        String layerInternalId = manifestLayerMapping.getLayerInternalIds().get(layerIndex);
-        return getLayerTar(unOrderedLayerTars, layerInternalId);
-    }
+    // Possible classes:
+    // ImageTar/DockerImageTar <== haven't identified anything for this yet; maybe some ImageInspector code belongs here
+    // Image/DockerImage (already unpacked) == DockerImageDirectory!
+    // ImageLayerTar/DockerImageLayerTar
+    // ImageLayer/DockerImageLayer
+    // ContainerFileSystemAnalyzer
 
-    // TODO this is Docker format specific
+    // Docker format specific: Image/DockerImage == DockerImageDirectory
     public List<TypedArchiveFile> getOrderedLayerTars(List<TypedArchiveFile> unOrderedLayerTars, ManifestLayerMapping manifestLayerMapping) {
         List<TypedArchiveFile> orderedLayerTars = new ArrayList<>(manifestLayerMapping.getLayerInternalIds().size());
         for (String layerInternalId : manifestLayerMapping.getLayerInternalIds()) {
@@ -86,10 +74,22 @@ public class DockerTarParser {
         }
         return orderedLayerTars;
     }
+    // Docker format specific
+    private TypedArchiveFile getLayerTar(final List<TypedArchiveFile> layerTars, final String layer) {
+        TypedArchiveFile layerTar = null;
+        for (final TypedArchiveFile candidateLayerTar : layerTars) {
+            if (layer.equals(candidateLayerTar.getFile().getParentFile().getName())) {
+                logger.trace(String.format("Found layer tar for layer %s", layer));
+                layerTar = candidateLayerTar;
+                break;
+            }
+        }
+        return layerTar;
+    }
+    /////////////////////////////////////////
 
-    // TODO image format independent
+    // image format independent: ImageLayerTar (Docker subclass does not need to override this method; but prefer composition over inheritance
     public void extractLayerTar(File destinationDir, final TypedArchiveFile layerTar) throws IOException, WrongInspectorOsException {
-        // TODO eventually inline this method:
         logger.trace(String.format("Extracting layer: %s into %s", layerTar.getFile().getAbsolutePath(), destinationDir.getAbsolutePath()));
         final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(fileOperations, layerTar.getFile(), destinationDir);
         for (final File fileToRemove : filesToRemove) {
@@ -103,7 +103,7 @@ public class DockerTarParser {
         }
     }
 
-    // TODO this should be image format independent
+    // image format independent: Image == DockerImageDirectory
     public Optional<Integer> getPlatformTopLayerIndex(FullLayerMapping fullLayerMapping, @Nullable String platformTopLayerExternalId) {
         if (platformTopLayerExternalId != null) {
             int curLayerIndex = 0;
@@ -118,56 +118,14 @@ public class DockerTarParser {
         return Optional.empty();
     }
 
-    // TODO should be image format independent
+    // Docker format specific: ImageLayerTar
     public LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, TypedArchiveFile layerTar, int layerIndex) {
         final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
         final List<String> layerCmd = dockerLayerConfigParser.parseCmd(layerMetadataFileContents);
         String layerExternalId = fullLayerMapping.getLayerExternalId(layerIndex);
         return new LayerMetadata(layerExternalId, layerCmd);
     }
-
-    public LayerComponents getLayerComponents(ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, LayerMetadata layerMetadata) {
-        final List<ComponentDetails> components = packageGetter.queryPkgMgrForDependencies(containerFileSystemWithPkgMgrDb);
-        return new LayerComponents(layerMetadata, components);
-    }
-
-    public Optional<ImageInspectorOsEnum> determineNeededImageInspectorOs(ContainerFileSystem containerFileSystem,
-                                                                          String targetLinuxDistroOverride) {
-        logger.debug("Attempting to determine the target image package manager");
-        ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = null;
-        try {
-            containerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, targetLinuxDistroOverride);
-        } catch (PkgMgrDataNotFoundException e) {
-            return Optional.empty();
-        }
-        final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
-                .getImageInspectorOs(containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
-        return Optional.of(neededInspectorOs);
-    }
-
-    // TODO this is Docker format specific
-    private TypedArchiveFile getLayerTar(final List<TypedArchiveFile> layerTars, final String layer) {
-        TypedArchiveFile layerTar = null;
-        for (final TypedArchiveFile candidateLayerTar : layerTars) {
-            if (layer.equals(candidateLayerTar.getFile().getParentFile().getName())) {
-                logger.trace(String.format("Found layer tar for layer %s", layer));
-                layerTar = candidateLayerTar;
-                break;
-            }
-        }
-        return layerTar;
-    }
-
-    // TODO this is not Docker specific
-    public void checkInspectorOs(ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageInspectorOsEnum currentOs) throws WrongInspectorOsException {
-        final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
-                .getImageInspectorOs(containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
-        if (!neededInspectorOs.equals(currentOs)) {
-            final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
-            throw new WrongInspectorOsException(neededInspectorOs, msg);
-        }
-    }
-
+    //// ... Because THIS IS DOCKER SPECIFIC!!
     private String getLayerMetadataFileContents(final TypedArchiveFile layerTarFile) {
         String layerMetadataFileContents = null;
         File dir = layerTarFile.getFile().getParentFile();
@@ -182,4 +140,17 @@ public class DockerTarParser {
         }
         return layerMetadataFileContents;
     }
+    //////////////////
+
+    // image format independent: ContainerFileSystemAnalyzer
+    public void checkInspectorOs(ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageInspectorOsEnum currentOs) throws WrongInspectorOsException {
+        final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
+                .getImageInspectorOs(containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
+        if (!neededInspectorOs.equals(currentOs)) {
+            final String msg = String.format("This docker tarfile needs to be inspected on %s", neededInspectorOs);
+            throw new WrongInspectorOsException(neededInspectorOs, msg);
+        }
+    }
+
+
 }

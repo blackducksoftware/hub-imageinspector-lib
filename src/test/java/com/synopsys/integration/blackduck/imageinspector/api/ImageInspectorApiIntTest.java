@@ -80,8 +80,6 @@ public class ImageInspectorApiIntTest {
         packageGetter = new PackageGetter(pkgMgrExecutor, cmdExecutor);
 
         DockerTarParser dockerTarParser = new DockerTarParser();
-        dockerTarParser.setPkgMgrExtractor(new PkgMgrDbExtractor(pkgMgrs, new LinuxDistroExtractor(fileOperations, os)));
-        dockerTarParser.setPackageGetter(new PackageGetter(pkgMgrExecutor, cmdExecutor));
         dockerTarParser.setFileOperations(fileOperations);
         dockerTarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
         dockerTarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));

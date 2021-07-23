@@ -69,8 +69,6 @@ public class DockerTarParserTest {
         pkgMgrs.add(pkgMgr);
 
         tarParser = new DockerTarParser();
-        tarParser.setPkgMgrExtractor(new PkgMgrDbExtractor(pkgMgrs, new LinuxDistroExtractor(fileOperations, os)));
-        tarParser.setPackageGetter(new PackageGetter(pkgMgrExecutor, cmdExecutor));
         tarParser.setFileOperations(fileOperations);
         tarParser.setLayerConfigParser(dockerLayerConfigParser);
         tarParser.setDockerLayerTarExtractor(dockerLayerTarExtractor);
@@ -155,9 +153,6 @@ public class DockerTarParserTest {
     public void testIgnoreUnreadableDistroFiles() {
         final DockerTarParser tarParserWithRealOsObject;
         tarParserWithRealOsObject = new DockerTarParser();
-        // TODO make sure this goes away: passing pkgMgrs, fileOperations, os into two places:
-        tarParserWithRealOsObject.setPkgMgrExtractor(new PkgMgrDbExtractor(pkgMgrs, new LinuxDistroExtractor(fileOperations, new Os())));
-        tarParserWithRealOsObject.setPackageGetter(new PackageGetter(pkgMgrExecutor, cmdExecutor));
         tarParserWithRealOsObject.setFileOperations(fileOperations);
         tarParserWithRealOsObject.setLayerConfigParser(dockerLayerConfigParser);
         tarParserWithRealOsObject.setDockerLayerTarExtractor(dockerLayerTarExtractor);
