@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 
 @Tag("integration")
-public class ImageLayerArchiveExtractorIntTest {
+public class ImageLayerArchiveAnalyzerExtractorIntTest {
 
     @Test
     public void testOpaqueDir() throws IOException {

@@ -12,16 +12,18 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ComponentHierarchyBuilder;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerApplier;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectory;
+import com.synopsys.integration.blackduck.imageinspector.api.*;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.*;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectoryAnalyzer;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerArchiveAnalyzer;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
+import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
+import com.synopsys.integration.exception.IntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +31,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
-import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 
 // As support for other image formats is added, this class will manage the list of TarParsers
 @Component
@@ -43,7 +41,7 @@ public class ImageInspector {
     public static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final DockerTarParser tarParser;
+    private final Os os;
     private final TarOperations tarOperations;
     private final GsonBuilder gsonBuilder;
     private final FileOperations fileOperations;
@@ -52,32 +50,146 @@ public class ImageInspector {
     private final List<PkgMgr> pkgMgrs;
     private final PkgMgrDbExtractor pkgMgrDbExtractor;
     private final ImageLayerApplier imageLayerApplier;
+    private final DockerImageLayerArchiveAnalyzer dockerImageLayerArchive;
+    private final ContainerFileSystemAnalyzer containerFileSystemAnalyzer;
+    private final BdioGenerator bdioGenerator;
 
-    public ImageInspector(List<PkgMgr> pkgMgrs, PkgMgrDbExtractor pkgMgrDbExtractor, DockerTarParser tarParser, TarOperations tarOperations, GsonBuilder gsonBuilder,
+    public ImageInspector(Os os, List<PkgMgr> pkgMgrs, PkgMgrDbExtractor pkgMgrDbExtractor, TarOperations tarOperations, GsonBuilder gsonBuilder,
                           FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory,
-                          ImageLayerApplier imageLayerApplier) {
-
+                          ImageLayerApplier imageLayerApplier, DockerImageLayerArchiveAnalyzer dockerImageLayerArchive,
+                          ContainerFileSystemAnalyzer containerFileSystemAnalyzer,
+                          BdioGenerator bdioGenerator) {
+        this.os = os;
         this.pkgMgrs = pkgMgrs;
         this.pkgMgrDbExtractor = pkgMgrDbExtractor;
-        this.tarParser = tarParser;
         this.tarOperations = tarOperations;
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
         this.dockerImageConfigParser = dockerImageConfigParser;
         this.dockerManifestFactory = dockerManifestFactory;
         this.imageLayerApplier = imageLayerApplier;
+        this.dockerImageLayerArchive = dockerImageLayerArchive;
+        this.containerFileSystemAnalyzer = containerFileSystemAnalyzer;
+        this.bdioGenerator = bdioGenerator;
     }
 
-    public File getTarExtractionDirectory(final File workingDirectory) {
+    ///////////////////////////////////////
+    public ImageInfoDerived inspectUsingGivenWorkingDir(ComponentHierarchyBuilder componentHierarchyBuilder, final ImageInspectionRequest imageInspectionRequest,
+                                                         final File tempDir,
+                                                         final String effectivePlatformTopLayerExternalId)
+            throws IOException, IntegrationException {
+
+        final File workingDir = new File(tempDir, "working");
+        final File tarExtractionBaseDirectory = getTarExtractionDirectory(workingDir);
+        logger.debug(String.format("workingDir: %s", workingDir.getAbsolutePath()));
+        final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
+        File imageDir = new File(tarExtractionBaseDirectory, dockerTarfile.getName());
+        final File dockerImageDirectory = extractImageTar(imageDir, dockerTarfile);
+
+        ////////////////
+        // TODO This (and anything that is Docker-specific) is too low-level for this class
+        // TODO: inject this or a factory or s.t.
+        // TODO use Abstract Factory Pattern to create Docker or OCI-specific objects? Has to be driven by the actual image passed in
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        FileOperations fileOperations = new FileOperations();
+        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
+        DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
+        ImageDirectoryAnalyzer imageDirectoryAnalyzer = new DockerImageDirectoryAnalyzer(gsonBuilder, fileOperations, dockerImageConfigParser,
+                dockerManifestFactory);
+        //////////////
+        final List<TypedArchiveFile> unOrderedLayerTars = imageDirectoryAnalyzer.getLayerArchives(imageDir);
+        final FullLayerMapping fullLayerMapping = imageDirectoryAnalyzer.getLayerMapping(imageDir, imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
+        final String imageRepo = fullLayerMapping.getManifestLayerMapping().getImageName();
+        final String imageTag = fullLayerMapping.getManifestLayerMapping().getTagName();
+
+        final File targetImageFileSystemParentDir = new File(tarExtractionBaseDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+        final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
+        File targetImageFileSystemAppLayersRootDir = null;
+        if (StringUtils.isNotBlank(effectivePlatformTopLayerExternalId)) {
+            targetImageFileSystemAppLayersRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemAppLayersRootDirName(imageRepo, imageTag));
+        }
+        final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
+        // TODO this seems like a pretty low level operation for this class
+        final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
+
+        ImageLayerArchives imageLayerArchives = new ImageLayerArchives(unOrderedLayerTars, fullLayerMapping.getManifestLayerMapping());
+        List<TypedArchiveFile> orderedLayerArchives = imageLayerArchives.getOrderedLayerArchives();
+        final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = extractDockerLayers(currentOs,
+                imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, orderedLayerArchives, fullLayerMapping,
+                        imageInspectionRequest.getPlatformTopLayerExternalId(), componentHierarchyBuilder);
+        ImageComponentHierarchy imageComponentHierarchy = componentHierarchyBuilder.build();
+        validatePlatformResults(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
+        logLayers(imageComponentHierarchy);
+        cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), unOrderedLayerTars);
+        ImageInfoDerived imageInfoDerived = generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb, fullLayerMapping,
+                imageComponentHierarchy,
+                imageInspectionRequest.getBlackDuckProjectName(), imageInspectionRequest.getBlackDuckProjectVersion(),
+                imageInspectionRequest.getCodeLocationPrefix(), imageInspectionRequest.isOrganizeComponentsByLayer(), imageInspectionRequest.isIncludeRemovedComponents(),
+                StringUtils.isNotBlank(effectivePlatformTopLayerExternalId));
+        createContainerFileSystemTarIfRequested(containerFileSystem, imageInspectionRequest.getContainerFileSystemOutputPath(),
+                imageInspectionRequest.getContainerFileSystemExcludedPathListString());
+        return imageInfoDerived;
+    }
+
+    private void validatePlatformResults(final String givenPlatformTopLayerExternalId, final ImageComponentHierarchy imageComponentHierarchy) throws IntegrationException {
+        if ((StringUtils.isNotBlank(givenPlatformTopLayerExternalId)) && (!imageComponentHierarchy.isPlatformTopLayerFound())) {
+            throw new IntegrationException(String.format("Platform top layer id (%s) was specified but not found", givenPlatformTopLayerExternalId));
+        }
+    }
+
+    private void logLayers(final ImageComponentHierarchy imageComponentHierarchy) {
+        if (!logger.isTraceEnabled()) {
+            return;
+        }
+        logger.trace("layer dump:");
+        for (LayerDetails layer : imageComponentHierarchy.getLayers()) {
+            if (layer == null) {
+                logger.trace("Layer is null");
+            } else if (layer.getComponents() == null) {
+                logger.trace(String.format("layer %s has no componenents", layer.getLayerIndexedName()));
+            } else {
+                logger.trace(String.format("Layer %s has %d components; layer cmd: %s", layer.getLayerIndexedName(), layer.getComponents().size(), layer.getLayerCmd()));
+            }
+        }
+        if (imageComponentHierarchy.getFinalComponents() == null) {
+            logger.trace("Final image components list not set");
+        } else {
+            logger.trace(String.format("Final image components list has %d components", imageComponentHierarchy.getFinalComponents().size()));
+        }
+    }
+
+    private void cleanUpLayerTars(final boolean cleanupWorkingDir, final List<TypedArchiveFile> layerTars) {
+        if (cleanupWorkingDir) {
+            for (final TypedArchiveFile layerTar : layerTars) {
+                logger.trace(String.format("Deleting %s", layerTar.getFile().getAbsolutePath()));
+                fileOperations.deleteQuietly(layerTar.getFile());
+            }
+        }
+    }
+
+    private void createContainerFileSystemTarIfRequested(final ContainerFileSystem containerFileSystem, final String containerFileSystemOutputPath, final String containerFileSystemExcludedPathListString) {
+        if (StringUtils.isNotBlank(containerFileSystemOutputPath)) {
+            logger.info("Including container file system in output");
+            final File outputDirectory = new File(containerFileSystemOutputPath);
+            final File containerFileSystemTarFile = new File(containerFileSystemOutputPath);
+            final File returnedTargetImageFileSystem = containerFileSystem.getTargetImageFileSystemAppOnly().orElse(containerFileSystem.getTargetImageFileSystemFull());
+            logger.debug(String.format("Creating container filesystem tarfile %s from %s into %s", containerFileSystemTarFile.getAbsolutePath(), returnedTargetImageFileSystem.getAbsolutePath(), outputDirectory.getAbsolutePath()));
+            final LinuxFileSystem containerFileSys = new LinuxFileSystem(returnedTargetImageFileSystem, fileOperations);
+            containerFileSys.writeToTarGz(containerFileSystemTarFile, containerFileSystemExcludedPathListString);
+        }
+    }
+
+    ///////////////////////////////////////
+
+    File getTarExtractionDirectory(final File workingDirectory) {
         return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
     }
 
-    public DockerImageDirectory extractImageTar(final File tarExtractionDirectory, final File dockerTar) throws IOException {
-        File imageDir = tarOperations.extractTarToGivenDir(tarExtractionDirectory, dockerTar);
-        return new DockerImageDirectory(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
+    File extractImageTar(final File tarExtractionDirectory, final File dockerTar) throws IOException {
+        return tarOperations.extractTarToGivenDir(tarExtractionDirectory, dockerTar);
     }
 
-    public ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> orderedLayerTars,
+    private ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> orderedLayerTars,
                                                                final FullLayerMapping layerMapping, final String platformTopLayerExternalId,
                                                                ComponentHierarchyBuilder componentHierarchyBuilder) throws IOException, WrongInspectorOsException {
 
@@ -94,7 +206,7 @@ public class ImageInspector {
             if (inApplicationLayers && containerFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
                 imageLayerApplier.extractLayerTar(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
             }
-            LayerMetadata layerMetadata = tarParser.getLayerMetadata(layerMapping, layerTar, layerIndex);
+            LayerMetadata layerMetadata = dockerImageLayerArchive.getLayerMetadata(layerMapping, layerTar, layerIndex);
             try {
                 postLayerContainerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, targetLinuxDistroOverride);
                 componentHierarchyBuilder.addLayer(postLayerContainerFileSystemWithPkgMgrDb, layerIndex, layerMetadata.getLayerExternalId(), layerMetadata.getLayerCmd());
@@ -110,14 +222,14 @@ public class ImageInspector {
         if (postLayerContainerFileSystemWithPkgMgrDb == null) {
             postLayerContainerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(containerFileSystem, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), targetLinuxDistroOverride, null);
         } else {
-            tarParser.checkInspectorOs(postLayerContainerFileSystemWithPkgMgrDb, currentOs);
+            containerFileSystemAnalyzer.checkInspectorOs(postLayerContainerFileSystemWithPkgMgrDb, currentOs);
         }
         // TODO This has always returned null in some cases, like a scratch image or a windows image, so should be OK w/out a null check
         return postLayerContainerFileSystemWithPkgMgrDb;
         //OLD: return tarParser.extractPkgMgrDb(currentOs, targetLinuxDistroOverride, containerFileSystem, unOrderedLayerTars, layerMapping, platformTopLayerExternalId);
     }
 
-    public ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final FullLayerMapping mapping,
+    ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final FullLayerMapping mapping,
                                                             ImageComponentHierarchy imageComponentHierarchy,
                                                             final String projectName,
                                                             final String versionName,

@@ -9,6 +9,7 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageDirectoryAnalyzer;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
@@ -25,24 +26,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DockerImageDirectory {
+public class DockerImageDirectoryAnalyzer implements ImageDirectoryAnalyzer {
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final GsonBuilder gsonBuilder;
     private final FileOperations fileOperations;
     private final DockerImageConfigParser dockerImageConfigParser;
     private final DockerManifestFactory dockerManifestFactory;
-    private final File imageDir;
 
-    public DockerImageDirectory(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory, File imageDir) {
+    public DockerImageDirectoryAnalyzer(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory) {
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
         this.dockerImageConfigParser = dockerImageConfigParser;
         this.dockerManifestFactory = dockerManifestFactory;
-        this.imageDir = imageDir;
     }
 
-    public List<TypedArchiveFile> getLayerArchives() throws IOException {
+    @Override
+    public List<TypedArchiveFile> getLayerArchives(File imageDir) throws IOException {
         logger.debug(String.format("Searching for layer archive files in unpackedImageDir: %s", imageDir.getAbsolutePath()));
         final List<TypedArchiveFile> untaredLayerFiles = new ArrayList<>();
         List<File> unpackedImageTopLevelFiles = Arrays.asList(imageDir.listFiles());
@@ -60,23 +60,23 @@ public class DockerImageDirectory {
         return untaredLayerFiles;
     }
 
-    public FullLayerMapping getLayerMapping(final String dockerImageName, final String dockerTagName) throws IntegrationException {
-        logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
-        logger.debug(String.format("unpackedImageDir: %s", imageDir));
+    @Override
+    public FullLayerMapping getLayerMapping(File imageDir, final String repo, final String tag) throws IntegrationException {
         final DockerManifest manifest = dockerManifestFactory.createManifest(imageDir);
         ManifestLayerMapping manifestLayerMapping;
         try {
-            manifestLayerMapping = manifest.getLayerMapping(dockerImageName, dockerTagName);
+            manifestLayerMapping = manifest.getLayerMapping(repo, tag);
         } catch (final Exception e) {
             final String msg = String.format("Could not parse the image manifest file : %s", e.getMessage());
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(manifestLayerMapping.getImageConfigFilename());
+        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(imageDir, manifestLayerMapping.getImageConfigFilename());
         return new FullLayerMapping(manifestLayerMapping, externalLayerIds);
     }
 
-    private List<String> getExternalLayerIdsFromImageConfigFile(String imageConfigFileName) {
+    // TODO seems to overlap w/ DockerImageLayerArchive
+    private List<String> getExternalLayerIdsFromImageConfigFile(File imageDir, String imageConfigFileName) {
         try {
             final File imageConfigFile = new File(imageDir, imageConfigFileName);
             final String imageConfigFileContents = fileOperations

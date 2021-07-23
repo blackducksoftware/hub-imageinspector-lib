@@ -28,20 +28,17 @@ import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnu
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 
 @Disabled
 class ImageInspectorTest {
-    private DockerTarParser tarParser;
     private TarOperations tarOperations;
     private ImageInspector imageInspector;
 
     @BeforeEach
     public void setUpEach() {
-        tarParser = Mockito.mock(DockerTarParser.class);
         tarOperations = Mockito.mock(TarOperations.class);
         // TODO should some of these be mocked?
         // NEED: Os os, List<PkgMgr> pkgMgrs, PkgMgrExecutor pkgMgrExecutor, CmdExecutor cmdExecutor,

@@ -10,9 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerApplier;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerArchiveAnalyzer;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +28,6 @@ import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerArchiveExtractor;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
@@ -77,15 +79,14 @@ public class ImageInspectorApiIntTest {
 
         packageGetter = new PackageGetter(pkgMgrExecutor, cmdExecutor);
 
-        DockerTarParser dockerTarParser = new DockerTarParser();
-        dockerTarParser.setFileOperations(fileOperations);
-        dockerTarParser.setDockerLayerTarExtractor(new ImageLayerArchiveExtractor());
-        dockerTarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
         TarOperations tarOperations = new TarOperations();
         tarOperations.setFileOperations(fileOperations);
+        ContainerFileSystemAnalyzer containerFileSystemAnalyzer = new ContainerFileSystemAnalyzer();
         ImageLayerApplier imageLayerApplier = new ImageLayerApplier(fileOperations, new ImageLayerArchiveExtractor());
-        ImageInspector imageInspector = new ImageInspector(pkgMgrs, pkgMgrDbExtractor, dockerTarParser, tarOperations, new GsonBuilder(),
-                new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageLayerApplier);
+        ImageInspector imageInspector = new ImageInspector(os, pkgMgrs, pkgMgrDbExtractor, tarOperations, new GsonBuilder(),
+                new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageLayerApplier,
+                new DockerImageLayerArchiveAnalyzer(new DockerLayerConfigParser(new GsonBuilder())),
+                containerFileSystemAnalyzer, new BdioGenerator());
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());
         imageInspectorApi.setBdioGenerator(TestUtils.createBdioGenerator());
