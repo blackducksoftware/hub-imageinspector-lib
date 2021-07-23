@@ -1,7 +1,6 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,14 +71,8 @@ public class DockerTarParserTest {
         tarParser = new DockerTarParser();
         tarParser.setPkgMgrExtractor(new PkgMgrDbExtractor(pkgMgrs, new LinuxDistroExtractor(fileOperations, os)));
         tarParser.setPackageGetter(new PackageGetter(pkgMgrExecutor, cmdExecutor));
-        tarParser.setPkgMgrs(pkgMgrs);
-        tarParser.setOs(os);
-        tarParser.setManifestFactory(dockerManifestFactory);
-        tarParser.setExecutor(cmdExecutor);
         tarParser.setFileOperations(fileOperations);
-        tarParser.setImageConfigParser(dockerImageConfigParser);
         tarParser.setLayerConfigParser(dockerLayerConfigParser);
-        tarParser.setPkgMgrExecutor(pkgMgrExecutor);
         tarParser.setDockerLayerTarExtractor(dockerLayerTarExtractor);
 
         tarOperations = new TarOperations();
@@ -165,14 +158,8 @@ public class DockerTarParserTest {
         // TODO make sure this goes away: passing pkgMgrs, fileOperations, os into two places:
         tarParserWithRealOsObject.setPkgMgrExtractor(new PkgMgrDbExtractor(pkgMgrs, new LinuxDistroExtractor(fileOperations, new Os())));
         tarParserWithRealOsObject.setPackageGetter(new PackageGetter(pkgMgrExecutor, cmdExecutor));
-        tarParserWithRealOsObject.setPkgMgrs(pkgMgrs);
-        tarParserWithRealOsObject.setOs(new Os());
-        tarParserWithRealOsObject.setManifestFactory(dockerManifestFactory);
-        tarParserWithRealOsObject.setExecutor(cmdExecutor);
         tarParserWithRealOsObject.setFileOperations(fileOperations);
-        tarParserWithRealOsObject.setImageConfigParser(dockerImageConfigParser);
         tarParserWithRealOsObject.setLayerConfigParser(dockerLayerConfigParser);
-        tarParserWithRealOsObject.setPkgMgrExecutor(pkgMgrExecutor);
         tarParserWithRealOsObject.setDockerLayerTarExtractor(dockerLayerTarExtractor);
 
         final File[] etcFiles = {
