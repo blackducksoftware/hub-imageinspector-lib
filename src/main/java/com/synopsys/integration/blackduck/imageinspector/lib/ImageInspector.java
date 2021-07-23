@@ -14,16 +14,14 @@ import java.util.Optional;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ComponentHierarchyBuilder;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerApplier;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectory;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +43,6 @@ public class ImageInspector {
     public static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Os os;
-    private final PkgMgrExecutor pkgMgrExecutor;
-    private final CmdExecutor cmdExecutor;
     private final DockerTarParser tarParser;
     private final TarOperations tarOperations;
     private final GsonBuilder gsonBuilder;
@@ -56,20 +51,21 @@ public class ImageInspector {
     private final DockerManifestFactory dockerManifestFactory;
     private final List<PkgMgr> pkgMgrs;
     private final PkgMgrDbExtractor pkgMgrDbExtractor;
+    private final ImageLayerApplier imageLayerApplier;
 
-    public ImageInspector(Os os, List<PkgMgr> pkgMgrs, PkgMgrDbExtractor pkgMgrDbExtractor, PkgMgrExecutor pkgMgrExecutor, CmdExecutor cmdExecutor, DockerTarParser tarParser, TarOperations tarOperations, GsonBuilder gsonBuilder,
-                          FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory) {
-        this.os = os;
+    public ImageInspector(List<PkgMgr> pkgMgrs, PkgMgrDbExtractor pkgMgrDbExtractor, DockerTarParser tarParser, TarOperations tarOperations, GsonBuilder gsonBuilder,
+                          FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory,
+                          ImageLayerApplier imageLayerApplier) {
+
         this.pkgMgrs = pkgMgrs;
         this.pkgMgrDbExtractor = pkgMgrDbExtractor;
-        this.pkgMgrExecutor = pkgMgrExecutor;
-        this.cmdExecutor = cmdExecutor;
         this.tarParser = tarParser;
         this.tarOperations = tarOperations;
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
         this.dockerImageConfigParser = dockerImageConfigParser;
         this.dockerManifestFactory = dockerManifestFactory;
+        this.imageLayerApplier = imageLayerApplier;
     }
 
     public File getTarExtractionDirectory(final File workingDirectory) {
@@ -81,25 +77,22 @@ public class ImageInspector {
         return new DockerImageDirectory(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
     }
 
-    public ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> unOrderedLayerTars,
+    public ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> orderedLayerTars,
                                                                final FullLayerMapping layerMapping, final String platformTopLayerExternalId,
                                                                ComponentHierarchyBuilder componentHierarchyBuilder) throws IOException, WrongInspectorOsException {
-        // TODO pass in some action that'll collect component hierarchy; a "call this after every layer" action; a post-layer action?
-        // The action we'll pass in is a component hierarchy builder
-        // This code can later query it for the component hierarchy
-        LinuxDistroExtractor linuxDistroExtractor = new LinuxDistroExtractor(fileOperations, os);
-        PackageGetter packageGetter = new PackageGetter(pkgMgrExecutor, cmdExecutor);
+
         Optional<Integer> platformTopLayerIndex = tarParser.getPlatformTopLayerIndex(layerMapping, platformTopLayerExternalId);
         if (platformTopLayerIndex.isPresent()) {
             componentHierarchyBuilder.setPlatformTopLayerIndex(platformTopLayerIndex.get());
         }
+
         ContainerFileSystemWithPkgMgrDb postLayerContainerFileSystemWithPkgMgrDb = null;
         boolean inApplicationLayers = false;
         int layerIndex = 0;
-        for (TypedArchiveFile layerTar : tarParser.getOrderedLayerTars(unOrderedLayerTars, layerMapping.getManifestLayerMapping())) {
-            tarParser.extractLayerTar(containerFileSystem.getTargetImageFileSystemFull(), layerTar);
+        for (TypedArchiveFile layerTar : orderedLayerTars) {
+            imageLayerApplier.extractLayerTar(containerFileSystem.getTargetImageFileSystemFull(), layerTar);
             if (inApplicationLayers && containerFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
-                tarParser.extractLayerTar(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
+                imageLayerApplier.extractLayerTar(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
             }
             LayerMetadata layerMetadata = tarParser.getLayerMetadata(layerMapping, layerTar, layerIndex);
             try {

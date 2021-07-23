@@ -10,10 +10,10 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerArchiveExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import org.apache.commons.io.FileUtils;
@@ -25,14 +25,8 @@ import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageInspectorOsMapping;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
-import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 
 @Component
 public class DockerTarParser {
@@ -40,7 +34,7 @@ public class DockerTarParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private DockerLayerConfigParser dockerLayerConfigParser;
     private FileOperations fileOperations;
-    private DockerLayerTarExtractor dockerLayerTarExtractor;
+    private ImageLayerArchiveExtractor imageLayerArchiveExtractor;
 
     @Autowired
     public void setLayerConfigParser(final DockerLayerConfigParser dockerLayerConfigParser) {
@@ -53,55 +47,19 @@ public class DockerTarParser {
     }
 
     @Autowired
-    public void setDockerLayerTarExtractor(final DockerLayerTarExtractor dockerLayerTarExtractor) {
-        this.dockerLayerTarExtractor = dockerLayerTarExtractor;
+    public void setDockerLayerTarExtractor(final ImageLayerArchiveExtractor imageLayerArchiveExtractor) {
+        this.imageLayerArchiveExtractor = imageLayerArchiveExtractor;
     }
 
     // TODO make sure there's test coverage for these new methods:
 
-    // Possible classes:
+    // Possible abstract/concrete classes:
     // ImageTar/DockerImageTar <== haven't identified anything for this yet; maybe some ImageInspector code belongs here
-    // Image/DockerImage (already unpacked) == DockerImageDirectory!
+    // ImageDirectory/DockerImageDirectory
     // ImageLayerTar/DockerImageLayerTar
     // ImageLayer/DockerImageLayer
     // ContainerFileSystemAnalyzer
-
-    // Docker format specific: Image/DockerImage == DockerImageDirectory
-    public List<TypedArchiveFile> getOrderedLayerTars(List<TypedArchiveFile> unOrderedLayerTars, ManifestLayerMapping manifestLayerMapping) {
-        List<TypedArchiveFile> orderedLayerTars = new ArrayList<>(manifestLayerMapping.getLayerInternalIds().size());
-        for (String layerInternalId : manifestLayerMapping.getLayerInternalIds()) {
-            orderedLayerTars.add(getLayerTar(unOrderedLayerTars, layerInternalId));
-        }
-        return orderedLayerTars;
-    }
-    // Docker format specific
-    private TypedArchiveFile getLayerTar(final List<TypedArchiveFile> layerTars, final String layer) {
-        TypedArchiveFile layerTar = null;
-        for (final TypedArchiveFile candidateLayerTar : layerTars) {
-            if (layer.equals(candidateLayerTar.getFile().getParentFile().getName())) {
-                logger.trace(String.format("Found layer tar for layer %s", layer));
-                layerTar = candidateLayerTar;
-                break;
-            }
-        }
-        return layerTar;
-    }
     /////////////////////////////////////////
-
-    // image format independent: ImageLayerTar (Docker subclass does not need to override this method; but prefer composition over inheritance
-    public void extractLayerTar(File destinationDir, final TypedArchiveFile layerTar) throws IOException, WrongInspectorOsException {
-        logger.trace(String.format("Extracting layer: %s into %s", layerTar.getFile().getAbsolutePath(), destinationDir.getAbsolutePath()));
-        final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(fileOperations, layerTar.getFile(), destinationDir);
-        for (final File fileToRemove : filesToRemove) {
-            if (fileToRemove.isDirectory()) {
-                logger.trace(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));
-                FileUtils.deleteDirectory(fileToRemove);
-            } else {
-                logger.trace(String.format("Removing file marked for deletion: %s", fileToRemove.getAbsolutePath()));
-                fileOperations.deleteQuietly(fileToRemove);
-            }
-        }
-    }
 
     // image format independent: Image == DockerImageDirectory
     public Optional<Integer> getPlatformTopLayerIndex(FullLayerMapping fullLayerMapping, @Nullable String platformTopLayerExternalId) {

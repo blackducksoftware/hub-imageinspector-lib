@@ -14,6 +14,7 @@ import java.util.List;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerUnorderedLayerTars;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
@@ -208,7 +209,7 @@ public class ImageInspectorApi {
         final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
         File imageDir = new File(tarExtractionBaseDirectory, dockerTarfile.getName());
         final DockerImageDirectory dockerImageDirectory = imageInspector.extractImageTar(imageDir, dockerTarfile);
-        final List<TypedArchiveFile> layerTars = dockerImageDirectory.getLayerArchives();
+        final List<TypedArchiveFile> unOrderedLayerTars = dockerImageDirectory.getLayerArchives();
         final FullLayerMapping fullLayerMapping = dockerImageDirectory.getLayerMapping(imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
         final String imageRepo = fullLayerMapping.getManifestLayerMapping().getImageName();
         final String imageTag = fullLayerMapping.getManifestLayerMapping().getTagName();
@@ -222,13 +223,15 @@ public class ImageInspectorApi {
         final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
         final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
 
+        DockerUnorderedLayerTars dockerUnorderedLayerTars = new DockerUnorderedLayerTars(unOrderedLayerTars, fullLayerMapping.getManifestLayerMapping());
+        List<TypedArchiveFile> orderedLayerTars = dockerUnorderedLayerTars.getOrderedLayerTars();
         final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = imageInspector
-                                                    .extractDockerLayers(currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, layerTars, fullLayerMapping,
+                                                    .extractDockerLayers(currentOs, imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, orderedLayerTars, fullLayerMapping,
                                                         imageInspectionRequest.getPlatformTopLayerExternalId(), componentHierarchyBuilder);
         ImageComponentHierarchy imageComponentHierarchy = componentHierarchyBuilder.build();
         validatePlatformResults(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
         logLayers(imageComponentHierarchy);
-        cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), layerTars);
+        cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), unOrderedLayerTars);
         ImageInfoDerived imageInfoDerived = imageInspector.generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb, fullLayerMapping,
             imageComponentHierarchy,
             imageInspectionRequest.getBlackDuckProjectName(), imageInspectionRequest.getBlackDuckProjectVersion(),

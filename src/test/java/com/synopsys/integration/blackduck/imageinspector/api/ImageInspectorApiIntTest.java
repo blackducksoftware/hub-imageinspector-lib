@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ComponentHierarchyBuilder;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerApplier;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
@@ -20,11 +21,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerTarExtractor;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerArchiveExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerConfigParser;
@@ -34,12 +34,10 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
-import org.mockito.stubbing.OngoingStubbing;
 
 @Tag("integration")
 public class ImageInspectorApiIntTest {
@@ -81,12 +79,13 @@ public class ImageInspectorApiIntTest {
 
         DockerTarParser dockerTarParser = new DockerTarParser();
         dockerTarParser.setFileOperations(fileOperations);
-        dockerTarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
+        dockerTarParser.setDockerLayerTarExtractor(new ImageLayerArchiveExtractor());
         dockerTarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
         TarOperations tarOperations = new TarOperations();
         tarOperations.setFileOperations(fileOperations);
-        ImageInspector imageInspector = new ImageInspector(os, pkgMgrs, pkgMgrDbExtractor, pkgMgrExecutor, cmdExecutor, dockerTarParser, tarOperations, new GsonBuilder(),
-                new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory());
+        ImageLayerApplier imageLayerApplier = new ImageLayerApplier(fileOperations, new ImageLayerArchiveExtractor());
+        ImageInspector imageInspector = new ImageInspector(pkgMgrs, pkgMgrDbExtractor, dockerTarParser, tarOperations, new GsonBuilder(),
+                new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageLayerApplier);
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());
         imageInspectorApi.setBdioGenerator(TestUtils.createBdioGenerator());

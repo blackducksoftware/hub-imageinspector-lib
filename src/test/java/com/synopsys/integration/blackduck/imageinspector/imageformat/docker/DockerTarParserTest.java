@@ -8,9 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerArchiveExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
@@ -20,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.google.gson.GsonBuilder;
-import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
@@ -42,7 +40,7 @@ public class DockerTarParserTest {
     private PkgMgrExecutor pkgMgrExecutor;
     private DockerImageConfigParser dockerImageConfigParser;
     private DockerLayerConfigParser dockerLayerConfigParser;
-    private DockerLayerTarExtractor dockerLayerTarExtractor;
+    private ImageLayerArchiveExtractor imageLayerArchiveExtractor;
     private List<PkgMgr> pkgMgrs;
     private DockerTarParser tarParser;
     private TarOperations tarOperations;
@@ -64,14 +62,14 @@ public class DockerTarParserTest {
         dockerImageConfigParser = Mockito.mock(DockerImageConfigParser.class);
         dockerLayerConfigParser = Mockito.mock(DockerLayerConfigParser.class);
         Mockito.when(dockerLayerConfigParser.parseCmd(Mockito.anyString())).thenReturn(Arrays.asList("testLayerCmd", "testLayerCmdArg"));
-        dockerLayerTarExtractor = Mockito.mock(DockerLayerTarExtractor.class);
+        imageLayerArchiveExtractor = Mockito.mock(ImageLayerArchiveExtractor.class);
         pkgMgrs = new ArrayList<>(1);
         pkgMgrs.add(pkgMgr);
 
         tarParser = new DockerTarParser();
         tarParser.setFileOperations(fileOperations);
         tarParser.setLayerConfigParser(dockerLayerConfigParser);
-        tarParser.setDockerLayerTarExtractor(dockerLayerTarExtractor);
+        tarParser.setDockerLayerTarExtractor(imageLayerArchiveExtractor);
 
         tarOperations = new TarOperations();
         tarOperations.setFileOperations(fileOperations);
@@ -155,7 +153,7 @@ public class DockerTarParserTest {
         tarParserWithRealOsObject = new DockerTarParser();
         tarParserWithRealOsObject.setFileOperations(fileOperations);
         tarParserWithRealOsObject.setLayerConfigParser(dockerLayerConfigParser);
-        tarParserWithRealOsObject.setDockerLayerTarExtractor(dockerLayerTarExtractor);
+        tarParserWithRealOsObject.setDockerLayerTarExtractor(imageLayerArchiveExtractor);
 
         final File[] etcFiles = {
             new File("thisdirdoesnotexist/os-release"),

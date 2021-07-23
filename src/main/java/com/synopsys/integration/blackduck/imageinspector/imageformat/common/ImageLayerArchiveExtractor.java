@@ -5,7 +5,7 @@
  *
  * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
-package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
+package com.synopsys.integration.blackduck.imageinspector.imageformat.common;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LowerLayerFileDeleter;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
@@ -27,18 +28,8 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.laye
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 @Component
-public class DockerLayerTarExtractor {
-    private static final Logger logger = LoggerFactory.getLogger(DockerLayerTarExtractor.class);
-
-    public List<File> extractLayerTarToDir(final File tarFile, final File outputDir) throws IOException {
-        final FileOperations fileOperations = new FileOperations();
-        return extractLayerTarToDir(fileOperations, tarFile, outputDir);
-    }
-
-    public List<File> extractLayerTarToDir(final TarArchiveInputStream tarFileInputStream, final File outputDir) throws IOException {
-        final FileOperations fileOperations = new FileOperations();
-        return extractLayerTarToDir(fileOperations, tarFileInputStream, outputDir);
-    }
+public class ImageLayerArchiveExtractor {
+    private static final Logger logger = LoggerFactory.getLogger(ImageLayerArchiveExtractor.class);
 
     public List<File> extractLayerTarToDir(final FileOperations fileOperations, final File tarFile, final File outputDir) throws IOException {
         logger.debug(String.format("tarFile: %s", tarFile.getAbsolutePath()));

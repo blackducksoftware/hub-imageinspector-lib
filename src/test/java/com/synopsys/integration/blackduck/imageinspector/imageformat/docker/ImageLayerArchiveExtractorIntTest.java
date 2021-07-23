@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerArchiveExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
@@ -16,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 
 @Tag("integration")
-public class DockerLayerTarExtractorIntTest {
+public class ImageLayerArchiveExtractorIntTest {
 
     @Test
     public void testOpaqueDir() throws IOException {
@@ -36,8 +38,8 @@ public class DockerLayerTarExtractorIntTest {
         dirContainingAnotherFileThatShouldBeRemoved.mkdirs();
         anotherFileThatShouldBeRemoved.createNewFile();
 
-        final DockerLayerTarExtractor dockerLayerTarExtractor = new DockerLayerTarExtractor();
-        final List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(tarFile, outputDir);
+        final ImageLayerArchiveExtractor imageLayerArchiveExtractor = new ImageLayerArchiveExtractor();
+        final List<File> filesToRemove = imageLayerArchiveExtractor.extractLayerTarToDir(new FileOperations(), tarFile, outputDir);
 
         assertEquals(0, filesToRemove.size());
         final File fileThatShouldBeCreated = new File(outputDir, "opt/luciddg-server/modules/django/bin/100_assets.csv");
@@ -60,9 +62,9 @@ public class DockerLayerTarExtractorIntTest {
         File fileThatShouldExist3 = new File(partitionDir, "queryosapi.py");
         File fileThatShouldExist4 = new File(partitionDir, "partitionPV.sh");
 
-        DockerLayerTarExtractor dockerLayerTarExtractor = new DockerLayerTarExtractor();
+        ImageLayerArchiveExtractor imageLayerArchiveExtractor = new ImageLayerArchiveExtractor();
         TarArchiveInputStream inputStream = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(tarFile)), "UTF-8");
-        List<File> filesToRemove = dockerLayerTarExtractor.extractLayerTarToDir(inputStream, outputDir);
+        List<File> filesToRemove = imageLayerArchiveExtractor.extractLayerTarToDir(new FileOperations(), inputStream, outputDir);
 
         assertTrue(filesToRemove.isEmpty());
         assertTrue(fileThatShouldExist1.exists());

@@ -60,7 +60,6 @@ public class DockerImageDirectory {
         return untaredLayerFiles;
     }
 
-
     public FullLayerMapping getLayerMapping(final String dockerImageName, final String dockerTagName) throws IntegrationException {
         logger.debug(String.format("getLayerMappings(): dockerImageName: %s; dockerTagName: %s", dockerImageName, dockerTagName));
         logger.debug(String.format("unpackedImageDir: %s", imageDir));
