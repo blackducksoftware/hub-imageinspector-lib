@@ -7,11 +7,18 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Optional;
+
+// TODO Do OCI images have both of these? If not, how do we make this class format-independent?
 public class FullLayerMapping {
-    private ManifestLayerMapping manifestLayerMapping;
-    private List<String> layerExternalIds;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final ManifestLayerMapping manifestLayerMapping;
+    private final List<String> layerExternalIds;
 
     public FullLayerMapping(ManifestLayerMapping manifestLayerMapping, List<String> layerExternalIds) {
         this.manifestLayerMapping = manifestLayerMapping;
@@ -31,5 +38,20 @@ public class FullLayerMapping {
             return null;
         }
         return layerExternalIds.get(layerIndex);
+    }
+
+    // image format independent: Image == DockerImageDirectory
+    public Optional<Integer> getPlatformTopLayerIndex(@Nullable String platformTopLayerExternalId) {
+        if (platformTopLayerExternalId != null) {
+            int curLayerIndex = 0;
+            for (String candidateLayerExternalId : getLayerExternalIds()) {
+                if ((candidateLayerExternalId != null) && (candidateLayerExternalId.equals(platformTopLayerExternalId))) {
+                    logger.trace("Found platform top layer ({}) at layerIndex: {}", platformTopLayerExternalId, curLayerIndex);
+                    return Optional.of(curLayerIndex);
+                }
+                curLayerIndex++;
+            }
+        }
+        return Optional.empty();
     }
 }

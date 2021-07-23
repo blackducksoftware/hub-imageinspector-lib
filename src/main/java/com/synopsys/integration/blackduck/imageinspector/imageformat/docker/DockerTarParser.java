@@ -61,21 +61,6 @@ public class DockerTarParser {
     // ContainerFileSystemAnalyzer
     /////////////////////////////////////////
 
-    // image format independent: Image == DockerImageDirectory
-    public Optional<Integer> getPlatformTopLayerIndex(FullLayerMapping fullLayerMapping, @Nullable String platformTopLayerExternalId) {
-        if (platformTopLayerExternalId != null) {
-            int curLayerIndex = 0;
-            for (String candidateLayerExternalId : fullLayerMapping.getLayerExternalIds()) {
-                if ((candidateLayerExternalId != null) && (candidateLayerExternalId.equals(platformTopLayerExternalId))) {
-                    logger.trace("Found platform top layer ({}) at layerIndex: {}", platformTopLayerExternalId, curLayerIndex);
-                    return Optional.of(curLayerIndex);
-                }
-                curLayerIndex++;
-            }
-        }
-        return Optional.empty();
-    }
-
     // Docker format specific: ImageLayerTar
     public LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, TypedArchiveFile layerTar, int layerIndex) {
         final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);

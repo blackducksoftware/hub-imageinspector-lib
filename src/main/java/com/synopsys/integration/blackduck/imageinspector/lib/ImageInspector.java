@@ -81,7 +81,7 @@ public class ImageInspector {
                                                                final FullLayerMapping layerMapping, final String platformTopLayerExternalId,
                                                                ComponentHierarchyBuilder componentHierarchyBuilder) throws IOException, WrongInspectorOsException {
 
-        Optional<Integer> platformTopLayerIndex = tarParser.getPlatformTopLayerIndex(layerMapping, platformTopLayerExternalId);
+        Optional<Integer> platformTopLayerIndex = layerMapping.getPlatformTopLayerIndex(platformTopLayerExternalId);
         if (platformTopLayerIndex.isPresent()) {
             componentHierarchyBuilder.setPlatformTopLayerIndex(platformTopLayerIndex.get());
         }
