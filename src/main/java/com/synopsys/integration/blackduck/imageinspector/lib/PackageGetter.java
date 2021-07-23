@@ -12,15 +12,19 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExec
 import com.synopsys.integration.exception.IntegrationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class PackageGetter {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final PkgMgrExecutor pkgMgrExecutor;
     private final CmdExecutor cmdExecutor;
 
+    @Autowired
     public PackageGetter(PkgMgrExecutor pkgMgrExecutor, CmdExecutor cmdExecutor) {
         this.pkgMgrExecutor = pkgMgrExecutor;
         this.cmdExecutor = cmdExecutor;

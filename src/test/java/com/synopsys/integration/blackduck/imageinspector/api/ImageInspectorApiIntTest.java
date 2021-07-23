@@ -41,7 +41,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkg
 import com.synopsys.integration.exception.IntegrationException;
 import org.mockito.stubbing.OngoingStubbing;
 
-///////////////////////@Tag("integration")
+@Tag("integration")
 public class ImageInspectorApiIntTest {
     private static final String PROJECT_VERSION = "unitTest1";
     private static final String PROJECT = "SB001";

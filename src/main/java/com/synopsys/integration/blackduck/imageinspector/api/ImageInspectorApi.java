@@ -143,6 +143,13 @@ public class ImageInspectorApi {
      * @return The generated BDIO object representing the componets (packages) read from the images's package manager database.
      * @throws IntegrationException, InterruptedException
      */
+    public SimpleBdioDocument getBdio(ImageInspectionRequest imageInspectionRequest) throws IntegrationException, InterruptedException {
+        PackageGetter packageGetter = new PackageGetter(pkgMgrExecutor, cmdExecutor);
+        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
+        return getBdio(componentHierarchyBuilder, imageInspectionRequest);
+    }
+
+    // TODO javadoc for this method
     public SimpleBdioDocument getBdio(ComponentHierarchyBuilder componentHierarchyBuilder, ImageInspectionRequest imageInspectionRequest) throws IntegrationException, InterruptedException {
         logger.info("getBdio()");
         os.logMemory();
