@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntries;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.layerentry.LayerEntry;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.layerentry.LayerEntries;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.layerentry.LayerEntry;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 @Component
