@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.LowerLayerFileDeleter;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class WhiteOutFileLayerEntryTest {
