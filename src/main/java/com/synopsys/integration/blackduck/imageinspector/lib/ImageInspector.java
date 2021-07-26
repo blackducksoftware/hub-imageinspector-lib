@@ -25,7 +25,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,36 +39,26 @@ import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 // As support for other image formats is added, this class will manage the list of TarParsers
 @Component
 public class ImageInspector {
-    public static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
-    public static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private static final String NO_PKG_MGR_FOUND = "noPkgMgr";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final Os os;
     private final TarOperations tarOperations;
-    private final GsonBuilder gsonBuilder;
     private final FileOperations fileOperations;
-    private final DockerImageConfigParser dockerImageConfigParser;
-    private final DockerManifestFactory dockerManifestFactory;
-    private final List<PkgMgr> pkgMgrs;
     private final PkgMgrDbExtractor pkgMgrDbExtractor;
     private final ImageLayerApplier imageLayerApplier;
     private final DockerImageLayerMetadataExtractor dockerImageLayerArchive;
     private final ContainerFileSystemParser containerFileSystemParser;
     private final BdioGenerator bdioGenerator;
 
-    public ImageInspector(Os os, List<PkgMgr> pkgMgrs, PkgMgrDbExtractor pkgMgrDbExtractor, TarOperations tarOperations, GsonBuilder gsonBuilder,
-                          FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory,
+    public ImageInspector(Os os, PkgMgrDbExtractor pkgMgrDbExtractor, TarOperations tarOperations,
+                          FileOperations fileOperations,
                           ImageLayerApplier imageLayerApplier, DockerImageLayerMetadataExtractor dockerImageLayerArchive,
                           ContainerFileSystemParser containerFileSystemParser,
                           BdioGenerator bdioGenerator) {
         this.os = os;
-        this.pkgMgrs = pkgMgrs;
         this.pkgMgrDbExtractor = pkgMgrDbExtractor;
         this.tarOperations = tarOperations;
-        this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
-        this.dockerImageConfigParser = dockerImageConfigParser;
-        this.dockerManifestFactory = dockerManifestFactory;
         this.imageLayerApplier = imageLayerApplier;
         this.dockerImageLayerArchive = dockerImageLayerArchive;
         this.containerFileSystemParser = containerFileSystemParser;
@@ -78,20 +67,15 @@ public class ImageInspector {
 
     ///////////////////////////////////////
     public ImageInfoDerived inspectUsingGivenWorkingDir(ComponentHierarchyBuilder componentHierarchyBuilder, final ImageInspectionRequest imageInspectionRequest,
-                                                        final File tempDir,
+                                                        final File workingDir,
                                                         final String effectivePlatformTopLayerExternalId)
             throws IOException, IntegrationException {
 
-        // WorkingDirectories
-        final File workingDir = new File(tempDir, "working");
-        // WorkingDirectories
-        final File tarExtractionBaseDirectory = getTarExtractionDirectory(workingDir);
-        logger.debug(String.format("workingDir: %s", workingDir.getAbsolutePath()));
-        final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
-
-        // WorkingDirectories
-        File imageDir = new File(tarExtractionBaseDirectory, dockerTarfile.getName());
-        final File dockerImageDirectory = extractImageTar(imageDir, dockerTarfile);
+        // TODO
+        WorkingDirectories workingDirectories = new WorkingDirectories(workingDir);
+        final File targetImageTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
+        File imageDir = workingDirectories.getExtractedImageDir(targetImageTarfile);
+        tarOperations.extractTarToGivenDir(imageDir, targetImageTarfile);
 
         ////////////////
         // TODO This (and anything that is Docker-specific) is too low-level for this class
@@ -109,13 +93,11 @@ public class ImageInspector {
         //////////////
 
         ImageDirectoryData imageDirectoryData = imageDirectoryDataFactory.create(imageDir, imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
-        ///////
-        // WorkingDirectories
-        final File targetImageFileSystemParentDir = new File(tarExtractionBaseDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
-        final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag()));
+
+        File targetImageFileSystemRootDir = workingDirectories.getTargetImageFileSystemRootDir(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag());
         File targetImageFileSystemAppLayersRootDir = null;
         if (StringUtils.isNotBlank(effectivePlatformTopLayerExternalId)) {
-            targetImageFileSystemAppLayersRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemAppLayersRootDirName(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag()));
+            targetImageFileSystemAppLayersRootDir = workingDirectories.getTargetImageFileSystemAppLayersRootDir(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag());
         }
 
 
@@ -193,14 +175,6 @@ public class ImageInspector {
     }
 
     ///////////////////////////////////////
-
-    File getTarExtractionDirectory(final File workingDirectory) {
-        return new File(workingDirectory, TAR_EXTRACTION_DIRECTORY);
-    }
-
-    File extractImageTar(final File tarExtractionDirectory, final File dockerTar) throws IOException {
-        return tarOperations.extractTarToGivenDir(tarExtractionDirectory, dockerTar);
-    }
 
     private ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> orderedLayerTars,
                                                                final FullLayerMapping layerMapping, final String platformTopLayerExternalId,

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ContainerFileSystemParser {
 
+    // TODO rethink this
     public void checkInspectorOs(ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageInspectorOsEnum currentOs) throws WrongInspectorOsException {
         final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
                 .getImageInspectorOs(containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());

@@ -43,7 +43,7 @@ class ImageInspectorTest {
     @Test
     void testGetTarExtractionDirectory() {
         File workingDir = new File("src/test/resources/working");
-        File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
+        File tarExtractionDirectory = new File(workingDir, WorkingDirectories.TAR_EXTRACTION_DIRECTORY);
         assertTrue(tarExtractionDirectory.getAbsolutePath().endsWith("src/test/resources/working/tarExtraction"));
     }
 
@@ -145,7 +145,7 @@ class ImageInspectorTest {
 
     private TestScenario setupTestScenario(String codeLocationPrefix, String distro, String tag, String pkgMgrId) throws IOException {
         File workingDir = new File("src/test/resources/working");
-        File tarExtractionDirectory = imageInspector.getTarExtractionDirectory(workingDir);
+        File tarExtractionDirectory = new File(workingDir, WorkingDirectories.TAR_EXTRACTION_DIRECTORY);
         String imageConfigFileContents = "testConfig";
         List<String> layers = getLayers();
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(distro, tag, imageConfigFileContents, layers);
@@ -174,7 +174,7 @@ class ImageInspectorTest {
 
     @NotNull
     private ContainerFileSystem generateTargetImageFileSystem(File tarExtractionDirectory, String imageRepo, String imageTag) {
-        File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+        File targetImageFileSystemParentDir = new File(tarExtractionDirectory, WorkingDirectories.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
         File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         return new ContainerFileSystem(targetImageFileSystemRootDir);
     }
