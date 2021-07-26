@@ -12,11 +12,13 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+@Component
 public class ImageLayerApplier {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private FileOperations fileOperations;

@@ -37,6 +37,7 @@ public class ImageLayerArchiveExtractor {
         return extractLayerTarToDir(fileOperations, tarFileInputStream, outputDir);
     }
 
+    // DI calls this for a simple un-tar; should modify this so there's a simple-untar way to call it
     public List<File> extractLayerTarToDir(final FileOperations fileOperations, final TarArchiveInputStream tarFileInputStream, final File outputDir) throws IOException {
         final List<File> filesToRemove = new ArrayList<>();
         try {
