@@ -5,7 +5,7 @@
  *
  * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
-package com.synopsys.integration.blackduck.imageinspector.bdio;
+package com.synopsys.integration.blackduck.imageinspector.lib.output.bdio;
 
 import java.util.HashMap;
 import java.util.Map;

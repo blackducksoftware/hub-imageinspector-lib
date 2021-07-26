@@ -9,6 +9,7 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 
 import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageInspectorOsMapping;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
+import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,9 @@ public class ContainerFileSystemParser {
 
     // TODO rethink this
     public void checkInspectorOs(ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageInspectorOsEnum currentOs) throws WrongInspectorOsException {
+        if (containerFileSystemWithPkgMgrDb.getPkgMgr() == null) {
+            return; // if there's no pkg mgr in target image, any image inspector will do
+        }
         final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
                 .getImageInspectorOs(containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
         if (!neededInspectorOs.equals(currentOs)) {

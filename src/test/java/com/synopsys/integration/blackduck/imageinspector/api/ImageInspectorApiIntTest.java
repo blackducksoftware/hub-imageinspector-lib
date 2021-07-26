@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.GsonBuilder;
-import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.lib.output.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.lib.components.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerApplier;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerMetadataExtractor;
@@ -19,7 +19,6 @@ import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -27,9 +26,7 @@ import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.ImageLayerArchiveExtractor;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;

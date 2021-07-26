@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.bdio;
+package com.synopsys.integration.blackduck.imageinspector.lib.output.bdio;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -24,15 +24,14 @@ import java.util.List;
 public class ImageLayerApplier {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private FileOperations fileOperations;
-    private ImageLayerArchiveExtractor imageLayerArchiveExtractor; // TODO misnamed
+    private ImageLayerArchiveExtractor imageLayerArchiveExtractor;
 
     public ImageLayerApplier(FileOperations fileOperations, ImageLayerArchiveExtractor imageLayerArchiveExtractor) {
         this.fileOperations = fileOperations;
         this.imageLayerArchiveExtractor = imageLayerArchiveExtractor;
     }
 
-    // image format independent: ImageLayerTar (Docker subclass does not need to override this method; but prefer composition over inheritance
-    public void extractLayerTar(File destinationDir, final TypedArchiveFile layerTar) throws IOException, WrongInspectorOsException {
+    public void applyLayer(File destinationDir, final TypedArchiveFile layerTar) throws IOException, WrongInspectorOsException {
         logger.trace(String.format("Extracting layer: %s into %s", layerTar.getFile().getAbsolutePath(), destinationDir.getAbsolutePath()));
         final List<File> filesToRemove = imageLayerArchiveExtractor.extractLayerTarToDir(fileOperations, layerTar.getFile(), destinationDir);
         for (final File fileToRemove : filesToRemove) {

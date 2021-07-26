@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
-import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.lib.output.bdio.BdioGenerator;
 
 // As support for other image formats is added, this class will manage the list of TarParsers
 @Component
@@ -100,18 +100,15 @@ public class ImageInspector {
             targetImageFileSystemAppLayersRootDir = workingDirectories.getTargetImageFileSystemAppLayersRootDir(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag());
         }
 
-
-
         final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
-        ///////
 
-        // TODO this seems like a pretty low level operation for this class
         final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
 
 
-        final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = extractDockerLayers(currentOs,
+        final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = applyLayers(
                 imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, imageDirectoryData.getOrderedLayerArchives(), imageDirectoryData.getFullLayerMapping(),
                         imageInspectionRequest.getPlatformTopLayerExternalId(), componentHierarchyBuilder);
+        containerFileSystemParser.checkInspectorOs(containerFileSystemWithPkgMgrDb, currentOs);
         ImageComponentHierarchy imageComponentHierarchy = componentHierarchyBuilder.build();
         verifyPlatformTopLayerFound(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
         logLayers(imageComponentHierarchy);
@@ -176,9 +173,9 @@ public class ImageInspector {
 
     ///////////////////////////////////////
 
-    private ContainerFileSystemWithPkgMgrDb extractDockerLayers(final ImageInspectorOsEnum currentOs, final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> orderedLayerTars,
-                                                               final FullLayerMapping layerMapping, final String platformTopLayerExternalId,
-                                                               ComponentHierarchyBuilder componentHierarchyBuilder) throws IOException, WrongInspectorOsException {
+    private ContainerFileSystemWithPkgMgrDb applyLayers(final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> orderedLayerTars,
+                                                        final FullLayerMapping layerMapping, final String platformTopLayerExternalId,
+                                                        ComponentHierarchyBuilder componentHierarchyBuilder) throws IOException, WrongInspectorOsException {
 
         Optional<Integer> platformTopLayerIndex = layerMapping.getPlatformTopLayerIndex(platformTopLayerExternalId);
         if (platformTopLayerIndex.isPresent()) {
@@ -189,9 +186,9 @@ public class ImageInspector {
         boolean inApplicationLayers = false;
         int layerIndex = 0;
         for (TypedArchiveFile layerTar : orderedLayerTars) {
-            imageLayerApplier.extractLayerTar(containerFileSystem.getTargetImageFileSystemFull(), layerTar);
+            imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemFull(), layerTar);
             if (inApplicationLayers && containerFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
-                imageLayerApplier.extractLayerTar(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
+                imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
             }
             LayerMetadata layerMetadata = dockerImageLayerArchive.getLayerMetadata(layerMapping, layerTar, layerIndex);
             try {
@@ -208,12 +205,8 @@ public class ImageInspector {
         // Never did find a pkg mgr, so create the result without one
         if (postLayerContainerFileSystemWithPkgMgrDb == null) {
             postLayerContainerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(containerFileSystem, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), targetLinuxDistroOverride, null);
-        } else {
-            containerFileSystemParser.checkInspectorOs(postLayerContainerFileSystemWithPkgMgrDb, currentOs);
         }
-        // TODO This has always returned null in some cases, like a scratch image or a windows image, so should be OK w/out a null check
         return postLayerContainerFileSystemWithPkgMgrDb;
-        //OLD: return tarParser.extractPkgMgrDb(currentOs, targetLinuxDistroOverride, containerFileSystem, unOrderedLayerTars, layerMapping, platformTopLayerExternalId);
     }
 
     ImageInfoDerived generateBdioFromGivenComponents(final BdioGenerator bdioGenerator, ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, final FullLayerMapping mapping,

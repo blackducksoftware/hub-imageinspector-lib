@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.lib.output.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.exception.IntegrationException;

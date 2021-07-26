@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.BdioProject;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.lib.output.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;

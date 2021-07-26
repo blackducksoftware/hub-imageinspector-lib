@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 import com.synopsys.integration.bdio.SimpleBdioFactory;
-import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.lib.output.bdio.BdioGenerator;
 
 public class TestUtils {
     public static File createTempDirectory() throws IOException {
