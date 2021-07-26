@@ -7,8 +7,8 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerArchiveAnalyzer;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerMetadataParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.lib.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerMetadata;
 import org.apache.commons.io.FileUtils;
@@ -22,19 +22,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
-public class DockerImageLayerArchiveAnalyzer implements ImageLayerArchiveAnalyzer {
+public class DockerImageLayerMetadataParser implements ImageLayerMetadataParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
-    private final DockerLayerConfigParser dockerLayerConfigParser;
+    private final DockerImageLayerConfigParser dockerImageLayerConfigParser;
 
-    public DockerImageLayerArchiveAnalyzer(DockerLayerConfigParser dockerLayerConfigParser) {
-        this.dockerLayerConfigParser = dockerLayerConfigParser;
+    public DockerImageLayerMetadataParser(DockerImageLayerConfigParser dockerImageLayerConfigParser) {
+        this.dockerImageLayerConfigParser = dockerImageLayerConfigParser;
     }
 
     @Override
     public LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, TypedArchiveFile layerTar, int layerIndex) {
         final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
-        final List<String> layerCmd = dockerLayerConfigParser.parseCmd(layerMetadataFileContents);
+        final List<String> layerCmd = dockerImageLayerConfigParser.parseCmd(layerMetadataFileContents);
         String layerExternalId = fullLayerMapping.getLayerExternalId(layerIndex);
         return new LayerMetadata(layerExternalId, layerCmd);
     }

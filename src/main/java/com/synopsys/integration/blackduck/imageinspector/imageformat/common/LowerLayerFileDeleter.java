@@ -5,7 +5,7 @@
  *
  * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
-package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
+package com.synopsys.integration.blackduck.imageinspector.imageformat.common;
 
 import java.io.File;
 import java.util.Arrays;
@@ -17,6 +17,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO package???
 public class LowerLayerFileDeleter {
     private final List<String> filesAddedByCurrentLayer = new LinkedList<>();
     private final int defaultSearchDepth = 20;

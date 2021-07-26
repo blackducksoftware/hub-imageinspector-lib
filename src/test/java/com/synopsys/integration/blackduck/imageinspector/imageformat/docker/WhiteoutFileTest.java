@@ -1,38 +1,8 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
-import com.synopsys.integration.blackduck.imageinspector.lib.FullLayerMapping;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import com.google.gson.GsonBuilder;
-import com.synopsys.integration.blackduck.imageinspector.TestUtils;
-import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
-import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
-import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
-import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystem;
-import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
 // TODO make sure this stuff is tested somewhere
 //public class WhiteoutFileTest {
 //    private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";

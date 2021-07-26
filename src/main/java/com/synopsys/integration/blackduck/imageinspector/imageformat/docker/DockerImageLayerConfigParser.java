@@ -10,6 +10,7 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerConfigParser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,14 +21,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @Component
-public class DockerLayerConfigParser {
+public class DockerImageLayerConfigParser implements ImageLayerConfigParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final GsonBuilder gsonBuilder;
 
-    public DockerLayerConfigParser(GsonBuilder gsonBuilder) {
+    public DockerImageLayerConfigParser(GsonBuilder gsonBuilder) {
         this.gsonBuilder = gsonBuilder;
     }
 
+    @Override
     public List<String> parseCmd(String layerConfigFileContents) {
         try {
             if (StringUtils.isBlank(layerConfigFileContents)) {

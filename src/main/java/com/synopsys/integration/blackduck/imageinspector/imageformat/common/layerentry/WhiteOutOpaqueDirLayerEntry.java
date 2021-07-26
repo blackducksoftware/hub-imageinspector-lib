@@ -17,7 +17,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LowerLayerFileDeleter;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.LowerLayerFileDeleter;
 
 public class WhiteOutOpaqueDirLayerEntry extends LayerEntryNoFileToDelete {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());

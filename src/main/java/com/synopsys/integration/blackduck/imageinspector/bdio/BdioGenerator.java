@@ -26,7 +26,7 @@ import com.synopsys.integration.bdio.model.dependency.DependencyFactory;
 import com.synopsys.integration.bdio.model.externalid.ExternalId;
 import com.synopsys.integration.bdio.model.externalid.ExternalIdFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
+import com.synopsys.integration.blackduck.imageinspector.lib.components.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 
 @Component

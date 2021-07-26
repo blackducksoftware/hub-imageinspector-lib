@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LowerLayerFileDeleter;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
@@ -37,7 +36,7 @@ public class ImageLayerArchiveExtractor {
         return extractLayerTarToDir(fileOperations, tarFileInputStream, outputDir);
     }
 
-    // DI calls this for a simple un-tar; should modify this so there's a simple-untar way to call it
+    // DI calls this for a simple un-tar; there should be a lower-level just-do-the-untarring method that this and DI both use
     public List<File> extractLayerTarToDir(final FileOperations fileOperations, final TarArchiveInputStream tarFileInputStream, final File outputDir) throws IOException {
         final List<File> filesToRemove = new ArrayList<>();
         try {

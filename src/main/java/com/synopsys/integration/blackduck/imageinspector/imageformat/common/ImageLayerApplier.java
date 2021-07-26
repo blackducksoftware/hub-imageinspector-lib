@@ -8,6 +8,7 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.common;
 
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;

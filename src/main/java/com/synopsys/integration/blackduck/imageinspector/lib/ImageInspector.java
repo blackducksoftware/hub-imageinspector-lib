@@ -14,9 +14,12 @@ import java.util.Optional;
 
 import com.synopsys.integration.blackduck.imageinspector.api.*;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.*;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.TypedArchiveFile;
+import com.synopsys.integration.blackduck.imageinspector.lib.components.ComponentHierarchyBuilder;
+import com.synopsys.integration.blackduck.imageinspector.lib.components.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectoryAnalyzer;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerArchiveAnalyzer;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectoryParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerMetadataParser;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
@@ -50,14 +53,14 @@ public class ImageInspector {
     private final List<PkgMgr> pkgMgrs;
     private final PkgMgrDbExtractor pkgMgrDbExtractor;
     private final ImageLayerApplier imageLayerApplier;
-    private final DockerImageLayerArchiveAnalyzer dockerImageLayerArchive;
-    private final ContainerFileSystemAnalyzer containerFileSystemAnalyzer;
+    private final DockerImageLayerMetadataParser dockerImageLayerArchive;
+    private final ContainerFileSystemParser containerFileSystemParser;
     private final BdioGenerator bdioGenerator;
 
     public ImageInspector(Os os, List<PkgMgr> pkgMgrs, PkgMgrDbExtractor pkgMgrDbExtractor, TarOperations tarOperations, GsonBuilder gsonBuilder,
                           FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory,
-                          ImageLayerApplier imageLayerApplier, DockerImageLayerArchiveAnalyzer dockerImageLayerArchive,
-                          ContainerFileSystemAnalyzer containerFileSystemAnalyzer,
+                          ImageLayerApplier imageLayerApplier, DockerImageLayerMetadataParser dockerImageLayerArchive,
+                          ContainerFileSystemParser containerFileSystemParser,
                           BdioGenerator bdioGenerator) {
         this.os = os;
         this.pkgMgrs = pkgMgrs;
@@ -69,14 +72,14 @@ public class ImageInspector {
         this.dockerManifestFactory = dockerManifestFactory;
         this.imageLayerApplier = imageLayerApplier;
         this.dockerImageLayerArchive = dockerImageLayerArchive;
-        this.containerFileSystemAnalyzer = containerFileSystemAnalyzer;
+        this.containerFileSystemParser = containerFileSystemParser;
         this.bdioGenerator = bdioGenerator;
     }
 
     ///////////////////////////////////////
     public ImageInfoDerived inspectUsingGivenWorkingDir(ComponentHierarchyBuilder componentHierarchyBuilder, final ImageInspectionRequest imageInspectionRequest,
-                                                         final File tempDir,
-                                                         final String effectivePlatformTopLayerExternalId)
+                                                        final File tempDir,
+                                                        final String effectivePlatformTopLayerExternalId)
             throws IOException, IntegrationException {
 
         final File workingDir = new File(tempDir, "working");
@@ -94,11 +97,11 @@ public class ImageInspector {
         FileOperations fileOperations = new FileOperations();
         DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
-        ImageDirectoryAnalyzer imageDirectoryAnalyzer = new DockerImageDirectoryAnalyzer(gsonBuilder, fileOperations, dockerImageConfigParser,
+        ImageDirectoryParser imageDirectoryParser = new DockerImageDirectoryParser(gsonBuilder, fileOperations, dockerImageConfigParser,
                 dockerManifestFactory);
         //////////////
-        final List<TypedArchiveFile> unOrderedLayerTars = imageDirectoryAnalyzer.getLayerArchives(imageDir);
-        final FullLayerMapping fullLayerMapping = imageDirectoryAnalyzer.getLayerMapping(imageDir, imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
+        final List<TypedArchiveFile> unOrderedLayerTars = imageDirectoryParser.getLayerArchives(imageDir);
+        final FullLayerMapping fullLayerMapping = imageDirectoryParser.getLayerMapping(imageDir, imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
         final String imageRepo = fullLayerMapping.getManifestLayerMapping().getImageName();
         final String imageTag = fullLayerMapping.getManifestLayerMapping().getTagName();
 
@@ -222,7 +225,7 @@ public class ImageInspector {
         if (postLayerContainerFileSystemWithPkgMgrDb == null) {
             postLayerContainerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(containerFileSystem, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), targetLinuxDistroOverride, null);
         } else {
-            containerFileSystemAnalyzer.checkInspectorOs(postLayerContainerFileSystemWithPkgMgrDb, currentOs);
+            containerFileSystemParser.checkInspectorOs(postLayerContainerFileSystemWithPkgMgrDb, currentOs);
         }
         // TODO This has always returned null in some cases, like a scratch image or a windows image, so should be OK w/out a null check
         return postLayerContainerFileSystemWithPkgMgrDb;

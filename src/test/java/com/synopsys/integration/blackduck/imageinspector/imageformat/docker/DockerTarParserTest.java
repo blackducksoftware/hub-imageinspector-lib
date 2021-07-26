@@ -2,33 +2,6 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerArchiveExtractor;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
-import com.synopsys.integration.blackduck.imageinspector.lib.*;
-import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
-import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import com.google.gson.GsonBuilder;
-import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
-import com.synopsys.integration.exception.IntegrationException;
-
 // TODO rethink this whole class
 
 //public class DockerTarParserTest {

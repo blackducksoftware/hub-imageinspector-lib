@@ -5,7 +5,7 @@
  *
  * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
-package com.synopsys.integration.blackduck.imageinspector.imageformat.common;
+package com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive;
 
 public enum ArchiveFileType {
     TAR,

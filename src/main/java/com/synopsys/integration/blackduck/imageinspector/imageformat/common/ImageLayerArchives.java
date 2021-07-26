@@ -7,6 +7,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.common;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.lib.ManifestLayerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

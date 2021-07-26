@@ -7,9 +7,10 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.common;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.lib.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerMetadata;
 
-public interface ImageLayerArchiveAnalyzer {
+public interface ImageLayerMetadataParser {
     LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, TypedArchiveFile layerTar, int layerIndex);
 }

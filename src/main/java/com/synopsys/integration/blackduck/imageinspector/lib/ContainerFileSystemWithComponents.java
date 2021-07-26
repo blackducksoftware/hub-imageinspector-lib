@@ -7,6 +7,8 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.lib;
 
+import com.synopsys.integration.blackduck.imageinspector.lib.components.ImageComponentHierarchy;
+
 public class ContainerFileSystemWithComponents {
     private ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb;
     private ImageComponentHierarchy imageComponentHierarchy;

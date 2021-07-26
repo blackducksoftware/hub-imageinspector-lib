@@ -8,9 +8,9 @@
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import com.google.gson.GsonBuilder;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ArchiveFileType;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageDirectoryAnalyzer;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.TypedArchiveFile;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.ArchiveFileType;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageDirectoryParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.FullLayerMapping;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DockerImageDirectoryAnalyzer implements ImageDirectoryAnalyzer {
+public class DockerImageDirectoryParser implements ImageDirectoryParser {
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final GsonBuilder gsonBuilder;
@@ -34,7 +34,7 @@ public class DockerImageDirectoryAnalyzer implements ImageDirectoryAnalyzer {
     private final DockerImageConfigParser dockerImageConfigParser;
     private final DockerManifestFactory dockerManifestFactory;
 
-    public DockerImageDirectoryAnalyzer(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory) {
+    public DockerImageDirectoryParser(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory) {
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
         this.dockerImageConfigParser = dockerImageConfigParser;

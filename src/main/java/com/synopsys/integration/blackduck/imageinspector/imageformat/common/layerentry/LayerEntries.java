@@ -14,7 +14,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LowerLayerFileDeleter;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.LowerLayerFileDeleter;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 
 public class LayerEntries {

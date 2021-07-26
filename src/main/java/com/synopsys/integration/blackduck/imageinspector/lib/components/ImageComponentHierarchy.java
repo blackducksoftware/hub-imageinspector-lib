@@ -5,7 +5,10 @@
  *
  * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
-package com.synopsys.integration.blackduck.imageinspector.lib;
+package com.synopsys.integration.blackduck.imageinspector.lib.components;
+
+import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 
 import java.util.ArrayList;
 import java.util.List;

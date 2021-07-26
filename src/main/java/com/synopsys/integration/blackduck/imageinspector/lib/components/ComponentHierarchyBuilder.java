@@ -5,13 +5,11 @@
  *
  * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
-package com.synopsys.integration.blackduck.imageinspector.imageformat.common;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
+package com.synopsys.integration.blackduck.imageinspector.lib.components;
 import com.synopsys.integration.blackduck.imageinspector.lib.PackageGetter;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.lib.ContainerFileSystemWithPkgMgrDb;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
 import org.apache.commons.collections.ListUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

@@ -19,7 +19,7 @@ import com.synopsys.integration.bdio.model.BdioRelationship;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
 import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
+import com.synopsys.integration.blackduck.imageinspector.lib.components.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;

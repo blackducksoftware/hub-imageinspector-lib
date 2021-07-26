@@ -10,7 +10,7 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 import java.io.File;
 import java.io.IOException;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ComponentHierarchyBuilder;
+import com.synopsys.integration.blackduck.imageinspector.lib.components.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
