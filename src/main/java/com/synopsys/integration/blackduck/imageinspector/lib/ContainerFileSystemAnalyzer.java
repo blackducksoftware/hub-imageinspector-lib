@@ -10,7 +10,9 @@ package com.synopsys.integration.blackduck.imageinspector.lib;
 import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageInspectorOsMapping;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsException;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ContainerFileSystemAnalyzer {
 
     public void checkInspectorOs(ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageInspectorOsEnum currentOs) throws WrongInspectorOsException {

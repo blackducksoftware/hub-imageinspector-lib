@@ -14,12 +14,14 @@ import com.synopsys.integration.blackduck.imageinspector.lib.LayerMetadata;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Component
 public class DockerImageLayerArchiveAnalyzer implements ImageLayerArchiveAnalyzer {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
