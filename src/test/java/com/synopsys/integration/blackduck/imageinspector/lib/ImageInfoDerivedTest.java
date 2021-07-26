@@ -24,29 +24,25 @@ public class ImageInfoDerivedTest {
         PackageManagerEnum.APK);
     final File targetImageFileSystemRootDir = new File("src/test/resources/imageDir");
     final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
-    ContainerFileSystemWithPkgMgrDb parsed = new ContainerFileSystemWithPkgMgrDb(containerFileSystem,
+    ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(containerFileSystem,
         pkgMgrDb, "alpine", new ApkPkgMgr(new FileOperations()));
 
-    assertEquals("imageDir", parsed.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
-    assertEquals("alpine", parsed.getLinuxDistroName());
-    assertEquals(PackageManagerEnum.APK, parsed.getImagePkgMgrDatabase().getPackageManager());
-    assertEquals("apk", parsed.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());
+    assertEquals("imageDir", containerFileSystemWithPkgMgrDb.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
+    assertEquals("alpine", containerFileSystemWithPkgMgrDb.getLinuxDistroName());
+    assertEquals(PackageManagerEnum.APK, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
+    assertEquals("apk", containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());
 
     // TODO also test the imageComponentHierarchy part?
-    ImageInfoDerived derived = new ImageInfoDerived(parsed, null);
-    derived.setCodeLocationName("testCodelocationName");
+    ManifestLayerMapping mapping = new ManifestLayerMapping("testImageName", "testTagName", "testConfig", Arrays
+            .asList("testLayer"));
+    FullLayerMapping fullLayerMapping = new FullLayerMapping(mapping, new ArrayList<>());
     SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
     bdioDoc.setProject(new BdioProject());
     bdioDoc.getProject().name = "testProjectName";
-    assertEquals("testProjectName", bdioDoc.getProject().name);
-    derived.setBdioDocument(bdioDoc);
-    derived.setFinalProjectName("testFinalProjectName");
-    derived.setFinalProjectVersionName("testFinalProjectVersionName");
-    ManifestLayerMapping mapping = new ManifestLayerMapping("testImageName", "testTagName", "testConfig", Arrays
-        .asList("testLayer"));
-    FullLayerMapping fullLayerMapping = new FullLayerMapping(mapping, new ArrayList<>());
-    derived.setFullLayerMapping(fullLayerMapping);
+    ImageInfoDerived derived = new ImageInfoDerived(fullLayerMapping, containerFileSystemWithPkgMgrDb, null, "testCodelocationName",
+            "testFinalProjectName", "testFinalProjectVersionName", bdioDoc);
 
+    assertEquals("testProjectName", bdioDoc.getProject().name);
     assertEquals("testLayer", derived.getFullLayerMapping().getManifestLayerMapping().getLayerInternalIds().get(0));
     assertEquals("testCodelocationName", derived.getCodeLocationName());
     assertEquals("testFinalProjectName", derived.getFinalProjectName());

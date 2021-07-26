@@ -15,16 +15,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class ImageDirectoryDataFactory {
+public class ImageDirectoryDataExtractor {
     private final ImageDirectoryExtractor imageDirectoryExtractor;
     private final ImageOrderedLayerExtractor imageOrderedLayerExtractor;
 
-    public ImageDirectoryDataFactory(ImageDirectoryExtractor imageDirectoryExtractor, ImageOrderedLayerExtractor imageOrderedLayerExtractor) {
+    public ImageDirectoryDataExtractor(ImageDirectoryExtractor imageDirectoryExtractor, ImageOrderedLayerExtractor imageOrderedLayerExtractor) {
         this.imageDirectoryExtractor = imageDirectoryExtractor;
         this.imageOrderedLayerExtractor = imageOrderedLayerExtractor;
     }
 
-    public ImageDirectoryData create(File imageDir, String givenRepo, String givenTag) throws IOException, IntegrationException {
+    public ImageDirectoryData extract(File imageDir, String givenRepo, String givenTag) throws IOException, IntegrationException {
         List<TypedArchiveFile> unOrderedLayerArchives = imageDirectoryExtractor.getLayerArchives(imageDir);
         FullLayerMapping fullLayerMapping = imageDirectoryExtractor.getLayerMapping(imageDir, givenRepo, givenTag);
         List<TypedArchiveFile> orderedLayerArchives = imageOrderedLayerExtractor.getOrderedLayerArchives(unOrderedLayerArchives, fullLayerMapping.getManifestLayerMapping());

@@ -15,23 +15,25 @@ import com.synopsys.integration.blackduck.imageinspector.lib.components.ImageCom
 public class ImageInfoDerived {
     private final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb;
     private final ImageComponentHierarchy imageComponentHierarchy;
-    private FullLayerMapping fullLayerMapping = null;
-    private String codeLocationName = null;
-    private String finalProjectName = null;
-    private String finalProjectVersionName = null;
-    private SimpleBdioDocument bdioDocument = null;
+    private final FullLayerMapping fullLayerMapping;
+    private final String codeLocationName;
+    private final String finalProjectName;
+    private final String finalProjectVersionName;
+    private final SimpleBdioDocument bdioDocument;
 
-    public ImageInfoDerived(final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageComponentHierarchy imageComponentHierarchy) {
+    public ImageInfoDerived(FullLayerMapping fullLayerMapping, ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb, ImageComponentHierarchy imageComponentHierarchy,
+                            String codeLocationName, String finalProjectName, String finalProjectVersionName, SimpleBdioDocument bdioDocument) {
+        this.fullLayerMapping = fullLayerMapping;
         this.containerFileSystemWithPkgMgrDb = containerFileSystemWithPkgMgrDb;
         this.imageComponentHierarchy = imageComponentHierarchy;
+        this.codeLocationName = codeLocationName;
+        this.finalProjectName = finalProjectName;
+        this.finalProjectVersionName = finalProjectVersionName;
+        this.bdioDocument = bdioDocument;
     }
 
     public FullLayerMapping getFullLayerMapping() {
         return fullLayerMapping;
-    }
-
-    public void setFullLayerMapping(final FullLayerMapping fullLayerMapping) {
-        this.fullLayerMapping = fullLayerMapping;
     }
 
     public ContainerFileSystemWithPkgMgrDb getImageInfoParsed() {
@@ -46,31 +48,15 @@ public class ImageInfoDerived {
         return codeLocationName;
     }
 
-    public void setCodeLocationName(final String codeLocationName) {
-        this.codeLocationName = codeLocationName;
-    }
-
     public String getFinalProjectName() {
         return finalProjectName;
-    }
-
-    public void setFinalProjectName(final String finalProjectName) {
-        this.finalProjectName = finalProjectName;
     }
 
     public String getFinalProjectVersionName() {
         return finalProjectVersionName;
     }
 
-    public void setFinalProjectVersionName(final String finalProjectVersionName) {
-        this.finalProjectVersionName = finalProjectVersionName;
-    }
-
     public SimpleBdioDocument getBdioDocument() {
         return bdioDocument;
-    }
-
-    public void setBdioDocument(final SimpleBdioDocument bdioDocument) {
-        this.bdioDocument = bdioDocument;
     }
 }

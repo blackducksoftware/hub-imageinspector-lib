@@ -177,7 +177,7 @@ public class ImageInspectorApi {
         }
         ImageInfoDerived imageInfoDerived = null;
         try {
-            imageInfoDerived = imageInspector.inspectUsingGivenWorkingDir(componentHierarchyBuilder, imageInspectionRequest,
+            imageInfoDerived = imageInspector.inspectImage(componentHierarchyBuilder, imageInspectionRequest,
                 tempDir,
                 effectivePlatformTopLayerExternalId);
         } catch (IOException e) {
