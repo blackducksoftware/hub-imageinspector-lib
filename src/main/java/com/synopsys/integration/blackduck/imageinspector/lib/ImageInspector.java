@@ -18,8 +18,8 @@ import com.synopsys.integration.blackduck.imageinspector.imageformat.common.arch
 import com.synopsys.integration.blackduck.imageinspector.lib.components.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.lib.components.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectoryParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerMetadataParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectoryExtractor;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerMetadataExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
@@ -53,13 +53,13 @@ public class ImageInspector {
     private final List<PkgMgr> pkgMgrs;
     private final PkgMgrDbExtractor pkgMgrDbExtractor;
     private final ImageLayerApplier imageLayerApplier;
-    private final DockerImageLayerMetadataParser dockerImageLayerArchive;
+    private final DockerImageLayerMetadataExtractor dockerImageLayerArchive;
     private final ContainerFileSystemParser containerFileSystemParser;
     private final BdioGenerator bdioGenerator;
 
     public ImageInspector(Os os, List<PkgMgr> pkgMgrs, PkgMgrDbExtractor pkgMgrDbExtractor, TarOperations tarOperations, GsonBuilder gsonBuilder,
                           FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory,
-                          ImageLayerApplier imageLayerApplier, DockerImageLayerMetadataParser dockerImageLayerArchive,
+                          ImageLayerApplier imageLayerApplier, DockerImageLayerMetadataExtractor dockerImageLayerArchive,
                           ContainerFileSystemParser containerFileSystemParser,
                           BdioGenerator bdioGenerator) {
         this.os = os;
@@ -82,10 +82,14 @@ public class ImageInspector {
                                                         final String effectivePlatformTopLayerExternalId)
             throws IOException, IntegrationException {
 
+        // WorkingDirectories
         final File workingDir = new File(tempDir, "working");
+        // WorkingDirectories
         final File tarExtractionBaseDirectory = getTarExtractionDirectory(workingDir);
         logger.debug(String.format("workingDir: %s", workingDir.getAbsolutePath()));
         final File dockerTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
+
+        // WorkingDirectories
         File imageDir = new File(tarExtractionBaseDirectory, dockerTarfile.getName());
         final File dockerImageDirectory = extractImageTar(imageDir, dockerTarfile);
 
@@ -97,34 +101,40 @@ public class ImageInspector {
         FileOperations fileOperations = new FileOperations();
         DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
-        ImageDirectoryParser imageDirectoryParser = new DockerImageDirectoryParser(gsonBuilder, fileOperations, dockerImageConfigParser,
+        ImageDirectoryExtractor imageDirectoryExtractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, dockerImageConfigParser,
                 dockerManifestFactory);
-        //////////////
-        final List<TypedArchiveFile> unOrderedLayerTars = imageDirectoryParser.getLayerArchives(imageDir);
-        final FullLayerMapping fullLayerMapping = imageDirectoryParser.getLayerMapping(imageDir, imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
-        final String imageRepo = fullLayerMapping.getManifestLayerMapping().getImageName();
-        final String imageTag = fullLayerMapping.getManifestLayerMapping().getTagName();
 
+        ImageOrderedLayerExtractor imageOrderedLayerExtractor = new ImageOrderedLayerExtractor();
+        ImageDirectoryDataFactory imageDirectoryDataFactory = new ImageDirectoryDataFactory(imageDirectoryExtractor, imageOrderedLayerExtractor);
+        //////////////
+
+        ImageDirectoryData imageDirectoryData = imageDirectoryDataFactory.create(imageDir, imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
+        ///////
+        // WorkingDirectories
         final File targetImageFileSystemParentDir = new File(tarExtractionBaseDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
-        final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
+        final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag()));
         File targetImageFileSystemAppLayersRootDir = null;
         if (StringUtils.isNotBlank(effectivePlatformTopLayerExternalId)) {
-            targetImageFileSystemAppLayersRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemAppLayersRootDirName(imageRepo, imageTag));
+            targetImageFileSystemAppLayersRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemAppLayersRootDirName(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag()));
         }
+
+
+
         final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
+        ///////
+
         // TODO this seems like a pretty low level operation for this class
         final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
 
-        ImageLayerArchives imageLayerArchives = new ImageLayerArchives(unOrderedLayerTars, fullLayerMapping.getManifestLayerMapping());
-        List<TypedArchiveFile> orderedLayerArchives = imageLayerArchives.getOrderedLayerArchives();
+
         final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = extractDockerLayers(currentOs,
-                imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, orderedLayerArchives, fullLayerMapping,
+                imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, imageDirectoryData.getOrderedLayerArchives(), imageDirectoryData.getFullLayerMapping(),
                         imageInspectionRequest.getPlatformTopLayerExternalId(), componentHierarchyBuilder);
         ImageComponentHierarchy imageComponentHierarchy = componentHierarchyBuilder.build();
-        validatePlatformResults(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
+        verifyPlatformTopLayerFound(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
         logLayers(imageComponentHierarchy);
-        cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), unOrderedLayerTars);
-        ImageInfoDerived imageInfoDerived = generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb, fullLayerMapping,
+        cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), imageDirectoryData.getOrderedLayerArchives());
+        ImageInfoDerived imageInfoDerived = generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb, imageDirectoryData.getFullLayerMapping(),
                 imageComponentHierarchy,
                 imageInspectionRequest.getBlackDuckProjectName(), imageInspectionRequest.getBlackDuckProjectVersion(),
                 imageInspectionRequest.getCodeLocationPrefix(), imageInspectionRequest.isOrganizeComponentsByLayer(), imageInspectionRequest.isIncludeRemovedComponents(),
@@ -134,7 +144,7 @@ public class ImageInspector {
         return imageInfoDerived;
     }
 
-    private void validatePlatformResults(final String givenPlatformTopLayerExternalId, final ImageComponentHierarchy imageComponentHierarchy) throws IntegrationException {
+    private void verifyPlatformTopLayerFound(final String givenPlatformTopLayerExternalId, final ImageComponentHierarchy imageComponentHierarchy) throws IntegrationException {
         if ((StringUtils.isNotBlank(givenPlatformTopLayerExternalId)) && (!imageComponentHierarchy.isPlatformTopLayerFound())) {
             throw new IntegrationException(String.format("Platform top layer id (%s) was specified but not found", givenPlatformTopLayerExternalId));
         }

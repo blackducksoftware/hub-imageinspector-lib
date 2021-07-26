@@ -9,7 +9,7 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.ArchiveFileType;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageDirectoryParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageDirectoryExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifest;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.DockerManifestFactory;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DockerImageDirectoryParser implements ImageDirectoryParser {
+public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final GsonBuilder gsonBuilder;
@@ -34,7 +34,7 @@ public class DockerImageDirectoryParser implements ImageDirectoryParser {
     private final DockerImageConfigParser dockerImageConfigParser;
     private final DockerManifestFactory dockerManifestFactory;
 
-    public DockerImageDirectoryParser(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory) {
+    public DockerImageDirectoryExtractor(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory) {
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
         this.dockerImageConfigParser = dockerImageConfigParser;

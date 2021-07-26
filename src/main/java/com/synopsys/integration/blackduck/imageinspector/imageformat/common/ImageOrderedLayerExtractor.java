@@ -15,25 +15,18 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImageLayerArchives {
+public class ImageOrderedLayerExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final List<TypedArchiveFile> unOrderedLayerArchives;
-    private final ManifestLayerMapping manifestLayerMapping;
 
-    public ImageLayerArchives(List<TypedArchiveFile> unOrderedLayerArchives, ManifestLayerMapping manifestLayerMapping) {
-        this.unOrderedLayerArchives = unOrderedLayerArchives;
-        this.manifestLayerMapping = manifestLayerMapping;
-    }
-
-    public List<TypedArchiveFile> getOrderedLayerArchives() {
+    public List<TypedArchiveFile> getOrderedLayerArchives(List<TypedArchiveFile> unOrderedLayerArchives, ManifestLayerMapping manifestLayerMapping) {
         List<TypedArchiveFile> orderedLayerArchives = new ArrayList<>(manifestLayerMapping.getLayerInternalIds().size());
         for (String layerInternalId : manifestLayerMapping.getLayerInternalIds()) {
-            orderedLayerArchives.add(getLayerArchive(layerInternalId));
+            orderedLayerArchives.add(getLayerArchive(unOrderedLayerArchives, layerInternalId));
         }
         return orderedLayerArchives;
     }
 
-    private TypedArchiveFile getLayerArchive(String layerInternalId) {
+    private TypedArchiveFile getLayerArchive(List<TypedArchiveFile> unOrderedLayerArchives, String layerInternalId) {
         TypedArchiveFile layerArchive = null;
         for (final TypedArchiveFile candidateLayerTar : unOrderedLayerArchives) {
             if (layerInternalId.equals(candidateLayerTar.getFile().getParentFile().getName())) {

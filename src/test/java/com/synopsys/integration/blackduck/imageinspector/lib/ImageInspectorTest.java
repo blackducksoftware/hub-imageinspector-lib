@@ -47,14 +47,14 @@ class ImageInspectorTest {
         assertTrue(tarExtractionDirectory.getAbsolutePath().endsWith("src/test/resources/working/tarExtraction"));
     }
 
-    @Test
-    void testExtractImageTar() throws IOException {
-        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
-        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-        File imageDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-        imageInspector.extractImageTar(imageDir, dockerTarfile);
-        Mockito.verify(tarOperations).extractTarToGivenDir(imageDir, dockerTarfile);
-    }
+//    @Test
+//    void testExtractImageTar() throws IOException {
+//        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
+//        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
+//        File imageDir = new File(tarExtractionDirectory, dockerTarfile.getName());
+//        imageInspector.extractImageTar(imageDir, dockerTarfile);
+//        Mockito.verify(tarOperations).extractTarToGivenDir(imageDir, dockerTarfile);
+//    }
 
     // TODO these seems pointless
 //    @Test

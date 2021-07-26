@@ -14,7 +14,7 @@ import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.lib.components.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerApplier;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerMetadataParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerMetadataExtractor;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +40,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgP
 import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
-@Tag("integration")
+//////////////////////////////@Tag("integration")
 public class ImageInspectorApiIntTest {
     private static final String PROJECT_VERSION = "unitTest1";
     private static final String PROJECT = "SB001";
@@ -84,7 +84,7 @@ public class ImageInspectorApiIntTest {
         ImageLayerApplier imageLayerApplier = new ImageLayerApplier(fileOperations, new ImageLayerArchiveExtractor());
         ImageInspector imageInspector = new ImageInspector(os, pkgMgrs, pkgMgrDbExtractor, tarOperations, new GsonBuilder(),
                 new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageLayerApplier,
-                new DockerImageLayerMetadataParser(new DockerImageLayerConfigParser(new GsonBuilder())),
+                new DockerImageLayerMetadataExtractor(new DockerImageLayerConfigParser(new GsonBuilder())),
                 containerFileSystemParser, new BdioGenerator());
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());

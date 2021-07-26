@@ -7,7 +7,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.imageformat.docker;
 
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerMetadataParser;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerMetadataExtractor;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.lib.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.lib.LayerMetadata;
@@ -22,12 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
-public class DockerImageLayerMetadataParser implements ImageLayerMetadataParser {
+public class DockerImageLayerMetadataExtractor implements ImageLayerMetadataExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String DOCKER_LAYER_METADATA_FILENAME = "json";
     private final DockerImageLayerConfigParser dockerImageLayerConfigParser;
 
-    public DockerImageLayerMetadataParser(DockerImageLayerConfigParser dockerImageLayerConfigParser) {
+    public DockerImageLayerMetadataExtractor(DockerImageLayerConfigParser dockerImageLayerConfigParser) {
         this.dockerImageLayerConfigParser = dockerImageLayerConfigParser;
     }
 

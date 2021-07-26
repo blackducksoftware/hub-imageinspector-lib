@@ -9,8 +9,13 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.common;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.lib.FullLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.lib.LayerMetadata;
+import com.synopsys.integration.exception.IntegrationException;
 
-public interface ImageLayerMetadataParser {
-    LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, TypedArchiveFile layerTar, int layerIndex);
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+public interface ImageDirectoryExtractor {
+    List<TypedArchiveFile> getLayerArchives(File imageDir) throws IOException;
+    FullLayerMapping getLayerMapping(File imageDir, final String repo, final String tag) throws IntegrationException;
 }
