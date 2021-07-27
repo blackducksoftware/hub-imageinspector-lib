@@ -10,6 +10,7 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 import java.io.File;
 import java.io.IOException;
 
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageDirectoryDataExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.lib.components.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
@@ -169,6 +170,9 @@ public class ImageInspectorApi {
             effectivePlatformTopLayerExternalId = imageInspectionRequest.getPlatformTopLayerExternalId();
         }
 
+        // TODO where should this go?
+        ImageDirectoryDataExtractorFactory imageDirectoryDataExtractorFactory = new ImageDirectoryDataExtractorFactory();
+
         File tempDir;
         try {
             tempDir = fileOperations.createTempDirectory();
@@ -177,7 +181,7 @@ public class ImageInspectorApi {
         }
         ImageInfoDerived imageInfoDerived = null;
         try {
-            imageInfoDerived = imageInspector.inspectImage(componentHierarchyBuilder, imageInspectionRequest,
+            imageInfoDerived = imageInspector.inspectImage(imageDirectoryDataExtractorFactory, componentHierarchyBuilder, imageInspectionRequest,
                 tempDir,
                 effectivePlatformTopLayerExternalId);
         } catch (IOException e) {

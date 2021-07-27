@@ -81,7 +81,6 @@ public class ImageInspectorApiIntTest {
         ImageLayerApplier imageLayerApplier = new ImageLayerApplier(fileOperations, new ImageLayerArchiveExtractor());
         ImageInspector imageInspector = new ImageInspector(os, pkgMgrDbExtractor, tarOperations,
                 new FileOperations(), imageLayerApplier,
-                new DockerImageLayerMetadataExtractor(new DockerImageLayerConfigParser(new GsonBuilder())),
                 containerFileSystemParser, new BdioGenerator());
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());
