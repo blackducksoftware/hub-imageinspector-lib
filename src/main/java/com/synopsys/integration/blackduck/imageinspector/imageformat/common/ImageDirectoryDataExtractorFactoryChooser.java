@@ -9,10 +9,12 @@ package com.synopsys.integration.blackduck.imageinspector.imageformat.common;
 
 import com.synopsys.integration.exception.IntegrationException;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.List;
 
+@Component
 public class ImageDirectoryDataExtractorFactoryChooser {
 
     @NotNull
