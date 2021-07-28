@@ -20,7 +20,7 @@ import com.synopsys.integration.bdio.BdioReader;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class BdioGeneratorApiFuncTest {

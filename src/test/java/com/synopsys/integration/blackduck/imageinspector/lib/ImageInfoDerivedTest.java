@@ -6,15 +6,21 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystem;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemWithPkgMgrDb;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ImageInfoDerived;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
 import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.bdio.model.BdioProject;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.blackduck.imageinspector.PackageManagerToImageInspectorOsMapping;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.PackageManagerToImageInspectorOsMapping;
 import com.synopsys.integration.blackduck.imageinspector.api.ImageInspectorOsEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk.ApkPkgMgr;
 
 public class ImageInfoDerivedTest {
 

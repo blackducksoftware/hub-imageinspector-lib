@@ -10,14 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.gson.GsonBuilder;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageDirectoryDataExtractorFactoryChooser;
-import com.synopsys.integration.blackduck.imageinspector.lib.components.ImageComponentHierarchyLogger;
-import com.synopsys.integration.blackduck.imageinspector.lib.output.bdio.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.lib.components.ComponentHierarchyBuilder;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerApplier;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerMetadataExtractor;
-import com.synopsys.integration.blackduck.imageinspector.lib.*;
+import com.synopsys.integration.blackduck.imageinspector.ImageInspector;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemCompatibilityChecker;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.LinuxDistroExtractor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PackageGetter;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PkgMgrDbExtractor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactoryChooser;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchyLogger;
+import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentHierarchyBuilder;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerApplier;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,16 +31,15 @@ import org.mockito.Mockito;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.common.archive.ImageLayerArchiveExtractor;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageLayerConfigParser;
+import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrExecutor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk.ApkPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.dpkg.DpkgPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
 //////////////////////////////@Tag("integration")
@@ -79,11 +82,11 @@ public class ImageInspectorApiIntTest {
 
         TarOperations tarOperations = new TarOperations();
         tarOperations.setFileOperations(fileOperations);
-        ContainerFileSystemParser containerFileSystemParser = new ContainerFileSystemParser();
+        ContainerFileSystemCompatibilityChecker containerFileSystemCompatibilityChecker = new ContainerFileSystemCompatibilityChecker();
         ImageLayerApplier imageLayerApplier = new ImageLayerApplier(fileOperations, new ImageLayerArchiveExtractor());
         ImageInspector imageInspector = new ImageInspector(os, pkgMgrDbExtractor, tarOperations,
                 new FileOperations(), imageLayerApplier,
-                containerFileSystemParser, new BdioGenerator(),
+                containerFileSystemCompatibilityChecker, new BdioGenerator(),
                 new ImageDirectoryDataExtractorFactoryChooser(),
                 new ImageComponentHierarchyLogger());
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
