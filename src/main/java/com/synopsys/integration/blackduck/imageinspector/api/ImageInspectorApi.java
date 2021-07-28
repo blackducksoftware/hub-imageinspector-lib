@@ -9,8 +9,12 @@ package com.synopsys.integration.blackduck.imageinspector.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageDirectoryDataExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageDirectoryDataExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerImageFormatMatchesChecker;
 import com.synopsys.integration.blackduck.imageinspector.lib.components.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.lib.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
@@ -170,18 +174,17 @@ public class ImageInspectorApi {
             effectivePlatformTopLayerExternalId = imageInspectionRequest.getPlatformTopLayerExternalId();
         }
 
-        // TODO where should this go?
-        ImageDirectoryDataExtractorFactory imageDirectoryDataExtractorFactory = new ImageDirectoryDataExtractorFactory();
-
         File tempDir;
         try {
             tempDir = fileOperations.createTempDirectory();
         } catch (final IOException e) {
             throw new IntegrationException(String.format("Error creating temp dir: %s", e.getMessage()), e);
         }
+
+        List<ImageDirectoryDataExtractorFactory> imageDirectoryDataExtractorFactories = Arrays.asList(new DockerImageDirectoryDataExtractorFactory(new DockerImageFormatMatchesChecker()));
         ImageInfoDerived imageInfoDerived = null;
         try {
-            imageInfoDerived = imageInspector.inspectImage(imageDirectoryDataExtractorFactory, componentHierarchyBuilder, imageInspectionRequest,
+            imageInfoDerived = imageInspector.inspectImage(imageDirectoryDataExtractorFactories, componentHierarchyBuilder, imageInspectionRequest,
                 tempDir,
                 effectivePlatformTopLayerExternalId);
         } catch (IOException e) {

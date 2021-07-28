@@ -23,8 +23,8 @@ import java.util.List;
 @Component
 public class ImageLayerApplier {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private FileOperations fileOperations;
-    private ImageLayerArchiveExtractor imageLayerArchiveExtractor;
+    private final FileOperations fileOperations;
+    private final ImageLayerArchiveExtractor imageLayerArchiveExtractor;
 
     public ImageLayerApplier(FileOperations fileOperations, ImageLayerArchiveExtractor imageLayerArchiveExtractor) {
         this.fileOperations = fileOperations;

@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.GsonBuilder;
+import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageDirectoryDataExtractorFactoryChooser;
+import com.synopsys.integration.blackduck.imageinspector.lib.components.ImageComponentHierarchyLogger;
 import com.synopsys.integration.blackduck.imageinspector.lib.output.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.lib.components.ComponentHierarchyBuilder;
 import com.synopsys.integration.blackduck.imageinspector.imageformat.common.ImageLayerApplier;
@@ -81,7 +83,9 @@ public class ImageInspectorApiIntTest {
         ImageLayerApplier imageLayerApplier = new ImageLayerApplier(fileOperations, new ImageLayerArchiveExtractor());
         ImageInspector imageInspector = new ImageInspector(os, pkgMgrDbExtractor, tarOperations,
                 new FileOperations(), imageLayerApplier,
-                containerFileSystemParser, new BdioGenerator());
+                containerFileSystemParser, new BdioGenerator(),
+                new ImageDirectoryDataExtractorFactoryChooser(),
+                new ImageComponentHierarchyLogger());
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());
         imageInspectorApi.setBdioGenerator(TestUtils.createBdioGenerator());
