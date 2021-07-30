@@ -29,6 +29,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import com.synopsys.integration.exception.IntegrationException;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -74,26 +75,20 @@ public class ImageInspector {
                                          final String effectivePlatformTopLayerExternalId)
             throws IOException, IntegrationException {
 
-        final File targetImageTarfile = new File(imageInspectionRequest.getDockerTarfilePath());
+        final File targetImageTarfile = new File(imageInspectionRequest.getImageTarfilePath());
         WorkingDirectories workingDirectories = new WorkingDirectories(workingDir);
-        File imageDir = workingDirectories.getExtractedImageDir(targetImageTarfile);
-        tarOperations.extractTarToGivenDir(imageDir, targetImageTarfile);
-
-        ImageDirectoryDataExtractorFactory imageDirectoryDataExtractorFactory = imageDirectoryDataExtractorFactoryChooser.choose(imageDirectoryDataExtractorFactories, imageDir);
+        tarOperations.extractTarToGivenDir(workingDirectories.getExtractedImageDir(targetImageTarfile), targetImageTarfile);
+        ImageDirectoryDataExtractorFactory imageDirectoryDataExtractorFactory = imageDirectoryDataExtractorFactoryChooser.choose(imageDirectoryDataExtractorFactories, workingDirectories.getExtractedImageDir(targetImageTarfile));
         ImageDirectoryDataExtractor imageDirectoryDataExtractor = imageDirectoryDataExtractorFactory.createImageDirectoryDataExtractor();
+        ImageDirectoryData imageDirectoryData = imageDirectoryDataExtractor.extract(workingDirectories.getExtractedImageDir(targetImageTarfile), imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
+        final ContainerFileSystem containerFileSystem = prepareContainerFileSystem(effectivePlatformTopLayerExternalId, workingDirectories, imageDirectoryData);
+        final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
         ImageLayerMetadataExtractor imageLayerMetadataExtractor = imageDirectoryDataExtractorFactory.createImageLayerMetadataExtractor();
 
-        ImageDirectoryData imageDirectoryData = imageDirectoryDataExtractor.extract(imageDir, imageInspectionRequest.getGivenImageRepo(), imageInspectionRequest.getGivenImageTag());
-        File targetImageFileSystemRootDir = workingDirectories.getTargetImageFileSystemRootDir(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag());
-        File targetImageFileSystemAppLayersRootDir = null;
-        if (StringUtils.isNotBlank(effectivePlatformTopLayerExternalId)) {
-            targetImageFileSystemAppLayersRootDir = workingDirectories.getTargetImageFileSystemAppLayersRootDir(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag());
-        }
-        final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
-        final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
         final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = applyImageLayersToContainerFileSystem(imageLayerMetadataExtractor,
                 imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, imageDirectoryData.getOrderedLayerArchives(), imageDirectoryData.getFullLayerMapping(),
                         imageInspectionRequest.getPlatformTopLayerExternalId(), componentHierarchyBuilder);
+
         containerFileSystemCompatibilityChecker.checkInspectorOs(containerFileSystemWithPkgMgrDb, currentOs);
         ImageComponentHierarchy imageComponentHierarchy = componentHierarchyBuilder.build();
         verifyPlatformTopLayerFound(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
@@ -107,6 +102,17 @@ public class ImageInspector {
         createContainerFileSystemTarIfRequested(containerFileSystem, imageInspectionRequest.getContainerFileSystemOutputPath(),
                 imageInspectionRequest.getContainerFileSystemExcludedPathListString());
         return imageInfoDerived;
+    }
+
+    @NotNull
+    private ContainerFileSystem prepareContainerFileSystem(String effectivePlatformTopLayerExternalId, WorkingDirectories workingDirectories, ImageDirectoryData imageDirectoryData) {
+        File targetImageFileSystemRootDir = workingDirectories.getTargetImageFileSystemRootDir(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag());
+        File targetImageFileSystemAppLayersRootDir = null;
+        if (StringUtils.isNotBlank(effectivePlatformTopLayerExternalId)) {
+            targetImageFileSystemAppLayersRootDir = workingDirectories.getTargetImageFileSystemAppLayersRootDir(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag());
+        }
+        final ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir, targetImageFileSystemAppLayersRootDir);
+        return containerFileSystem;
     }
 
     private void verifyPlatformTopLayerFound(final String givenPlatformTopLayerExternalId, final ImageComponentHierarchy imageComponentHierarchy) throws IntegrationException {
@@ -150,17 +156,7 @@ public class ImageInspector {
         boolean inApplicationLayers = false;
         int layerIndex = 0;
         for (TypedArchiveFile layerTar : orderedLayerTars) {
-            imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemFull(), layerTar);
-            if (inApplicationLayers && containerFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
-                imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
-            }
-            LayerMetadata layerMetadata = imageLayerMetadataExtractor.getLayerMetadata(layerMapping, layerTar, layerIndex);
-            try {
-                postLayerContainerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, targetLinuxDistroOverride);
-                componentHierarchyBuilder.addLayer(postLayerContainerFileSystemWithPkgMgrDb, layerIndex, layerMetadata.getLayerExternalId(), layerMetadata.getLayerCmd());
-            } catch (PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
-                logger.debug(String.format("Unable to collect components present after layer %d: The file system is not yet populated with the linux distro and package manager files: %s", layerIndex, pkgMgrDataNotFoundException.getMessage()));
-            }
+            postLayerContainerFileSystemWithPkgMgrDb = applyLayer(imageLayerMetadataExtractor, targetLinuxDistroOverride, containerFileSystem, layerMapping, componentHierarchyBuilder, postLayerContainerFileSystemWithPkgMgrDb, inApplicationLayers, layerIndex, layerTar);
             if (platformTopLayerIndex.isPresent() && (layerIndex == platformTopLayerIndex.get())) {
                 inApplicationLayers = true; // for subsequent iterations
             }
@@ -169,6 +165,21 @@ public class ImageInspector {
         // Never did find a pkg mgr, so create the result without one
         if (postLayerContainerFileSystemWithPkgMgrDb == null) {
             postLayerContainerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(containerFileSystem, new ImagePkgMgrDatabase(null, PackageManagerEnum.NULL), targetLinuxDistroOverride, null);
+        }
+        return postLayerContainerFileSystemWithPkgMgrDb;
+    }
+
+    private ContainerFileSystemWithPkgMgrDb applyLayer(ImageLayerMetadataExtractor imageLayerMetadataExtractor, String targetLinuxDistroOverride, ContainerFileSystem containerFileSystem, FullLayerMapping layerMapping, ComponentHierarchyBuilder componentHierarchyBuilder, ContainerFileSystemWithPkgMgrDb postLayerContainerFileSystemWithPkgMgrDb, boolean inApplicationLayers, int layerIndex, TypedArchiveFile layerTar) throws IOException, WrongInspectorOsException {
+        imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemFull(), layerTar);
+        if (inApplicationLayers && containerFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
+            imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
+        }
+        LayerMetadata layerMetadata = imageLayerMetadataExtractor.getLayerMetadata(layerMapping, layerTar, layerIndex);
+        try {
+            postLayerContainerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, targetLinuxDistroOverride);
+            componentHierarchyBuilder.addLayer(postLayerContainerFileSystemWithPkgMgrDb, layerIndex, layerMetadata.getLayerExternalId(), layerMetadata.getLayerCmd());
+        } catch (PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
+            logger.debug(String.format("Unable to collect components present after layer %d: The file system is not yet populated with the linux distro and package manager files: %s", layerIndex, pkgMgrDataNotFoundException.getMessage()));
         }
         return postLayerContainerFileSystemWithPkgMgrDb;
     }

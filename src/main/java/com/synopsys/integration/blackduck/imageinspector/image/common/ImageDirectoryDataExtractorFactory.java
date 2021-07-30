@@ -9,7 +9,6 @@ package com.synopsys.integration.blackduck.imageinspector.image.common;
 
 import java.io.File;
 
-// TODO these factories should create ALL image-specific classes; better than Spring dependency injection
 public interface ImageDirectoryDataExtractorFactory {
     boolean applies(File imageDir);
     ImageDirectoryDataExtractor createImageDirectoryDataExtractor();

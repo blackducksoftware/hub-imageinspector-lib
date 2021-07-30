@@ -11,7 +11,7 @@ import com.synopsys.integration.util.Stringable;
 
 public class ImageInspectionRequest extends Stringable {
     private final String loggingLevel;
-    private final String dockerTarfilePath;
+    private final String imageTarfilePath;
     private final String blackDuckProjectName;
     private final String blackDuckProjectVersion;
     private final String codeLocationPrefix;
@@ -27,7 +27,7 @@ public class ImageInspectionRequest extends Stringable {
     private final String platformTopLayerExternalId;
 
     public ImageInspectionRequest(final String loggingLevel,
-        final String dockerTarfilePath,
+        final String imageTarfilePath,
         final String blackDuckProjectName,
         final String blackDuckProjectVersion,
         final String codeLocationPrefix,
@@ -42,7 +42,7 @@ public class ImageInspectionRequest extends Stringable {
         final String targetLinuxDistroOverride,
         final String platformTopLayerExternalId) {
         this.loggingLevel = loggingLevel;
-        this.dockerTarfilePath = dockerTarfilePath;
+        this.imageTarfilePath = imageTarfilePath;
         this.blackDuckProjectName = blackDuckProjectName;
         this.blackDuckProjectVersion = blackDuckProjectVersion;
         this.codeLocationPrefix = codeLocationPrefix;
@@ -62,8 +62,8 @@ public class ImageInspectionRequest extends Stringable {
         return loggingLevel;
     }
 
-    public String getDockerTarfilePath() {
-        return dockerTarfilePath;
+    public String getImageTarfilePath() {
+        return imageTarfilePath;
     }
 
     public String getBlackDuckProjectName() {
