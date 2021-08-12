@@ -10,32 +10,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.ImageInspector;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemCompatibilityChecker;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.LinuxDistroExtractor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PackageGetter;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PkgMgrDbExtractor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactoryChooser;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchyLogger;
+import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentHierarchyBuilder;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerApplier;
+import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerLayerTarExtractor;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.DockerTarParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.ImageConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.LayerConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.imageformat.docker.manifest.ManifestFactory;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageInspector;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgrFactory;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrExecutor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk.ApkPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.dpkg.DpkgPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Tag("integration")
@@ -49,40 +54,55 @@ public class ImageInspectorApiIntTest {
     private static Os os;
     private static ImageInspectorApi imageInspectorApi;
     private static List<PkgMgr> pkgMgrs;
+    private static PackageGetter packageGetter;
+    private static RpmPkgMgr rpmPkgMgr;
 
     private static final String[] apkOutput = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
 
     @BeforeAll
     public static void setup() throws IntegrationException, InterruptedException {
+        rpmPkgMgr = Mockito.mock(RpmPkgMgr.class);
+        List<ComponentDetails> comps = new ArrayList<>();
+        comps.add(new ComponentDetails("comp0", "version0", "testExternalId0", "testArch", "centos"));
+        Mockito.when(rpmPkgMgr.extractComponentsFromPkgMgrOutput(Mockito.any(File.class), Mockito.anyString(), Mockito.any(String[].class))).thenReturn(comps);
         FileOperations fileOperations = new FileOperations();
         pkgMgrs = new ArrayList<>(3);
         pkgMgrs.add(new ApkPkgMgr(fileOperations));
         pkgMgrs.add(new DpkgPkgMgr(fileOperations));
-        pkgMgrs.add(new RpmPkgMgr(new Gson(), fileOperations));
+        pkgMgrs.add(rpmPkgMgr);
         os = Mockito.mock(Os.class);
 
+        LinuxDistroExtractor linuxDistroExtractor = new LinuxDistroExtractor(fileOperations, os);
+        PkgMgrDbExtractor pkgMgrDbExtractor = new PkgMgrDbExtractor(pkgMgrs, linuxDistroExtractor);
         PkgMgrExecutor pkgMgrExecutor = Mockito.mock(PkgMgrExecutor.class);
-        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(CmdExecutor.class), Mockito.any(PkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkOutput);
+        CmdExecutor cmdExecutor = Mockito.mock(CmdExecutor.class);
+        Mockito.when(pkgMgrExecutor.runPackageManager(Mockito.any(CmdExecutor.class), Mockito.any(ApkPkgMgr.class), Mockito.any(ImagePkgMgrDatabase.class))).thenReturn(apkOutput);
 
-        DockerTarParser dockerTarParser = new DockerTarParser();
-        dockerTarParser.setManifestFactory(new ManifestFactory());
-        dockerTarParser.setOs(os);
-        dockerTarParser.setFileOperations(new FileOperations());
-        dockerTarParser.setPkgMgrs(pkgMgrs);
-        dockerTarParser.setPkgMgrExecutor(pkgMgrExecutor);
-        dockerTarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
-        dockerTarParser.setImageConfigParser(new ImageConfigParser());
-        dockerTarParser.setLayerConfigParser(new LayerConfigParser());
-        PkgMgrFactory pkgMgrFactory = new PkgMgrFactory();
-        ImageInspector imageInspector = new ImageInspector(dockerTarParser);
+        packageGetter = new PackageGetter(pkgMgrExecutor, cmdExecutor);
+
+        TarOperations tarOperations = new TarOperations();
+        tarOperations.setFileOperations(fileOperations);
+        ContainerFileSystemCompatibilityChecker containerFileSystemCompatibilityChecker = new ContainerFileSystemCompatibilityChecker();
+        ImageLayerApplier imageLayerApplier = new ImageLayerApplier(fileOperations, new ImageLayerArchiveExtractor());
+        ImageInspector imageInspector = new ImageInspector(os, pkgMgrDbExtractor, tarOperations,
+                new FileOperations(), imageLayerApplier,
+                containerFileSystemCompatibilityChecker, new BdioGenerator(),
+                new ImageDirectoryDataExtractorFactoryChooser(),
+                new ImageComponentHierarchyLogger());
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());
         imageInspectorApi.setBdioGenerator(TestUtils.createBdioGenerator());
+        imageInspectorApi.setPkgMgrExecutor(pkgMgrExecutor);
+        imageInspectorApi.setCmdExecutor(cmdExecutor);
     }
 
     @Test
     public void testOnWrongOs() throws IntegrationException, InterruptedException {
+        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
+        // currently-running-on distro:
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
+        // target image distro
+        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         try {
             ImageInspectionRequest imageInspectionRequest = new ImageInspectionRequestBuilder()
                                                                 .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
@@ -92,7 +112,7 @@ public class ImageInspectorApiIntTest {
                                                                 .setIncludeRemovedComponents(false)
                                                                 .setCurrentLinuxDistro("CENTOS")
                                                                 .build();
-            imageInspectorApi.getBdio(imageInspectionRequest);
+            imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
             fail("Expected WrongInspectorOsException");
         } catch (WrongInspectorOsException e) {
             System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
@@ -102,6 +122,7 @@ public class ImageInspectorApiIntTest {
 
     @Test
     public void testOnNoPkgMgrImage() throws IntegrationException, InterruptedException, IOException {
+        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
 
         FileOperations fileOperations = new FileOperations();
@@ -118,7 +139,7 @@ public class ImageInspectorApiIntTest {
                                                             .setCurrentLinuxDistro("UBUNTU")
                                                             .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
                                                             .build();
-        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
         assertEquals(0, bdioDocument.getComponents().size());
 
         File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
@@ -138,6 +159,7 @@ public class ImageInspectorApiIntTest {
     }
 
     private void doTest(String targetLinuxDistroOverride) throws IntegrationException, InterruptedException {
+        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
         String expectedForgeName;
         if (StringUtils.isNotBlank(targetLinuxDistroOverride)) {
             expectedForgeName = "@" + targetLinuxDistroOverride;
@@ -153,7 +175,7 @@ public class ImageInspectorApiIntTest {
                                                             .setCurrentLinuxDistro("ALPINE")
                                                             .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
                                                             .build();
-        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
         assertEquals(PROJECT, bdioDocument.getProject().name);
         assertEquals(PROJECT_VERSION, bdioDocument.getProject().version);
@@ -175,8 +197,12 @@ public class ImageInspectorApiIntTest {
 
     @Test
     public void testAppOnlyFileSystem() throws IntegrationException, IOException, InterruptedException {
+        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
         Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("centos"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
+        Mockito.when(rpmPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
+        Mockito.when(rpmPkgMgr.getType()).thenReturn(PackageManagerEnum.RPM);
+        Mockito.when(rpmPkgMgr.getImagePackageManagerDirectory(Mockito.any(File.class))).thenReturn(new File("."));
 
         FileOperations fileOperations = new FileOperations();
         File tempDir = fileOperations.createTempDirectory();
@@ -190,7 +216,7 @@ public class ImageInspectorApiIntTest {
                                                             .setCurrentLinuxDistro("CENTOS")
                                                             .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
                                                             .build();
-        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(imageInspectionRequest);
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
 
         File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
         System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());

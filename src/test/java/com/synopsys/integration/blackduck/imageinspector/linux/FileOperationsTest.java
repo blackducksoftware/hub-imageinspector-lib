@@ -28,14 +28,14 @@ public class FileOperationsTest {
     public void testMoveFile() throws IOException {
         final File fileToMove = new File("test/fileToMove.txt");
         fileToMove.createNewFile();
-        final File destinationDir = new File("test/output");
-        if (!destinationDir.exists()) {
-            destinationDir.mkdirs();
+        File imageDir = new File("test/output");
+        if (!imageDir.exists()) {
+            imageDir.mkdirs();
         }
-        final File destinationFile = new File(destinationDir, "fileToMove.txt");
+        final File destinationFile = new File(imageDir, "fileToMove.txt");
         destinationFile.delete();
 
-        fileOperations.moveFile(fileToMove, destinationDir);
+        fileOperations.moveFile(fileToMove, imageDir);
         assertTrue(destinationFile.exists());
     }
 

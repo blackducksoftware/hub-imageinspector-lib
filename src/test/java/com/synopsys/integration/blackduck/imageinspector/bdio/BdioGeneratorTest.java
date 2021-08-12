@@ -18,14 +18,14 @@ import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.BdioRelationship;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
-import com.synopsys.integration.blackduck.imageinspector.lib.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.lib.ImageComponentHierarchy;
-import com.synopsys.integration.blackduck.imageinspector.lib.LayerDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchy;
+import com.synopsys.integration.blackduck.imageinspector.image.common.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.PkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.apk.ApkPkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.dpkg.DpkgPkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.linux.pkgmgr.rpm.RpmPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk.ApkPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.dpkg.DpkgPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class BdioGeneratorTest {
@@ -266,7 +266,7 @@ public class BdioGeneratorTest {
     }
 
     private ImageComponentHierarchy createImageComponentHierarchy() {
-        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy("manifestFileContents", "imageConfigFileContents");
+        ImageComponentHierarchy imageComponentHierarchy = new ImageComponentHierarchy();
         List<ComponentDetails> allComponents = new ArrayList<>();
         addLayer1(imageComponentHierarchy, allComponents);
         List<ComponentDetails> layer2Components = addLayer2(imageComponentHierarchy, allComponents);
@@ -281,7 +281,7 @@ public class BdioGeneratorTest {
         components.add(new ComponentDetails("comp1a", "version1a", "comp1aExternalId", "arch", "ubuntu"));
         components.add(new ComponentDetails("comp2a", "version2a", "comp2aExternalId", "arch", "ubuntu"));
         allComponents.addAll(components);
-        LayerDetails layer2 = new LayerDetails(1, "sha:layer2", "layerMetadataFileContents", Arrays.asList("layerCmd", "layerCmdArg"), components);
+        LayerDetails layer2 = new LayerDetails(1, "sha:layer2", Arrays.asList("layerCmd", "layerCmdArg"), components);
         imageComponentHierarchy.addLayer(layer2);
         return components;
     }
@@ -292,7 +292,7 @@ public class BdioGeneratorTest {
         components.add(new ComponentDetails("comp1", "version1", "comp1ExternalId", "arch", "ubuntu"));
         components.add(new ComponentDetails("comp2", "version2", "comp2ExternalId", "arch", "ubuntu"));
         allComponents.addAll(components);
-        LayerDetails layer1 = new LayerDetails(0, "sha:layer1", "layerMetadataFileContents", Arrays.asList("layerCmd", "layerCmdArg"), components);
+        LayerDetails layer1 = new LayerDetails(0, "sha:layer1", Arrays.asList("layerCmd", "layerCmdArg"), components);
         imageComponentHierarchy.addLayer(layer1);
         return components;
     }
