@@ -4,7 +4,6 @@ import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -38,6 +37,6 @@ public class PkgMgrDbExtractorTest {
 
         assertEquals("ubuntu", result.getLinuxDistroName());
         assertEquals(pkgMgr, result.getPkgMgr());
-        assertEquals(containerFileSystem, result.getTargetImageFileSystem());
+        assertEquals(containerFileSystem, result.getContainerFileSystem());
     }
 }

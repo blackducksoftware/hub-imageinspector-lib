@@ -24,7 +24,7 @@ public class ContainerFileSystemWithPkgMgrDb extends Stringable {
         this.pkgMgr = pkgMgr;
     }
 
-    public ContainerFileSystem getTargetImageFileSystem() {
+    public ContainerFileSystem getContainerFileSystem() {
         return containerFileSystem;
     }
 
