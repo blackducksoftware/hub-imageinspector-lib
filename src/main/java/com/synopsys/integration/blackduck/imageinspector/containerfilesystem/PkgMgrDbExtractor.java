@@ -26,8 +26,6 @@ public class PkgMgrDbExtractor {
     private final List<PkgMgr> pkgMgrs;
     private final LinuxDistroExtractor linuxDistroExtractor;
 
-    // TODO need to decide when to use Autowired / whether to ditch it
-
     @Autowired
     public PkgMgrDbExtractor(final List<PkgMgr> pkgMgrs, LinuxDistroExtractor linuxDistroExtractor) {
         this.pkgMgrs = pkgMgrs;
@@ -49,7 +47,6 @@ public class PkgMgrDbExtractor {
                         linuxDistroName = targetLinuxDistroOverride;
                         logger.trace(String.format("Target linux distro name overridden by caller to: %s", linuxDistroName));
                     } else {
-                        // TODO this doesn't belong here
                         linuxDistroName = linuxDistroExtractor.extract(containerFileSystem.getTargetImageFileSystemFull()).orElse(null);
                         logger.trace(String.format("Target linux distro name derived from image file system: %s", linuxDistroName));
                     }

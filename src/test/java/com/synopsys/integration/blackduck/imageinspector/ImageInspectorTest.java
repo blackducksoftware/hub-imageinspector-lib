@@ -45,12 +45,12 @@ class ImageInspectorTest {
 //                new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory());
     }
 
-    @Test
-    void testGetTarExtractionDirectory() {
-        File workingDir = new File("src/test/resources/working");
-        File tarExtractionDirectory = new File(workingDir, WorkingDirectories.TAR_EXTRACTION_DIRECTORY);
-        assertTrue(tarExtractionDirectory.getAbsolutePath().endsWith("src/test/resources/working/tarExtraction"));
-    }
+//    @Test
+//    void testGetTarExtractionDirectory() {
+//        File workingDir = new File("src/test/resources/working");
+//        File tarExtractionDirectory = new File(workingDir, WorkingDirectories.TAR_EXTRACTION_DIRECTORY);
+//        assertTrue(tarExtractionDirectory.getAbsolutePath().endsWith("src/test/resources/working/tarExtraction"));
+//    }
 
 //    @Test
 //    void testExtractImageTar() throws IOException {
@@ -150,7 +150,7 @@ class ImageInspectorTest {
 
     private TestScenario setupTestScenario(String codeLocationPrefix, String distro, String tag, String pkgMgrId) throws IOException {
         File workingDir = new File("src/test/resources/working");
-        File tarExtractionDirectory = new File(workingDir, WorkingDirectories.TAR_EXTRACTION_DIRECTORY);
+        File tarExtractionDirectory = new File(workingDir, "tarExtraction");
         String imageConfigFileContents = "testConfig";
         List<String> layers = getLayers();
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(distro, tag, imageConfigFileContents, layers);
@@ -179,7 +179,7 @@ class ImageInspectorTest {
 
     @NotNull
     private ContainerFileSystem generateTargetImageFileSystem(File tarExtractionDirectory, String imageRepo, String imageTag) {
-        File targetImageFileSystemParentDir = new File(tarExtractionDirectory, WorkingDirectories.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+        File targetImageFileSystemParentDir = new File(tarExtractionDirectory, "imageFiles");
         File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         return new ContainerFileSystem(targetImageFileSystemRootDir);
     }

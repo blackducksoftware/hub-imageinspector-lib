@@ -75,7 +75,6 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
         return new FullLayerMapping(manifestLayerMapping, externalLayerIds);
     }
 
-    // TODO seems to overlap w/ DockerImageLayerArchive
     private List<String> getExternalLayerIdsFromImageConfigFile(File imageDir, String imageConfigFileName) {
         try {
             final File imageConfigFile = new File(imageDir, imageConfigFileName);
