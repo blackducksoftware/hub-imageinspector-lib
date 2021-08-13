@@ -18,8 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-// TODO need a test for this
-
 @Component
 public class PkgMgrDbExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
