@@ -15,18 +15,12 @@ import java.io.IOException;
 import java.util.List;
 
 public class ImageDirectoryDataExtractor {
-    private final ImageFormatMatchesChecker imageFormatMatchesChecker;
     private final ImageDirectoryExtractor imageDirectoryExtractor;
     private final ImageOrderedLayerExtractor imageOrderedLayerExtractor;
 
-    public ImageDirectoryDataExtractor(ImageFormatMatchesChecker imageFormatMatchesChecker, ImageDirectoryExtractor imageDirectoryExtractor, ImageOrderedLayerExtractor imageOrderedLayerExtractor) {
-        this.imageFormatMatchesChecker = imageFormatMatchesChecker;
+    public ImageDirectoryDataExtractor(ImageDirectoryExtractor imageDirectoryExtractor, ImageOrderedLayerExtractor imageOrderedLayerExtractor) {
         this.imageDirectoryExtractor = imageDirectoryExtractor;
         this.imageOrderedLayerExtractor = imageOrderedLayerExtractor;
-    }
-
-    public boolean applies(File imageDir) throws IntegrationException {
-        return imageFormatMatchesChecker.applies(imageDir);
     }
 
     public ImageDirectoryData extract(File imageDir, String givenRepo, String givenTag) throws IOException, IntegrationException {

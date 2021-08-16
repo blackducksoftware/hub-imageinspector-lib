@@ -34,8 +34,7 @@ public class DockerImageDirectoryDataExtractorFactory implements ImageDirectoryD
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
         ImageDirectoryExtractor imageDirectoryExtractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory);
         ImageOrderedLayerExtractor imageOrderedLayerExtractor = new ImageOrderedLayerExtractor();
-        ImageFormatMatchesChecker imageFormatMatchesChecker = new DockerImageFormatMatchesChecker();
-        return new ImageDirectoryDataExtractor(imageFormatMatchesChecker, imageDirectoryExtractor, imageOrderedLayerExtractor);
+        return new ImageDirectoryDataExtractor(imageDirectoryExtractor, imageOrderedLayerExtractor);
     }
 
     @Override
