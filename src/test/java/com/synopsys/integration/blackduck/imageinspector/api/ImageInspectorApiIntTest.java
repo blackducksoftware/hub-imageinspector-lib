@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import com.synopsys.integration.bdio.model.BdioComponent;
@@ -58,6 +59,9 @@ public class ImageInspectorApiIntTest {
     private static RpmPkgMgr rpmPkgMgr;
 
     private static final String[] apkOutput = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
+
+    @TempDir
+    File tempDir;
 
     @BeforeAll
     public static void setup() throws IntegrationException, InterruptedException {
@@ -125,8 +129,6 @@ public class ImageInspectorApiIntTest {
         ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
 
-        FileOperations fileOperations = new FileOperations();
-        File tempDir = fileOperations.createTempDirectory();
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
 
@@ -204,8 +206,6 @@ public class ImageInspectorApiIntTest {
         Mockito.when(rpmPkgMgr.getType()).thenReturn(PackageManagerEnum.RPM);
         Mockito.when(rpmPkgMgr.getImagePackageManagerDirectory(Mockito.any(File.class))).thenReturn(new File("."));
 
-        FileOperations fileOperations = new FileOperations();
-        File tempDir = fileOperations.createTempDirectory();
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
         ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())

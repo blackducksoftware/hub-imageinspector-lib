@@ -82,9 +82,9 @@ public class FileOperationsTest {
     @Test
     public void testCreateTempDirectory() throws IOException {
         final File tempDir = fileOperations.createTempDirectory();
-
         assertTrue(tempDir.isDirectory());
         assertTrue(tempDir.canWrite());
         assertEquals(0, tempDir.listFiles().length);
+        tempDir.deleteOnExit();
     }
 }
