@@ -157,6 +157,7 @@ public class FileOperations {
     public File createTempDirectory() throws IOException {
         final String prefix = String.format("ImageInspectorApi_%s_%s", Thread.currentThread().getName(), Long.toString(new Date().getTime()));
         final File temp = Files.createTempDirectory(prefix).toFile();
+        temp.deleteOnExit();
         logger.debug(String.format("Created temp dir %s", temp.getAbsolutePath()));
         logFreeDiskSpace(temp);
         return temp;
