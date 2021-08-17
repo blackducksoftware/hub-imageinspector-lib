@@ -20,6 +20,7 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.synopsys.integration.exception.IntegrationException;
@@ -154,10 +155,12 @@ public class FileOperations {
         Files.createLink(startLink, endLink);
     }
 
-    public File createTempDirectory() throws IOException {
+    public File createTempDirectory(boolean deleteOnExit) throws IOException {
         final String prefix = String.format("ImageInspectorApi_%s_%s", Thread.currentThread().getName(), Long.toString(new Date().getTime()));
         final File temp = Files.createTempDirectory(prefix).toFile();
-        temp.deleteOnExit();
+        if (deleteOnExit) {
+            temp.deleteOnExit();
+        }
         logger.debug(String.format("Created temp dir %s", temp.getAbsolutePath()));
         logFreeDiskSpace(temp);
         return temp;
