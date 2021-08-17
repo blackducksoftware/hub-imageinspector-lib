@@ -16,9 +16,11 @@ import java.io.File;
 
 public class DockerImageDirectoryDataExtractorFactory implements ImageDirectoryDataExtractorFactory {
     private final DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker;
+    private final CommonImageConfigParser commonImageConfigParser;
 
-    public DockerImageDirectoryDataExtractorFactory(DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker) {
+    public DockerImageDirectoryDataExtractorFactory(final DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker, final CommonImageConfigParser commonImageConfigParser) {
         this.dockerImageFormatMatchesChecker = dockerImageFormatMatchesChecker;
+        this.commonImageConfigParser = commonImageConfigParser;
     }
 
     @Override
@@ -30,7 +32,7 @@ public class DockerImageDirectoryDataExtractorFactory implements ImageDirectoryD
     public ImageDirectoryDataExtractor createImageDirectoryDataExtractor() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         FileOperations fileOperations = new FileOperations();
-        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
+        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser(commonImageConfigParser);
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
         ImageDirectoryExtractor imageDirectoryExtractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory);
         ImageOrderedLayerExtractor imageOrderedLayerExtractor = new ImageOrderedLayerExtractor();
@@ -39,7 +41,7 @@ public class DockerImageDirectoryDataExtractorFactory implements ImageDirectoryD
 
     @Override
     public ImageLayerMetadataExtractor createImageLayerMetadataExtractor() {
-        DockerImageLayerConfigParser dockerImageLayerConfigParser = new DockerImageLayerConfigParser(new GsonBuilder());
+        DockerImageLayerConfigParser dockerImageLayerConfigParser = new DockerImageLayerConfigParser(commonImageConfigParser);
         return new DockerImageLayerMetadataExtractor(dockerImageLayerConfigParser);
     }
 }

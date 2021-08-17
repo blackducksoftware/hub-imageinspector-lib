@@ -10,6 +10,7 @@ package com.synopsys.integration.blackduck.imageinspector.image.docker;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerConfigParser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,33 +23,15 @@ import com.google.gson.JsonObject;
 
 @Component
 public class DockerImageLayerConfigParser implements ImageLayerConfigParser {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final GsonBuilder gsonBuilder;
+    private final String CONFIG_DATA_JSON_KEY = "container_config";
+    private final CommonImageConfigParser imageConfigParser;
 
-    public DockerImageLayerConfigParser(GsonBuilder gsonBuilder) {
-        this.gsonBuilder = gsonBuilder;
+    public DockerImageLayerConfigParser(final CommonImageConfigParser imageConfigParser) {
+        this.imageConfigParser = imageConfigParser;
     }
 
     @Override
     public List<String> parseCmd(String layerConfigFileContents) {
-        try {
-            if (StringUtils.isBlank(layerConfigFileContents)) {
-                return new ArrayList<>(0);
-            }
-            logger.trace(String.format("layerConfigFileContents: %s", layerConfigFileContents));
-            JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(layerConfigFileContents, JsonObject.class);
-            JsonObject containerConfigJsonObj = imageConfigJsonObj.getAsJsonObject("container_config");
-            JsonArray cmdPartsJsonArray = containerConfigJsonObj.getAsJsonArray("Cmd");
-            final int numParts = cmdPartsJsonArray.size();
-            final List<String> cmdParts = new ArrayList<>(numParts);
-            for (int i = 0; i < numParts; i++) {
-                logger.trace(String.format("layer cmd part: %s", cmdPartsJsonArray.get(i).getAsString()));
-                cmdParts.add(cmdPartsJsonArray.get(i).getAsString());
-            }
-            return cmdParts;
-        } catch (Exception e) {
-            logger.trace(String.format("Error parsing layer cmd from layer config file contents: %s", e.getMessage()));
-        }
-        return new ArrayList<>(0);
+        return imageConfigParser.parseCmd(layerConfigFileContents, CONFIG_DATA_JSON_KEY);
     }
 }

@@ -12,5 +12,5 @@ import com.google.gson.GsonBuilder;
 import java.util.List;
 
 public interface ImageConfigParser {
-    List<String> parseExternalLayerIds(final GsonBuilder gsonBuilder, final String imageConfigFileContents);
+    List<String> parseExternalLayerIds(final String imageConfigFileContents);
 }

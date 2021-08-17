@@ -14,6 +14,7 @@ import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PackageGetter;
+import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageInfoDerived;
 import com.synopsys.integration.blackduck.imageinspector.image.docker.DockerImageDirectoryDataExtractorFactory;
@@ -111,7 +112,7 @@ public class ImageInspectorApi {
             throw new IntegrationException(String.format("Error creating temp dir: %s", e.getMessage()), e);
         }
 
-        List<ImageDirectoryDataExtractorFactory> imageDirectoryDataExtractorFactories = Arrays.asList(new DockerImageDirectoryDataExtractorFactory(new DockerImageFormatMatchesChecker()));
+        List<ImageDirectoryDataExtractorFactory> imageDirectoryDataExtractorFactories = Arrays.asList(new DockerImageDirectoryDataExtractorFactory(new DockerImageFormatMatchesChecker(), new CommonImageConfigParser(gsonBuilder)));
         ImageInfoDerived imageInfoDerived = null;
         try {
             imageInfoDerived = imageInspector.inspectImage(imageDirectoryDataExtractorFactories, componentHierarchyBuilder, imageInspectionRequest,

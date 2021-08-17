@@ -1,14 +1,14 @@
-package com.synopsys.integration.blackduck.imageinspector.image.docker;
+package com.synopsys.integration.blackduck.imageinspector.image.oci;
 
 import java.util.List;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageConfigParser;
 
-public class DockerImageConfigParser implements ImageConfigParser {
-    private CommonImageConfigParser imageConfigParser;
+public class OciImageConfigParser implements ImageConfigParser {
+    private final CommonImageConfigParser imageConfigParser;
 
-    public DockerImageConfigParser(final CommonImageConfigParser imageConfigParser) {
+    public OciImageConfigParser(final CommonImageConfigParser imageConfigParser) {
         this.imageConfigParser = imageConfigParser;
     }
 
