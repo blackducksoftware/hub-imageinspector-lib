@@ -115,6 +115,7 @@ public class ImageInspectorApiIntTest {
                                                                 .setOrganizeComponentsByLayer(false)
                                                                 .setIncludeRemovedComponents(false)
                                                                 .setCurrentLinuxDistro("CENTOS")
+                                                                .setCleanupWorkingDir(true)
                                                                 .build();
             imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
             fail("Expected WrongInspectorOsException");
@@ -140,6 +141,7 @@ public class ImageInspectorApiIntTest {
                                                             .setIncludeRemovedComponents(false)
                                                             .setCurrentLinuxDistro("UBUNTU")
                                                             .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+                                                            .setCleanupWorkingDir(true)
                                                             .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
         assertEquals(0, bdioDocument.getComponents().size());
@@ -176,6 +178,7 @@ public class ImageInspectorApiIntTest {
                                                             .setBlackDuckProjectVersion(PROJECT_VERSION)
                                                             .setCurrentLinuxDistro("ALPINE")
                                                             .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
+                                                            .setCleanupWorkingDir(true)
                                                             .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
@@ -215,6 +218,7 @@ public class ImageInspectorApiIntTest {
                                                             .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
                                                             .setCurrentLinuxDistro("CENTOS")
                                                             .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
+                                                            .setCleanupWorkingDir(true)
                                                             .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
 
