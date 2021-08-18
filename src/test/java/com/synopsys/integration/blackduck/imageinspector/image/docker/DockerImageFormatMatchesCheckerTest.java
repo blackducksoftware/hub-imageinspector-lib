@@ -2,6 +2,7 @@ package com.synopsys.integration.blackduck.imageinspector.image.docker;
 
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ImageFormatMatchesChecker;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.image.docker.manifest.DockerManifestFactory;
@@ -18,17 +19,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DockerImageFormatMatchesCheckerTest {
 
     @Test
-    void testTrue() {
+    void testTrue() throws IntegrationException {
         File imageDir = new File("src/test/resources/mockDockerTarContents");
-        DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker = new DockerImageFormatMatchesChecker();
+        ImageFormatMatchesChecker dockerImageFormatMatchesChecker = new DockerImageFormatMatchesChecker();
 
         assertTrue(dockerImageFormatMatchesChecker.applies(imageDir));
     }
 
     @Test
-    void testFalse() {
+    void testFalse() throws IntegrationException {
         File imageDir = new File("src/test/resources");
-        DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker = new DockerImageFormatMatchesChecker();
+        ImageFormatMatchesChecker dockerImageFormatMatchesChecker = new DockerImageFormatMatchesChecker();
 
         assertFalse(dockerImageFormatMatchesChecker.applies(imageDir));
     }
