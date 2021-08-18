@@ -47,9 +47,9 @@ public class OciImageDirectoryExtractorTest {
             Assertions.assertEquals("sha256:b2d5eeeaba3a22b9b8aa97261957974a6bd65274ebd43e1d81d0a7b8b752b116", externalIds.get(0));
 
             ManifestLayerMapping manifestLayerMapping = mapping.getManifestLayerMapping();
-            Assertions.assertEquals(testRepo, manifestLayerMapping.getImageName().get());
-            Assertions.assertEquals(testTag, manifestLayerMapping.getTagName().get());
-            Assertions.assertEquals("blobs/sha256/cdce9ebeb6e8364afeac430fe7a886ca89a90a5139bc3b6f40b5dbd0cf66391c", manifestLayerMapping.getPathToImageConfigFileFromRoot());
+            Assertions.assertEquals(testRepo, manifestLayerMapping.getImageName());
+            Assertions.assertEquals(testTag, manifestLayerMapping.getTagName());
+            Assertions.assertEquals("blobs/sha256/cdce9ebeb6e8364afeac430fe7a886ca89a90a5139bc3b6f40b5dbd0cf66391c", manifestLayerMapping.getImageConfigFilename());
 
             List<String> internalIds = manifestLayerMapping.getLayerInternalIds();
             Assertions.assertEquals(1, internalIds.size());
