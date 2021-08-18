@@ -82,7 +82,7 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
             final String imageConfigFileContents = fileOperations
                     .readFileToString(imageConfigFile);
             logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            return dockerImageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents);
+            return dockerImageConfigParser.parseExternalLayerIds(imageConfigFileContents);
         } catch (Exception e) {
             logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
         }
