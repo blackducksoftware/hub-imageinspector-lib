@@ -11,7 +11,6 @@ import com.synopsys.integration.blackduck.imageinspector.api.WrongInspectorOsExc
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -37,7 +36,7 @@ public class ImageLayerApplier {
         for (final File fileToRemove : filesToRemove) {
             if (fileToRemove.isDirectory()) {
                 logger.trace(String.format("Removing dir marked for deletion: %s", fileToRemove.getAbsolutePath()));
-                FileUtils.deleteDirectory(fileToRemove);
+                fileOperations.deleteDirectory(fileToRemove);
             } else {
                 logger.trace(String.format("Removing file marked for deletion: %s", fileToRemove.getAbsolutePath()));
                 fileOperations.deleteQuietly(fileToRemove);
