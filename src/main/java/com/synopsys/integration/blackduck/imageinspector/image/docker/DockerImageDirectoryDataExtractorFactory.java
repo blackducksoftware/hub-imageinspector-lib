@@ -32,9 +32,8 @@ public class DockerImageDirectoryDataExtractorFactory implements ImageDirectoryD
     public ImageDirectoryDataExtractor createImageDirectoryDataExtractor() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         FileOperations fileOperations = new FileOperations();
-        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser(commonImageConfigParser);
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
-        ImageDirectoryExtractor imageDirectoryExtractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory);
+        ImageDirectoryExtractor imageDirectoryExtractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, commonImageConfigParser, dockerManifestFactory);
         ImageOrderedLayerExtractor imageOrderedLayerExtractor = new ImageOrderedLayerExtractor();
         return new ImageDirectoryDataExtractor(imageDirectoryExtractor, imageOrderedLayerExtractor);
     }

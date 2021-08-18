@@ -19,7 +19,7 @@ public class OciImageDirectoryExtractorTest {
 
     @Test
     public void testParseLayerArchives() {
-        OciImageConfigParser configParser = new OciImageConfigParser(new CommonImageConfigParser(new GsonBuilder()));
+        CommonImageConfigParser configParser = new CommonImageConfigParser(new GsonBuilder());
         OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(new GsonBuilder(), new FileOperations(), configParser);
         File alpineOciImageDir = new File(OCI_ALPINE_IMAGE_RESOURCE_PATH);
         try {
@@ -35,7 +35,7 @@ public class OciImageDirectoryExtractorTest {
 
     @Test
     public void testGetLayerMapping() {
-        OciImageConfigParser configParser = new OciImageConfigParser(new CommonImageConfigParser(new GsonBuilder()));
+        CommonImageConfigParser configParser = new CommonImageConfigParser(new GsonBuilder());
         OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(new GsonBuilder(), new FileOperations(), configParser);
         File alpineOciImageDir = new File(OCI_ALPINE_IMAGE_RESOURCE_PATH);
         String testRepo = "testRepo";

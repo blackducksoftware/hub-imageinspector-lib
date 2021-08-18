@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.GsonBuilder;
+import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryExtractor;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
@@ -39,12 +40,12 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
     private GsonBuilder gsonBuilder;
     private FileOperations fileOperations;
-    private final OciImageConfigParser ociImageConfigParser;
+    private final CommonImageConfigParser commonImageConfigParser;
 
-    public OciImageDirectoryExtractor(final GsonBuilder gsonBuilder, FileOperations fileOperations, OciImageConfigParser ociImageConfigParser) {
+    public OciImageDirectoryExtractor(final GsonBuilder gsonBuilder, FileOperations fileOperations, CommonImageConfigParser commonImageConfigParser) {
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
-        this.ociImageConfigParser = ociImageConfigParser;
+        this.commonImageConfigParser = commonImageConfigParser;
     }
 
     @Override
@@ -53,7 +54,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         File manifestFile;
         try {
             manifestFile = findManifestFile(imageDir);
-        } catch (Exception e) {
+        } catch (Exception e) { //TODO- revisit exception handling
             logger.trace(e.getMessage());
             return new LinkedList<>();
         }
@@ -66,7 +67,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
         Optional<String> manifestFileDigest = parseManifestFileDigestFromImageIndex(indexFile);
         if (!manifestFileDigest.isPresent()) {
-            throw new Exception("Unable to find image manifest");
+            return null;
         }
 
         File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
@@ -182,7 +183,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             final File imageConfigFile = new File(imageDir, pathToImageConfigFile);
             final String imageConfigFileContents = fileOperations.readFileToString(imageConfigFile);
             logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            return ociImageConfigParser.parseExternalLayerIds(imageConfigFileContents);
+            return commonImageConfigParser.parseExternalLayerIds(imageConfigFileContents);
         } catch (Exception e) {
             logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
         }

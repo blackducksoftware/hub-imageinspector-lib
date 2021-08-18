@@ -8,6 +8,7 @@
 package com.synopsys.integration.blackduck.imageinspector.image.docker;
 
 import com.google.gson.GsonBuilder;
+import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryExtractor;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
@@ -31,13 +32,13 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final GsonBuilder gsonBuilder;
     private final FileOperations fileOperations;
-    private final DockerImageConfigParser dockerImageConfigParser;
+    private final CommonImageConfigParser commonImageConfigParser;
     private final DockerManifestFactory dockerManifestFactory;
 
-    public DockerImageDirectoryExtractor(GsonBuilder gsonBuilder, FileOperations fileOperations, DockerImageConfigParser dockerImageConfigParser, DockerManifestFactory dockerManifestFactory) {
+    public DockerImageDirectoryExtractor(GsonBuilder gsonBuilder, FileOperations fileOperations, CommonImageConfigParser commonImageConfigParser, DockerManifestFactory dockerManifestFactory) {
         this.gsonBuilder = gsonBuilder;
         this.fileOperations = fileOperations;
-        this.dockerImageConfigParser = dockerImageConfigParser;
+        this.commonImageConfigParser = commonImageConfigParser;
         this.dockerManifestFactory = dockerManifestFactory;
     }
 
@@ -82,7 +83,7 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
             final String imageConfigFileContents = fileOperations
                     .readFileToString(imageConfigFile);
             logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            return dockerImageConfigParser.parseExternalLayerIds(imageConfigFileContents);
+            return commonImageConfigParser.parseExternalLayerIds(imageConfigFileContents);
         } catch (Exception e) {
             logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
         }
