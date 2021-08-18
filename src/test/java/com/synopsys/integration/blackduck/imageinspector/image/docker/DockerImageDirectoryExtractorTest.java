@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class DockerImageDirectoryExtractorTest {
 
@@ -37,5 +38,25 @@ public class DockerImageDirectoryExtractorTest {
         assertEquals("sha256:503e53e365f34399c4d58d8f4e23c161106cfbce4400e3d0a0357967bad69390", fullLayerMapping.getLayerExternalId(0));
     }
 
-    // TODO also test specifying repo tag
+    @Test
+    void testNonExistentRepoTag() throws IOException {
+        File imageDir = new File("src/test/resources/mockDockerTarContents");
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        FileOperations fileOperations = new FileOperations();
+        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
+        DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
+        DockerImageDirectoryExtractor extractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory);
+
+        List<TypedArchiveFile> typedArchiveFiles = extractor.getLayerArchives(imageDir);
+
+        assertEquals(1, typedArchiveFiles.size());
+        assertEquals(ArchiveFileType.TAR, typedArchiveFiles.get(0).getType());
+        assertEquals("layer.tar", typedArchiveFiles.get(0).getFile().getName());
+
+        try {
+            extractor.getLayerMapping(imageDir, "nonexistentrepo", "nonexistenttag");
+            fail("Expected exception");
+        } catch (IntegrationException e) {
+        }
+    }
 }
