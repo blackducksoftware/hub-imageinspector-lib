@@ -72,22 +72,8 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(imageDir, manifestLayerMapping.getPathToConfigFileFromImageRoot());
+        final List<String> externalLayerIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, manifestLayerMapping.getPathToConfigFileFromImageRoot());
         return new FullLayerMapping(manifestLayerMapping, externalLayerIds);
-    }
-
-    // TODO seems to overlap w/ DockerImageLayerArchive
-    private List<String> getExternalLayerIdsFromImageConfigFile(File imageDir, String imageConfigFileName) {
-        try {
-            final File imageConfigFile = new File(imageDir, imageConfigFileName);
-            final String imageConfigFileContents = fileOperations
-                    .readFileToString(imageConfigFile);
-            logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            return commonImageConfigParser.parseExternalLayerIds(imageConfigFileContents);
-        } catch (Exception e) {
-            logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
-        }
-        return new ArrayList<>(0);
     }
 
 }

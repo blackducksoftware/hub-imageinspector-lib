@@ -58,34 +58,39 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     @Override
     public List<TypedArchiveFile> getLayerArchives(final File imageDir) throws IOException {
         File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
-        File manifestFile;
-        try {
-            manifestFile = findManifestFile(imageDir);
-        } catch (Exception e) { //TODO- revisit exception handling
-            logger.trace(e.getMessage());
+
+        Optional<File> manifestFile = findManifestFile(imageDir);
+        if (!manifestFile.isPresent()) {
+            logger.trace("Could not find manifest file.");
             return new LinkedList<>();
         }
 
-        return parseLayerArchives(manifestFile, blobsDir);
+        return parseLayerArchives(manifestFile.get(), blobsDir);
     }
 
-    private File findManifestFile(File imageDir) throws Exception {
+    private Optional<File> findManifestFile(File imageDir) {
         File indexFile = new File (imageDir, INDEX_FILE_NAME);
 
         Optional<String> manifestFileDigest = parseManifestFileDigestFromImageIndex(indexFile);
         if (!manifestFileDigest.isPresent()) {
-            return null;
+            return Optional.empty();
         }
 
         File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
 
         String pathToManifestFile = parsePathToBlobFileFromDigest(manifestFileDigest.get());
-        return findBlob(blobsDir, pathToManifestFile);
+        return Optional.of(findBlob(blobsDir, pathToManifestFile));
     }
 
-    private Optional<String> parseManifestFileDigestFromImageIndex(File indexFile) throws IOException {
+    private Optional<String> parseManifestFileDigestFromImageIndex(File indexFile) {
         // Parse index.json to find manifest file digest (we'll later use it to find the file from the root directory)
-        String indexFileText = fileOperations.readFileToString(indexFile);
+        String indexFileText;
+        try {
+            indexFileText = fileOperations.readFileToString(indexFile);
+        } catch (IOException e) {
+            return Optional.empty();
+        }
+
         OciImageIndex imageIndex = gsonBuilder.create().fromJson(indexFileText, OciImageIndex.class);
         String manifestFileDigest = null;
         for (OciDescriptor manifestData : imageIndex.getManifests()) {
@@ -125,14 +130,14 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         OciImageManifest imageManifest = gsonBuilder.create().fromJson(manifestFileText, OciImageManifest.class);
 
         List<TypedArchiveFile> layerArchives = new LinkedList<>();
-        for (OciDescriptor layerData : imageManifest.getLayers()) {
-            String pathToLayerFile = parsePathToBlobFileFromDigest(layerData.getDigest());
+        for (OciDescriptor layer : imageManifest.getLayers()) {
+            String pathToLayerFile = parsePathToBlobFileFromDigest(layer.getDigest());
             File layerFile = findBlob(blobsDir, pathToLayerFile);
             ArchiveFileType archiveFileType;
             try {
-                archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layerData.getMediaType());
+                archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layer.getMediaType());
             } catch (Exception e) {
-                logger.trace("Unrecognized layer media type: " + layerData.getMediaType());
+                logger.trace("Unrecognized layer media type: " + layer.getMediaType());
                 continue;
             }
             layerArchives.add(new TypedArchiveFile(archiveFileType, layerFile));
@@ -158,13 +163,20 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     public FullLayerMapping getLayerMapping(final File imageDir, final String repo, final String tag) throws IntegrationException {
 
         OciImageManifest imageManifest;
-        try {
-            File manifestFile = findManifestFile(imageDir);
-            String manifestFileText = fileOperations.readFileToString(manifestFile);
-            imageManifest = gsonBuilder.create().fromJson(manifestFileText, OciImageManifest.class);
-        } catch (Exception e) {
-            throw new IntegrationException(e.getMessage());
+        Optional<File> manifestFile = findManifestFile(imageDir);
+        if (!manifestFile.isPresent()) {
+            throw new IntegrationException("Could not find manifest file");
         }
+
+        String manifestFileText;
+        try {
+            manifestFileText = fileOperations.readFileToString(manifestFile.get());
+        } catch (IOException e) {
+            throw new IntegrationException(String.format("Unable to parse manifest file %s", manifestFile.get().getAbsolutePath()));
+        }
+
+        imageManifest = gsonBuilder.create().fromJson(manifestFileText, OciImageManifest.class);
+
 
         String pathToImageConfigFileFromRoot = findImageConfigFilePath(imageManifest);
         List<String> layerInternalIds = imageManifest.getLayers().stream()
@@ -172,7 +184,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                                             .collect(Collectors.toList());
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(repo, tag, pathToImageConfigFileFromRoot, layerInternalIds);
 
-        List<String> layerExternalIds = getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
+        List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
     }
 
@@ -185,15 +197,4 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         }
     }
 
-    private List<String> getExternalLayerIdsFromImageConfigFile(File imageDir, String pathToImageConfigFile) {
-        try {
-            final File imageConfigFile = new File(imageDir, pathToImageConfigFile);
-            final String imageConfigFileContents = fileOperations.readFileToString(imageConfigFile);
-            logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            return commonImageConfigParser.parseExternalLayerIds(imageConfigFileContents);
-        } catch (Exception e) {
-            logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
-        }
-        return new ArrayList<>(0);
-    }
 }

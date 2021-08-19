@@ -21,10 +21,12 @@ import com.synopsys.integration.exception.IntegrationException;
 public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryDataExtractorFactory {
     private final OciImageFormatMatchesChecker ociImageFormatMatchesChecker;
     private final CommonImageConfigParser commonImageConfigParser;
+    private final GsonBuilder gsonBuilder;
 
-    public OciImageDirectoryDataExtractorFactory(final OciImageFormatMatchesChecker ociImageFormatMatchesChecker, final CommonImageConfigParser commonImageConfigParser) {
+    public OciImageDirectoryDataExtractorFactory(final OciImageFormatMatchesChecker ociImageFormatMatchesChecker, final CommonImageConfigParser commonImageConfigParser, final GsonBuilder gsonBuilder) {
         this.ociImageFormatMatchesChecker = ociImageFormatMatchesChecker;
         this.commonImageConfigParser = commonImageConfigParser;
+        this.gsonBuilder = gsonBuilder;
     }
 
     @Override
@@ -34,7 +36,6 @@ public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryData
 
     @Override
     public ImageDirectoryDataExtractor createImageDirectoryDataExtractor() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
         FileOperations fileOperations = new FileOperations();
         OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gsonBuilder, fileOperations, commonImageConfigParser);
         ImageOrderedLayerExtractor imageOrderedLayerExtractor = new ImageOrderedLayerExtractor(); // TODO- Is this cool?
