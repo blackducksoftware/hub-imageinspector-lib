@@ -17,10 +17,12 @@ import java.io.File;
 public class DockerImageDirectoryDataExtractorFactory implements ImageDirectoryDataExtractorFactory {
     private final DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker;
     private final CommonImageConfigParser commonImageConfigParser;
+    private final GsonBuilder gsonBuilder;
 
-    public DockerImageDirectoryDataExtractorFactory(final DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker, final CommonImageConfigParser commonImageConfigParser) {
+    public DockerImageDirectoryDataExtractorFactory(final DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker, final CommonImageConfigParser commonImageConfigParser, final GsonBuilder gsonBuilder) {
         this.dockerImageFormatMatchesChecker = dockerImageFormatMatchesChecker;
         this.commonImageConfigParser = commonImageConfigParser;
+        this.gsonBuilder = gsonBuilder;
     }
 
     @Override
@@ -30,7 +32,6 @@ public class DockerImageDirectoryDataExtractorFactory implements ImageDirectoryD
 
     @Override
     public ImageDirectoryDataExtractor createImageDirectoryDataExtractor() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
         FileOperations fileOperations = new FileOperations();
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
         ImageDirectoryExtractor imageDirectoryExtractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, commonImageConfigParser, dockerManifestFactory);
