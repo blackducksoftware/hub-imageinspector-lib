@@ -20,6 +20,9 @@ import com.synopsys.integration.blackduck.imageinspector.image.common.ImageInfoD
 import com.synopsys.integration.blackduck.imageinspector.image.docker.DockerImageDirectoryDataExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.image.docker.DockerImageFormatMatchesChecker;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentHierarchyBuilder;
+import com.synopsys.integration.blackduck.imageinspector.image.oci.OciImageDirectoryDataExtractorFactory;
+import com.synopsys.integration.blackduck.imageinspector.image.oci.OciImageFormatMatchesChecker;
+import com.synopsys.integration.blackduck.imageinspector.image.oci.OciLayoutParser;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrExecutor;
 import org.slf4j.Logger;
@@ -112,7 +115,10 @@ public class ImageInspectorApi {
             throw new IntegrationException(String.format("Error creating temp dir: %s", e.getMessage()), e);
         }
 
-        List<ImageDirectoryDataExtractorFactory> imageDirectoryDataExtractorFactories = Arrays.asList(new DockerImageDirectoryDataExtractorFactory(new DockerImageFormatMatchesChecker(), new CommonImageConfigParser(gsonBuilder)));
+        List<ImageDirectoryDataExtractorFactory> imageDirectoryDataExtractorFactories = Arrays.asList(
+            new DockerImageDirectoryDataExtractorFactory(new DockerImageFormatMatchesChecker(), new CommonImageConfigParser(gsonBuilder)),
+            new OciImageDirectoryDataExtractorFactory(new OciImageFormatMatchesChecker(new OciLayoutParser(gsonBuilder)), new CommonImageConfigParser(gsonBuilder))
+        );
         ImageInfoDerived imageInfoDerived = null;
         try {
             imageInfoDerived = imageInspector.inspectImage(imageDirectoryDataExtractorFactories, componentHierarchyBuilder, imageInspectionRequest,
