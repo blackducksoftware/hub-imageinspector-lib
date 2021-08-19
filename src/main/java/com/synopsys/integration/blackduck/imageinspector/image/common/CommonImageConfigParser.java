@@ -7,9 +7,12 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.image.common;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +68,18 @@ public class CommonImageConfigParser {
             return cmdParts;
         } catch (Exception e) {
             logger.trace(String.format("Error parsing layer cmd from layer config file contents: %s", e.getMessage()));
+        }
+        return new ArrayList<>(0);
+    }
+
+    public List<String> getExternalLayerIdsFromImageConfigFile(File imageDir, String pathToImageConfigFile) {
+        try {
+            final File imageConfigFile = new File(imageDir, pathToImageConfigFile);
+            final String imageConfigFileContents = FileUtils.readFileToString(imageConfigFile, StandardCharsets.UTF_8);
+            logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
+            return parseExternalLayerIds(imageConfigFileContents);
+        } catch (Exception e) {
+            logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
         }
         return new ArrayList<>(0);
     }

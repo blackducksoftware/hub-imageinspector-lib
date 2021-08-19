@@ -172,7 +172,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                                             .collect(Collectors.toList());
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(repo, tag, pathToImageConfigFileFromRoot, layerInternalIds);
 
-        List<String> layerExternalIds = getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
+        List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
     }
 
@@ -185,15 +185,4 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         }
     }
 
-    private List<String> getExternalLayerIdsFromImageConfigFile(File imageDir, String pathToImageConfigFile) {
-        try {
-            final File imageConfigFile = new File(imageDir, pathToImageConfigFile);
-            final String imageConfigFileContents = fileOperations.readFileToString(imageConfigFile);
-            logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
-            return commonImageConfigParser.parseExternalLayerIds(imageConfigFileContents);
-        } catch (Exception e) {
-            logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
-        }
-        return new ArrayList<>(0);
-    }
 }
