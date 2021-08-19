@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.image.common.LayerDetailsBuilder;
 import com.synopsys.integration.blackduck.imageinspector.image.common.LayerMetadata;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ArchiveFileType;
@@ -33,9 +34,11 @@ public class OciImageLayerMetadataEctractorTest {
 
         File layerTar = new File("src/test/resources/oci/alpine/blobs/sha256/d3470daaa19c14ddf4ec500a3bb4f073fa9827aa4f19145222d459016ee9193e");
         TypedArchiveFile typedArchiveFile = new TypedArchiveFile(ArchiveFileType.TAR_GZIPPED, layerTar);
-        LayerMetadata metadata = metadataExtractor.getLayerMetadata(fullLayerMapping, typedArchiveFile, 0);
+        LayerDetailsBuilder layerData = new LayerDetailsBuilder();
+        layerData.setArchive(typedArchiveFile);
+        layerData.setExternalId(externalId);
+        LayerMetadata metadata = metadataExtractor.getLayerMetadata(fullLayerMapping, layerData);
 
-        Assertions.assertEquals(externalId, metadata.getLayerExternalId());
         Assertions.assertEquals(1, metadata.getLayerCmd().size());
         Assertions.assertEquals("/bin/sh", metadata.getLayerCmd().get(0));
     }

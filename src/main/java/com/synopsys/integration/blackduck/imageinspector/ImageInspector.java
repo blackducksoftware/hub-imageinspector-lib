@@ -85,15 +85,19 @@ public class ImageInspector {
         final ImageInspectorOsEnum currentOs = os.deriveOs(imageInspectionRequest.getCurrentLinuxDistro());
         ImageLayerMetadataExtractor imageLayerMetadataExtractor = imageDirectoryDataExtractorFactory.createImageLayerMetadataExtractor();
 
+        Optional<Integer> platformTopLayerIndex = imageDirectoryData.getPlatformTopLayerIndex(imageInspectionRequest.getPlatformTopLayerExternalId());
+        if (platformTopLayerIndex.isPresent()) {
+            componentHierarchyBuilder.setPlatformTopLayerIndex(platformTopLayerIndex.get());
+        }
+
         final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = applyImageLayersToContainerFileSystem(imageLayerMetadataExtractor,
-                imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, imageDirectoryData.getOrderedLayerArchives(), imageDirectoryData.getFullLayerMapping(),
-                        imageInspectionRequest.getPlatformTopLayerExternalId(), componentHierarchyBuilder);
+                imageInspectionRequest.getTargetLinuxDistroOverride(), containerFileSystem, componentHierarchyBuilder, imageDirectoryData.getLayerData(), imageDirectoryData.getFullLayerMapping());
 
         containerFileSystemCompatibilityChecker.checkInspectorOs(containerFileSystemWithPkgMgrDb, currentOs);
         ImageComponentHierarchy imageComponentHierarchy = componentHierarchyBuilder.build();
         verifyPlatformTopLayerFound(effectivePlatformTopLayerExternalId, imageComponentHierarchy);
         imageComponentHierarchyLogger.log(imageComponentHierarchy);
-        cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), imageDirectoryData.getOrderedLayerArchives());
+        cleanUpLayerTars(imageInspectionRequest.isCleanupWorkingDir(), imageDirectoryData.getLayerData());
         ImageInfoDerived imageInfoDerived = generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb, imageDirectoryData.getFullLayerMapping(),
                 imageComponentHierarchy,
                 imageInspectionRequest.getBlackDuckProjectName(), imageInspectionRequest.getBlackDuckProjectVersion(),
@@ -121,11 +125,12 @@ public class ImageInspector {
         }
     }
 
-    private void cleanUpLayerTars(final boolean cleanupWorkingDir, final List<TypedArchiveFile> layerTars) {
+    private void cleanUpLayerTars(final boolean cleanupWorkingDir, final List<LayerDetailsBuilder> layers) {
         if (cleanupWorkingDir) {
-            for (final TypedArchiveFile layerTar : layerTars) {
-                logger.trace(String.format("Deleting %s", layerTar.getFile().getAbsolutePath()));
-                fileOperations.deleteQuietly(layerTar.getFile());
+            for (LayerDetailsBuilder layer : layers) {
+                File layerArchive = layer.getArchive().getFile();
+                logger.trace(String.format("Deleting %s", layerArchive.getAbsolutePath()));
+                fileOperations.deleteQuietly(layerArchive);
             }
         }
     }
@@ -143,24 +148,18 @@ public class ImageInspector {
     }
 
     private ContainerFileSystemWithPkgMgrDb applyImageLayersToContainerFileSystem(ImageLayerMetadataExtractor imageLayerMetadataExtractor,
-                                                                                  final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem, final List<TypedArchiveFile> orderedLayerTars,
-                                                                                  final FullLayerMapping layerMapping, final String platformTopLayerExternalId,
-                                                                                  ComponentHierarchyBuilder componentHierarchyBuilder) throws IOException, WrongInspectorOsException {
+                                                                                  final String targetLinuxDistroOverride, final ContainerFileSystem containerFileSystem,
+                                                                                  ComponentHierarchyBuilder componentHierarchyBuilder, List<LayerDetailsBuilder> layerDataList, FullLayerMapping fullLayerMapping) throws IOException, WrongInspectorOsException {
 
-        Optional<Integer> platformTopLayerIndex = layerMapping.getPlatformTopLayerIndex(platformTopLayerExternalId);
-        if (platformTopLayerIndex.isPresent()) {
-            componentHierarchyBuilder.setPlatformTopLayerIndex(platformTopLayerIndex.get());
-        }
 
         ContainerFileSystemWithPkgMgrDb postLayerContainerFileSystemWithPkgMgrDb = null;
         boolean inApplicationLayers = false;
-        int layerIndex = 0;
-        for (TypedArchiveFile layerTar : orderedLayerTars) {
-            postLayerContainerFileSystemWithPkgMgrDb = applyLayer(imageLayerMetadataExtractor, targetLinuxDistroOverride, containerFileSystem, layerMapping, componentHierarchyBuilder, postLayerContainerFileSystemWithPkgMgrDb, inApplicationLayers, layerIndex, layerTar);
-            if (platformTopLayerIndex.isPresent() && (layerIndex == platformTopLayerIndex.get())) {
+        Optional<Integer> platformTopLayerIndex = componentHierarchyBuilder.getPlatformTopLayerIndex();
+        for (LayerDetailsBuilder layerData : layerDataList) {
+            postLayerContainerFileSystemWithPkgMgrDb = applyLayer(imageLayerMetadataExtractor, targetLinuxDistroOverride, containerFileSystem, componentHierarchyBuilder, postLayerContainerFileSystemWithPkgMgrDb, inApplicationLayers, layerData, fullLayerMapping);
+            if (platformTopLayerIndex.isPresent() && (layerData.getLayerIndex() == platformTopLayerIndex.get())) {
                 inApplicationLayers = true; // for subsequent iterations
             }
-            layerIndex++;
         }
         // Never did find a pkg mgr, so create the result without one
         if (postLayerContainerFileSystemWithPkgMgrDb == null) {
@@ -169,17 +168,18 @@ public class ImageInspector {
         return postLayerContainerFileSystemWithPkgMgrDb;
     }
 
-    private ContainerFileSystemWithPkgMgrDb applyLayer(ImageLayerMetadataExtractor imageLayerMetadataExtractor, String targetLinuxDistroOverride, ContainerFileSystem containerFileSystem, FullLayerMapping layerMapping, ComponentHierarchyBuilder componentHierarchyBuilder, ContainerFileSystemWithPkgMgrDb postLayerContainerFileSystemWithPkgMgrDb, boolean inApplicationLayers, int layerIndex, TypedArchiveFile layerTar) throws IOException, WrongInspectorOsException {
-        imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemFull(), layerTar);
+    private ContainerFileSystemWithPkgMgrDb applyLayer(ImageLayerMetadataExtractor imageLayerMetadataExtractor, String targetLinuxDistroOverride, ContainerFileSystem containerFileSystem, ComponentHierarchyBuilder componentHierarchyBuilder, ContainerFileSystemWithPkgMgrDb postLayerContainerFileSystemWithPkgMgrDb, boolean inApplicationLayers, LayerDetailsBuilder layerData, FullLayerMapping fullLayerMapping) throws IOException, WrongInspectorOsException {
+        imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemFull(), layerData.getArchive());
         if (inApplicationLayers && containerFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
-            imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerTar);
+            imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerData.getArchive());
         }
-        LayerMetadata layerMetadata = imageLayerMetadataExtractor.getLayerMetadata(layerMapping, layerTar, layerIndex);
+        LayerMetadata layerMetadata = imageLayerMetadataExtractor.getLayerMetadata(fullLayerMapping, layerData);
+        layerData.setCmd(layerMetadata.getLayerCmd());
         try {
             postLayerContainerFileSystemWithPkgMgrDb = pkgMgrDbExtractor.extract(containerFileSystem, targetLinuxDistroOverride);
-            componentHierarchyBuilder.addLayer(postLayerContainerFileSystemWithPkgMgrDb, layerIndex, layerMetadata.getLayerExternalId(), layerMetadata.getLayerCmd());
+            componentHierarchyBuilder.addLayer(postLayerContainerFileSystemWithPkgMgrDb, layerData);
         } catch (PkgMgrDataNotFoundException pkgMgrDataNotFoundException) {
-            logger.debug(String.format("Unable to collect components present after layer %d: The file system is not yet populated with the linux distro and package manager files: %s", layerIndex, pkgMgrDataNotFoundException.getMessage()));
+            logger.debug(String.format("Unable to collect components present after layer %d: The file system is not yet populated with the linux distro and package manager files: %s", layerData.getLayerIndex(), pkgMgrDataNotFoundException.getMessage()));
         }
         return postLayerContainerFileSystemWithPkgMgrDb;
     }

@@ -9,17 +9,12 @@ package com.synopsys.integration.blackduck.imageinspector.image.common;
 
 import java.util.List;
 
+//TODO- does this class need to exist?  theoretically there could be more metadata we want to collect down the road?
 public class LayerMetadata {
-    private final String layerExternalId;
     private final List<String> layerCmd;
 
-    public LayerMetadata(String layerExternalId, List<String> layerCmd) {
-        this.layerExternalId = layerExternalId;
+    public LayerMetadata(List<String> layerCmd) {
         this.layerCmd = layerCmd;
-    }
-
-    public String getLayerExternalId() {
-        return layerExternalId;
     }
 
     public List<String> getLayerCmd() {

@@ -51,6 +51,7 @@ public class ImageInspectorApi {
     public ImageInspectorApi(ImageInspector imageInspector, Os os) {
         this.imageInspector = imageInspector;
         this.os = os;
+        this.gsonBuilder = new GsonBuilder();
     }
 
     @Autowired

@@ -12,6 +12,7 @@ import com.synopsys.integration.exception.IntegrationException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ImageDirectoryDataExtractor {
@@ -27,7 +28,19 @@ public class ImageDirectoryDataExtractor {
         List<TypedArchiveFile> unOrderedLayerArchives = imageDirectoryExtractor.getLayerArchives(imageDir);
         FullLayerMapping fullLayerMapping = imageDirectoryExtractor.getLayerMapping(imageDir, givenRepo, givenTag);
         List<TypedArchiveFile> orderedLayerArchives = imageOrderedLayerExtractor.getOrderedLayerArchives(unOrderedLayerArchives, fullLayerMapping.getManifestLayerMapping());
-        return new ImageDirectoryData(fullLayerMapping.getManifestLayerMapping().getImageName(), fullLayerMapping.getManifestLayerMapping().getTagName(),
-                fullLayerMapping, orderedLayerArchives);
+        List<LayerDetailsBuilder> layerData = collectLayerData(fullLayerMapping, orderedLayerArchives);
+        return new ImageDirectoryData(fullLayerMapping.getManifestLayerMapping().getImageName(), fullLayerMapping.getManifestLayerMapping().getTagName(), fullLayerMapping, layerData);
+    }
+
+    private List<LayerDetailsBuilder> collectLayerData(FullLayerMapping layerMapping, List<TypedArchiveFile> archives) {
+        List<LayerDetailsBuilder> layerData = new LinkedList<>();
+        for (int layerIndex = 0; layerIndex < archives.size(); layerIndex++) {
+            LayerDetailsBuilder layerDataBuilder = new LayerDetailsBuilder();
+            layerDataBuilder.setLayerIndex(layerIndex);
+            layerDataBuilder.setArchive(archives.get(layerIndex));
+            layerDataBuilder.setExternalId(layerMapping.getLayerExternalId(layerIndex));
+            layerData.add(layerDataBuilder);
+        }
+        return layerData;
     }
 }

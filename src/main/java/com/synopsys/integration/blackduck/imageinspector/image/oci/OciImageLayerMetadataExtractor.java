@@ -1,3 +1,10 @@
+/*
+ * hub-imageinspector-lib
+ *
+ * Copyright (c) 2021 Synopsys, Inc.
+ *
+ * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
+ */
 package com.synopsys.integration.blackduck.imageinspector.image.oci;
 
 import java.io.File;
@@ -12,8 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerMetadataExtractor;
+import com.synopsys.integration.blackduck.imageinspector.image.common.LayerDetailsBuilder;
 import com.synopsys.integration.blackduck.imageinspector.image.common.LayerMetadata;
-import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 
 public class OciImageLayerMetadataExtractor implements ImageLayerMetadataExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -24,10 +31,9 @@ public class OciImageLayerMetadataExtractor implements ImageLayerMetadataExtract
     }
 
     @Override
-    public LayerMetadata getLayerMetadata(final FullLayerMapping fullLayerMapping, final TypedArchiveFile layerTar, final int layerIndex) {
-        File blobsDir = layerTar.getFile().getParentFile().getParentFile();
-        File imageRoot = blobsDir.getParentFile();
-        File configFile = new File(imageRoot, fullLayerMapping.getManifestLayerMapping().getImageConfigFilename());
+    public LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, LayerDetailsBuilder layerData) {
+        File layerTar = layerData.getArchive().getFile();
+        File configFile = findConfigFile(layerTar, fullLayerMapping.getManifestLayerMapping().getPathToConfigFileFromImageRoot());
         List<String> cmd = new LinkedList<>();
         try {
             String configFileContents = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);
@@ -35,8 +41,12 @@ public class OciImageLayerMetadataExtractor implements ImageLayerMetadataExtract
         } catch (IOException e) {
             logger.trace(String.format("Unable to read contents of %s: %s", configFile.getAbsolutePath(), e.getMessage()));
         }
+        return new LayerMetadata(cmd);
+    }
 
-        String layerExternalId = fullLayerMapping.getLayerExternalId(layerIndex);
-        return new LayerMetadata(layerExternalId, cmd);
+    private File findConfigFile(File layerTar, String imageConfigFilePathFromRoot) {
+        File blobsDir = layerTar.getParentFile().getParentFile();
+        File imageRoot = blobsDir.getParentFile();
+        return new File(imageRoot, imageConfigFilePathFromRoot);
     }
 }

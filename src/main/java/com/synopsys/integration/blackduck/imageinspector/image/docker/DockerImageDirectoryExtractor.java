@@ -72,7 +72,7 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(imageDir, manifestLayerMapping.getImageConfigFilename());
+        final List<String> externalLayerIds = getExternalLayerIdsFromImageConfigFile(imageDir, manifestLayerMapping.getPathToConfigFileFromImageRoot());
         return new FullLayerMapping(manifestLayerMapping, externalLayerIds);
     }
 

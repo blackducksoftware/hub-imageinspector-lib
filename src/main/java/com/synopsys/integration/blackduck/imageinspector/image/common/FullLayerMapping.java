@@ -38,19 +38,4 @@ public class FullLayerMapping {
         }
         return layerExternalIds.get(layerIndex);
     }
-
-    // image format independent: Image == DockerImageDirectory
-    public Optional<Integer> getPlatformTopLayerIndex(@Nullable String platformTopLayerExternalId) {
-        if (platformTopLayerExternalId != null) {
-            int curLayerIndex = 0;
-            for (String candidateLayerExternalId : getLayerExternalIds()) {
-                if ((candidateLayerExternalId != null) && (candidateLayerExternalId.equals(platformTopLayerExternalId))) {
-                    logger.trace("Found platform top layer ({}) at layerIndex: {}", platformTopLayerExternalId, curLayerIndex);
-                    return Optional.of(curLayerIndex);
-                }
-                curLayerIndex++;
-            }
-        }
-        return Optional.empty();
-    }
 }

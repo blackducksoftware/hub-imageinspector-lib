@@ -14,13 +14,13 @@ import com.synopsys.integration.util.Stringable;
 public class ManifestLayerMapping extends Stringable {
     private final String imageName;
     private final String tagName;
-    private final String imageConfigFilename;
+    private final String pathToConfigFileFromImageRoot;
     private final List<String> layerInternalIds;
 
-    public ManifestLayerMapping(String imageName, String tagName, String imageConfigFilename, List<String> layerInternalIds) {
+    public ManifestLayerMapping(String imageName, String tagName, String pathToConfigFileFromImageRoot, List<String> layerInternalIds) {
         this.imageName = imageName;
         this.tagName = tagName;
-        this.imageConfigFilename = imageConfigFilename;
+        this.pathToConfigFileFromImageRoot = pathToConfigFileFromImageRoot;
         this.layerInternalIds = layerInternalIds;
     }
 
@@ -32,8 +32,8 @@ public class ManifestLayerMapping extends Stringable {
         return tagName;
     }
 
-    public String getImageConfigFilename() {
-        return imageConfigFilename;
+    public String getPathToConfigFileFromImageRoot() {
+        return pathToConfigFileFromImageRoot;
     }
 
     public List<String> getLayerInternalIds() {

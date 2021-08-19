@@ -8,6 +8,7 @@
 package com.synopsys.integration.blackduck.imageinspector.image.docker;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerMetadataExtractor;
+import com.synopsys.integration.blackduck.imageinspector.image.common.LayerDetailsBuilder;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.LayerMetadata;
@@ -32,11 +33,11 @@ public class DockerImageLayerMetadataExtractor implements ImageLayerMetadataExtr
     }
 
     @Override
-    public LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, TypedArchiveFile layerTar, int layerIndex) {
+    public LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, LayerDetailsBuilder layerData) {
+        TypedArchiveFile layerTar = layerData.getArchive();
         final String layerMetadataFileContents = getLayerMetadataFileContents(layerTar);
         final List<String> layerCmd = dockerImageLayerConfigParser.parseCmd(layerMetadataFileContents);
-        String layerExternalId = fullLayerMapping.getLayerExternalId(layerIndex);
-        return new LayerMetadata(layerExternalId, layerCmd);
+        return new LayerMetadata(layerCmd);
     }
 
     private String getLayerMetadataFileContents(final TypedArchiveFile layerTarFile) {

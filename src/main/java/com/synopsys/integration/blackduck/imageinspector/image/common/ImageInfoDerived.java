@@ -16,7 +16,7 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.com
 public class ImageInfoDerived {
     private final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb;
     private final ImageComponentHierarchy imageComponentHierarchy;
-    private final FullLayerMapping fullLayerMapping;
+    private final FullLayerMapping fullLayerMapping; //TODO- does ImageInfoDerived really need a FullLayerMapping?  Or just data it contains?
     private final String codeLocationName;
     private final String finalProjectName;
     private final String finalProjectVersionName;
