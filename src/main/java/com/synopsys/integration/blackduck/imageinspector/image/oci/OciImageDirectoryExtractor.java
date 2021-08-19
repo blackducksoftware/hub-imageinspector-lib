@@ -130,14 +130,14 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         OciImageManifest imageManifest = gsonBuilder.create().fromJson(manifestFileText, OciImageManifest.class);
 
         List<TypedArchiveFile> layerArchives = new LinkedList<>();
-        for (OciDescriptor layerData : imageManifest.getLayers()) {
-            String pathToLayerFile = parsePathToBlobFileFromDigest(layerData.getDigest());
+        for (OciDescriptor layer : imageManifest.getLayers()) {
+            String pathToLayerFile = parsePathToBlobFileFromDigest(layer.getDigest());
             File layerFile = findBlob(blobsDir, pathToLayerFile);
             ArchiveFileType archiveFileType;
             try {
-                archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layerData.getMediaType());
+                archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layer.getMediaType());
             } catch (Exception e) {
-                logger.trace("Unrecognized layer media type: " + layerData.getMediaType());
+                logger.trace("Unrecognized layer media type: " + layer.getMediaType());
                 continue;
             }
             layerArchives.add(new TypedArchiveFile(archiveFileType, layerFile));
