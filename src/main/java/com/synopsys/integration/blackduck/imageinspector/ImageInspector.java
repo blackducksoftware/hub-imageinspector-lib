@@ -192,9 +192,10 @@ public class ImageInspector {
                                                             final boolean organizeComponentsByLayer,
                                                             final boolean includeRemovedComponents,
                                                             final boolean platformComponentsExcluded) {
+        //TODO- what to do when image repo/tag aren't known (oci image directory does not contain that info)?
         String codeLocationName = deriveCodeLocationName(codeLocationPrefix, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase(),
-                fullLayerMapping.getManifestLayerMapping().getImageName(), fullLayerMapping.getManifestLayerMapping().getTagName(), platformComponentsExcluded);
-        String finalProjectName = deriveBlackDuckProject(fullLayerMapping.getManifestLayerMapping().getImageName(), givenProjectName, platformComponentsExcluded);
+                fullLayerMapping.getManifestLayerMapping().getImageName().get(), fullLayerMapping.getManifestLayerMapping().getTagName().get(), platformComponentsExcluded);
+        String finalProjectName = deriveBlackDuckProject(fullLayerMapping.getManifestLayerMapping().getImageName().get(), givenProjectName, platformComponentsExcluded);
         String finalProjectVersionName = deriveBlackDuckProjectVersion(fullLayerMapping, givenProjectVersionName);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(codeLocationName,
                 finalProjectName, finalProjectVersionName, containerFileSystemWithPkgMgrDb.getLinuxDistroName(), imageComponentHierarchy, organizeComponentsByLayer,
@@ -246,7 +247,7 @@ public class ImageInspector {
     private String deriveBlackDuckProjectVersion(final FullLayerMapping mapping, final String versionName) {
         String blackDuckVersionName;
         if (StringUtils.isBlank(versionName)) {
-            blackDuckVersionName = mapping.getManifestLayerMapping().getTagName();
+            blackDuckVersionName = mapping.getManifestLayerMapping().getTagName().get();
         } else {
             logger.debug("Using project version from config property");
             blackDuckVersionName = versionName;
