@@ -99,6 +99,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                     manifestFileDigest = manifestData.getDigest();
                 } else {
                     //TODO- what to do if we find multiple manifests?  OCI specs mention sometimes there's one for each supported architecture
+                    // we'd throw some kind of error, but should look into any pre-defined defaults that may inform us which one to pick (eg. re: architecture)
                 }
             }
             if (manifestData.getMediaType().equals(INDEX_FILE_MEDIA_TYPE)) {
@@ -155,6 +156,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         File blob = new File(blobsDir, pathToBlob);
         if (!blob.exists()) {
             //TODO- specs say "The blobs directory MAY be missing referenced blobs, in which case the missing blobs SHOULD be fulfilled by an external blob store" --> should we handle this case?
+            // we'll throw some kind of exception
         }
         return blob;
     }
