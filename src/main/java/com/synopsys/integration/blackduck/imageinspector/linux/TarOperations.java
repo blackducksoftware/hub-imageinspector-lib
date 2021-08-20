@@ -40,7 +40,6 @@ public class TarOperations {
         return extractTarToGivenDir(destinationDir, tarArchiveInputStream);
     }
 
-    //ac- TODO- is DI going to use this instead of DockerLayerTarExtractor?
     private File extractTarToGivenDir(final File destinationDir, TarArchiveInputStream archiveInputStream) throws IOException {
         logger.debug(String.format("destinationDir: %s", destinationDir));
             TarArchiveEntry tarArchiveEntry = null;
