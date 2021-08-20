@@ -34,9 +34,7 @@ public class OciImageLayerMetadataEctractorTest {
 
         File layerTar = new File("src/test/resources/oci/alpine/blobs/sha256/d3470daaa19c14ddf4ec500a3bb4f073fa9827aa4f19145222d459016ee9193e");
         TypedArchiveFile typedArchiveFile = new TypedArchiveFile(ArchiveFileType.TAR_GZIPPED, layerTar);
-        LayerDetailsBuilder layerData = new LayerDetailsBuilder();
-        layerData.setArchive(typedArchiveFile);
-        layerData.setExternalId(externalId);
+        LayerDetailsBuilder layerData = new LayerDetailsBuilder(0, typedArchiveFile, externalId);
         LayerMetadata metadata = metadataExtractor.getLayerMetadata(fullLayerMapping, layerData);
 
         Assertions.assertEquals(1, metadata.getLayerCmd().size());

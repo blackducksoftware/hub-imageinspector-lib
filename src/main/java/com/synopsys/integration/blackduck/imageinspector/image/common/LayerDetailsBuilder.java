@@ -13,13 +13,19 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.com
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 
 public class LayerDetailsBuilder {
-    private int layerIndex;
-    private TypedArchiveFile archive;
-    private String externalId;
-    private List<String> cmd;
-    private List<ComponentDetails> comps;
+    private final int layerIndex;
+    private final TypedArchiveFile archive;
+    private final String externalId;
 
-    public LayerDetails build() {
+    private List<String> cmd; // collected later
+
+    public LayerDetailsBuilder(final int layerIndex, final TypedArchiveFile archive, final String externalId) {
+        this.layerIndex = layerIndex;
+        this.archive = archive;
+        this.externalId = externalId;
+    }
+
+    public LayerDetails build(List<ComponentDetails> comps) {
         return new LayerDetails(layerIndex, externalId, cmd, comps);
     }
 
@@ -27,24 +33,12 @@ public class LayerDetailsBuilder {
         return layerIndex;
     }
 
-    public void setLayerIndex(final int layerIndex) {
-        this.layerIndex = layerIndex;
-    }
-
     public TypedArchiveFile getArchive() {
         return archive;
     }
 
-    public void setArchive(final TypedArchiveFile archive) {
-        this.archive = archive;
-    }
-
     public String getExternalId() {
         return externalId;
-    }
-
-    public void setExternalId(final String externalId) {
-        this.externalId = externalId;
     }
 
     public List<String> getCmd() {
@@ -53,13 +47,5 @@ public class LayerDetailsBuilder {
 
     public void setCmd(final List<String> cmd) {
         this.cmd = cmd;
-    }
-
-    public List<ComponentDetails> getComps() {
-        return comps;
-    }
-
-    public void setComps(final List<ComponentDetails> comps) {
-        this.comps = comps;
     }
 }

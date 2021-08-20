@@ -35,11 +35,7 @@ public class ImageDirectoryDataExtractor {
     private List<LayerDetailsBuilder> collectLayerData(FullLayerMapping layerMapping, List<TypedArchiveFile> archives) {
         List<LayerDetailsBuilder> layerData = new LinkedList<>();
         for (int layerIndex = 0; layerIndex < archives.size(); layerIndex++) {
-            LayerDetailsBuilder layerDataBuilder = new LayerDetailsBuilder();
-            layerDataBuilder.setLayerIndex(layerIndex);
-            layerDataBuilder.setArchive(archives.get(layerIndex));
-            layerDataBuilder.setExternalId(layerMapping.getLayerExternalId(layerIndex));
-            layerData.add(layerDataBuilder);
+            layerData.add(new LayerDetailsBuilder(layerIndex, archives.get(layerIndex), layerMapping.getLayerExternalId(layerIndex)));
         }
         return layerData;
     }

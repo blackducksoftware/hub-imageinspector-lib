@@ -109,7 +109,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         return Optional.ofNullable(manifestFileDigest);
     }
 
-    private ArchiveFileType parseArchiveTypeFromLayerDescriptorMediaType(String mediaType) throws Exception {
+    private ArchiveFileType parseArchiveTypeFromLayerDescriptorMediaType(String mediaType) throws IntegrationException {
         if (mediaType.contains("nondistributable")) {
             //TODO- what do we do with archives with distribution restrictions?
         }
@@ -120,7 +120,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         } else if (mediaType.endsWith(LAYER_ARCHIVE_TAR_ZSTD_MEDIA_TYPE_SUFFIX)) {
             return ArchiveFileType.TAR_ZSTD;
         } else {
-            throw new Exception();
+            throw new IntegrationException(String.format("Unrecognized layer media type: %s", mediaType));
         }
     }
 
@@ -136,8 +136,8 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             ArchiveFileType archiveFileType;
             try {
                 archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layer.getMediaType());
-            } catch (Exception e) {
-                logger.trace("Unrecognized layer media type: " + layer.getMediaType());
+            } catch (IntegrationException e) {
+                logger.trace(e.getMessage());
                 continue;
             }
             layerArchives.add(new TypedArchiveFile(archiveFileType, layerFile));

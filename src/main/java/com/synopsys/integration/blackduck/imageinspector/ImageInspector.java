@@ -171,6 +171,7 @@ public class ImageInspector {
     private ContainerFileSystemWithPkgMgrDb applyLayer(ImageLayerMetadataExtractor imageLayerMetadataExtractor, String targetLinuxDistroOverride, ContainerFileSystem containerFileSystem, ComponentHierarchyBuilder componentHierarchyBuilder, ContainerFileSystemWithPkgMgrDb postLayerContainerFileSystemWithPkgMgrDb, boolean inApplicationLayers, LayerDetailsBuilder layerData, FullLayerMapping fullLayerMapping) throws IOException, WrongInspectorOsException {
         imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemFull(), layerData.getArchive());
         if (inApplicationLayers && containerFileSystem.getTargetImageFileSystemAppOnly().isPresent()) {
+            // We're building two filesystems: 1 where we have all the files (guaranteed pkg mgr db included), and 1 with just files associated with the actual application (for ppl that don't car about base image)
             imageLayerApplier.applyLayer(containerFileSystem.getTargetImageFileSystemAppOnly().get(), layerData.getArchive());
         }
         LayerMetadata layerMetadata = imageLayerMetadataExtractor.getLayerMetadata(fullLayerMapping, layerData);

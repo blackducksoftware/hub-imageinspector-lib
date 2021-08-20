@@ -42,8 +42,7 @@ public class ComponentHierarchyBuilder {
         for (ComponentDetails comp : comps) {
             logger.trace(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
         }
-        layerData.setComps(comps);
-        final LayerDetails layer = layerData.build();
+        final LayerDetails layer = layerData.build(comps);
         imageComponentHierarchy.addLayer(layer);
         if ((platformTopLayerIndex != null) && (layerIndex == platformTopLayerIndex)) {
             imageComponentHierarchy.setPlatformComponents(comps);
