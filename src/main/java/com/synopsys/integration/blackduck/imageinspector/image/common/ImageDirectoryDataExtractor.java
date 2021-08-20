@@ -16,9 +16,9 @@ import java.util.List;
 
 public class ImageDirectoryDataExtractor {
     private final ImageDirectoryExtractor imageDirectoryExtractor;
-    private final ImageOrderedLayerExtractor imageOrderedLayerExtractor;
+    private final ImageLayerSorter imageOrderedLayerExtractor;
 
-    public ImageDirectoryDataExtractor(ImageDirectoryExtractor imageDirectoryExtractor, ImageOrderedLayerExtractor imageOrderedLayerExtractor) {
+    public ImageDirectoryDataExtractor(ImageDirectoryExtractor imageDirectoryExtractor, ImageLayerSorter imageOrderedLayerExtractor) {
         this.imageDirectoryExtractor = imageDirectoryExtractor;
         this.imageOrderedLayerExtractor = imageOrderedLayerExtractor;
     }
