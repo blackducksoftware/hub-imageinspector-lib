@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //        String currentLinuxDistro = "alpine";
 //
 //        BdioGenerator bdioGenerator = TestUtils.createBdioGenerator();
-//        GsonBuilder gsonBuilder = new GsonBuilder();
+//        Gson gson = new Gson();
 //
 //        ImageInspector imageInspector = Mockito.mock(ImageInspector.class);
 //        Mockito.when(imageInspector.getTarExtractionDirectory(Mockito.any(File.class)))
@@ -86,7 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //        Os os = Mockito.mock(Os.class);
 //        Mockito.when(os.deriveOs("alpine")).thenReturn(ImageInspectorOsEnum.ALPINE);
 //        ImageInspectorApi api = new ImageInspectorApi(imageInspector, os);
-//        api.setGsonBuilder(gsonBuilder);
+//        api.setGson(gson);
 //        api.setBdioGenerator(bdioGenerator);
 //        FileOperations fileOperations = Mockito.mock(FileOperations.class);
 //        Mockito.when(fileOperations.createTempDirectory()).thenReturn(new File("test"));

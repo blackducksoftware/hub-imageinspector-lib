@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
@@ -40,7 +40,7 @@ import com.synopsys.integration.exception.IntegrationException;
 @Component
 public class ImageInspectorApi {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private GsonBuilder gsonBuilder;
+    private Gson gson;
     private ImageInspector imageInspector;
     private Os os;
     private FileOperations fileOperations;
@@ -51,7 +51,7 @@ public class ImageInspectorApi {
     public ImageInspectorApi(ImageInspector imageInspector, Os os) {
         this.imageInspector = imageInspector;
         this.os = os;
-        this.gsonBuilder = new GsonBuilder();
+        this.gson = new Gson();
     }
 
     @Autowired
@@ -59,9 +59,9 @@ public class ImageInspectorApi {
         this.bdioGenerator = bdioGenerator;
     }
 
-    // autowired does not work on GsonBuilder; not sure why
-    public void setGsonBuilder(final GsonBuilder gsonBuilder) {
-        this.gsonBuilder = gsonBuilder;
+    // autowired does not work on Gson; not sure why
+    public void setGson(final Gson gson) {
+        this.gson = gson;
     }
 
     @Autowired
@@ -89,8 +89,8 @@ public class ImageInspectorApi {
      * @throws IntegrationException, InterruptedException
      */
     public SimpleBdioDocument getBdio(ImageInspectionRequest imageInspectionRequest) throws IntegrationException, InterruptedException {
-        if (gsonBuilder == null) {
-            gsonBuilder = new GsonBuilder();
+        if (gson == null) {
+            gson = new Gson();
         }
         PackageGetter packageGetter = new PackageGetter(pkgMgrExecutor, cmdExecutor);
         ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
@@ -117,8 +117,8 @@ public class ImageInspectorApi {
         }
 
         List<ImageDirectoryDataExtractorFactory> imageDirectoryDataExtractorFactories = Arrays.asList(
-            new DockerImageDirectoryDataExtractorFactory(new DockerImageFormatMatchesChecker(), new CommonImageConfigParser(gsonBuilder), gsonBuilder),
-            new OciImageDirectoryDataExtractorFactory(new OciImageFormatMatchesChecker(new OciLayoutParser(gsonBuilder)), new CommonImageConfigParser(gsonBuilder), gsonBuilder)
+            new DockerImageDirectoryDataExtractorFactory(new DockerImageFormatMatchesChecker(), new CommonImageConfigParser(gson), gson),
+            new OciImageDirectoryDataExtractorFactory(new OciImageFormatMatchesChecker(new OciLayoutParser(gson)), new CommonImageConfigParser(gson), gson)
         );
         ImageInfoDerived imageInfoDerived = null;
         try {

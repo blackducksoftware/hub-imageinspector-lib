@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 
 public class DockerImageConfigParserTest {
@@ -15,7 +15,7 @@ public class DockerImageConfigParserTest {
 
   @Test
   public void testImageConfigParser() {
-    CommonImageConfigParser parser = new CommonImageConfigParser(new GsonBuilder());
+    CommonImageConfigParser parser = new CommonImageConfigParser(new Gson());
     List<String> layerIds = parser.parseExternalLayerIds(CONFIG_FILE_CONTENTS);
     assertEquals(1, layerIds.size());
     assertEquals("sha256:503e53e365f34399c4d58d8f4e23c161106cfbce4400e3d0a0357967bad69390", layerIds.get(0));
