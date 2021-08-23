@@ -9,7 +9,7 @@ package com.synopsys.integration.blackduck.imageinspector.image.oci;
 
 import java.io.File;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractor;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactory;
@@ -21,12 +21,12 @@ import com.synopsys.integration.exception.IntegrationException;
 public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryDataExtractorFactory {
     private final OciImageFormatMatchesChecker ociImageFormatMatchesChecker;
     private final CommonImageConfigParser commonImageConfigParser;
-    private final GsonBuilder gsonBuilder;
+    private final Gson gson;
 
-    public OciImageDirectoryDataExtractorFactory(final OciImageFormatMatchesChecker ociImageFormatMatchesChecker, final CommonImageConfigParser commonImageConfigParser, final GsonBuilder gsonBuilder) {
+    public OciImageDirectoryDataExtractorFactory(final OciImageFormatMatchesChecker ociImageFormatMatchesChecker, final CommonImageConfigParser commonImageConfigParser, final Gson gson) {
         this.ociImageFormatMatchesChecker = ociImageFormatMatchesChecker;
         this.commonImageConfigParser = commonImageConfigParser;
-        this.gsonBuilder = gsonBuilder;
+        this.gson = gson;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryData
     @Override
     public ImageDirectoryDataExtractor createImageDirectoryDataExtractor() {
         FileOperations fileOperations = new FileOperations();
-        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gsonBuilder, fileOperations, commonImageConfigParser);
+        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, commonImageConfigParser);
         ImageLayerSorter imageOrderedLayerExtractor = new OciImageLayerSorter();
         return new ImageDirectoryDataExtractor(ociImageDirectoryExtractor, imageOrderedLayerExtractor);
     }

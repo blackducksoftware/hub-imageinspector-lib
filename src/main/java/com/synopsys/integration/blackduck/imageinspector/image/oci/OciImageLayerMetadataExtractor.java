@@ -34,7 +34,7 @@ public class OciImageLayerMetadataExtractor implements ImageLayerMetadataExtract
     public LayerMetadata getLayerMetadata(final FullLayerMapping fullLayerMapping, final TypedArchiveFile layerTar, final int layerIndex) {
         File blobsDir = layerTar.getFile().getParentFile().getParentFile();
         File imageRoot = blobsDir.getParentFile();
-        File configFile = new File(imageRoot, fullLayerMapping.getManifestLayerMapping().getImageConfigFilename());
+        File configFile = new File(imageRoot, fullLayerMapping.getManifestLayerMapping().getPathToImageConfigFileFromRoot());
         List<String> cmd = new LinkedList<>();
         try {
             String configFileContents = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);

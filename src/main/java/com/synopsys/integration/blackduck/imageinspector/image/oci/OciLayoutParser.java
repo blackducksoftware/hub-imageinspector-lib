@@ -7,21 +7,21 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.image.oci;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class OciLayoutParser {
-    private final GsonBuilder gsonBuilder;
+    private final Gson gson;
 
-    public OciLayoutParser(GsonBuilder gsonBuilder) {
-        this.gsonBuilder = gsonBuilder;
+    public OciLayoutParser(Gson gson) {
+        this.gson = gson;
     }
 
     public String parseOciVersion(String ociLayoutFileContents) throws IntegrationException {
         try {
-            JsonObject ociLayoutJsonObj = gsonBuilder.create().fromJson(ociLayoutFileContents, JsonObject.class);
+            JsonObject ociLayoutJsonObj = gson.fromJson(ociLayoutFileContents, JsonObject.class);
             JsonPrimitive ociLayoutVersionJsonPrimitive = ociLayoutJsonObj.getAsJsonPrimitive("imageLayoutVersion");
             return ociLayoutVersionJsonPrimitive.getAsString();
         } catch (Exception e) {

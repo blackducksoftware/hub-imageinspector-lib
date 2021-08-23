@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.LayerMetadata;
@@ -18,7 +18,7 @@ import com.synopsys.integration.blackduck.imageinspector.image.common.archive.Ty
 public class OciImageLayerMetadataEctractorTest {
     @Test
     public void testGetLayerMetadata() {
-        CommonImageConfigParser commonImageConfigParser = new CommonImageConfigParser(new GsonBuilder());
+        CommonImageConfigParser commonImageConfigParser = new CommonImageConfigParser(new Gson());
         OciImageConfigCommandParser configCommandParser = new OciImageConfigCommandParser(commonImageConfigParser);
         OciImageLayerMetadataExtractor metadataExtractor = new OciImageLayerMetadataExtractor(configCommandParser);
 

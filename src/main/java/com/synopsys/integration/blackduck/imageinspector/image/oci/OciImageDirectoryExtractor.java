@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryExtractor;
@@ -45,12 +45,12 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private GsonBuilder gsonBuilder;
+    private Gson gson;
     private FileOperations fileOperations;
     private final CommonImageConfigParser commonImageConfigParser;
 
-    public OciImageDirectoryExtractor(final GsonBuilder gsonBuilder, FileOperations fileOperations, CommonImageConfigParser commonImageConfigParser) {
-        this.gsonBuilder = gsonBuilder;
+    public OciImageDirectoryExtractor(final Gson gson, FileOperations fileOperations, CommonImageConfigParser commonImageConfigParser) {
+        this.gson = gson;
         this.fileOperations = fileOperations;
         this.commonImageConfigParser = commonImageConfigParser;
     }
@@ -91,7 +91,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             return Optional.empty();
         }
 
-        OciImageIndex imageIndex = gsonBuilder.create().fromJson(indexFileText, OciImageIndex.class);
+        OciImageIndex imageIndex = gson.fromJson(indexFileText, OciImageIndex.class);
         String manifestFileDigest = null;
         for (OciDescriptor manifestData : imageIndex.getManifests()) {
             if (manifestData.getMediaType().equals(MANIFEST_FILE_MEDIA_TYPE)) {
@@ -128,7 +128,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     private List<TypedArchiveFile> parseLayerArchives(File manifestFile, File blobsDir) throws IOException {
         // Parse manifest file for names + archive formats of layer files
         String manifestFileText = fileOperations.readFileToString(manifestFile);
-        OciImageManifest imageManifest = gsonBuilder.create().fromJson(manifestFileText, OciImageManifest.class);
+        OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
 
         List<TypedArchiveFile> layerArchives = new LinkedList<>();
         for (OciDescriptor layer : imageManifest.getLayers()) {
@@ -177,7 +177,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             throw new IntegrationException(String.format("Unable to parse manifest file %s", manifestFile.get().getAbsolutePath()));
         }
 
-        imageManifest = gsonBuilder.create().fromJson(manifestFileText, OciImageManifest.class);
+        imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
 
 
         String pathToImageConfigFileFromRoot = findImageConfigFilePath(imageManifest);
