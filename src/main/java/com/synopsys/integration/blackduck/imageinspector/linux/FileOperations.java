@@ -20,6 +20,7 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.synopsys.integration.exception.IntegrationException;
@@ -109,14 +110,18 @@ public class FileOperations {
         return attrsMsg;
     }
 
+    public void deleteDirectory(File dir) {
+        try {
+            FileUtils.deleteDirectory(dir);
+        } catch (final IOException e) {
+            logger.warn(String.format("Error deleting dir %s: %s", dir.getAbsolutePath(), e.getMessage()));
+        }
+    }
+
     public void deleteDirPersistently(final File dir) throws InterruptedException {
         for (int i = 0; i < 10; i++) {
             logger.debug(String.format("Attempt #%d to delete dir %s", i, dir.getAbsolutePath()));
-            try {
-                FileUtils.deleteDirectory(dir);
-            } catch (final IOException e) {
-                logger.warn(String.format("Error deleting dir %s: %s", dir.getAbsolutePath(), e.getMessage()));
-            }
+            deleteDirectory(dir);
             if (!dir.exists()) {
                 logger.debug(String.format("Dir %s has been deleted", dir.getAbsolutePath()));
                 return;
@@ -154,9 +159,12 @@ public class FileOperations {
         Files.createLink(startLink, endLink);
     }
 
-    public File createTempDirectory() throws IOException {
+    public File createTempDirectory(boolean deleteOnExit) throws IOException {
         final String prefix = String.format("ImageInspectorApi_%s_%s", Thread.currentThread().getName(), Long.toString(new Date().getTime()));
         final File temp = Files.createTempDirectory(prefix).toFile();
+        if (deleteOnExit) {
+            temp.deleteOnExit();
+        }
         logger.debug(String.format("Created temp dir %s", temp.getAbsolutePath()));
         logFreeDiskSpace(temp);
         return temp;

@@ -106,7 +106,7 @@ public class ImageInspectorApi {
 
         File tempDir;
         try {
-            tempDir = fileOperations.createTempDirectory();
+            tempDir = fileOperations.createTempDirectory(imageInspectionRequest.isCleanupWorkingDir());
         } catch (final IOException e) {
             throw new IntegrationException(String.format("Error creating temp dir: %s", e.getMessage()), e);
         }

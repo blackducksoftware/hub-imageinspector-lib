@@ -9,13 +9,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.GsonBuilder;
+import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystem;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemCompatibilityChecker;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemWithPkgMgrDb;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PkgMgrDbExtractor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchyLogger;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ImageInfoDerived;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.image.common.*;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchy;
+import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
+import com.synopsys.integration.blackduck.imageinspector.image.docker.DockerImageConfigParser;
+import com.synopsys.integration.blackduck.imageinspector.image.docker.manifest.DockerManifestFactory;
+import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +37,6 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk.ApkPkgMgr;
 
-@Disabled
 class ImageInspectorTest {
     private TarOperations tarOperations;
     private ImageInspector imageInspector;
@@ -38,74 +44,22 @@ class ImageInspectorTest {
     @BeforeEach
     public void setUpEach() {
         tarOperations = Mockito.mock(TarOperations.class);
-        // TODO should some of these be mocked?
-        // NEED: Os os, List<PkgMgr> pkgMgrs, PkgMgrExecutor pkgMgrExecutor, CmdExecutor cmdExecutor,
-        // TODO revisit testing of this class in general
-//        imageInspector = new ImageInspector(tarParser, tarOperations, new GsonBuilder(),
-//                new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory());
+        Os os = Mockito.mock(Os.class);
+        PkgMgrDbExtractor pkgMgrDbExtractor = Mockito.mock(PkgMgrDbExtractor.class);
+        ImageLayerArchiveExtractor imageLayerArchiveExtractor = new ImageLayerArchiveExtractor();
+        FileOperations fileOperations = new FileOperations();
+        ContainerFileSystemCompatibilityChecker containerFileSystemCompatibilityChecker = new ContainerFileSystemCompatibilityChecker();
+        ImageLayerApplier imageLayerApplier = new ImageLayerApplier(fileOperations, imageLayerArchiveExtractor);
+        BdioGenerator bdioGenerator = new BdioGenerator();
+        ImageDirectoryDataExtractorFactoryChooser imageDirectoryDataExtractorFactoryChooser = new ImageDirectoryDataExtractorFactoryChooser();
+        ImageComponentHierarchyLogger imageComponentHierarchyLogger = new ImageComponentHierarchyLogger();
+        imageInspector = new ImageInspector(os, pkgMgrDbExtractor, tarOperations,
+                fileOperations, imageLayerApplier, containerFileSystemCompatibilityChecker,
+                bdioGenerator, imageDirectoryDataExtractorFactoryChooser,
+                imageComponentHierarchyLogger);
     }
 
-    @Test
-    void testGetTarExtractionDirectory() {
-        File workingDir = new File("src/test/resources/working");
-        File tarExtractionDirectory = new File(workingDir, WorkingDirectories.TAR_EXTRACTION_DIRECTORY);
-        assertTrue(tarExtractionDirectory.getAbsolutePath().endsWith("src/test/resources/working/tarExtraction"));
-    }
-
-//    @Test
-//    void testExtractImageTar() throws IOException {
-//        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
-//        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-//        File imageDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-//        imageInspector.extractImageTar(imageDir, dockerTarfile);
-//        Mockito.verify(tarOperations).extractTarToGivenDir(imageDir, dockerTarfile);
-//    }
-
-    // TODO these seems pointless
-//    @Test
-//    void testGetLayerArchives() throws IOException {
-//        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
-//        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-//        File extractionDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-//        List<TypedArchiveFile> layerTars = imageInspector.getLayerArchives(extractionDir);
-//        Mockito.verify(tarParser).getLayerArchives(extractionDir);
-//    }
-//    @Test
-//    void testGetLayerMapping() throws IntegrationException {
-//        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
-//        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-//        File imageDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-//        GsonBuilder gsonBuilder = new GsonBuilder();
-//        String imageRepo = "alpine";
-//        String imageTag = "latest";
-//        imageInspector.getLayerMapping(gsonBuilder, imageDir, imageRepo, imageTag);
-//        Mockito.verify(tarParser).getLayerMapping(gsonBuilder, imageDir, imageRepo, imageTag);
-//    }
-
-    // TODO make sure this is tested somewhere
-//    @Test
-//    void testExtractDockerLayers() throws IOException, WrongInspectorOsException {
-//        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
-//        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
-//        String imageRepo = "alpine";
-//        String imageTag = "latest";
-//        String imageConfigFileContents = "testConfig";
-//        List<String> layers = getLayers();
-//        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(imageRepo, imageTag, imageConfigFileContents, layers);
-//        FullLayerMapping fullLayerMapping = new FullLayerMapping(manifestLayerMapping, new ArrayList<>(0));
-//        List<TypedArchiveFile> layerTars = new ArrayList<>();
-//        File layerTar = new File(tarExtractionDirectory, String.format("%s/aaa/layer.tar", dockerTarfile.getName()));
-//        layerTars.add(new TypedArchiveFile(ArchiveFileType.TAR, layerTar));
-//
-//        File targetImageFileSystemParentDir = new File(tarExtractionDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
-//        File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
-//        ContainerFileSystem containerFileSystem = new ContainerFileSystem(targetImageFileSystemRootDir);
-//        // TODO test componentHierarchyBuilder?
-//        PackageGetter packageGetter = Mockito.mock(PackageGetter.class);
-//        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
-//        imageInspector.extractDockerLayers(ImageInspectorOsEnum.ALPINE, null, containerFileSystem, layerTars, fullLayerMapping, null, componentHierarchyBuilder);
-//        Mockito.verify(tarParser).extractPkgMgrDb(ImageInspectorOsEnum.ALPINE, null, containerFileSystem, layerTars, fullLayerMapping, null);
-//    }
+    // TODO these tests aren't actually testing all that much; they're not testing the graph. Are they worth it?
 
     @Test
     void testGenerateBdioFromGivenComponentsFull() throws IOException {
@@ -150,7 +104,7 @@ class ImageInspectorTest {
 
     private TestScenario setupTestScenario(String codeLocationPrefix, String distro, String tag, String pkgMgrId) throws IOException {
         File workingDir = new File("src/test/resources/working");
-        File tarExtractionDirectory = new File(workingDir, WorkingDirectories.TAR_EXTRACTION_DIRECTORY);
+        File tarExtractionDirectory = new File(workingDir, "tarExtraction");
         String imageConfigFileContents = "testConfig";
         List<String> layers = getLayers();
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(distro, tag, imageConfigFileContents, layers);
@@ -179,7 +133,7 @@ class ImageInspectorTest {
 
     @NotNull
     private ContainerFileSystem generateTargetImageFileSystem(File tarExtractionDirectory, String imageRepo, String imageTag) {
-        File targetImageFileSystemParentDir = new File(tarExtractionDirectory, WorkingDirectories.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
+        File targetImageFileSystemParentDir = new File(tarExtractionDirectory, "imageFiles");
         File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageRepo, imageTag));
         return new ContainerFileSystem(targetImageFileSystemRootDir);
     }

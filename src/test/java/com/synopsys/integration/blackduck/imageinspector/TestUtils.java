@@ -11,16 +11,6 @@ import com.synopsys.integration.bdio.SimpleBdioFactory;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 
 public class TestUtils {
-    public static File createTempDirectory() throws IOException {
-        File temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
-        if (!(temp.delete())) {
-            throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
-        }
-        if (!(temp.mkdir())) {
-            throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
-        }
-        return (temp);
-    }
 
     public static boolean contentEquals(File file1, File file2, List<String> exceptLinesContainingThese) throws IOException {
         System.out.println(String.format("Comparing %s %s", file1.getAbsolutePath(), file2.getAbsolutePath()));
