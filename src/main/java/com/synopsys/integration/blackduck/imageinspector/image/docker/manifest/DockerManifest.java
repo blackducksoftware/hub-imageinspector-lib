@@ -89,7 +89,7 @@ public class DockerManifest extends Stringable {
             layerIds.add(layer.substring(0, layer.indexOf('/')));
         }
         final ManifestLayerMapping mapping = new ManifestLayerMapping(imageName, tagName, image.config, layerIds);
-        logger.trace(String.format("Found layer mapping: Image %s, Tag %s, Layers: %s", mapping.getImageName(), mapping.getTagName(), mapping.getLayerInternalIds()));
+        logger.trace(String.format("Found layer mapping: Image %s, Tag %s, Layers: %s", mapping.getImageName().get(), mapping.getTagName().get(), mapping.getLayerInternalIds()));
         return mapping;
     }
 

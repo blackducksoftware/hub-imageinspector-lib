@@ -14,9 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImageOrderedLayerExtractor {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+public abstract class ImageLayerSorter {
     public List<TypedArchiveFile> getOrderedLayerArchives(List<TypedArchiveFile> unOrderedLayerArchives, ManifestLayerMapping manifestLayerMapping) {
         List<TypedArchiveFile> orderedLayerArchives = new ArrayList<>(manifestLayerMapping.getLayerInternalIds().size());
         for (String layerInternalId : manifestLayerMapping.getLayerInternalIds()) {
@@ -25,15 +23,5 @@ public class ImageOrderedLayerExtractor {
         return orderedLayerArchives;
     }
 
-    private TypedArchiveFile getLayerArchive(List<TypedArchiveFile> unOrderedLayerArchives, String layerInternalId) {
-        TypedArchiveFile layerArchive = null;
-        for (final TypedArchiveFile candidateLayerTar : unOrderedLayerArchives) {
-            if (layerInternalId.equals(candidateLayerTar.getFile().getParentFile().getName())) {
-                logger.trace(String.format("Found layer archive for layer %s: ", layerInternalId, candidateLayerTar.getFile().getAbsolutePath()));
-                layerArchive = candidateLayerTar;
-                break;
-            }
-        }
-        return layerArchive;
-    }
+    protected abstract TypedArchiveFile getLayerArchive(List<TypedArchiveFile> unOrderedLayerArchives, String layerInternalId);
 }

@@ -9,6 +9,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +28,22 @@ public class TarOperations {
         this.fileOperations = fileOperations;
     }
 
+    public File extractGzipTarToGivenDir(final File destinationDir, final File sourceTarFile) throws IOException {
+        logPermissions(sourceTarFile);
+        TarArchiveInputStream gzipTarArchiveInputStream = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(sourceTarFile)));
+        return extractTarToGivenDir(destinationDir, gzipTarArchiveInputStream);
+    }
+
     public File extractTarToGivenDir(final File destinationDir, final File sourceTarFile) throws IOException {
+        logPermissions(sourceTarFile);
+        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(sourceTarFile));
+        return extractTarToGivenDir(destinationDir, tarArchiveInputStream);
+    }
+
+    private File extractTarToGivenDir(final File destinationDir, TarArchiveInputStream archiveInputStream) throws IOException {
         logger.debug(String.format("destinationDir: %s", destinationDir));
-        fileOperations.logFileOwnerGroupPerms(sourceTarFile.getParentFile());
-        fileOperations.logFileOwnerGroupPerms(sourceTarFile);
-        try (final TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(sourceTarFile))) {
             TarArchiveEntry tarArchiveEntry = null;
-            while (null != (tarArchiveEntry = tarArchiveInputStream.getNextTarEntry())) {
+            while (null != (tarArchiveEntry = archiveInputStream.getNextTarEntry())) {
                 final File outputFile = new File(destinationDir, tarArchiveEntry.getName());
                 if (tarArchiveEntry.isFile()) {
                     if (!outputFile.getParentFile().exists()) {
@@ -42,13 +52,17 @@ public class TarOperations {
                     final OutputStream outputFileStream = new FileOutputStream(outputFile);
                     try {
                         logger.trace(String.format("Untarring %s", outputFile.getAbsolutePath()));
-                        IOUtils.copy(tarArchiveInputStream, outputFileStream);
+                        IOUtils.copy(archiveInputStream, outputFileStream);
                     } finally {
                         outputFileStream.close();
                     }
                 }
             }
-        }
         return destinationDir;
+    }
+
+    private void logPermissions(File file) {
+        fileOperations.logFileOwnerGroupPerms(file.getParentFile());
+        fileOperations.logFileOwnerGroupPerms(file);
     }
 }
