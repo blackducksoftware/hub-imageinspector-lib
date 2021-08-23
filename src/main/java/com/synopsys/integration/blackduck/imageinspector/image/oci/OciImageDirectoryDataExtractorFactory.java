@@ -15,6 +15,7 @@ import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirec
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactory;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerMetadataExtractor;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerSorter;
+import com.synopsys.integration.blackduck.imageinspector.image.common.LayerDataExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.exception.IntegrationException;
 
@@ -39,7 +40,8 @@ public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryData
         FileOperations fileOperations = new FileOperations();
         OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, commonImageConfigParser);
         ImageLayerSorter imageOrderedLayerExtractor = new OciImageLayerSorter();
-        return new ImageDirectoryDataExtractor(ociImageDirectoryExtractor, imageOrderedLayerExtractor);
+        LayerDataExtractor layerDataExtractor = new LayerDataExtractor(imageOrderedLayerExtractor);
+        return new ImageDirectoryDataExtractor(ociImageDirectoryExtractor, layerDataExtractor);
     }
 
     @Override

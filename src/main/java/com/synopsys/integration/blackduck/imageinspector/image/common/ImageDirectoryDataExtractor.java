@@ -17,26 +17,17 @@ import java.util.List;
 
 public class ImageDirectoryDataExtractor {
     private final ImageDirectoryExtractor imageDirectoryExtractor;
-    private final ImageLayerSorter imageOrderedLayerExtractor;
+    private final LayerDataExtractor layerDataExtractor;
 
-    public ImageDirectoryDataExtractor(ImageDirectoryExtractor imageDirectoryExtractor, ImageLayerSorter imageOrderedLayerExtractor) {
+    public ImageDirectoryDataExtractor(final ImageDirectoryExtractor imageDirectoryExtractor, final LayerDataExtractor layerDataExtractor) {
         this.imageDirectoryExtractor = imageDirectoryExtractor;
-        this.imageOrderedLayerExtractor = imageOrderedLayerExtractor;
+        this.layerDataExtractor = layerDataExtractor;
     }
 
     public ImageDirectoryData extract(File imageDir, String givenRepo, String givenTag) throws IOException, IntegrationException {
         List<TypedArchiveFile> unOrderedLayerArchives = imageDirectoryExtractor.getLayerArchives(imageDir);
         FullLayerMapping fullLayerMapping = imageDirectoryExtractor.getLayerMapping(imageDir, givenRepo, givenTag);
-        List<TypedArchiveFile> orderedLayerArchives = imageOrderedLayerExtractor.getOrderedLayerArchives(unOrderedLayerArchives, fullLayerMapping.getManifestLayerMapping());
-        List<LayerDetailsBuilder> layerData = collectLayerData(fullLayerMapping, orderedLayerArchives);
+        List<LayerDetailsBuilder> layerData = layerDataExtractor.getLayerData(unOrderedLayerArchives, fullLayerMapping);
         return new ImageDirectoryData(fullLayerMapping.getManifestLayerMapping().getImageName().get(), fullLayerMapping.getManifestLayerMapping().getTagName().get(), fullLayerMapping, layerData);
-    }
-
-    private List<LayerDetailsBuilder> collectLayerData(FullLayerMapping layerMapping, List<TypedArchiveFile> archives) {
-        List<LayerDetailsBuilder> layerData = new LinkedList<>();
-        for (int layerIndex = 0; layerIndex < archives.size(); layerIndex++) {
-            layerData.add(new LayerDetailsBuilder(layerIndex, archives.get(layerIndex), layerMapping.getLayerExternalId(layerIndex)));
-        }
-        return layerData;
     }
 }
