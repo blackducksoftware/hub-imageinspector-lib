@@ -75,6 +75,11 @@ task buildTestDockerTarfile(type: Exec, dependsOn: buildTestDockerImage) {
             "blackducksoftware/centos_minus_vim_plus_bacula:1.0"
 }
 
+task buildTestOciFilesystem(type: Exec, dependsOn: [buildTestDockerTarfile]) {
+    commandLine "skopeo", "copy", "docker-archive:${buildDir}/images/test/centos_minus_vim_plus_bacula.tar", "oci:${buildDir}/images/test/centos_minus_vim_plus_bacula-oci",     \
+    "--override-arch=amd64", "--override-os=linux"
+}
+
 task createTestFile(type: Exec) {
     commandLine "touch", "${buildDir}/images/test/nopkgmgr/testfile.txt"
 }
@@ -109,20 +114,29 @@ task buildAlpineTestDockerTarfile(type: Exec, dependsOn: [createImagesDir, pullA
     commandLine "docker", "save", "-o", "${buildDir}/images/test/alpine.tar", "alpine:latest"
 }
 
+task buildAlpineTestOciFilesystem(type: Exec, dependsOn: [buildAlpineTestDockerTarfile]) {
+    commandLine "skopeo", "copy", "docker-archive:${buildDir}/images/test/alpine.tar", "oci:${buildDir}/images/test/alpine-oci",     \
+    "--override-arch=amd64", "--override-os=linux"
+}
+
 task createAlpineDir(type: Exec) {
     commandLine "mkdir", "-p", "build/images/test/alpine/tarExtraction/alpine.tar"
 }
 
 task buildTestTarfiles(dependsOn: [buildTestDockerTarfile, buildAlpineTestDockerTarfile, buildTestDockerTarfileNoPkgMgr]) {}
 
+task buildTestOciFilesystems(dependsOn: [buildAlpineTestOciFilesystem, buildTestOciFilesystem]) {}
+
 task unTarAlpine(type: Exec, dependsOn: [buildTestTarfiles, createAlpineDir]) {
     workingDir "build/images/test/alpine/tarExtraction/alpine.tar"
     commandLine "tar", "xvf", "../../../alpine.tar"
 }
 
+task prepareTestImagesAndFilesystems(dependsOn: [unTarAlpine, buildTestOciFilesystems]) {}
+
 // Having trouble finding the best way to do this since the cgp change
 // This builds the test images every time, but nothing else I've tried works across all builds
-jar.dependsOn unTarAlpine
+jar.dependsOn prepareTestImagesAndFilesystems
 
 // End of stuff for integration tests
 ////////////////////////////////////////////////

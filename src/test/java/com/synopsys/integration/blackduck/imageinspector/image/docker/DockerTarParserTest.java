@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //        File imageDir = new File(tarExtractionDirectory, dockerTar.getName());
 //        // TODO Should test these separately?
 //        File extractionDir = tarOperations.extractTarToGivenDir(imageDir, dockerTar);
-//        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new GsonBuilder(), new FileOperations(), new DockerImageConfigParser(),
+//        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new Gson(), new FileOperations(), new DockerImageConfigParser(),
 //                new DockerManifestFactory(), extractionDir);
 //        List<TypedArchiveFile> layerTars = dockerImageDirectory.getLayerArchives();
 //        assertEquals(1, layerTars.size());
@@ -69,7 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //        final String imageName = "alpine";
 //        final String imageTag = "latest";
 //
-//        final GsonBuilder gsonBuilder = new GsonBuilder();
+//        final Gson gson = new Gson();
 //        final File tarExtractionDirectory = new File("test/extraction");
 //        FileUtils.deleteDirectory(tarExtractionDirectory);
 //        tarExtractionDirectory.mkdir();
@@ -88,9 +88,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //        final String imageConfigFileContents = FileUtils.readFileToString(imageConfigTestDataFile, StandardCharsets.UTF_8);
 //        Mockito.when(fileOperations
 //                         .readFileToString(imageConfigMockedFile)).thenReturn(imageConfigFileContents);
-//        Mockito.when(dockerImageConfigParser.parseExternalLayerIds(gsonBuilder, imageConfigFileContents)).thenReturn(layerExternalIds);
+//        Mockito.when(dockerImageConfigParser.parseExternalLayerIds(gson, imageConfigFileContents)).thenReturn(layerExternalIds);
 //        File imageDir = new File(tarExtractionDirectory, imageTarFilename);
-//        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
+//        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(gson, fileOperations, dockerImageConfigParser, dockerManifestFactory, imageDir);
 //        FullLayerMapping mapping = dockerImageDirectory.getLayerMapping(imageName, imageTag);
 //        assertEquals(imageName, mapping.getManifestLayerMapping().getImageName());
 //        assertEquals(imageTag, mapping.getManifestLayerMapping().getTagName());

@@ -20,9 +20,9 @@ public class DockerManifestTest {
         final String targetImageName = "alpine";
         final String targetTagName = "latest";
         ManifestLayerMapping manifestLayerMapping = manifest.getLayerMapping(targetImageName, targetTagName);
-        assertEquals("alpine", manifestLayerMapping.getImageName());
-        assertEquals("latest", manifestLayerMapping.getTagName());
-        assertEquals("caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json", manifestLayerMapping.getPathToConfigFileFromImageRoot());
+        assertEquals("alpine", manifestLayerMapping.getImageName().get());
+        assertEquals("latest", manifestLayerMapping.getTagName().get());
+        assertEquals("caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json", manifestLayerMapping.getPathToImageConfigFileFromRoot());
         assertEquals(1, manifestLayerMapping.getLayerInternalIds().size());
         assertEquals("03b951adf840798cb236a62db6705df7fb2f1e60e6f5fb93499ee8a566bd4114", manifestLayerMapping.getLayerInternalIds().get(0));
     }
@@ -36,9 +36,9 @@ public class DockerManifestTest {
         final String targetImageName = "docker.io/alpine";
         final String targetTagName = "latest";
         ManifestLayerMapping manifestLayerMapping = manifest.getLayerMapping(targetImageName, targetTagName);
-        assertEquals("alpine", manifestLayerMapping.getImageName());
-        assertEquals("latest", manifestLayerMapping.getTagName());
-        assertEquals("caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json", manifestLayerMapping.getPathToConfigFileFromImageRoot());
+        assertEquals("alpine", manifestLayerMapping.getImageName().get());
+        assertEquals("latest", manifestLayerMapping.getTagName().get());
+        assertEquals("caf27325b298a6730837023a8a342699c8b7b388b8d878966b064a1320043019.json", manifestLayerMapping.getPathToImageConfigFileFromRoot());
         assertEquals(1, manifestLayerMapping.getLayerInternalIds().size());
         assertEquals("03b951adf840798cb236a62db6705df7fb2f1e60e6f5fb93499ee8a566bd4114", manifestLayerMapping.getLayerInternalIds().get(0));
     }

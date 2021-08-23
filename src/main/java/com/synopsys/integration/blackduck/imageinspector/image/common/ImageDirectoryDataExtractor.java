@@ -17,9 +17,9 @@ import java.util.List;
 
 public class ImageDirectoryDataExtractor {
     private final ImageDirectoryExtractor imageDirectoryExtractor;
-    private final ImageOrderedLayerExtractor imageOrderedLayerExtractor;
+    private final ImageLayerSorter imageOrderedLayerExtractor;
 
-    public ImageDirectoryDataExtractor(ImageDirectoryExtractor imageDirectoryExtractor, ImageOrderedLayerExtractor imageOrderedLayerExtractor) {
+    public ImageDirectoryDataExtractor(ImageDirectoryExtractor imageDirectoryExtractor, ImageLayerSorter imageOrderedLayerExtractor) {
         this.imageDirectoryExtractor = imageDirectoryExtractor;
         this.imageOrderedLayerExtractor = imageOrderedLayerExtractor;
     }
@@ -29,7 +29,7 @@ public class ImageDirectoryDataExtractor {
         FullLayerMapping fullLayerMapping = imageDirectoryExtractor.getLayerMapping(imageDir, givenRepo, givenTag);
         List<TypedArchiveFile> orderedLayerArchives = imageOrderedLayerExtractor.getOrderedLayerArchives(unOrderedLayerArchives, fullLayerMapping.getManifestLayerMapping());
         List<LayerDetailsBuilder> layerData = collectLayerData(fullLayerMapping, orderedLayerArchives);
-        return new ImageDirectoryData(fullLayerMapping.getManifestLayerMapping().getImageName(), fullLayerMapping.getManifestLayerMapping().getTagName(), fullLayerMapping, layerData);
+        return new ImageDirectoryData(fullLayerMapping.getManifestLayerMapping().getImageName().get(), fullLayerMapping.getManifestLayerMapping().getTagName().get(), fullLayerMapping, layerData);
     }
 
     private List<LayerDetailsBuilder> collectLayerData(FullLayerMapping layerMapping, List<TypedArchiveFile> archives) {

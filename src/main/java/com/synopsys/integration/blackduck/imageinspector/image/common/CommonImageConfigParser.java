@@ -18,23 +18,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @Component
 public class CommonImageConfigParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final GsonBuilder gsonBuilder;
+    private final Gson gson;
 
-    public CommonImageConfigParser(final GsonBuilder gsonBuilder) {
-        this.gsonBuilder = gsonBuilder;
+    public CommonImageConfigParser(final Gson gson) {
+        this.gson = gson;
     }
 
     public List<String> parseExternalLayerIds(final String imageConfigFileContents) {
         try {
             logger.trace(String.format("imageConfigFileContents: %s", imageConfigFileContents));
-            JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(imageConfigFileContents, JsonObject.class);
+            JsonObject imageConfigJsonObj = gson.fromJson(imageConfigFileContents, JsonObject.class);
             JsonObject rootFsJsonObj = imageConfigJsonObj.getAsJsonObject("rootfs");
             JsonArray layerIdsJsonArray = rootFsJsonObj.getAsJsonArray("diff_ids");
             final int numLayers = layerIdsJsonArray.size();
@@ -56,7 +56,7 @@ public class CommonImageConfigParser {
                 return new ArrayList<>(0);
             }
             logger.trace(String.format("layerConfigFileContents: %s", layerConfigFileContents));
-            JsonObject imageConfigJsonObj = gsonBuilder.create().fromJson(layerConfigFileContents, JsonObject.class);
+            JsonObject imageConfigJsonObj = gson.fromJson(layerConfigFileContents, JsonObject.class);
             JsonObject containerConfigJsonObj = imageConfigJsonObj.getAsJsonObject(configDataJsonKey);
             JsonArray cmdPartsJsonArray = containerConfigJsonObj.getAsJsonArray("Cmd");
             final int numParts = cmdPartsJsonArray.size();

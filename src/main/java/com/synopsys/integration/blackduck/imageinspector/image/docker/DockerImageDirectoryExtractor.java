@@ -7,7 +7,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.image.docker;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryExtractor;
@@ -30,13 +30,13 @@ import java.util.List;
 public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
     private static final String DOCKER_LAYER_TAR_FILENAME = "layer.tar";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final GsonBuilder gsonBuilder;
+    private final Gson gson;
     private final FileOperations fileOperations;
     private final CommonImageConfigParser commonImageConfigParser;
     private final DockerManifestFactory dockerManifestFactory;
 
-    public DockerImageDirectoryExtractor(GsonBuilder gsonBuilder, FileOperations fileOperations, CommonImageConfigParser commonImageConfigParser, DockerManifestFactory dockerManifestFactory) {
-        this.gsonBuilder = gsonBuilder;
+    public DockerImageDirectoryExtractor(Gson gson, FileOperations fileOperations, CommonImageConfigParser commonImageConfigParser, DockerManifestFactory dockerManifestFactory) {
+        this.gson = gson;
         this.fileOperations = fileOperations;
         this.commonImageConfigParser = commonImageConfigParser;
         this.dockerManifestFactory = dockerManifestFactory;
@@ -72,7 +72,7 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
             logger.error(msg);
             throw new IntegrationException(msg, e);
         }
-        final List<String> externalLayerIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, manifestLayerMapping.getPathToConfigFileFromImageRoot());
+        final List<String> externalLayerIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, manifestLayerMapping.getPathToImageConfigFileFromRoot());
         return new FullLayerMapping(manifestLayerMapping, externalLayerIds);
     }
 

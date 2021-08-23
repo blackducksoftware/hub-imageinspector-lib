@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import com.synopsys.integration.blackduck.imageinspector.image.common.layerentry.LowerLayerFileDeleter;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,12 @@ public class ImageLayerArchiveExtractor {
     public List<File> extractLayerTarToDir(final FileOperations fileOperations, final File tarFile, final File outputDir) throws IOException {
         logger.debug(String.format("tarFile: %s", tarFile.getAbsolutePath()));
         final TarArchiveInputStream tarFileInputStream = new TarArchiveInputStream(new FileInputStream(tarFile), "UTF-8");
+        return extractLayerTarToDir(fileOperations, tarFileInputStream, outputDir);
+    }
+
+    public List<File> extractLayerGzipTarToDir(final FileOperations fileOperations, final File tarFile, final File outputDir) throws IOException {
+        logger.debug(String.format("tarFile: %s", tarFile.getAbsolutePath()));
+        final TarArchiveInputStream tarFileInputStream = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(tarFile)), "UTF-8");
         return extractLayerTarToDir(fileOperations, tarFileInputStream, outputDir);
     }
 
