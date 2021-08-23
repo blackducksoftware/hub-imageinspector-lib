@@ -8,32 +8,44 @@
 package com.synopsys.integration.blackduck.imageinspector.image.common;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.synopsys.integration.util.Stringable;
 
 public class ManifestLayerMapping extends Stringable {
+    @Nullable
     private final String imageName;
+    @Nullable
     private final String tagName;
-    private final String imageConfigFilename;
+    private final String pathToImageConfigFileFromRoot;
     private final List<String> layerInternalIds;
 
-    public ManifestLayerMapping(String imageName, String tagName, String imageConfigFilename, List<String> layerInternalIds) {
+    public ManifestLayerMapping(String imageName, String tagName, String pathToImageConfigFileFromRoot, List<String> layerInternalIds) {
         this.imageName = imageName;
         this.tagName = tagName;
-        this.imageConfigFilename = imageConfigFilename;
+        this.pathToImageConfigFileFromRoot = pathToImageConfigFileFromRoot;
         this.layerInternalIds = layerInternalIds;
     }
 
-    public String getImageName() {
-        return imageName;
+    public ManifestLayerMapping(String pathToImageConfigFileFromRoot, List<String> layerInternalIds) {
+        imageName = null;
+        tagName = null;
+        this.pathToImageConfigFileFromRoot = pathToImageConfigFileFromRoot;
+        this.layerInternalIds = layerInternalIds;
     }
 
-    public String getTagName() {
-        return tagName;
+    public Optional<String> getImageName() {
+        return Optional.ofNullable(imageName);
     }
 
-    public String getImageConfigFilename() {
-        return imageConfigFilename;
+    public Optional<String> getTagName() {
+        return Optional.ofNullable(tagName);
+    }
+
+    public String getPathToImageConfigFileFromRoot() {
+        return pathToImageConfigFileFromRoot;
     }
 
     public List<String> getLayerInternalIds() {
