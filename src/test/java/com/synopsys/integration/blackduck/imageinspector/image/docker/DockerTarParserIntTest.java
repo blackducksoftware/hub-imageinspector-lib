@@ -84,13 +84,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 ////        tarParser.setPkgMgrExecutor(pkgMgrExecutor);
 ////        tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
 ////        tarParser.setImageConfigParser(new DockerImageConfigParser());
-////        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
+////        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new Gson()));
 ////
 ////        TarOperations tarOperations = new TarOperations();
 ////        tarOperations.setFileOperations(new FileOperations());
 ////
 ////        File extractionDir = tarOperations.extractTarToGivenDir(imageDir, dockerTar);
-////        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new GsonBuilder(), new FileOperations(),
+////        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new Gson(), new FileOperations(),
 ////                new DockerImageConfigParser(), new DockerManifestFactory(), extractionDir);
 ////        final List<TypedArchiveFile> layerTars = dockerImageDirectory.getLayerArchives();
 ////        final FullLayerMapping fullLayerMapping = dockerImageDirectory.getLayerMapping(IMAGE_NAME, IMAGE_TAG);
@@ -155,7 +155,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 //        tarParser.setPkgMgrs(pkgMgrs);
 //        tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
 //        tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
-//        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
+//        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new Gson()));
 //
 //        final List<String> layerIds = new ArrayList<>();
 //        layerIds.add(LAYER_ID);
@@ -186,10 +186,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 //        tarParser.setPkgMgrs(pkgMgrs);
 //        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
 //        tarParser.setImageConfigParser(dockerImageConfigParser);
-//        // TODO reuse a GsonBuilder
-//        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
+//        // TODO reuse a Gson
+//        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new Gson()));
 //        File imageDir = new File(tarExtractionDirectory, tarFilename);
-//        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new GsonBuilder(), new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageDir);
+//        DockerImageDirectory dockerImageDirectory = new DockerImageDirectory(new Gson(), new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory(), imageDir);
 //        FullLayerMapping mapping = dockerImageDirectory.getLayerMapping("alpine", "latest");
 //        assertEquals("alpine", mapping.getManifestLayerMapping().getImageName());
 //        assertEquals("latest", mapping.getManifestLayerMapping().getTagName());

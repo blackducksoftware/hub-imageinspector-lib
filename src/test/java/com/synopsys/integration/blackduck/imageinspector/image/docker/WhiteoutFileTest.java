@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 //        tarParser.setManifestFactory(new DockerManifestFactory());
 //        tarParser.setFileOperations(new FileOperations());
 //        tarParser.setImageConfigParser(new DockerImageConfigParser());
-//        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new GsonBuilder()));
+//        tarParser.setLayerConfigParser(new DockerLayerConfigParser(new Gson()));
 //        tarParser.setDockerLayerTarExtractor(new DockerLayerTarExtractor());
 //        tarParser.setPkgMgrExecutor(new PkgMgrExecutor());
 //        tarParser.setExecutor(new CmdExecutor());

@@ -41,7 +41,7 @@ class ImageInspectorTest {
         // TODO should some of these be mocked?
         // NEED: Os os, List<PkgMgr> pkgMgrs, PkgMgrExecutor pkgMgrExecutor, CmdExecutor cmdExecutor,
         // TODO revisit testing of this class in general
-//        imageInspector = new ImageInspector(tarParser, tarOperations, new GsonBuilder(),
+//        imageInspector = new ImageInspector(tarParser, tarOperations, new Gson(),
 //                new FileOperations(), new DockerImageConfigParser(), new DockerManifestFactory());
     }
 
@@ -75,11 +75,11 @@ class ImageInspectorTest {
 //        File tarExtractionDirectory = new File("src/test/resources/working/tarExtraction");
 //        File dockerTarfile = new File("src/test/resources/testDockerTarfile");
 //        File imageDir = new File(tarExtractionDirectory, dockerTarfile.getName());
-//        GsonBuilder gsonBuilder = new GsonBuilder();
+//        Gson gson = new Gson();
 //        String imageRepo = "alpine";
 //        String imageTag = "latest";
-//        imageInspector.getLayerMapping(gsonBuilder, imageDir, imageRepo, imageTag);
-//        Mockito.verify(tarParser).getLayerMapping(gsonBuilder, imageDir, imageRepo, imageTag);
+//        imageInspector.getLayerMapping(gson, imageDir, imageRepo, imageTag);
+//        Mockito.verify(tarParser).getLayerMapping(gson, imageDir, imageRepo, imageTag);
 //    }
 
     // TODO make sure this is tested somewhere

@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ArchiveFileType;
@@ -19,8 +19,8 @@ public class OciImageDirectoryExtractorTest {
 
     @Test
     public void testParseLayerArchives() {
-        CommonImageConfigParser configParser = new CommonImageConfigParser(new GsonBuilder());
-        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(new GsonBuilder(), new FileOperations(), configParser);
+        CommonImageConfigParser configParser = new CommonImageConfigParser(new Gson());
+        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(new Gson(), new FileOperations(), configParser);
         File alpineOciImageDir = new File(OCI_ALPINE_IMAGE_RESOURCE_PATH);
         try {
             List<TypedArchiveFile> layerArchives = extractor.getLayerArchives(alpineOciImageDir);
@@ -35,8 +35,8 @@ public class OciImageDirectoryExtractorTest {
 
     @Test
     public void testGetLayerMapping() {
-        CommonImageConfigParser configParser = new CommonImageConfigParser(new GsonBuilder());
-        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(new GsonBuilder(), new FileOperations(), configParser);
+        CommonImageConfigParser configParser = new CommonImageConfigParser(new Gson());
+        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(new Gson(), new FileOperations(), configParser);
         File alpineOciImageDir = new File(OCI_ALPINE_IMAGE_RESOURCE_PATH);
         String testRepo = "testRepo";
         String testTag = "testTag";
