@@ -12,6 +12,8 @@ import com.synopsys.integration.blackduck.imageinspector.image.common.archive.Ar
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +43,8 @@ public class ImageLayerApplier {
         } else if (layerTar.getType().equals(ArchiveFileType.TAR_GZIPPED)) {
             filesToRemove = imageLayerArchiveExtractor.extractLayerGzipTarToDir(fileOperations, layerTar.getFile(), destinationDir);
         } else if (layerTar.getType().equals(ArchiveFileType.TAR_ZSTD)) {
-            //TODO- implement zstd extraction
+            //TODO- test this works
+            filesToRemove = imageLayerArchiveExtractor.extractLayerZstdTarToDir(fileOperations, layerTar.getFile(), destinationDir);
         }
         for (final File fileToRemove : filesToRemove) {
             if (fileToRemove.isDirectory()) {
