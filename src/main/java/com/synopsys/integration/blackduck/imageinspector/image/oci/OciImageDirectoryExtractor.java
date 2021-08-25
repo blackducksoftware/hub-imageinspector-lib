@@ -79,7 +79,14 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
 
         String pathToManifestFile = parsePathToBlobFileFromDigest(manifestFileDigest.get());
-        return Optional.of(findBlob(blobsDir, pathToManifestFile));
+        File manifestFile;
+        try {
+            manifestFile = findBlob(blobsDir, pathToManifestFile);
+        } catch (IntegrationException e) {
+            logger.error(e.getMessage());
+            return Optional.empty();
+        }
+        return Optional.of(manifestFile);
     }
 
     private Optional<String> parseManifestFileDigestFromImageIndex(File indexFile) {
@@ -133,7 +140,14 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         List<TypedArchiveFile> layerArchives = new LinkedList<>();
         for (OciDescriptor layer : imageManifest.getLayers()) {
             String pathToLayerFile = parsePathToBlobFileFromDigest(layer.getDigest());
-            File layerFile = findBlob(blobsDir, pathToLayerFile);
+            File layerFile;
+            try {
+                layerFile = findBlob(blobsDir, pathToLayerFile);
+            } catch (IntegrationException e) {
+                logger.error(e.getMessage());
+                continue;
+            }
+
             ArchiveFileType archiveFileType;
             try {
                 archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layer.getMediaType());
@@ -152,11 +166,10 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         return String.join("/", digest.split(":"));
     }
 
-    private File findBlob(File blobsDir, String pathToBlob) {
+    private File findBlob(File blobsDir, String pathToBlob) throws IntegrationException {
         File blob = new File(blobsDir, pathToBlob);
         if (!blob.exists()) {
-            //TODO- specs say "The blobs directory MAY be missing referenced blobs, in which case the missing blobs SHOULD be fulfilled by an external blob store" --> should we handle this case?
-            // we'll throw some kind of exception
+            throw new IntegrationException(String.format("Blob referenced by image manifest could not be found at %s.", blob.getAbsolutePath()));
         }
         return blob;
     }
