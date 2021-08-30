@@ -30,7 +30,7 @@ public class OciImageDirectoryExtractorTest {
 
     @ParameterizedTest
     @MethodSource("testParseLayerArchivesProvider")
-    public void testParseLayerArchives(String testImagePath, List<TypedArchiveFile> expectedArchiveList) throws IOException {
+    public void testParseLayerArchives(String testImagePath, List<TypedArchiveFile> expectedArchiveList) throws IntegrationException {
         File ociImageDir = new File(testImagePath);
         CommonImageConfigParser configParser = new CommonImageConfigParser(new Gson());
         OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(new Gson(), new FileOperations(), configParser);

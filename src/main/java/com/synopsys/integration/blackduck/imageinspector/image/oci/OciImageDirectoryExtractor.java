@@ -56,7 +56,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     @Override
-    public List<TypedArchiveFile> getLayerArchives(final File imageDir) throws IOException {
+    public List<TypedArchiveFile> getLayerArchives(final File imageDir) throws IntegrationException {
         File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
 
         Optional<File> manifestFile = findManifestFile(imageDir);
@@ -65,7 +65,11 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             return new LinkedList<>();
         }
 
-        return parseLayerArchives(manifestFile.get(), blobsDir);
+        try { //TODO- this is probably not the best way to handle this exception...
+            return parseLayerArchives(manifestFile.get(), blobsDir);
+        } catch (IOException e) {
+            throw new IntegrationException(e.getMessage());
+        }
     }
 
     private Optional<File> findManifestFile(File imageDir) {
@@ -107,10 +111,8 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                 } else {
                     //TODO- what to do if we find multiple manifests?  OCI specs mention sometimes there's one for each supported architecture
                     // we'd throw some kind of error, but should look into any pre-defined defaults that may inform us which one to pick (eg. re: architecture)
+                    throw new RuntimeException(String.format("Found multiple manifest files: %s and %s.  Please specify which image to target.  See help for information on how to do so.", manifestFileDigest, manifestData.getDigest()));
                 }
-            }
-            if (manifestData.getMediaType().equals(INDEX_FILE_MEDIA_TYPE)) {
-                //TODO- what to do if we find multiple image indexes?
             }
         }
         // Per specs, the size of OciImageIndex.manifests may be 0
@@ -119,7 +121,8 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
     private ArchiveFileType parseArchiveTypeFromLayerDescriptorMediaType(String mediaType) throws IntegrationException {
         if (mediaType.contains("nondistributable")) {
-            //TODO- what do we do with archives with distribution restrictions?
+            //TODO- what do we do with archives "nondistributable" media types? https://github.com/opencontainers/image-spec/blob/main/layer.md#non-distributable-layers
+            // ac- based on the linked doc, I think we should just treat them normally (as if they were their "distributable" counterparts)
         }
         if (mediaType.endsWith(LAYER_ARCHIVE_TAR_MEDIA_TYPE_SUFFIX)) {
             return ArchiveFileType.TAR;

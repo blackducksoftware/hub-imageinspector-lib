@@ -43,7 +43,7 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     @Override
-    public List<TypedArchiveFile> getLayerArchives(File imageDir) throws IOException {
+    public List<TypedArchiveFile> getLayerArchives(File imageDir) throws IntegrationException {
         logger.debug(String.format("Searching for layer archive files in unpackedImageDir: %s", imageDir.getAbsolutePath()));
         final List<TypedArchiveFile> untaredLayerFiles = new ArrayList<>();
         List<File> unpackedImageTopLevelFiles = Arrays.asList(imageDir.listFiles());
