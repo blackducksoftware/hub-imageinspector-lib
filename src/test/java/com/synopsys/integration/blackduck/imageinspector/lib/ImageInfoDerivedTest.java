@@ -33,7 +33,7 @@ public class ImageInfoDerivedTest {
     ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb = new ContainerFileSystemWithPkgMgrDb(containerFileSystem,
         pkgMgrDb, "alpine", new ApkPkgMgr(new FileOperations()));
 
-    assertEquals("imageDir", containerFileSystemWithPkgMgrDb.getTargetImageFileSystem().getTargetImageFileSystemFull().getName());
+    assertEquals("imageDir", containerFileSystemWithPkgMgrDb.getContainerFileSystem().getTargetImageFileSystemFull().getName());
     assertEquals("alpine", containerFileSystemWithPkgMgrDb.getLinuxDistroName());
     assertEquals(PackageManagerEnum.APK, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
     assertEquals("apk", containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getExtractedPackageManagerDirectory().getName());

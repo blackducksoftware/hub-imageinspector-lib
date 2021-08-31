@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -74,6 +73,19 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
         }
         final List<String> externalLayerIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, manifestLayerMapping.getPathToImageConfigFileFromRoot());
         return new FullLayerMapping(manifestLayerMapping, externalLayerIds);
+    }
+
+    private List<String> getExternalLayerIdsFromImageConfigFile(File imageDir, String imageConfigFileName) {
+        try {
+            final File imageConfigFile = new File(imageDir, imageConfigFileName);
+            final String imageConfigFileContents = fileOperations
+                    .readFileToString(imageConfigFile);
+            logger.trace(String.format("imageConfigFileContents (%s): %s", imageConfigFile.getName(), imageConfigFileContents));
+            return commonImageConfigParser.parseExternalLayerIds(imageConfigFileContents);
+        } catch (Exception e) {
+            logger.warn(String.format("Error logging image config file contents: %s", e.getMessage()));
+        }
+        return new ArrayList<>(0);
     }
 
 }

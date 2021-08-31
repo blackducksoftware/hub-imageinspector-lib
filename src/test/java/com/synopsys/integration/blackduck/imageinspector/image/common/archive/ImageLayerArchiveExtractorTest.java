@@ -1,29 +1,46 @@
-package com.synopsys.integration.blackduck.imageinspector.image.docker;
+package com.synopsys.integration.blackduck.imageinspector.image.common.archive;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
-
-import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.io.TempDir;
 
-@Tag("integration")
-public class ImageLayerMetadataExtractorExtractorIntTest {
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+public class ImageLayerArchiveExtractorTest {
+
+    @TempDir
+    File tempDir;
+
+    @Test
+    void test() throws IOException {
+        ImageLayerArchiveExtractor imageLayerArchiveExtractor = new ImageLayerArchiveExtractor();
+        FileOperations fileOperations = new FileOperations();
+        File tarFile = new File("src/test/resources/omitdir/layer.tar");
+        File outputDir = new File(tempDir, "output");
+
+        imageLayerArchiveExtractor.extractLayerTarToDir(fileOperations, tarFile, outputDir);
+
+        List<File> extractedFiles = Arrays.asList(outputDir.listFiles());
+        assertEquals(2, extractedFiles.size());
+        assertTrue(extractedFiles.stream().map(File::getName).filter(name -> name.equals("omit")).findAny().isPresent());
+        assertTrue(extractedFiles.stream().map(File::getName).filter(name -> name.equals("regular")).findAny().isPresent());
+        assertTrue(extractedFiles.stream().findFirst().get().isDirectory());
+    }
 
     @Test
     public void testOpaqueDir() throws IOException {
         final File tarFile = new File("src/test/resources/layers/whiteoutOpaqueDir/layer.tar");
-        final File outputDir = new File("test/output/whiteoutOpaqueDirLayer");
+        final File outputDir = new File(tempDir, "whiteoutOpaqueDirLayer");
         outputDir.mkdirs();
         FileUtils.deleteQuietly(outputDir);
         outputDir.mkdirs();
@@ -51,7 +68,7 @@ public class ImageLayerMetadataExtractorExtractorIntTest {
     @Test
     public void testFilesInOpaqueLayerAddedToOutput() throws IOException {
         File tarFile = new File("src/test/resources/layers/eapLayer/layer.tar");
-        File outputDir = new File("test/output/eapLayer");
+        File outputDir = new File(tempDir, "eapLayer");
         outputDir.mkdirs();
         FileUtils.deleteQuietly(outputDir);
         outputDir.mkdirs();

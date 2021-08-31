@@ -5,12 +5,12 @@ buildscript {
     apply from: 'https://raw.githubusercontent.com/blackducksoftware/integration-resources/master/gradle_common/buildscript-dependencies.gradle', to: buildscript
 
     dependencies {
-        classpath 'com.bmuschko:gradle-docker-plugin:6.4.0'
+        classpath 'com.bmuschko:gradle-docker-plugin:6.7.0'
     }
 }
 
 plugins {
-    id 'org.springframework.boot' version '2.4.5' apply false
+    id 'org.springframework.boot' version '2.5.3' apply false
 }
 
 project.ext.moduleName = 'com.synopsys.integration.hub-imageinspector-lib'
@@ -27,12 +27,12 @@ apply plugin: 'com.synopsys.integration.library'
 dependencyManagement {
     imports {
         mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
-        mavenBom 'com.fasterxml.jackson:jackson-bom:2.10.3'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.12.4'
     }
 }
 
 dependencies {
-    api 'com.synopsys.integration:integration-bdio:22.1.1'
+    api 'com.synopsys.integration:integration-bdio:22.1.4'
     api 'org.springframework.boot:spring-boot-starter'
     api 'org.springframework:spring-context'
     api 'org.apache.commons:commons-exec:1.3'

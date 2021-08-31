@@ -12,9 +12,8 @@ import com.synopsys.integration.blackduck.imageinspector.api.name.Names;
 import java.io.File;
 
 public class WorkingDirectories {
-    // TODO I'm not sure these should stay public
-    public static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
-    public static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
+    private static final String TAR_EXTRACTION_DIRECTORY = "tarExtraction";
+    private static final String TARGET_IMAGE_FILESYSTEM_PARENT_DIR = "imageFiles";
     private final File workingDir;
 
     public WorkingDirectories(File workingDir) {
@@ -25,17 +24,14 @@ public class WorkingDirectories {
         return new File(getImageExtractionBaseDirectory(), targetImageTarfile.getName());
     }
 
-    // final File targetImageFileSystemParentDir = new File(tarExtractionBaseDirectory, ImageInspector.TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
     private File getTargetImageFileSystemParentDir() {
         return new File(getImageExtractionBaseDirectory(), TARGET_IMAGE_FILESYSTEM_PARENT_DIR);
     }
 
-    // final File targetImageFileSystemRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemRootDirName(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag()));
     public File getTargetImageFileSystemRootDir(String repo, String tag) {
         return new File(getTargetImageFileSystemParentDir(), Names.getTargetImageFileSystemRootDirName(repo, tag));
     }
 
-    // targetImageFileSystemAppLayersRootDir = new File(targetImageFileSystemParentDir, Names.getTargetImageFileSystemAppLayersRootDirName(imageDirectoryData.getActualRepo(), imageDirectoryData.getActualTag()));
     public File getTargetImageFileSystemAppLayersRootDir(String repo, String tag) {
         return new File(getTargetImageFileSystemParentDir(), Names.getTargetImageFileSystemAppLayersRootDirName(repo, tag));
     }

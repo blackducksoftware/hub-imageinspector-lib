@@ -18,15 +18,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-// TODO need a test for this
-
 @Component
 public class PkgMgrDbExtractor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final List<PkgMgr> pkgMgrs;
     private final LinuxDistroExtractor linuxDistroExtractor;
-
-    // TODO need to decide when to use Autowired / whether to ditch it
 
     @Autowired
     public PkgMgrDbExtractor(final List<PkgMgr> pkgMgrs, LinuxDistroExtractor linuxDistroExtractor) {
@@ -49,7 +45,6 @@ public class PkgMgrDbExtractor {
                         linuxDistroName = targetLinuxDistroOverride;
                         logger.trace(String.format("Target linux distro name overridden by caller to: %s", linuxDistroName));
                     } else {
-                        // TODO this doesn't belong here
                         linuxDistroName = linuxDistroExtractor.extract(containerFileSystem.getTargetImageFileSystemFull()).orElse(null);
                         logger.trace(String.format("Target linux distro name derived from image file system: %s", linuxDistroName));
                     }

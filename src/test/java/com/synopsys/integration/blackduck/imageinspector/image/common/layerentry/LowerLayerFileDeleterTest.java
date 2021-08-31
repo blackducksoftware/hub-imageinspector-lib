@@ -1,4 +1,9 @@
-package com.synopsys.integration.blackduck.imageinspector.image.docker;
+package com.synopsys.integration.blackduck.imageinspector.image.common.layerentry;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,15 +11,33 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import com.synopsys.integration.blackduck.imageinspector.image.common.layerentry.LowerLayerFileDeleter;
-import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LowerLayerFileDeleterTest {
+
+    @TempDir
+    File tempDir;
+
+    @Test
+    void test() throws IOException {
+
+        File oldFile = new File(tempDir, "oldFile");
+        File newFile = new File(tempDir, "newFile");
+        oldFile.createNewFile();
+        newFile.createNewFile();
+
+        LowerLayerFileDeleter lowerLayerFileDeleter = new LowerLayerFileDeleter();
+        lowerLayerFileDeleter.addFilesAddedByCurrentLayer(Arrays.asList(tempDir.getAbsolutePath(), newFile.getAbsolutePath()));
+        lowerLayerFileDeleter.deleteFilesAddedByLowerLayers(tempDir);
+
+        assertTrue(newFile.exists());
+        assertFalse(oldFile.exists());
+    }
+
     @Test
     public void testDoesNotFollowSymbolicLinks() throws IOException {
-        File parentOFfSymLink = new File("test/parentOfSymLink");
+        File parentOFfSymLink = new File(tempDir, "parentOfSymLink");
         parentOFfSymLink.mkdir();
 
         File symLinkTarget = new File(parentOFfSymLink, "symLink");
@@ -22,7 +45,7 @@ public class LowerLayerFileDeleterTest {
             FileUtils.deleteQuietly(symLinkTarget);
         }
 
-        File dirWithFileNotToDelete = new File("test/dirWithFileNotToDelete");
+        File dirWithFileNotToDelete = new File(tempDir, "dirWithFileNotToDelete");
         dirWithFileNotToDelete.mkdir();
         File fileNotToDelete = new File(dirWithFileNotToDelete, "fileNotToDelete.txt");
         fileNotToDelete.createNewFile();

@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import com.synopsys.integration.bdio.model.BdioComponent;
@@ -58,6 +59,9 @@ public class ImageInspectorApiIntTest {
     private static RpmPkgMgr rpmPkgMgr;
 
     private static final String[] apkOutput = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
+
+    @TempDir
+    File tempDir;
 
     @BeforeAll
     public static void setup() throws IntegrationException, InterruptedException {
@@ -111,6 +115,7 @@ public class ImageInspectorApiIntTest {
                                                                 .setOrganizeComponentsByLayer(false)
                                                                 .setIncludeRemovedComponents(false)
                                                                 .setCurrentLinuxDistro("CENTOS")
+                                                                .setCleanupWorkingDir(true)
                                                                 .build();
             imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
             fail("Expected WrongInspectorOsException");
@@ -125,8 +130,6 @@ public class ImageInspectorApiIntTest {
         ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
 
-        FileOperations fileOperations = new FileOperations();
-        File tempDir = fileOperations.createTempDirectory();
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
 
@@ -138,6 +141,7 @@ public class ImageInspectorApiIntTest {
                                                             .setIncludeRemovedComponents(false)
                                                             .setCurrentLinuxDistro("UBUNTU")
                                                             .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+                                                            .setCleanupWorkingDir(true)
                                                             .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
         assertEquals(0, bdioDocument.getComponents().size());
@@ -174,6 +178,7 @@ public class ImageInspectorApiIntTest {
                                                             .setBlackDuckProjectVersion(PROJECT_VERSION)
                                                             .setCurrentLinuxDistro("ALPINE")
                                                             .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
+                                                            .setCleanupWorkingDir(true)
                                                             .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
@@ -204,8 +209,6 @@ public class ImageInspectorApiIntTest {
         Mockito.when(rpmPkgMgr.getType()).thenReturn(PackageManagerEnum.RPM);
         Mockito.when(rpmPkgMgr.getImagePackageManagerDirectory(Mockito.any(File.class))).thenReturn(new File("."));
 
-        FileOperations fileOperations = new FileOperations();
-        File tempDir = fileOperations.createTempDirectory();
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
         ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
@@ -215,6 +218,7 @@ public class ImageInspectorApiIntTest {
                                                             .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
                                                             .setCurrentLinuxDistro("CENTOS")
                                                             .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
+                                                            .setCleanupWorkingDir(true)
                                                             .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
 
