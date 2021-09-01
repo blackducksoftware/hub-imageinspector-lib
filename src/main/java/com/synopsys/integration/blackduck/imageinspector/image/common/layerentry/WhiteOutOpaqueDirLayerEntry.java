@@ -31,10 +31,10 @@ public class WhiteOutOpaqueDirLayerEntry extends LayerEntryNoFileToDelete {
 
     @Override
     public List<File> processFiles() {
-        logger.debug(String.format("WhiteOutOpaqueDirLayerEntry: %s", layerEntry.getName()));
+        logger.trace(String.format("WhiteOutOpaqueDirLayerEntry: %s", layerEntry.getName()));
         final Path whiteoutFilePath = Paths.get(layerOutputDir.getAbsolutePath(), layerEntry.getName());
         final File opaqueDir = whiteoutFilePath.getParent().toFile();
-        logger.debug(String.format("Deleting/re-creating opaque dir %s", opaqueDir.getAbsolutePath()));
+        logger.trace(String.format("Deleting/re-creating opaque dir %s", opaqueDir.getAbsolutePath()));
         fileDeleter.deleteFilesAddedByLowerLayers(opaqueDir);
         opaqueDir.mkdirs();
         return Collections.emptyList();

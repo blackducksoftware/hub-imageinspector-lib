@@ -1,6 +1,8 @@
 package com.synopsys.integration.blackduck.imageinspector.image.docker;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
@@ -21,11 +23,11 @@ public class DockerImageDirectoryExtractorTest {
     @Test
     void test() throws IOException, IntegrationException {
         File imageDir = new File("src/test/resources/mockDockerTarContents");
-        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = new Gson();
         FileOperations fileOperations = new FileOperations();
-        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
+        CommonImageConfigParser commonImageConfigParser = new CommonImageConfigParser(gson);
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
-        DockerImageDirectoryExtractor extractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory);
+        DockerImageDirectoryExtractor extractor = new DockerImageDirectoryExtractor(gson, fileOperations, commonImageConfigParser, dockerManifestFactory);
 
         List<TypedArchiveFile> typedArchiveFiles = extractor.getLayerArchives(imageDir);
 
@@ -39,13 +41,13 @@ public class DockerImageDirectoryExtractorTest {
     }
 
     @Test
-    void testNonExistentRepoTag() throws IOException {
+    void testNonExistentRepoTag() throws IntegrationException {
         File imageDir = new File("src/test/resources/mockDockerTarContents");
-        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = new Gson();
         FileOperations fileOperations = new FileOperations();
-        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
+        CommonImageConfigParser dockerImageConfigParser = new CommonImageConfigParser(gson);
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
-        DockerImageDirectoryExtractor extractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory);
+        DockerImageDirectoryExtractor extractor = new DockerImageDirectoryExtractor(gson, fileOperations, dockerImageConfigParser, dockerManifestFactory);
 
         List<TypedArchiveFile> typedArchiveFiles = extractor.getLayerArchives(imageDir);
 

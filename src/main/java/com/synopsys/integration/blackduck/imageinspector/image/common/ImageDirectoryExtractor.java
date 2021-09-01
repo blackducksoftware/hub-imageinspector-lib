@@ -15,6 +15,6 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ImageDirectoryExtractor {
-    List<TypedArchiveFile> getLayerArchives(File imageDir) throws IOException;
+    List<TypedArchiveFile> getLayerArchives(File imageDir) throws IntegrationException;
     FullLayerMapping getLayerMapping(File imageDir, final String repo, final String tag) throws IntegrationException;
 }

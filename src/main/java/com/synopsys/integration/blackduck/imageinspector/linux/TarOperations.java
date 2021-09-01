@@ -10,6 +10,7 @@ package com.synopsys.integration.blackduck.imageinspector.linux;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,16 +29,22 @@ public class TarOperations {
         this.fileOperations = fileOperations;
     }
 
+    public File extractTarToGivenDir(final File destinationDir, final File sourceTarFile) throws IOException {
+        logPermissions(sourceTarFile);
+        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(sourceTarFile));
+        return extractTarToGivenDir(destinationDir, tarArchiveInputStream);
+    }
+
     public File extractGzipTarToGivenDir(final File destinationDir, final File sourceTarFile) throws IOException {
         logPermissions(sourceTarFile);
         TarArchiveInputStream gzipTarArchiveInputStream = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(sourceTarFile)));
         return extractTarToGivenDir(destinationDir, gzipTarArchiveInputStream);
     }
 
-    public File extractTarToGivenDir(final File destinationDir, final File sourceTarFile) throws IOException {
+    public File extractZstdTarToGivenDir(final File destinationDir, final File sourceTarFile) throws IOException {
         logPermissions(sourceTarFile);
-        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new FileInputStream(sourceTarFile));
-        return extractTarToGivenDir(destinationDir, tarArchiveInputStream);
+        TarArchiveInputStream gzipTarArchiveInputStream = new TarArchiveInputStream(new ZstdCompressorInputStream(new FileInputStream(sourceTarFile)));
+        return extractTarToGivenDir(destinationDir, gzipTarArchiveInputStream);
     }
 
     //ac- TODO- is DI going to use this instead of DockerLayerTarExtractor?

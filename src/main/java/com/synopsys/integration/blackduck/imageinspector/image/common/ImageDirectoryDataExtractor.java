@@ -9,31 +9,26 @@ package com.synopsys.integration.blackduck.imageinspector.image.common;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.synopsys.integration.exception.IntegrationException;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ImageDirectoryDataExtractor {
-    private final ImageFormatMatchesChecker imageFormatMatchesChecker;
     private final ImageDirectoryExtractor imageDirectoryExtractor;
-    private final ImageOrderedLayerExtractor imageOrderedLayerExtractor;
+    private final LayerDataExtractor layerDataExtractor;
 
-    public ImageDirectoryDataExtractor(ImageFormatMatchesChecker imageFormatMatchesChecker, ImageDirectoryExtractor imageDirectoryExtractor, ImageOrderedLayerExtractor imageOrderedLayerExtractor) {
-        this.imageFormatMatchesChecker = imageFormatMatchesChecker;
+    public ImageDirectoryDataExtractor(final ImageDirectoryExtractor imageDirectoryExtractor, final LayerDataExtractor layerDataExtractor) {
         this.imageDirectoryExtractor = imageDirectoryExtractor;
-        this.imageOrderedLayerExtractor = imageOrderedLayerExtractor;
+        this.layerDataExtractor = layerDataExtractor;
     }
 
-    public boolean applies(File imageDir) throws IntegrationException {
-        return imageFormatMatchesChecker.applies(imageDir);
-    }
-
-    public ImageDirectoryData extract(File imageDir, String givenRepo, String givenTag) throws IOException, IntegrationException {
+    public ImageDirectoryData extract(File imageDir, @Nullable String givenRepo, @Nullable String givenTag) throws IOException, IntegrationException {
         List<TypedArchiveFile> unOrderedLayerArchives = imageDirectoryExtractor.getLayerArchives(imageDir);
         FullLayerMapping fullLayerMapping = imageDirectoryExtractor.getLayerMapping(imageDir, givenRepo, givenTag);
-        List<TypedArchiveFile> orderedLayerArchives = imageOrderedLayerExtractor.getOrderedLayerArchives(unOrderedLayerArchives, fullLayerMapping.getManifestLayerMapping());
-        return new ImageDirectoryData(fullLayerMapping.getManifestLayerMapping().getImageName(), fullLayerMapping.getManifestLayerMapping().getTagName(),
-                fullLayerMapping, orderedLayerArchives);
+        List<LayerDetailsBuilder> layerData = layerDataExtractor.getLayerData(unOrderedLayerArchives, fullLayerMapping);
+        return new ImageDirectoryData(fullLayerMapping.getManifestLayerMapping().getImageName().orElse(null), fullLayerMapping.getManifestLayerMapping().getTagName().orElse(null), fullLayerMapping, layerData);
     }
 }

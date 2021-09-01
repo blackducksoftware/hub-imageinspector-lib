@@ -7,6 +7,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PackageGetter;
+import com.synopsys.integration.blackduck.imageinspector.image.common.LayerDetailsBuilder;
 import com.synopsys.integration.blackduck.imageinspector.image.common.LayerDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemWithPkgMgrDb;
 import org.apache.commons.collections.ListUtils;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ComponentHierarchyBuilder {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -32,14 +34,15 @@ public class ComponentHierarchyBuilder {
         return this;
     }
 
-    public ComponentHierarchyBuilder addLayer(ContainerFileSystemWithPkgMgrDb postLayerContainerFileSystem, int layerIndex, String layerExternalId, List<String> layerCmd) {
+    public ComponentHierarchyBuilder addLayer(ContainerFileSystemWithPkgMgrDb postLayerContainerFileSystem, LayerDetailsBuilder layerData) {
+        int layerIndex = layerData.getLayerIndex();
         logger.info("Querying pkg mgr for components after adding layer {}", layerIndex);
         final List<ComponentDetails> comps = packageGetter.queryPkgMgrForDependencies(postLayerContainerFileSystem);
         logger.info(String.format("Found %d components in file system after adding layer %d", comps.size(), layerIndex));
         for (ComponentDetails comp : comps) {
             logger.trace(String.format("\t%s/%s/%s", comp.getName(), comp.getVersion(), comp.getArchitecture()));
         }
-        final LayerDetails layer = new LayerDetails(layerIndex, layerExternalId, layerCmd, comps);
+        final LayerDetails layer = layerData.build(comps);
         imageComponentHierarchy.addLayer(layer);
         if ((platformTopLayerIndex != null) && (layerIndex == platformTopLayerIndex)) {
             imageComponentHierarchy.setPlatformComponents(comps);
@@ -68,5 +71,9 @@ public class ComponentHierarchyBuilder {
         List<ComponentDetails> netComponents = ListUtils.subtract(grossComponents, componentsToOmit);
         logger.debug(String.format("grossComponents: %d, componentsToOmit: %d, netComponents: %d", grossComponents.size(), componentsToOmit.size(), netComponents.size()));
         return netComponents;
+    }
+
+    public Optional<Integer> getPlatformTopLayerIndex() {
+        return Optional.ofNullable(platformTopLayerIndex);
     }
 }

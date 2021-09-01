@@ -1,6 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.image.docker;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
+import com.synopsys.integration.blackduck.imageinspector.image.common.LayerDetailsBuilder;
 import com.synopsys.integration.blackduck.imageinspector.image.common.LayerMetadata;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.synopsys.integration.exception.IntegrationException;
@@ -35,9 +36,9 @@ public class DockerImageLayerMetadataExtractorTest {
         Mockito.when(layerTar.getFile()).thenReturn(layerTarFile);
         Mockito.when(layerTarFile.getParentFile()).thenReturn(layerTarParent);
 
-        LayerMetadata layerMetadata = dockerImageLayerMetadataExtractor.getLayerMetadata(fullLayerMapping, layerTar, 0);
+        LayerDetailsBuilder layerData = new LayerDetailsBuilder(0, layerTar, LAYER_0_EXTERNAL_ID);
+        LayerMetadata layerMetadata = dockerImageLayerMetadataExtractor.getLayerMetadata(fullLayerMapping, layerData);
 
         assertEquals(TEST_COMMAND, layerMetadata.getLayerCmd().get(0));
-        assertEquals(LAYER_0_EXTERNAL_ID, layerMetadata.getLayerExternalId());
     }
 }

@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemCompatibilityChecker;
@@ -20,14 +19,11 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkg
 import com.synopsys.integration.blackduck.imageinspector.image.common.*;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchy;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
-import com.synopsys.integration.blackduck.imageinspector.image.docker.DockerImageConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.image.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.Os;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -59,8 +55,6 @@ class ImageInspectorTest {
                 imageComponentHierarchyLogger);
     }
 
-    // TODO these tests aren't actually testing all that much; they're not testing the graph. Are they worth it?
-
     @Test
     void testGenerateBdioFromGivenComponentsFull() throws IOException {
         String codeLocationPrefix = "testCodeLocationPrefix";
@@ -89,12 +83,13 @@ class ImageInspectorTest {
             testScenario.getFullLayerMapping(),
             testScenario.getImageComponentHierarchy(),
             testScenario.getBlackDuckProjectName(), testScenario.getBlackDuckProjectVersion(),
+            "testImage.tar",
             codeLocationPrefix, true, true, platformComponentsExcluded);
 
         assertEquals(testScenario.getBlackDuckProjectName(), imageInfoDerived.getFinalProjectName());
         assertEquals(testScenario.getBlackDuckProjectVersion(), imageInfoDerived.getFinalProjectVersionName());
         assertEquals(testScenario.getPkgMgrId(), imageInfoDerived.getImageInfoParsed().getImagePkgMgrDatabase().getPackageManager().name());
-        assertEquals(testScenario.getRepo(), imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getImageName());
+        assertEquals(testScenario.getRepo(), imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getImageName().get());
         assertEquals(testScenario.getLayers().get(0), imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getLayerInternalIds().get(0));
         assertEquals(testScenario.getLayers().get(1), imageInfoDerived.getFullLayerMapping().getManifestLayerMapping().getLayerInternalIds().get(1));
         assertEquals(String.format("%s/%s", testScenario.getBlackDuckProjectName(), testScenario.getBlackDuckProjectVersion()),

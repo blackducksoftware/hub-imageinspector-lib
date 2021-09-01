@@ -1,5 +1,6 @@
 package com.synopsys.integration.blackduck.imageinspector.image.oci;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageFormatMatchesChecker;
 import com.synopsys.integration.blackduck.imageinspector.image.docker.DockerImageFormatMatchesChecker;
@@ -15,7 +16,7 @@ public class OciImageFormatMatchesCheckerTest {
     @Test
     void testTrue() throws IntegrationException {
         File imageDir = new File("src/test/resources/mockOciTarContents");
-        OciLayoutParser ociLayoutParser = new OciLayoutParser(new GsonBuilder());
+        OciLayoutParser ociLayoutParser = new OciLayoutParser(new Gson());
         ImageFormatMatchesChecker ociImageFormatMatchesChecker = new OciImageFormatMatchesChecker(ociLayoutParser);
 
         assertTrue(ociImageFormatMatchesChecker.applies(imageDir));

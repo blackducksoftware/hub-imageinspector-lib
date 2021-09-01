@@ -7,8 +7,6 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.image.common;
 
-import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
-
 public interface ImageLayerMetadataExtractor {
-    LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, TypedArchiveFile layerTar, int layerIndex);
+    LayerMetadata getLayerMetadata(FullLayerMapping fullLayerMapping, LayerDetailsBuilder layerData);
 }

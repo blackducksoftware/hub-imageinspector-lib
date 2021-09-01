@@ -21,7 +21,5 @@ public class FullLayerMappingTest {
         assertEquals("layer0ExternalId", fullLayerMapping.getLayerExternalId(0));
         assertEquals("layer1ExternalId", fullLayerMapping.getLayerExternalId(1));
         assertEquals("layer2ExternalId", fullLayerMapping.getLayerExternalId(2));
-
-        assertEquals(1, fullLayerMapping.getPlatformTopLayerIndex("layer1ExternalId").get());
     }
 }

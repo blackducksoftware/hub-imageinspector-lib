@@ -9,5 +9,6 @@ package com.synopsys.integration.blackduck.imageinspector.image.common.archive;
 
 public enum ArchiveFileType {
     TAR,
-    TAR_GZIPPED
+    TAR_GZIPPED,
+    TAR_ZSTD
 }

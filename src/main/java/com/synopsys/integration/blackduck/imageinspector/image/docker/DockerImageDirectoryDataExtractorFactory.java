@@ -7,7 +7,7 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.image.docker;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.image.common.*;
 import com.synopsys.integration.blackduck.imageinspector.image.docker.manifest.DockerManifestFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
@@ -16,9 +16,13 @@ import java.io.File;
 
 public class DockerImageDirectoryDataExtractorFactory implements ImageDirectoryDataExtractorFactory {
     private final DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker;
+    private final CommonImageConfigParser commonImageConfigParser;
+    private final Gson gson;
 
-    public DockerImageDirectoryDataExtractorFactory(DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker) {
+    public DockerImageDirectoryDataExtractorFactory(final DockerImageFormatMatchesChecker dockerImageFormatMatchesChecker, final CommonImageConfigParser commonImageConfigParser, final Gson gson) {
         this.dockerImageFormatMatchesChecker = dockerImageFormatMatchesChecker;
+        this.commonImageConfigParser = commonImageConfigParser;
+        this.gson = gson;
     }
 
     @Override
@@ -28,19 +32,17 @@ public class DockerImageDirectoryDataExtractorFactory implements ImageDirectoryD
 
     @Override
     public ImageDirectoryDataExtractor createImageDirectoryDataExtractor() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
         FileOperations fileOperations = new FileOperations();
-        DockerImageConfigParser dockerImageConfigParser = new DockerImageConfigParser();
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
-        ImageDirectoryExtractor imageDirectoryExtractor = new DockerImageDirectoryExtractor(gsonBuilder, fileOperations, dockerImageConfigParser, dockerManifestFactory);
-        ImageOrderedLayerExtractor imageOrderedLayerExtractor = new ImageOrderedLayerExtractor();
-        ImageFormatMatchesChecker imageFormatMatchesChecker = new DockerImageFormatMatchesChecker();
-        return new ImageDirectoryDataExtractor(imageFormatMatchesChecker, imageDirectoryExtractor, imageOrderedLayerExtractor);
+        ImageDirectoryExtractor imageDirectoryExtractor = new DockerImageDirectoryExtractor(gson, fileOperations, commonImageConfigParser, dockerManifestFactory);
+        ImageLayerSorter imageOrderedLayerExtractor = new DockerImageLayerSorter();
+        LayerDataExtractor layerDataExtractor = new LayerDataExtractor(imageOrderedLayerExtractor);
+        return new ImageDirectoryDataExtractor(imageDirectoryExtractor, layerDataExtractor);
     }
 
     @Override
     public ImageLayerMetadataExtractor createImageLayerMetadataExtractor() {
-        DockerImageLayerConfigParser dockerImageLayerConfigParser = new DockerImageLayerConfigParser(new GsonBuilder());
+        DockerImageLayerConfigParser dockerImageLayerConfigParser = new DockerImageLayerConfigParser(commonImageConfigParser);
         return new DockerImageLayerMetadataExtractor(dockerImageLayerConfigParser);
     }
 }
