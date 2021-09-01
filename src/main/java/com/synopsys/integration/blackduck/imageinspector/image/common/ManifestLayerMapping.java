@@ -22,7 +22,7 @@ public class ManifestLayerMapping extends Stringable {
     private final String pathToImageConfigFileFromRoot;
     private final List<String> layerInternalIds;
 
-    public ManifestLayerMapping(String imageName, String tagName, String pathToImageConfigFileFromRoot, List<String> layerInternalIds) {
+    public ManifestLayerMapping(@Nullable String imageName, @Nullable String tagName, String pathToImageConfigFileFromRoot, List<String> layerInternalIds) {
         this.imageName = imageName;
         this.tagName = tagName;
         this.pathToImageConfigFileFromRoot = pathToImageConfigFileFromRoot;

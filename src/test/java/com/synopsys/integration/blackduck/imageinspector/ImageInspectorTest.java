@@ -83,6 +83,7 @@ class ImageInspectorTest {
             testScenario.getFullLayerMapping(),
             testScenario.getImageComponentHierarchy(),
             testScenario.getBlackDuckProjectName(), testScenario.getBlackDuckProjectVersion(),
+            "testImage.tar",
             codeLocationPrefix, true, true, platformComponentsExcluded);
 
         assertEquals(testScenario.getBlackDuckProjectName(), imageInfoDerived.getFinalProjectName());

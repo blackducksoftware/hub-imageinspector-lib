@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,13 +202,18 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         List<String> layerInternalIds = imageManifest.getLayers().stream()
                                             .map(OciDescriptor::getDigest)
                                             .collect(Collectors.toList());
-        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(
-                Optional.ofNullable(repo).orElse("unknown"),
-                Optional.ofNullable(tag).orElse("unknown"),
-                pathToImageConfigFileFromRoot, layerInternalIds);
+
+        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(repo, tag, pathToImageConfigFileFromRoot, layerInternalIds);
 
         List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
+    }
+
+    private String ensurePopulated(String field, String defaultValue) {
+        if (StringUtils.isBlank(field)) {
+            field = defaultValue;
+        }
+        return field;
     }
 
     private String findImageConfigFilePath(OciImageManifest imageManifest) throws IntegrationException {

@@ -44,13 +44,15 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkg
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
-@Tag("integration")
+/////////@Tag("integration")
 public class ImageInspectorApiIntTest {
     private static final String PROJECT_VERSION = "unitTest1";
     private static final String PROJECT = "SB001";
     private static final String SIMPLE_IMAGE_TARFILE = "build/images/test/alpine.tar";
     private static final String MULTILAYER_IMAGE_TARFILE = "build/images/test/centos_minus_vim_plus_bacula.tar";
     private static final String NOPKGMGR_IMAGE_TARFILE = "build/images/test/nopkgmgr.tar";
+    // TODO need to build this:
+    private static final String OCI_IMAGE_TARFILE = "/tmp/ccc/centos_minus_vim_plus_bacula-oci.tar";
 
     private static Os os;
     private static ImageInspectorApi imageInspectorApi;
@@ -226,5 +228,31 @@ public class ImageInspectorApiIntTest {
         System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());
         assertTrue(containerFileSystemFile.length() > 10000000);
         assertTrue(containerFileSystemFile.length() < 80000000);
+    }
+
+    @Test
+    public void testOciImage() throws IntegrationException, IOException, InterruptedException {
+        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
+        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("centos"));
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
+        Mockito.when(rpmPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
+        Mockito.when(rpmPkgMgr.getType()).thenReturn(PackageManagerEnum.RPM);
+        Mockito.when(rpmPkgMgr.getImagePackageManagerDirectory(Mockito.any(File.class))).thenReturn(new File("."));
+
+        File destinationFile = new File(tempDir, "out.tar.gz");
+        String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
+        ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
+                .setDockerTarfilePath(OCI_IMAGE_TARFILE)
+                //.setBlackDuckProjectName(PROJECT)
+                //.setBlackDuckProjectVersion(PROJECT_VERSION)
+                .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+                .setCurrentLinuxDistro("CENTOS")
+                .setCleanupWorkingDir(true)
+                .build();
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
+
+        File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
+        System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());
+        assertTrue(containerFileSystemFile.length() > 10000000);
     }
 }

@@ -30,6 +30,7 @@ import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import com.synopsys.integration.exception.IntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -101,6 +102,7 @@ public class ImageInspector {
         ImageInfoDerived imageInfoDerived = generateBdioFromGivenComponents(bdioGenerator, containerFileSystemWithPkgMgrDb, imageDirectoryData.getFullLayerMapping(),
                 imageComponentHierarchy,
                 imageInspectionRequest.getBlackDuckProjectName(), imageInspectionRequest.getBlackDuckProjectVersion(),
+                targetImageTarfile.getName(),
                 imageInspectionRequest.getCodeLocationPrefix(), imageInspectionRequest.isOrganizeComponentsByLayer(), imageInspectionRequest.isIncludeRemovedComponents(),
                 StringUtils.isNotBlank(effectivePlatformTopLayerExternalId));
         createContainerFileSystemTarIfRequested(containerFileSystem, imageInspectionRequest.getContainerFileSystemOutputPath(),
@@ -189,15 +191,16 @@ public class ImageInspector {
                                                             ImageComponentHierarchy imageComponentHierarchy,
                                                             final String givenProjectName,
                                                             final String givenProjectVersionName,
+                                                            final String givenArchiveFilename,
                                                             final String codeLocationPrefix,
                                                             final boolean organizeComponentsByLayer,
                                                             final boolean includeRemovedComponents,
                                                             final boolean platformComponentsExcluded) {
         //TODO- what to do when image repo/tag aren't known (oci image directory does not contain that info)?
         String codeLocationName = deriveCodeLocationName(codeLocationPrefix, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase(),
-                fullLayerMapping.getManifestLayerMapping().getImageName().get(), fullLayerMapping.getManifestLayerMapping().getTagName().get(), platformComponentsExcluded);
-        String finalProjectName = deriveBlackDuckProject(fullLayerMapping.getManifestLayerMapping().getImageName().get(), givenProjectName, platformComponentsExcluded);
-        String finalProjectVersionName = deriveBlackDuckProjectVersion(fullLayerMapping, givenProjectVersionName);
+                fullLayerMapping.getManifestLayerMapping().getImageName().orElse(null), fullLayerMapping.getManifestLayerMapping().getTagName().orElse(null), givenArchiveFilename, platformComponentsExcluded);
+        String finalProjectName = deriveBlackDuckProject(fullLayerMapping.getManifestLayerMapping().getImageName().orElse(null), givenProjectName, givenArchiveFilename, platformComponentsExcluded);
+        String finalProjectVersionName = deriveBlackDuckProjectVersion(fullLayerMapping.getManifestLayerMapping().getTagName().orElse(null), givenProjectVersionName);
         final SimpleBdioDocument bdioDocument = bdioGenerator.generateBdioDocumentFromImageComponentHierarchy(codeLocationName,
                 finalProjectName, finalProjectVersionName, containerFileSystemWithPkgMgrDb.getLinuxDistroName(), imageComponentHierarchy, organizeComponentsByLayer,
                 includeRemovedComponents);
@@ -217,9 +220,9 @@ public class ImageInspector {
         return imageInfoDerived;
     }
 
-    private String deriveCodeLocationName(final String codeLocationPrefix, ImagePkgMgrDatabase imagePkgMgrDatabase, String repo, String tag, final boolean platformComponentsExcluded) {
+    private String deriveCodeLocationName(final String codeLocationPrefix, ImagePkgMgrDatabase imagePkgMgrDatabase, @Nullable String repo, @Nullable String tag, @Nullable String tarchiveFilename, final boolean platformComponentsExcluded) {
         final String pkgMgrName = derivePackageManagerName(imagePkgMgrDatabase);
-        return Names.getCodeLocationName(codeLocationPrefix, repo, tag,
+        return Names.getCodeLocationName(codeLocationPrefix, repo, tag, tarchiveFilename,
                 pkgMgrName, platformComponentsExcluded);
     }
 
@@ -233,25 +236,27 @@ public class ImageInspector {
         return pkgMgrName;
     }
 
-    private String deriveBlackDuckProject(final String imageName, final String projectName,
+    private String deriveBlackDuckProject(@Nullable String imageName, final String givenProjectName, @Nullable String archiveFilename,
         final boolean platformComponentsExcluded) {
         String blackDuckProjectName;
-        if (StringUtils.isBlank(projectName)) {
-            blackDuckProjectName = Names.getBlackDuckProjectNameFromImageName(imageName, platformComponentsExcluded);
+        if (StringUtils.isBlank(givenProjectName)) {
+            blackDuckProjectName = Names.getBlackDuckProjectNameFromImageName(imageName, archiveFilename, platformComponentsExcluded);
+            logger.debug("Derived project name: {}", blackDuckProjectName);
         } else {
             logger.debug("Using project from config property");
-            blackDuckProjectName = projectName;
+            blackDuckProjectName = givenProjectName;
         }
         return blackDuckProjectName;
     }
 
-    private String deriveBlackDuckProjectVersion(final FullLayerMapping mapping, final String versionName) {
+    private String deriveBlackDuckProjectVersion(@Nullable String givenTagName, final String givenVersionName) {
         String blackDuckVersionName;
-        if (StringUtils.isBlank(versionName)) {
-            blackDuckVersionName = mapping.getManifestLayerMapping().getTagName().get();
+        if (StringUtils.isBlank(givenVersionName)) {
+            blackDuckVersionName = Names.getBlackDuckProjectVersionNameFromImageTag(givenTagName);
+            logger.debug("Derived project version: {}", blackDuckVersionName);
         } else {
             logger.debug("Using project version from config property");
-            blackDuckVersionName = versionName;
+            blackDuckVersionName = givenVersionName;
         }
         return blackDuckVersionName;
     }
