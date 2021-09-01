@@ -8,6 +8,7 @@
 package com.synopsys.integration.blackduck.imageinspector.image.common;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
+import com.synopsys.integration.exception.IntegrationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ImageLayerSorter {
-    public List<TypedArchiveFile> getOrderedLayerArchives(List<TypedArchiveFile> unOrderedLayerArchives, ManifestLayerMapping manifestLayerMapping) {
+    public List<TypedArchiveFile> getOrderedLayerArchives(List<TypedArchiveFile> unOrderedLayerArchives, ManifestLayerMapping manifestLayerMapping) throws IntegrationException {
         List<TypedArchiveFile> orderedLayerArchives = new ArrayList<>(manifestLayerMapping.getLayerInternalIds().size());
         for (String layerInternalId : manifestLayerMapping.getLayerInternalIds()) {
             orderedLayerArchives.add(getLayerArchive(unOrderedLayerArchives, layerInternalId));
@@ -23,5 +24,5 @@ public abstract class ImageLayerSorter {
         return orderedLayerArchives;
     }
 
-    protected abstract TypedArchiveFile getLayerArchive(List<TypedArchiveFile> unOrderedLayerArchives, String layerInternalId);
+    protected abstract TypedArchiveFile getLayerArchive(List<TypedArchiveFile> unOrderedLayerArchives, String layerInternalId) throws IntegrationException;
 }

@@ -2,6 +2,7 @@ package com.synopsys.integration.blackduck.imageinspector.image.common;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.image.docker.DockerImageLayerSorter;
+import com.synopsys.integration.exception.IntegrationException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -14,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class DockerImageLayerSorterTest {
 
     @Test
-    void test() {
+    void test() throws IntegrationException {
         ImageLayerSorter imageOrderedLayerExtractor = new DockerImageLayerSorter();
         ManifestLayerMapping manifestLayerMapping = Mockito.mock(ManifestLayerMapping.class);
         List<String> layerInternalIds = Arrays.asList("layer0InternalId", "layer1InternalId");

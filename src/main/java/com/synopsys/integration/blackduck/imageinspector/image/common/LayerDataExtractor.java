@@ -8,6 +8,7 @@
 package com.synopsys.integration.blackduck.imageinspector.image.common;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
+import com.synopsys.integration.exception.IntegrationException;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +21,7 @@ public class LayerDataExtractor {
         this.layerSorter = layerSorter;
     }
 
-    public List<LayerDetailsBuilder> getLayerData(List<TypedArchiveFile> unOrderedLayerArchives, FullLayerMapping fullLayerMapping) {
+    public List<LayerDetailsBuilder> getLayerData(List<TypedArchiveFile> unOrderedLayerArchives, FullLayerMapping fullLayerMapping) throws IntegrationException {
         AtomicInteger layerIndex = new AtomicInteger(0);
         return layerSorter.getOrderedLayerArchives(unOrderedLayerArchives, fullLayerMapping.getManifestLayerMapping()).stream()
                                                   .map(archive -> new LayerDetailsBuilder(layerIndex.get(), archive, fullLayerMapping.getLayerExternalId(layerIndex.getAndIncrement())))

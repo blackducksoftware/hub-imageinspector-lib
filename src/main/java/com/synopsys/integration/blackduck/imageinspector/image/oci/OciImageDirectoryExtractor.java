@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,7 +179,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     @Override
-    public FullLayerMapping getLayerMapping(final File imageDir, final String repo, final String tag) throws IntegrationException {
+    public FullLayerMapping getLayerMapping(final File imageDir, @Nullable String repo, @Nullable String tag) throws IntegrationException {
 
         OciImageManifest imageManifest;
         Optional<File> manifestFile = findManifestFile(imageDir);
@@ -200,7 +201,10 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         List<String> layerInternalIds = imageManifest.getLayers().stream()
                                             .map(OciDescriptor::getDigest)
                                             .collect(Collectors.toList());
-        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(repo, tag, pathToImageConfigFileFromRoot, layerInternalIds);
+        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(
+                Optional.ofNullable(repo).orElse("unknown"),
+                Optional.ofNullable(tag).orElse("unknown"),
+                pathToImageConfigFileFromRoot, layerInternalIds);
 
         List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
