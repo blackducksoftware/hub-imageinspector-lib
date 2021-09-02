@@ -37,7 +37,13 @@ public class ImageLayerApplier {
         logger.trace(String.format("Extracting layer: %s into %s", layerTar.getFile().getAbsolutePath(), destinationDir.getAbsolutePath()));
         List<File> filesToRemove = new LinkedList<>();
         if (layerTar.getType().equals(ArchiveFileType.TAR)) {
-            filesToRemove = imageLayerArchiveExtractor.extractLayerTarToDir(fileOperations, layerTar.getFile(), destinationDir);
+            try {
+                filesToRemove = imageLayerArchiveExtractor.extractLayerTarToDir(fileOperations, layerTar.getFile(), destinationDir);
+            } catch (IOException e) {
+                // podman writes tar.gz layer files, but gives them media type: application/vnd.oci.image.layer.v1.tar
+                logger.warn("Extracting {} as a tarfile failed; will try again, this time as a gzipped tarfile. Error was: {}", layerTar.getFile().getAbsolutePath(), e.getMessage());
+                filesToRemove = imageLayerArchiveExtractor.extractLayerGzipTarToDir(fileOperations, layerTar.getFile(), destinationDir);
+            }
         } else if (layerTar.getType().equals(ArchiveFileType.TAR_GZIPPED)) {
             filesToRemove = imageLayerArchiveExtractor.extractLayerGzipTarToDir(fileOperations, layerTar.getFile(), destinationDir);
         } else if (layerTar.getType().equals(ArchiveFileType.TAR_ZSTD)) {
