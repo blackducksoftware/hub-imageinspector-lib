@@ -25,6 +25,7 @@ import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayer
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -44,7 +45,7 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkg
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmPkgMgr;
 import com.synopsys.integration.exception.IntegrationException;
 
-/////////@Tag("integration")
+@Tag("integration")
 public class ImageInspectorApiIntTest {
     private static final String PROJECT_VERSION = "unitTest1";
     private static final String PROJECT = "SB001";
@@ -230,6 +231,7 @@ public class ImageInspectorApiIntTest {
         assertTrue(containerFileSystemFile.length() < 80000000);
     }
 
+    @Disabled
     @Test
     public void testOciImage() throws IntegrationException, IOException, InterruptedException {
         ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
