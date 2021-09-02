@@ -22,26 +22,13 @@ public class OciDescriptor {
     @SerializedName("size")
     private String size;
 
-    @SerializedName("urls")
-    private List<String> urls;
-
-    @SerializedName("annotations")
-    private List<String> annotations;
+    // annotations looks potentially useful (sometimes has repo:tag), but also problematic: spec says it should be
+    // an array of strings, but buildah gives it a single string (non-array) value. I've removed the reference for now.
 
     public OciDescriptor(final String mediaType, final String digest, final String size) {
         this.mediaType = mediaType;
         this.digest = digest;
         this.size = size;
-        this.urls = new LinkedList<>();
-        this.annotations = new LinkedList<>();
-    }
-
-    public OciDescriptor(final String mediaType, final String digest, final String size, final List<String> urls, final List<String> annotations) {
-        this.mediaType = mediaType;
-        this.digest = digest;
-        this.size = size;
-        this.urls = urls;
-        this.annotations = annotations;
     }
 
     public String getMediaType() {
@@ -54,13 +41,5 @@ public class OciDescriptor {
 
     public String getSize() {
         return size;
-    }
-
-    public List<String> getUrls() {
-        return urls;
-    }
-
-    public List<String> getAnnotations() {
-        return annotations;
     }
 }
