@@ -77,8 +77,9 @@ task buildTestDockerTarfile(type: Exec, dependsOn: buildTestDockerImage) {
 }
 
 task buildTestOciFilesystem(type: Exec, dependsOn: [buildTestDockerTarfile]) {
-    commandLine "skopeo", "copy", "docker-archive:${buildDir}/images/test/centos_minus_vim_plus_bacula.tar", "oci:${buildDir}/images/test/centos_minus_vim_plus_bacula-oci",     \
-    "--override-arch=amd64", "--override-os=linux"
+    commandLine "echo", "Building of OCI test images is disabled for now"
+    //commandLine "skopeo", "copy", "docker-archive:${buildDir}/images/test/centos_minus_vim_plus_bacula.tar", "oci:${buildDir}/images/test/centos_minus_vim_plus_bacula-oci",     \
+    //"--override-arch=amd64", "--override-os=linux"
 }
 
 task createTestFile(type: Exec) {
@@ -116,8 +117,9 @@ task buildAlpineTestDockerTarfile(type: Exec, dependsOn: [createImagesDir, pullA
 }
 
 task buildAlpineTestOciFilesystem(type: Exec, dependsOn: [buildAlpineTestDockerTarfile]) {
-    commandLine "skopeo", "copy", "docker-archive:${buildDir}/images/test/alpine.tar", "oci:${buildDir}/images/test/alpine-oci",     \
-    "--override-arch=amd64", "--override-os=linux"
+    commandLine "echo", "Building of OCI test images is disabled for now"
+    // commandLine "skopeo", "copy", "docker-archive:${buildDir}/images/test/alpine.tar", "oci:${buildDir}/images/test/alpine-oci",     \
+    // "--override-arch=amd64", "--override-os=linux"
 }
 
 task createAlpineDir(type: Exec) {
