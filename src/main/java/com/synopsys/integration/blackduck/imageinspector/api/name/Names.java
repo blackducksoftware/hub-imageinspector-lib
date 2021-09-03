@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Names {
     private static final String APP_ONLY_HINT = "app";
+    public static final String UNKNOWN = "unknown";
 
     private Names() {
     }
@@ -58,7 +59,7 @@ public class Names {
 
     public static String getBlackDuckProjectVersionNameFromImageTag(@Nullable String tagName) {
         if (StringUtils.isBlank(tagName)) {
-            return "unknown";
+            return UNKNOWN;
         }
         return tagName;
     }
@@ -66,7 +67,7 @@ public class Names {
     private static String deriveNameFromFilename(@Nullable String fileName) {
         String derivedName;
         if (StringUtils.isBlank(fileName) || ".".equals(fileName)) {
-            derivedName = "unknown";
+            derivedName = UNKNOWN;
         } else {
             if (fileName.startsWith(".")) {
                 fileName = fileName.substring(1);
@@ -83,7 +84,7 @@ public class Names {
     private static String deriveExtensionFromFilename(@Nullable String fileName) {
         String derivedExtension;
         if (StringUtils.isBlank(fileName) || ".".equals(fileName)) {
-            derivedExtension = "unknown";
+            derivedExtension = UNKNOWN;
         } else {
             if (fileName.startsWith(".")) {
                 fileName = fileName.substring(1);
@@ -91,7 +92,7 @@ public class Names {
             if (fileName.contains(".") && (!fileName.endsWith("."))) {
                 derivedExtension = fileName.substring(fileName.lastIndexOf('.')+1);
             } else {
-                derivedExtension = "unknown";
+                derivedExtension = UNKNOWN;
             }
         }
         return derivedExtension;

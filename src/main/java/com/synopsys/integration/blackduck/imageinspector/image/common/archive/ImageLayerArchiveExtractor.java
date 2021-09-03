@@ -32,22 +32,24 @@ import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 @Component
 public class ImageLayerArchiveExtractor {
     private static final Logger logger = LoggerFactory.getLogger(ImageLayerArchiveExtractor.class);
+    public static final String TARFILE_FORMAT_STRING = "tarFile: %s";
+    public static final String UTF_8 = "UTF-8";
 
     public List<File> extractLayerTarToDir(final FileOperations fileOperations, final File tarFile, final File outputDir) throws IOException {
-        logger.debug(String.format("tarFile: %s", tarFile.getAbsolutePath()));
-        final TarArchiveInputStream tarFileInputStream = new TarArchiveInputStream(new FileInputStream(tarFile), "UTF-8");
+        logger.debug(String.format(TARFILE_FORMAT_STRING, tarFile.getAbsolutePath()));
+        final TarArchiveInputStream tarFileInputStream = new TarArchiveInputStream(new FileInputStream(tarFile), UTF_8);
         return extractLayerTarToDir(fileOperations, tarFileInputStream, outputDir);
     }
 
     public List<File> extractLayerGzipTarToDir(final FileOperations fileOperations, final File tarFile, final File outputDir) throws IOException {
-        logger.debug(String.format("tarFile: %s", tarFile.getAbsolutePath()));
-        final TarArchiveInputStream tarFileInputStream = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(tarFile)), "UTF-8");
+        logger.debug(String.format(TARFILE_FORMAT_STRING, tarFile.getAbsolutePath()));
+        final TarArchiveInputStream tarFileInputStream = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(tarFile)), UTF_8);
         return extractLayerTarToDir(fileOperations, tarFileInputStream, outputDir);
     }
 
     public List<File> extractLayerZstdTarToDir(final FileOperations fileOperations, final File tarFile, final File outputDir) throws IOException {
-        logger.debug(String.format("tarFile: %s", tarFile.getAbsolutePath()));
-        final TarArchiveInputStream tarFileInputStream = new TarArchiveInputStream(new ZstdCompressorInputStream(new FileInputStream(tarFile)), "UTF-8");
+        logger.debug(String.format(TARFILE_FORMAT_STRING, tarFile.getAbsolutePath()));
+        final TarArchiveInputStream tarFileInputStream = new TarArchiveInputStream(new ZstdCompressorInputStream(new FileInputStream(tarFile)), UTF_8);
         return extractLayerTarToDir(fileOperations, tarFileInputStream, outputDir);
     }
 
