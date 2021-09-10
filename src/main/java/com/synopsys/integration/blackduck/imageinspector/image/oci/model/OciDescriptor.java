@@ -47,6 +47,8 @@ public class OciDescriptor {
         return size;
     }
 
+    // TODO The following methods probably belong in a separate class to keep this class a pure model class
+
     public Optional<Map<String, String>> getAnnotations() {
         return Optional.ofNullable(annotations);
     }

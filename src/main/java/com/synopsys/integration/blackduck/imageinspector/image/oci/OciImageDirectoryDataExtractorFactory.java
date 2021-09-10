@@ -39,7 +39,8 @@ public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryData
     public ImageDirectoryDataExtractor createImageDirectoryDataExtractor() {
         FileOperations fileOperations = new FileOperations();
         OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
-        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, commonImageConfigParser, ociImageIndexFileParser);
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser();
+        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, commonImageConfigParser, ociImageIndexFileParser, ociManifestDescriptorParser);
         ImageLayerSorter imageOrderedLayerExtractor = new OciImageLayerSorter();
         LayerDataExtractor layerDataExtractor = new LayerDataExtractor(imageOrderedLayerExtractor);
         return new ImageDirectoryDataExtractor(ociImageDirectoryExtractor, layerDataExtractor);

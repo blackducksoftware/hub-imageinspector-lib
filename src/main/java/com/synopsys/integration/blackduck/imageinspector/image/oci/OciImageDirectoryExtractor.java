@@ -50,48 +50,73 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     private FileOperations fileOperations;
     private final CommonImageConfigParser commonImageConfigParser;
     private final OciImageIndexFileParser ociImageIndexFileParser;
+    private final OciManifestDescriptorParser ociManifestDescriptorParser;
 
     public OciImageDirectoryExtractor(final Gson gson, FileOperations fileOperations, CommonImageConfigParser commonImageConfigParser,
-                                      OciImageIndexFileParser ociImageIndexFileParser) {
+                                      OciImageIndexFileParser ociImageIndexFileParser, OciManifestDescriptorParser ociManifestDescriptorParser) {
         this.gson = gson;
         this.fileOperations = fileOperations;
         this.commonImageConfigParser = commonImageConfigParser;
         this.ociImageIndexFileParser = ociImageIndexFileParser;
+        this.ociManifestDescriptorParser = ociManifestDescriptorParser;
     }
 
     @Override
     public List<TypedArchiveFile> getLayerArchives(final File imageDir) throws IntegrationException {
         File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
 
-        Optional<File> manifestFile = findManifestFile(imageDir);
-        if (!manifestFile.isPresent()) {
-            logger.trace("Could not find manifest file.");
-            return new LinkedList<>();
-        }
+        // TODO this code is repeated below
+        OciImageIndex ociImageIndex = extractOciImageIndex(imageDir);
+        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex);
+        File manifestFile = findManifestFile(imageDir, manifestDescriptor);
 
-        try { //TODO- this is probably not the best way to handle this exception...
-            return parseLayerArchives(manifestFile.get(), blobsDir);
+        try {
+            return parseLayerArchives(manifestFile, blobsDir);
         } catch (IOException e) {
-            throw new IntegrationException(e.getMessage());
+            throw new IntegrationException(String.format("Error parsing layer archives from manifest file %s: %s", manifestFile.getAbsolutePath(), e.getMessage()), e);
         }
     }
 
-    private Optional<File> findManifestFile(File imageDir) throws IntegrationException {
-        File indexFile = new File (imageDir, INDEX_FILE_NAME);
+    @Override
+    public FullLayerMapping getLayerMapping(final File imageDir, @Nullable String repo, @Nullable String tag) throws IntegrationException {
+        OciImageIndex ociImageIndex = extractOciImageIndex(imageDir);
+        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex);
+        Optional<String> repoTagString = manifestDescriptor.getRepoTagString();
 
-        OciImageIndex ociImageIndex = ociImageIndexFileParser.loadIndex(indexFile);
-        String manifestFileDigest = ociImageIndexFileParser.parseManifestFileDigestFromImageIndex(ociImageIndex);
-        File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
+        File manifestFile = findManifestFile(imageDir, manifestDescriptor);
+        String manifestFileText;
+        try {
+            manifestFileText = fileOperations.readFileToString(manifestFile);
+        } catch (IOException e) {
+            throw new IntegrationException(String.format("Unable to parse manifest file %s", manifestFile.getAbsolutePath()));
+        }
+
+        OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
+
+
+        String pathToImageConfigFileFromRoot = findImageConfigFilePath(imageManifest);
+        List<String> layerInternalIds = imageManifest.getLayers().stream()
+                                            .map(OciDescriptor::getDigest)
+                                            .collect(Collectors.toList());
+
+        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(repo, tag, pathToImageConfigFileFromRoot, layerInternalIds);
+
+        List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
+        return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
+    }
+
+    private OciImageIndex extractOciImageIndex(File imageDir) throws IntegrationException {
+        File indexFile = new File (imageDir, INDEX_FILE_NAME);
+        return ociImageIndexFileParser.loadIndex(indexFile);
+    }
+
+    private File findManifestFile(File imageDir, OciDescriptor manifestDescriptor) throws IntegrationException {
+        String manifestFileDigest = manifestDescriptor.getDigest();
 
         String pathToManifestFile = parsePathToBlobFileFromDigest(manifestFileDigest);
-        File manifestFile;
-        try {
-            manifestFile = findBlob(blobsDir, pathToManifestFile);
-        } catch (IntegrationException e) {
-            logger.error(e.getMessage());
-            return Optional.empty();
-        }
-        return Optional.of(manifestFile);
+        logger.trace("Path to manifest file: {}", pathToManifestFile);
+        File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
+        return findBlob(blobsDir, pathToManifestFile);
     }
 
     private ArchiveFileType parseArchiveTypeFromLayerDescriptorMediaType(String mediaType) throws IntegrationException {
@@ -150,37 +175,6 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             throw new IntegrationException(String.format("Blob referenced by image manifest could not be found at %s.", blob.getAbsolutePath()));
         }
         return blob;
-    }
-
-    @Override
-    public FullLayerMapping getLayerMapping(final File imageDir, @Nullable String repo, @Nullable String tag) throws IntegrationException {
-
-        OciImageManifest imageManifest;
-        // TODO use exception instead of optional
-        Optional<File> manifestFile = findManifestFile(imageDir);
-        if (!manifestFile.isPresent()) {
-            throw new IntegrationException("Could not find manifest file");
-        }
-
-        String manifestFileText;
-        try {
-            manifestFileText = fileOperations.readFileToString(manifestFile.get());
-        } catch (IOException e) {
-            throw new IntegrationException(String.format("Unable to parse manifest file %s", manifestFile.get().getAbsolutePath()));
-        }
-
-        imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
-
-
-        String pathToImageConfigFileFromRoot = findImageConfigFilePath(imageManifest);
-        List<String> layerInternalIds = imageManifest.getLayers().stream()
-                                            .map(OciDescriptor::getDigest)
-                                            .collect(Collectors.toList());
-
-        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(repo, tag, pathToImageConfigFileFromRoot, layerInternalIds);
-
-        List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
-        return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
     }
 
     private String ensurePopulated(String field, String defaultValue) {

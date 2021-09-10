@@ -35,8 +35,10 @@ public class OciImageDirectoryExtractorTest {
         Gson gson = new Gson();
         FileOperations fileOperations = new FileOperations();
         CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser();
         OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, configParser,
-                new OciImageIndexFileParser(gson, fileOperations));
+                new OciImageIndexFileParser(gson, fileOperations),
+                ociManifestDescriptorParser);
 
         List<TypedArchiveFile> layerArchives = extractor.getLayerArchives(ociImageDir);
         Assertions.assertEquals(expectedArchiveList.size(), layerArchives.size());
@@ -78,7 +80,9 @@ public class OciImageDirectoryExtractorTest {
         FileOperations fileOperations = new FileOperations();
         CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
         OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
-        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, configParser, ociImageIndexFileParser);
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser();
+        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, configParser, ociImageIndexFileParser,
+                ociManifestDescriptorParser);
         File alpineOciImageDir = new File(imagePath);
         String testRepo = "testRepo";
         String testTag = "testTag";

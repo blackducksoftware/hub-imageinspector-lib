@@ -22,8 +22,12 @@ public class OciImageIndexFileParserTest {
         OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
 
         OciImageIndex ociImageIndex = ociImageIndexFileParser.loadIndex(indexFile);
-        assertEquals(1, ociImageIndex.getManifests().size());
-        String manifestDigest = ociImageIndexFileParser.parseManifestFileDigestFromImageIndex(ociImageIndex);
+        // TODO this test is now cluttered / testing different classes
+        // TODO need a test class for OciManifestDescriptorParser
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser();
+        String manifestDigest = ociManifestDescriptorParser.getManifestFileDigest(ociImageIndex);
+        //assertEquals(1, ociImageIndex.getManifests().size());
+        //String manifestDigest = ociImageIndexFileParser.parseManifestFileDigestFromImageIndex(ociImageIndex);
         assertEquals("sha256:8bd1d67ebe6aeae405d824c21560ec9aa2371ed48aa0c4a833e4672cadb0cf3e", manifestDigest);
     }
 
