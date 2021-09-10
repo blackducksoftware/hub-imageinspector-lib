@@ -1,0 +1,1 @@
+{"schemaVersion":2,"manifests":[{"mediaType":"application/vnd.oci.image.manifest.v1+json","digest":"sha256:8bd1d67ebe6aeae405d824c21560ec9aa2371ed48aa0c4a833e4672cadb0cf3e","size":499,"annotations":{"org.opencontainers.image.ref.name":"localhost/centosplus:1"},"platform":{"architecture":"amd64","os":"linux"}}]}

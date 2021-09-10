@@ -32,8 +32,11 @@ public class OciImageDirectoryExtractorTest {
     @MethodSource("testParseLayerArchivesProvider")
     public void testParseLayerArchives(String testImagePath, List<TypedArchiveFile> expectedArchiveList) throws IntegrationException {
         File ociImageDir = new File(testImagePath);
-        CommonImageConfigParser configParser = new CommonImageConfigParser(new Gson());
-        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(new Gson(), new FileOperations(), configParser);
+        Gson gson = new Gson();
+        FileOperations fileOperations = new FileOperations();
+        CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
+        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, configParser,
+                new OciImageIndexFileParser(gson, fileOperations));
 
         List<TypedArchiveFile> layerArchives = extractor.getLayerArchives(ociImageDir);
         Assertions.assertEquals(expectedArchiveList.size(), layerArchives.size());
@@ -71,8 +74,11 @@ public class OciImageDirectoryExtractorTest {
     @ParameterizedTest
     @MethodSource("testGetLayerMappingProvider")
     public void testGetLayerMapping(String imagePath, FullLayerMapping expected) throws IntegrationException {
-        CommonImageConfigParser configParser = new CommonImageConfigParser(new Gson());
-        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(new Gson(), new FileOperations(), configParser);
+        Gson gson = new Gson();
+        FileOperations fileOperations = new FileOperations();
+        CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
+        OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
+        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, configParser, ociImageIndexFileParser);
         File alpineOciImageDir = new File(imagePath);
         String testRepo = "testRepo";
         String testTag = "testTag";
