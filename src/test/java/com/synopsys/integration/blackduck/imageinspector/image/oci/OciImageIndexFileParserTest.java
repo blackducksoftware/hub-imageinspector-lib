@@ -1,6 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.image.oci;
 
 import com.google.gson.Gson;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
 import com.synopsys.integration.blackduck.imageinspector.image.oci.model.OciImageIndex;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.exception.IntegrationException;
@@ -24,8 +25,8 @@ public class OciImageIndexFileParserTest {
         OciImageIndex ociImageIndex = ociImageIndexFileParser.loadIndex(indexFile);
         // TODO this test is now cluttered / testing different classes
         // TODO need a test class for OciManifestDescriptorParser
-        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser();
-        String manifestDigest = ociManifestDescriptorParser.getManifestFileDigest(ociImageIndex);
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
+        String manifestDigest = ociManifestDescriptorParser.getManifestFileDigest(ociImageIndex, "", "");
         //assertEquals(1, ociImageIndex.getManifests().size());
         //String manifestDigest = ociImageIndexFileParser.parseManifestFileDigestFromImageIndex(ociImageIndex);
         assertEquals("sha256:8bd1d67ebe6aeae405d824c21560ec9aa2371ed48aa0c4a833e4672cadb0cf3e", manifestDigest);

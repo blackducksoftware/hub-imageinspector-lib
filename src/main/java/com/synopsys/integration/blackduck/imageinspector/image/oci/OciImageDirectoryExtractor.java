@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -62,12 +63,12 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     @Override
-    public List<TypedArchiveFile> getLayerArchives(final File imageDir) throws IntegrationException {
+    public List<TypedArchiveFile> getLayerArchives(final File imageDir, @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
         File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
 
-        // TODO this code is repeated below
+        // TODO this code is repeated below / executed twice
         OciImageIndex ociImageIndex = extractOciImageIndex(imageDir);
-        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex);
+        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex, givenRepo, givenTag);
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
 
         try {
@@ -78,11 +79,19 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     @Override
-    public FullLayerMapping getLayerMapping(final File imageDir, @Nullable String repo, @Nullable String tag) throws IntegrationException {
+    public FullLayerMapping getLayerMapping(final File imageDir, @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
         OciImageIndex ociImageIndex = extractOciImageIndex(imageDir);
-        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex);
-        Optional<String> repoTagString = manifestDescriptor.getRepoTagString();
+        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex, givenRepo, givenTag);
 
+        String actualRepo = givenRepo;
+        String actualTag = givenTag;
+        if (manifestDescriptor.getRepoTagString().isPresent()) {
+            logger.debug(String.format("foundRepoTag: %s", manifestDescriptor.getRepoTagString().get()));
+            final ImageNameResolver resolver = new ImageNameResolver(manifestDescriptor.getRepoTagString().get());
+            actualRepo = resolver.getNewImageRepo().orElse(givenRepo);
+            actualTag = resolver.getNewImageTag().orElse(givenTag);
+            logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", actualRepo, actualTag));
+        }
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
         String manifestFileText;
         try {
@@ -99,7 +108,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                                             .map(OciDescriptor::getDigest)
                                             .collect(Collectors.toList());
 
-        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(repo, tag, pathToImageConfigFileFromRoot, layerInternalIds);
+        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(actualRepo, actualTag, pathToImageConfigFileFromRoot, layerInternalIds);
 
         List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);

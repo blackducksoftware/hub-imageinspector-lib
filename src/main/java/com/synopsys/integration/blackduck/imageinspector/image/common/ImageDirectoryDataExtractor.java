@@ -25,7 +25,7 @@ public class ImageDirectoryDataExtractor {
     }
 
     public ImageDirectoryData extract(File imageDir, @Nullable String givenRepo, @Nullable String givenTag) throws IOException, IntegrationException {
-        List<TypedArchiveFile> unOrderedLayerArchives = imageDirectoryExtractor.getLayerArchives(imageDir);
+        List<TypedArchiveFile> unOrderedLayerArchives = imageDirectoryExtractor.getLayerArchives(imageDir, givenRepo, givenTag);
         FullLayerMapping fullLayerMapping = imageDirectoryExtractor.getLayerMapping(imageDir, givenRepo, givenTag);
         List<LayerDetailsBuilder> layerData = layerDataExtractor.getLayerData(unOrderedLayerArchives, fullLayerMapping);
         return new ImageDirectoryData(fullLayerMapping.getManifestLayerMapping().getImageName().orElse(null), fullLayerMapping.getManifestLayerMapping().getTagName().orElse(null), fullLayerMapping, layerData);

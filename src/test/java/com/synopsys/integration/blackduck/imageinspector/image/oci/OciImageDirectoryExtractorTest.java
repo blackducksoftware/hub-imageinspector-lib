@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -35,12 +37,12 @@ public class OciImageDirectoryExtractorTest {
         Gson gson = new Gson();
         FileOperations fileOperations = new FileOperations();
         CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
-        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser();
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
         OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, configParser,
                 new OciImageIndexFileParser(gson, fileOperations),
                 ociManifestDescriptorParser);
 
-        List<TypedArchiveFile> layerArchives = extractor.getLayerArchives(ociImageDir);
+        List<TypedArchiveFile> layerArchives = extractor.getLayerArchives(ociImageDir, null, null);
         Assertions.assertEquals(expectedArchiveList.size(), layerArchives.size());
 
         for (int i = 0; i < expectedArchiveList.size(); i++) {
@@ -75,24 +77,27 @@ public class OciImageDirectoryExtractorTest {
 
     @ParameterizedTest
     @MethodSource("testGetLayerMappingProvider")
-    public void testGetLayerMapping(String imagePath, FullLayerMapping expected) throws IntegrationException {
+    public void testGetLayerMapping(String imagePath, FullLayerMapping expected, String givenRepo, String givenTag) throws IntegrationException {
         Gson gson = new Gson();
         FileOperations fileOperations = new FileOperations();
         CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
         OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
-        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser();
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
         OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, configParser, ociImageIndexFileParser,
                 ociManifestDescriptorParser);
         File alpineOciImageDir = new File(imagePath);
-        String testRepo = "testRepo";
-        String testTag = "testTag";
 
-        FullLayerMapping mapping = extractor.getLayerMapping(alpineOciImageDir, testRepo, testTag);
+        FullLayerMapping mapping = extractor.getLayerMapping(alpineOciImageDir, givenRepo, givenTag);
         ManifestLayerMapping manifestLayerMapping = mapping.getManifestLayerMapping();
         ManifestLayerMapping expectedManifestMapping = expected.getManifestLayerMapping();
 
-        Assertions.assertEquals(testRepo, manifestLayerMapping.getImageName().get());
-        Assertions.assertEquals(testTag, manifestLayerMapping.getTagName().get());
+        if (StringUtils.isBlank(givenRepo)) {
+            Assertions.assertTrue(StringUtils.isBlank(manifestLayerMapping.getImageName().orElse(null)));
+            Assertions.assertTrue(StringUtils.isBlank(manifestLayerMapping.getTagName().orElse(null)));
+        } else {
+            Assertions.assertEquals(givenRepo, manifestLayerMapping.getImageName().isPresent());
+            Assertions.assertEquals(givenTag, manifestLayerMapping.getTagName().isPresent());
+        }
         Assertions.assertEquals(expectedManifestMapping.getPathToImageConfigFileFromRoot(), manifestLayerMapping.getPathToImageConfigFileFromRoot());
 
         List<String> externalIds = mapping.getLayerExternalIds();
@@ -124,7 +129,9 @@ public class OciImageDirectoryExtractorTest {
                     Arrays.asList(
                         "sha256:b2d5eeeaba3a22b9b8aa97261957974a6bd65274ebd43e1d81d0a7b8b752b116"
                     )
-                )
+                ),
+                    "",
+                    ""
             ),
             arguments(
                 OCI_CENTOS_MINUS_VIM_BACULA_TEST_IMAGE_PATH,
@@ -140,7 +147,9 @@ public class OciImageDirectoryExtractorTest {
                         "sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11",
                         "sha256:a43c72846ed18b6c373821c3aaa1ba2eaafc273b8b7d0a03cc08b94909faa525"
                     )
-                )
+                ),
+                    "",
+                    ""
             )
         );
     }
