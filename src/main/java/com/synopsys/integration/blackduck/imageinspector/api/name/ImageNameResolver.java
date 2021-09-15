@@ -13,25 +13,32 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ImageNameResolver {
 
-    public NameValuePair resolve(@Nullable String givenImageName) {
-        Optional<String> newImageRepo = Optional.empty();
-        Optional<String> newImageTag = Optional.empty();
-        if (StringUtils.isNotBlank(givenImageName)) {
-            newImageTag = Optional.of("latest");
-            final int tagColonIndex = findColonBeforeTag(givenImageName);
+    public NameValuePair resolve(@Nullable String foundImageName, @Nullable String givenRepo, @Nullable String givenTag) {
+        givenRepo = Optional.ofNullable(givenRepo).orElse("");
+        givenTag = Optional.ofNullable(givenTag).orElse("");
+        if (StringUtils.isBlank(foundImageName)) {
+            return new BasicNameValuePair(givenRepo, givenTag);
+        }
+        String resolvedImageRepo = givenRepo;
+        String resolvedImageTag = givenTag;
+        if (StringUtils.isNotBlank(foundImageName)) {
+            resolvedImageTag = "latest";
+            final int tagColonIndex = findColonBeforeTag(foundImageName);
             if (tagColonIndex < 0) {
-                newImageRepo = Optional.of(givenImageName);
+                resolvedImageRepo = foundImageName;
             } else {
-                newImageRepo = Optional.of(givenImageName.substring(0, tagColonIndex));
-                if (tagColonIndex + 1 != givenImageName.length()) {
-                    newImageTag = Optional.of(givenImageName.substring(tagColonIndex + 1));
+                resolvedImageRepo = foundImageName.substring(0, tagColonIndex);
+                if (tagColonIndex + 1 != foundImageName.length()) {
+                    resolvedImageTag = foundImageName.substring(tagColonIndex + 1);
                 }
             }
         }
-        return new BasicNameValuePair(newImageRepo.orElse(""), newImageTag.orElse(""));
+        return new BasicNameValuePair(resolvedImageRepo, resolvedImageTag);
     }
 
     private int findColonBeforeTag(final String givenImageName) {

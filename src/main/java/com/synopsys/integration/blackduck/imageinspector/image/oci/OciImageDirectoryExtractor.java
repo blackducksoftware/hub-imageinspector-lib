@@ -85,16 +85,9 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     public FullLayerMapping getLayerMapping(final File imageDir, @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
         OciImageIndex ociImageIndex = extractOciImageIndex(imageDir);
         OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex, givenRepo, givenTag);
-
-        String actualRepo = givenRepo;
-        String actualTag = givenTag;
-        if (manifestDescriptor.getRepoTagString().isPresent()) {
-            logger.debug(String.format("foundRepoTag: %s", manifestDescriptor.getRepoTagString().get()));
-            final NameValuePair resolvedRepoTag = imageNameResolver.resolve(manifestDescriptor.getRepoTagString().get());
-            String resolvedRepo = resolvedRepoTag.getName();
-            String resolvedTag = resolvedRepoTag.getValue();
-            logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", resolvedRepo, resolvedTag));
-        }
+        logger.debug(String.format("foundRepoTag: %s", manifestDescriptor.getRepoTagString().orElse("")));
+        NameValuePair resolvedRepoTag = imageNameResolver.resolve(manifestDescriptor.getRepoTagString().orElse(null), givenRepo, givenTag);
+        logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", resolvedRepoTag.getName(), resolvedRepoTag.getValue()));
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
         String manifestFileText;
         try {
@@ -111,7 +104,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                                             .map(OciDescriptor::getDigest)
                                             .collect(Collectors.toList());
 
-        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(actualRepo, actualTag, pathToImageConfigFileFromRoot, layerInternalIds);
+        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(resolvedRepoTag.getName(), resolvedRepoTag.getValue(), pathToImageConfigFileFromRoot, layerInternalIds);
 
         List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);

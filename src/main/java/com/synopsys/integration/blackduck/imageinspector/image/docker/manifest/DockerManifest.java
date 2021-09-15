@@ -54,7 +54,7 @@ public class DockerManifest extends Stringable {
                 continue;
             }
             logger.debug(String.format("foundRepoTag: %s", foundRepoTag.get()));
-            final NameValuePair resolvedRepoTag = imageNameResolver.resolve(foundRepoTag.get());
+            final NameValuePair resolvedRepoTag = imageNameResolver.resolve(foundRepoTag.get(), targetImageName, targetTagName);
             String resolvedRepo = resolvedRepoTag.getName();
             String resolvedTag = resolvedRepoTag.getValue();
             logger.debug(String.format("translated repoTag to: repo: %s, tag: %s", resolvedRepo, resolvedTag));
