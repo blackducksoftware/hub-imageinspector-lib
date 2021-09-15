@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,10 +88,10 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         String actualTag = givenTag;
         if (manifestDescriptor.getRepoTagString().isPresent()) {
             logger.debug(String.format("foundRepoTag: %s", manifestDescriptor.getRepoTagString().get()));
-            final ImageNameResolver resolver = new ImageNameResolver(manifestDescriptor.getRepoTagString().get());
-            actualRepo = resolver.getNewImageRepo().orElse(givenRepo);
-            actualTag = resolver.getNewImageTag().orElse(givenTag);
-            logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", actualRepo, actualTag));
+            final NameValuePair resolvedRepoTag = (new ImageNameResolver()).resolve(manifestDescriptor.getRepoTagString().get());
+            String resolvedRepo = resolvedRepoTag.getName();
+            String resolvedTag = resolvedRepoTag.getValue();
+            logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", resolvedRepo, resolvedTag));
         }
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
         String manifestFileText;

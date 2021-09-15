@@ -17,6 +17,7 @@ import java.util.Optional;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +52,11 @@ public class DockerManifest extends Stringable {
                 continue;
             }
             logger.debug(String.format("foundRepoTag: %s", foundRepoTag.get()));
-            final ImageNameResolver resolver = new ImageNameResolver(foundRepoTag.get());
-            logger.debug(String.format("translated repoTag to: repo: %s, tag: %s", resolver.getNewImageRepo().get(), resolver.getNewImageTag().get()));
-            return createMapping(image, resolver.getNewImageRepo().get(), resolver.getNewImageTag().get());
+            final NameValuePair resolvedRepoTag = (new ImageNameResolver()).resolve(foundRepoTag.get());
+            String resolvedRepo = resolvedRepoTag.getName();
+            String resolvedTag = resolvedRepoTag.getValue();
+            logger.debug(String.format("translated repoTag to: repo: %s, tag: %s", resolvedRepo, resolvedTag));
+            return createMapping(image, resolvedRepo, resolvedTag);
         }
         throw new IntegrationException(String.format("Layer mapping for repo:tag %s:%s not found in manifest.json", targetImageName, targetTagName));
     }

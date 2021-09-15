@@ -10,12 +10,15 @@ package com.synopsys.integration.blackduck.imageinspector.api.name;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.jetbrains.annotations.Nullable;
 
 public class ImageNameResolver {
-    private Optional<String> newImageRepo = Optional.empty();
-    private Optional<String> newImageTag = Optional.empty();
 
-    public ImageNameResolver(final String givenImageName) {
+    public NameValuePair resolve(@Nullable String givenImageName) {
+        Optional<String> newImageRepo = Optional.empty();
+        Optional<String> newImageTag = Optional.empty();
         if (StringUtils.isNotBlank(givenImageName)) {
             newImageTag = Optional.of("latest");
             final int tagColonIndex = findColonBeforeTag(givenImageName);
@@ -28,14 +31,7 @@ public class ImageNameResolver {
                 }
             }
         }
-    }
-
-    public Optional<String> getNewImageRepo() {
-        return newImageRepo;
-    }
-
-    public Optional<String> getNewImageTag() {
-        return newImageTag;
+        return new BasicNameValuePair(newImageRepo.orElse(""), newImageTag.orElse(""));
     }
 
     private int findColonBeforeTag(final String givenImageName) {
