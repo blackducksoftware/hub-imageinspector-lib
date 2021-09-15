@@ -48,16 +48,18 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private Gson gson;
-    private FileOperations fileOperations;
+    private final Gson gson;
+    private final FileOperations fileOperations;
+    private final ImageNameResolver imageNameResolver;
     private final CommonImageConfigParser commonImageConfigParser;
     private final OciImageIndexFileParser ociImageIndexFileParser;
     private final OciManifestDescriptorParser ociManifestDescriptorParser;
 
-    public OciImageDirectoryExtractor(final Gson gson, FileOperations fileOperations, CommonImageConfigParser commonImageConfigParser,
+    public OciImageDirectoryExtractor(final Gson gson, FileOperations fileOperations, ImageNameResolver imageNameResolver, CommonImageConfigParser commonImageConfigParser,
                                       OciImageIndexFileParser ociImageIndexFileParser, OciManifestDescriptorParser ociManifestDescriptorParser) {
         this.gson = gson;
         this.fileOperations = fileOperations;
+        this.imageNameResolver = imageNameResolver;
         this.commonImageConfigParser = commonImageConfigParser;
         this.ociImageIndexFileParser = ociImageIndexFileParser;
         this.ociManifestDescriptorParser = ociManifestDescriptorParser;
@@ -88,7 +90,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         String actualTag = givenTag;
         if (manifestDescriptor.getRepoTagString().isPresent()) {
             logger.debug(String.format("foundRepoTag: %s", manifestDescriptor.getRepoTagString().get()));
-            final NameValuePair resolvedRepoTag = (new ImageNameResolver()).resolve(manifestDescriptor.getRepoTagString().get());
+            final NameValuePair resolvedRepoTag = imageNameResolver.resolve(manifestDescriptor.getRepoTagString().get());
             String resolvedRepo = resolvedRepoTag.getName();
             String resolvedTag = resolvedRepoTag.getValue();
             logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", resolvedRepo, resolvedTag));

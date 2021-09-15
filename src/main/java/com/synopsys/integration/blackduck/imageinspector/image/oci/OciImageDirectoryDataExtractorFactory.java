@@ -10,6 +10,7 @@ package com.synopsys.integration.blackduck.imageinspector.image.oci;
 import java.io.File;
 
 import com.google.gson.Gson;
+import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 import com.synopsys.integration.blackduck.imageinspector.image.common.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.exception.IntegrationException;
@@ -35,7 +36,8 @@ public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryData
         FileOperations fileOperations = new FileOperations();
         OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
         OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
-        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, commonImageConfigParser, ociImageIndexFileParser, ociManifestDescriptorParser);
+        ImageNameResolver imageNameResolver = new ImageNameResolver();
+        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, imageNameResolver, commonImageConfigParser, ociImageIndexFileParser, ociManifestDescriptorParser);
         ImageLayerSorter imageOrderedLayerExtractor = new OciImageLayerSorter();
         LayerDataExtractor layerDataExtractor = new LayerDataExtractor(imageOrderedLayerExtractor);
         return new ImageDirectoryDataExtractor(ociImageDirectoryExtractor, layerDataExtractor);

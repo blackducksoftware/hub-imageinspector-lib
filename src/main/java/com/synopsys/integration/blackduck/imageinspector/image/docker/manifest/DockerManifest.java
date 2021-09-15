@@ -33,10 +33,12 @@ import com.synopsys.integration.util.Stringable;
 public class DockerManifest extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ManifestRepoTagMatcher manifestRepoTagMatcher;
+    private final ImageNameResolver imageNameResolver;
     private final File tarExtractionDirectory;
 
-    public DockerManifest(ManifestRepoTagMatcher manifestRepoTagMatcher, File tarExtractionDirectory) {
+    public DockerManifest(ManifestRepoTagMatcher manifestRepoTagMatcher, ImageNameResolver imageNameResolver, File tarExtractionDirectory) {
         this.manifestRepoTagMatcher = manifestRepoTagMatcher;
+        this.imageNameResolver = imageNameResolver;
         this.tarExtractionDirectory = tarExtractionDirectory;
     }
 
@@ -52,7 +54,7 @@ public class DockerManifest extends Stringable {
                 continue;
             }
             logger.debug(String.format("foundRepoTag: %s", foundRepoTag.get()));
-            final NameValuePair resolvedRepoTag = (new ImageNameResolver()).resolve(foundRepoTag.get());
+            final NameValuePair resolvedRepoTag = imageNameResolver.resolve(foundRepoTag.get());
             String resolvedRepo = resolvedRepoTag.getName();
             String resolvedTag = resolvedRepoTag.getValue();
             logger.debug(String.format("translated repoTag to: repo: %s, tag: %s", resolvedRepo, resolvedTag));

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
@@ -38,7 +39,8 @@ public class OciImageDirectoryExtractorTest {
         FileOperations fileOperations = new FileOperations();
         CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
         OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
-        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, configParser,
+        ImageNameResolver imageNameResolver = new ImageNameResolver();
+        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, imageNameResolver, configParser,
                 new OciImageIndexFileParser(gson, fileOperations),
                 ociManifestDescriptorParser);
 
@@ -83,7 +85,8 @@ public class OciImageDirectoryExtractorTest {
         CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
         OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
         OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
-        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, configParser, ociImageIndexFileParser,
+        ImageNameResolver imageNameResolver = new ImageNameResolver();
+        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, imageNameResolver, configParser, ociImageIndexFileParser,
                 ociManifestDescriptorParser);
         File alpineOciImageDir = new File(imagePath);
 
