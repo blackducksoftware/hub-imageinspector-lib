@@ -9,12 +9,13 @@ package com.synopsys.integration.blackduck.imageinspector.image.common;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.synopsys.integration.exception.IntegrationException;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 public interface ImageDirectoryExtractor {
-    List<TypedArchiveFile> getLayerArchives(File imageDir) throws IntegrationException;
+    List<TypedArchiveFile> getLayerArchives(File imageDir, @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException;
     FullLayerMapping getLayerMapping(File imageDir, final String repo, final String tag) throws IntegrationException;
 }

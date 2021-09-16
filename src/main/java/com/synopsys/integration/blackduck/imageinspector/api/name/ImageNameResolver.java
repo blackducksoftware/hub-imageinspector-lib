@@ -9,33 +9,33 @@ package com.synopsys.integration.blackduck.imageinspector.api.name;
 
 import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.image.common.RepoTag;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ImageNameResolver {
-    private Optional<String> newImageRepo = Optional.empty();
-    private Optional<String> newImageTag = Optional.empty();
 
-    public ImageNameResolver(final String givenImageName) {
-        if (StringUtils.isNotBlank(givenImageName)) {
-            newImageTag = Optional.of("latest");
-            final int tagColonIndex = findColonBeforeTag(givenImageName);
+    public RepoTag resolve(@Nullable String foundImageName, @Nullable String givenRepo, @Nullable String givenTag) {
+        if (StringUtils.isBlank(foundImageName)) {
+            return new RepoTag(givenRepo, givenTag);
+        }
+        String resolvedImageRepo = givenRepo;
+        String resolvedImageTag = givenTag;
+        if (StringUtils.isNotBlank(foundImageName)) {
+            resolvedImageTag = "latest";
+            final int tagColonIndex = findColonBeforeTag(foundImageName);
             if (tagColonIndex < 0) {
-                newImageRepo = Optional.of(givenImageName);
+                resolvedImageRepo = foundImageName;
             } else {
-                newImageRepo = Optional.of(givenImageName.substring(0, tagColonIndex));
-                if (tagColonIndex + 1 != givenImageName.length()) {
-                    newImageTag = Optional.of(givenImageName.substring(tagColonIndex + 1));
+                resolvedImageRepo = foundImageName.substring(0, tagColonIndex);
+                if (tagColonIndex + 1 != foundImageName.length()) {
+                    resolvedImageTag = foundImageName.substring(tagColonIndex + 1);
                 }
             }
         }
-    }
-
-    public Optional<String> getNewImageRepo() {
-        return newImageRepo;
-    }
-
-    public Optional<String> getNewImageTag() {
-        return newImageTag;
+        return new RepoTag(resolvedImageRepo, resolvedImageTag);
     }
 
     private int findColonBeforeTag(final String givenImageName) {

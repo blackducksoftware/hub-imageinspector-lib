@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
+import com.synopsys.integration.blackduck.imageinspector.image.common.RepoTag;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,9 +32,13 @@ import com.synopsys.integration.util.Stringable;
 
 public class DockerManifest extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final ManifestRepoTagMatcher manifestRepoTagMatcher;
+    private final ImageNameResolver imageNameResolver;
     private final File tarExtractionDirectory;
 
-    public DockerManifest(final File tarExtractionDirectory) {
+    public DockerManifest(ManifestRepoTagMatcher manifestRepoTagMatcher, ImageNameResolver imageNameResolver, File tarExtractionDirectory) {
+        this.manifestRepoTagMatcher = manifestRepoTagMatcher;
+        this.imageNameResolver = imageNameResolver;
         this.tarExtractionDirectory = tarExtractionDirectory;
     }
 
@@ -42,39 +49,28 @@ public class DockerManifest extends Stringable {
         validateImageSpecificity(images, targetImageName, targetTagName);
         for (final DockerImageInfo image : images) {
             logger.trace(String.format("getLayerMappings(): image: %s", image));
-            final String foundRepoTag = findRepoTag(images.size(), image, targetImageName, targetTagName);
-            if (foundRepoTag == null) {
+            final Optional<String> foundRepoTag = findRepoTag(images.size(), image, targetImageName, targetTagName);
+            if (!foundRepoTag.isPresent()) {
                 continue;
             }
-            logger.debug(String.format("foundRepoTag: %s", foundRepoTag));
-            final ImageNameResolver resolver = new ImageNameResolver(foundRepoTag);
-            logger.debug(String.format("translated repoTag to: repo: %s, tag: %s", resolver.getNewImageRepo().get(), resolver.getNewImageTag().get()));
-            return createMapping(image, resolver.getNewImageRepo().get(), resolver.getNewImageTag().get());
+            logger.debug(String.format("foundRepoTag: %s", foundRepoTag.get()));
+            RepoTag resolvedRepoTag = imageNameResolver.resolve(foundRepoTag.get(), targetImageName, targetTagName);
+            logger.debug(String.format("translated repoTag to: repo: %s, tag: %s", resolvedRepoTag.getRepo().orElse(""), resolvedRepoTag.getTag().orElse("")));
+            return createMapping(image, resolvedRepoTag.getRepo().orElse(""), resolvedRepoTag.getTag().orElse(""));
         }
         throw new IntegrationException(String.format("Layer mapping for repo:tag %s:%s not found in manifest.json", targetImageName, targetTagName));
     }
 
-    private String findRepoTag(final int numImages, final DockerImageInfo image, final String targetImageName, final String targetTagName) {
+    private Optional<String> findRepoTag(final int numImages, final DockerImageInfo image, final String targetImageName, final String targetTagName) {
         // user didn't specify which image, and there is only one: return it
         if (numImages == 1 && StringUtils.isBlank(targetImageName) && StringUtils.isBlank(targetTagName)) {
             logger.debug(String.format("User did not specify a repo:tag, and there's only one image; inspecting that one: %s", getRepoTag(image)));
-            return getRepoTag(image);
+            return Optional.of(getRepoTag(image));
         }
         final String targetRepoTag = deriveSpecifiedRepoTag(targetImageName, targetTagName);
-        logger.debug(String.format("findRepoTag(): specifiedRepoTag: %s", targetRepoTag));
-        for (final String repoTag : image.repoTags) {
-            logger.trace(String.format("Target repo tag %s; checking %s", targetRepoTag, repoTag));
-            if (StringUtils.compare(repoTag, targetRepoTag) == 0) {
-                logger.trace(String.format("Found the targetRepoTag %s", targetRepoTag));
-                return repoTag;
-            }
-            if (targetRepoTag.endsWith("/" + repoTag)) {
-                logger.trace(String.format("Matched the targetRepoTag %s to %s by ignoring the repository prefix", targetRepoTag, repoTag));
-                return repoTag;
-            }
-        }
-        return null;
+        return manifestRepoTagMatcher.findMatch(image.repoTags, targetRepoTag);
     }
+
 
     private String getRepoTag(final DockerImageInfo image) {
         if (image.repoTags == null || image.repoTags.isEmpty()) {

@@ -29,7 +29,7 @@ public class DockerImageDirectoryExtractorTest {
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
         DockerImageDirectoryExtractor extractor = new DockerImageDirectoryExtractor(gson, fileOperations, commonImageConfigParser, dockerManifestFactory);
 
-        List<TypedArchiveFile> typedArchiveFiles = extractor.getLayerArchives(imageDir);
+        List<TypedArchiveFile> typedArchiveFiles = extractor.getLayerArchives(imageDir, null, null);
 
         assertEquals(1, typedArchiveFiles.size());
         assertEquals(ArchiveFileType.TAR, typedArchiveFiles.get(0).getType());
@@ -49,7 +49,7 @@ public class DockerImageDirectoryExtractorTest {
         DockerManifestFactory dockerManifestFactory = new DockerManifestFactory();
         DockerImageDirectoryExtractor extractor = new DockerImageDirectoryExtractor(gson, fileOperations, dockerImageConfigParser, dockerManifestFactory);
 
-        List<TypedArchiveFile> typedArchiveFiles = extractor.getLayerArchives(imageDir);
+        List<TypedArchiveFile> typedArchiveFiles = extractor.getLayerArchives(imageDir, "", "");
 
         assertEquals(1, typedArchiveFiles.size());
         assertEquals(ArchiveFileType.TAR, typedArchiveFiles.get(0).getType());

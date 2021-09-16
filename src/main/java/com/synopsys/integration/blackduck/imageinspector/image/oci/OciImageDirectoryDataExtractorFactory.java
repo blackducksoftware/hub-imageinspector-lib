@@ -10,12 +10,8 @@ package com.synopsys.integration.blackduck.imageinspector.image.oci;
 import java.io.File;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractor;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactory;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerMetadataExtractor;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerSorter;
-import com.synopsys.integration.blackduck.imageinspector.image.common.LayerDataExtractor;
+import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
+import com.synopsys.integration.blackduck.imageinspector.image.common.*;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.exception.IntegrationException;
 
@@ -38,7 +34,10 @@ public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryData
     @Override
     public ImageDirectoryDataExtractor createImageDirectoryDataExtractor() {
         FileOperations fileOperations = new FileOperations();
-        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, commonImageConfigParser);
+        OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
+        ImageNameResolver imageNameResolver = new ImageNameResolver();
+        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, imageNameResolver, commonImageConfigParser, ociImageIndexFileParser, ociManifestDescriptorParser);
         ImageLayerSorter imageOrderedLayerExtractor = new OciImageLayerSorter();
         LayerDataExtractor layerDataExtractor = new LayerDataExtractor(imageOrderedLayerExtractor);
         return new ImageDirectoryDataExtractor(ociImageDirectoryExtractor, layerDataExtractor);

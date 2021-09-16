@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.io.IOException;
 
+import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
 import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
@@ -16,7 +18,7 @@ public class DockerManifestTest {
     public void test() throws IOException, IntegrationException {
         final File tarExtractionDirectory = new File("src/test/resources/extraction");
         final String dockerTarFileName = "alpine.tar";
-        DockerManifest manifest = new DockerManifest(new File(tarExtractionDirectory, dockerTarFileName));
+        DockerManifest manifest = new DockerManifest(new ManifestRepoTagMatcher(), new ImageNameResolver(), new File(tarExtractionDirectory, dockerTarFileName));
         final String targetImageName = "alpine";
         final String targetTagName = "latest";
         ManifestLayerMapping manifestLayerMapping = manifest.getLayerMapping(targetImageName, targetTagName);
@@ -32,7 +34,7 @@ public class DockerManifestTest {
     public void testRepoIncludesRegistryPrefix() throws IOException, IntegrationException {
         final File tarExtractionDirectory = new File("src/test/resources/extraction");
         final String dockerTarFileName = "alpine.tar";
-        DockerManifest manifest = new DockerManifest(new File(tarExtractionDirectory, dockerTarFileName));
+        DockerManifest manifest = new DockerManifest(new ManifestRepoTagMatcher(), new ImageNameResolver(), new File(tarExtractionDirectory, dockerTarFileName));
         final String targetImageName = "docker.io/alpine";
         final String targetTagName = "latest";
         ManifestLayerMapping manifestLayerMapping = manifest.getLayerMapping(targetImageName, targetTagName);

@@ -4,14 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.synopsys.integration.blackduck.imageinspector.image.common.RepoTag;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class ImageNameResolverTest {
+    private static ImageNameResolver resolver;
 
     @BeforeAll
     public static void setUpBeforeAll() throws Exception {
+        resolver = new ImageNameResolver();
     }
 
     @AfterAll
@@ -20,94 +23,94 @@ public class ImageNameResolverTest {
 
     @Test
     public void testSimple() {
-        final ImageNameResolver resolver = new ImageNameResolver("alpine:latest");
-        assertEquals("alpine", resolver.getNewImageRepo().get());
-        assertEquals("latest", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("alpine:latest", null, null);
+        assertEquals("alpine", resolvedRepoTag.getRepo().get());
+        assertEquals("latest", resolvedRepoTag.getTag().get());
     }
 
     @Test
-    public void testNull() {
-        final ImageNameResolver resolver = new ImageNameResolver("null:null");
-        assertEquals("null", resolver.getNewImageRepo().get());
-        assertEquals("null", resolver.getNewImageTag().get());
+    public void testNullLiterals() {
+        RepoTag resolvedRepoTag = resolver.resolve(null, "givenRepo", "givenTag");
+        assertEquals("givenRepo", resolvedRepoTag.getRepo().get());
+        assertEquals("givenTag", resolvedRepoTag.getTag().get());
     }
 
     @Test
     public void testWithoutTag() {
-        final ImageNameResolver resolver = new ImageNameResolver("alpine");
-        assertEquals("alpine", resolver.getNewImageRepo().get());
-        assertEquals("latest", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("alpine", null, null);
+        assertEquals("alpine", resolvedRepoTag.getRepo().get());
+        assertEquals("latest", resolvedRepoTag.getTag().get());
     }
 
     @Test
     public void testWithUrlPortTag() {
-        final ImageNameResolver resolver = new ImageNameResolver("https://artifactory.team.domain.com:5002/repo:tag");
-        assertEquals("https://artifactory.team.domain.com:5002/repo", resolver.getNewImageRepo().get());
-        assertEquals("tag", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("https://artifactory.team.domain.com:5002/repo:tag", null, null);
+        assertEquals("https://artifactory.team.domain.com:5002/repo", resolvedRepoTag.getRepo().get());
+        assertEquals("tag", resolvedRepoTag.getTag().get());
     }
 
     @Test
     public void testWithUrlPortNoTag() {
-        final ImageNameResolver resolver = new ImageNameResolver("https://artifactory.team.domain.com:5002/repo");
-        assertEquals("https://artifactory.team.domain.com:5002/repo", resolver.getNewImageRepo().get());
-        assertEquals("latest", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("https://artifactory.team.domain.com:5002/repo", null, null);
+        assertEquals("https://artifactory.team.domain.com:5002/repo", resolvedRepoTag.getRepo().get());
+        assertEquals("latest", resolvedRepoTag.getTag().get());
     }
 
     @Test
     public void testWithUrlTag() {
-        final ImageNameResolver resolver = new ImageNameResolver("https://artifactory.team.domain.com/repo:tag");
-        assertEquals("https://artifactory.team.domain.com/repo", resolver.getNewImageRepo().get());
-        assertEquals("tag", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("https://artifactory.team.domain.com/repo:tag", null, null);
+        assertEquals("https://artifactory.team.domain.com/repo", resolvedRepoTag.getRepo().get());
+        assertEquals("tag", resolvedRepoTag.getTag().get());
     }
 
     @Test
     public void testWithUrlNoTag() {
-        final ImageNameResolver resolver = new ImageNameResolver("https://artifactory.team.domain.com/repo");
-        assertEquals("https://artifactory.team.domain.com/repo", resolver.getNewImageRepo().get());
-        assertEquals("latest", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("https://artifactory.team.domain.com/repo", null, null);
+        assertEquals("https://artifactory.team.domain.com/repo", resolvedRepoTag.getRepo().get());
+        assertEquals("latest", resolvedRepoTag.getTag().get());
+    }
+
+
+    @Test
+    public void testNull() {
+        RepoTag resolvedRepoTag = resolver.resolve(null, null, null);
+        assertFalse(resolvedRepoTag.getRepo().isPresent());
+        assertFalse(resolvedRepoTag.getTag().isPresent());
     }
 
     @Test
     public void testNone() {
-        final ImageNameResolver resolver = new ImageNameResolver("");
-        assertFalse(resolver.getNewImageRepo().isPresent());
-        assertFalse(resolver.getNewImageTag().isPresent());
+        RepoTag resolvedRepoTag = resolver.resolve("", null, null);
+        assertFalse(resolvedRepoTag.getRepo().isPresent());
+        assertFalse(resolvedRepoTag.getTag().isPresent());
     }
 
     @Test
     public void testRepoOnly() {
-        final ImageNameResolver resolver = new ImageNameResolver("alpine");
-        assertTrue(resolver.getNewImageRepo().isPresent());
-        assertTrue(resolver.getNewImageTag().isPresent());
-        assertEquals("alpine", resolver.getNewImageRepo().get());
-        assertEquals("latest", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("alpine", null, null);
+        assertEquals("alpine", resolvedRepoTag.getRepo().get());
+        assertEquals("latest", resolvedRepoTag.getTag().get());
     }
 
     @Test
     public void testBoth() {
-        final ImageNameResolver resolver = new ImageNameResolver("alpine:1.0");
-        assertTrue(resolver.getNewImageRepo().isPresent());
-        assertTrue(resolver.getNewImageTag().isPresent());
-        assertEquals("alpine", resolver.getNewImageRepo().get());
-        assertEquals("1.0", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("alpine:1.0", null, null);
+        assertEquals("alpine", resolvedRepoTag.getRepo().get());
+        assertEquals("1.0", resolvedRepoTag.getTag().get());
     }
 
     @Test
     public void testBothColonInRepoSpecifier() {
-        final ImageNameResolver resolver = new ImageNameResolver("artifactoryserver:5000/alpine:1.0");
-        assertTrue(resolver.getNewImageRepo().isPresent());
-        assertTrue(resolver.getNewImageTag().isPresent());
-        assertEquals("artifactoryserver:5000/alpine", resolver.getNewImageRepo().get());
-        assertEquals("1.0", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("artifactoryserver:5000/alpine:1.0", null, null);
+        assertEquals("artifactoryserver:5000/alpine", resolvedRepoTag.getRepo().get());
+        assertEquals("1.0", resolvedRepoTag.getTag().get());
     }
 
     @Test
     public void testEndsWithColon() {
-        final ImageNameResolver resolver = new ImageNameResolver("alpine:");
-        assertTrue(resolver.getNewImageRepo().isPresent());
-        assertTrue(resolver.getNewImageTag().isPresent());
-        assertEquals("alpine", resolver.getNewImageRepo().get());
-        assertEquals("latest", resolver.getNewImageTag().get());
+        RepoTag resolvedRepoTag = resolver.resolve("alpine:", "", "");
+        assertEquals("alpine", resolvedRepoTag.getRepo().get());
+        assertEquals("latest", resolvedRepoTag.getTag().get());
     }
 
 }

@@ -9,10 +9,14 @@ package com.synopsys.integration.blackduck.imageinspector.image.oci.model;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.google.gson.annotations.SerializedName;
 
 public class OciDescriptor {
+    private static final String REP_TAG_ANNOTATION_KEY = "org.opencontainers.image.ref.name";
+
     @SerializedName("mediaType")
     private String mediaType;
 
@@ -22,8 +26,8 @@ public class OciDescriptor {
     @SerializedName("size")
     private String size;
 
-    // annotations looks potentially useful (sometimes has repo:tag), but also problematic: spec says it should be
-    // an array of strings, but buildah gives it a single string (non-array) value. I've removed the reference for now.
+    @SerializedName("annotations")
+    private Map<String, String> annotations;
 
     public OciDescriptor(final String mediaType, final String digest, final String size) {
         this.mediaType = mediaType;
@@ -41,5 +45,22 @@ public class OciDescriptor {
 
     public String getSize() {
         return size;
+    }
+
+    // TODO The following methods probably belong in a separate class to keep this class a pure model class
+
+    public Optional<Map<String, String>> getAnnotations() {
+        return Optional.ofNullable(annotations);
+    }
+
+    public Optional<String> getAnnotation(String key) {
+        if (annotations == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(annotations.get(key));
+    }
+
+    public Optional<String> getRepoTagString() {
+        return getAnnotation(REP_TAG_ANNOTATION_KEY);
     }
 }

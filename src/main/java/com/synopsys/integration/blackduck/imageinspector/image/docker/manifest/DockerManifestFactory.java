@@ -9,13 +9,15 @@ package com.synopsys.integration.blackduck.imageinspector.image.docker.manifest;
 
 import java.io.File;
 
+import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DockerManifestFactory {
 
     public DockerManifest createManifest(final File tarExtractionDirectory) {
-        final DockerManifest manifest = new DockerManifest(tarExtractionDirectory);
+        final DockerManifest manifest = new DockerManifest(new ManifestRepoTagMatcher(), new ImageNameResolver(), tarExtractionDirectory);
         return manifest;
     }
 

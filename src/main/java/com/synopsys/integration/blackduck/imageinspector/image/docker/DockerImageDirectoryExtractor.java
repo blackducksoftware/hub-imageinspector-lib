@@ -18,6 +18,7 @@ import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerM
 import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.exception.IntegrationException;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,7 @@ public class DockerImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     @Override
-    public List<TypedArchiveFile> getLayerArchives(File imageDir) throws IntegrationException {
+    public List<TypedArchiveFile> getLayerArchives(File imageDir, @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
         logger.debug(String.format("Searching for layer archive files in unpackedImageDir: %s", imageDir.getAbsolutePath()));
         final List<TypedArchiveFile> untaredLayerFiles = new ArrayList<>();
         List<File> unpackedImageTopLevelFiles = Arrays.asList(imageDir.listFiles());
