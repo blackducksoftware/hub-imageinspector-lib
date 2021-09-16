@@ -98,8 +98,8 @@ public class OciImageDirectoryExtractorTest {
             Assertions.assertTrue(StringUtils.isBlank(manifestLayerMapping.getImageName().orElse(null)));
             Assertions.assertTrue(StringUtils.isBlank(manifestLayerMapping.getTagName().orElse(null)));
         } else {
-            Assertions.assertEquals(givenRepo, manifestLayerMapping.getImageName().isPresent());
-            Assertions.assertEquals(givenTag, manifestLayerMapping.getTagName().isPresent());
+            Assertions.assertEquals(givenRepo, manifestLayerMapping.getImageName().get());
+            Assertions.assertEquals(givenTag, manifestLayerMapping.getTagName().get());
         }
         Assertions.assertEquals(expectedManifestMapping.getPathToImageConfigFileFromRoot(), manifestLayerMapping.getPathToImageConfigFileFromRoot());
 
