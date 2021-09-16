@@ -9,20 +9,17 @@ package com.synopsys.integration.blackduck.imageinspector.api.name;
 
 import java.util.Optional;
 
+import com.synopsys.integration.blackduck.imageinspector.image.common.RepoTag;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ImageNameResolver {
 
-    public NameValuePair resolve(@Nullable String foundImageName, @Nullable String givenRepo, @Nullable String givenTag) {
-        givenRepo = Optional.ofNullable(givenRepo).orElse("");
-        givenTag = Optional.ofNullable(givenTag).orElse("");
+    public RepoTag resolve(@Nullable String foundImageName, @Nullable String givenRepo, @Nullable String givenTag) {
         if (StringUtils.isBlank(foundImageName)) {
-            return new BasicNameValuePair(givenRepo, givenTag);
+            return new RepoTag(givenRepo, givenTag);
         }
         String resolvedImageRepo = givenRepo;
         String resolvedImageTag = givenTag;
@@ -38,7 +35,7 @@ public class ImageNameResolver {
                 }
             }
         }
-        return new BasicNameValuePair(resolvedImageRepo, resolvedImageTag);
+        return new RepoTag(resolvedImageRepo, resolvedImageTag);
     }
 
     private int findColonBeforeTag(final String givenImageName) {

@@ -16,17 +16,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.synopsys.integration.blackduck.imageinspector.api.name.ImageNameResolver;
+import com.synopsys.integration.blackduck.imageinspector.image.common.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
-import com.synopsys.integration.blackduck.imageinspector.image.common.FullLayerMapping;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryExtractor;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ArchiveFileType;
 import com.synopsys.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.synopsys.integration.blackduck.imageinspector.image.oci.model.OciDescriptor;
@@ -86,8 +82,8 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         OciImageIndex ociImageIndex = extractOciImageIndex(imageDir);
         OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex, givenRepo, givenTag);
         logger.debug(String.format("foundRepoTag: %s", manifestDescriptor.getRepoTagString().orElse("")));
-        NameValuePair resolvedRepoTag = imageNameResolver.resolve(manifestDescriptor.getRepoTagString().orElse(null), givenRepo, givenTag);
-        logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", resolvedRepoTag.getName(), resolvedRepoTag.getValue()));
+        RepoTag resolvedRepoTag = imageNameResolver.resolve(manifestDescriptor.getRepoTagString().orElse(null), givenRepo, givenTag);
+        logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", resolvedRepoTag.getRepo().orElse(""), resolvedRepoTag.getTag().orElse("")));
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
         String manifestFileText;
         try {
@@ -104,7 +100,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                                             .map(OciDescriptor::getDigest)
                                             .collect(Collectors.toList());
 
-        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(resolvedRepoTag.getName(), resolvedRepoTag.getValue(), pathToImageConfigFileFromRoot, layerInternalIds);
+        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(resolvedRepoTag.getRepo().orElse(""), resolvedRepoTag.getTag().orElse(""), pathToImageConfigFileFromRoot, layerInternalIds);
 
         List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
