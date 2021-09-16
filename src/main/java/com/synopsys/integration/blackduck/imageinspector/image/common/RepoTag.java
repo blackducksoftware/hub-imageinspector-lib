@@ -18,6 +18,8 @@ public class RepoTag {
     @Nullable
     private final String tag;
 
+    // TODO there are many more places where this class should be used
+
     public RepoTag(@Nullable String repo, @Nullable String tag) {
         this.repo = repo;
         this.tag = tag;
