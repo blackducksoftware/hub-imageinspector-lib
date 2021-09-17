@@ -20,16 +20,31 @@ public class ManifestRepoTagMatcher {
     public Optional<String> findMatch(List<String> manifestRepoTags, String targetRepoTag) {
         logger.debug(String.format("findRepoTag(): specifiedRepoTag: %s", targetRepoTag));
         for (final String repoTag : manifestRepoTags) {
-            logger.trace(String.format("Target repo tag %s; checking %s", targetRepoTag, repoTag));
-            if (StringUtils.compare(repoTag, targetRepoTag) == 0) {
-                logger.trace(String.format("Found the targetRepoTag %s", targetRepoTag));
-                return Optional.of(repoTag);
-            }
-            if (targetRepoTag.endsWith("/" + repoTag)) {
-                logger.trace(String.format("Matched the targetRepoTag %s to %s by ignoring the repository prefix", targetRepoTag, repoTag));
+            if (doesMatch(repoTag, targetRepoTag)) {
                 return Optional.of(repoTag);
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<String> findMatch(String manifestRepoTag, String targetRepoTag) {
+        if (doesMatch(manifestRepoTag, targetRepoTag)) {
+            return Optional.of(manifestRepoTag);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private boolean doesMatch(String manifestRepoTag, String targetRepoTag) {
+        logger.trace(String.format("Target repo tag %s; checking %s", targetRepoTag, manifestRepoTag));
+        if (StringUtils.compare(manifestRepoTag, targetRepoTag) == 0) {
+            logger.trace(String.format("Found the targetRepoTag %s", targetRepoTag));
+            return true;
+        }
+        if (targetRepoTag.endsWith("/" + manifestRepoTag)) {
+            logger.trace(String.format("Matched the targetRepoTag %s to %s by ignoring the repository prefix", targetRepoTag, manifestRepoTag));
+            return true;
+        }
+        return false;
     }
 }

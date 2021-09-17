@@ -178,13 +178,6 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         return blob;
     }
 
-    private String ensurePopulated(String field, String defaultValue) {
-        if (StringUtils.isBlank(field)) {
-            field = defaultValue;
-        }
-        return field;
-    }
-
     private String findImageConfigFilePath(OciImageManifest imageManifest) throws IntegrationException {
         OciDescriptor imageConfig = imageManifest.getConfig();
         if (imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
