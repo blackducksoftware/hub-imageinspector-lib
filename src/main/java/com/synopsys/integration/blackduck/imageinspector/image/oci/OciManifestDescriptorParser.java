@@ -28,7 +28,7 @@ public class OciManifestDescriptorParser {
 
     public OciDescriptor getManifestDescriptor(OciImageIndex ociImageIndex,
                                                @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
-        // Probably also need to select one of multiple based on arch
+        // TODO- Probably also need to select one of multiple based on arch
         List<OciDescriptor> trueManifests =
                 ociImageIndex.getManifests().stream()
                         .filter(man -> MANIFEST_FILE_MEDIA_TYPE.equals(man.getMediaType()))
@@ -42,32 +42,16 @@ public class OciManifestDescriptorParser {
         if (StringUtils.isBlank(givenTag)) {
             givenTag = "latest";
         }
-        // Both repo and tag have values
+        // Safe to assume both repo and tag have values
         String givenRepoTag = String.format("%s:%s", givenRepo, givenTag);
 
-        // TODO is there a simpler way to do this?
-        List <String> manifestRepTagStrings = trueManifests.stream()
-                .map(OciDescriptor::getRepoTagString)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-        Optional<String> matchingManifestRepoTagString = manifestRepoTagMatcher.findMatch(manifestRepTagStrings, givenRepoTag);
-        if (!matchingManifestRepoTagString.isPresent()) {
-            throw new IntegrationException(String.format("No manifest found matching given repo:tag: %s", givenRepoTag));
-        }
-        // We know which repo:tag we want; return manifest matching that
         Optional<OciDescriptor> matchingManifest = trueManifests.stream()
-                .filter(m -> m.getRepoTagString().isPresent())
-                .filter(m -> m.getRepoTagString().get().equals(matchingManifestRepoTagString.get()))
-                .findFirst();
+                                                       .filter(m -> m.getRepoTagString().isPresent())
+                                                       .filter(m -> manifestRepoTagMatcher.findMatch(m.getRepoTagString().get(), givenRepoTag).isPresent())
+                                                       .findFirst();
         if (!matchingManifest.isPresent()) {
-            throw new IntegrationException(String.format("Unable to find manifest matching repo:tag: %s", matchingManifestRepoTagString.get()));
+            throw new IntegrationException(String.format("Unable to find manifest matching repo:tag: %s", givenRepoTag));
         }
         return matchingManifest.get();
-    }
-
-    public String getManifestFileDigest(OciImageIndex ociImageIndex,
-                                        @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
-        return getManifestDescriptor(ociImageIndex, givenRepo, givenTag).getDigest();
     }
 }
