@@ -47,7 +47,6 @@ public class ImageLayerApplier {
         } else if (layerTar.getType().equals(ArchiveFileType.TAR_GZIPPED)) {
             filesToRemove = imageLayerArchiveExtractor.extractLayerGzipTarToDir(fileOperations, layerTar.getFile(), destinationDir);
         } else if (layerTar.getType().equals(ArchiveFileType.TAR_ZSTD)) {
-            //TODO- test this works
             filesToRemove = imageLayerArchiveExtractor.extractLayerZstdTarToDir(fileOperations, layerTar.getFile(), destinationDir);
         }
         for (final File fileToRemove : filesToRemove) {

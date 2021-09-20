@@ -21,6 +21,8 @@ public class ImageLayerArchiveExtractorTest {
     @TempDir
     File tempDir;
 
+    // TODO next 3 tests could be parameterized
+
     @Test
     void test() throws IOException {
         ImageLayerArchiveExtractor imageLayerArchiveExtractor = new ImageLayerArchiveExtractor();
@@ -29,6 +31,38 @@ public class ImageLayerArchiveExtractorTest {
         File outputDir = new File(tempDir, "output");
 
         imageLayerArchiveExtractor.extractLayerTarToDir(fileOperations, tarFile, outputDir);
+
+        List<File> extractedFiles = Arrays.asList(outputDir.listFiles());
+        assertEquals(2, extractedFiles.size());
+        assertTrue(extractedFiles.stream().map(File::getName).filter(name -> name.equals("omit")).findAny().isPresent());
+        assertTrue(extractedFiles.stream().map(File::getName).filter(name -> name.equals("regular")).findAny().isPresent());
+        assertTrue(extractedFiles.stream().findFirst().get().isDirectory());
+    }
+
+    @Test
+    void testTarGz() throws IOException {
+        ImageLayerArchiveExtractor imageLayerArchiveExtractor = new ImageLayerArchiveExtractor();
+        FileOperations fileOperations = new FileOperations();
+        File tarFile = new File("src/test/resources/layers/targz/123456");
+        File outputDir = new File(tempDir, "output");
+
+        imageLayerArchiveExtractor.extractLayerGzipTarToDir(fileOperations, tarFile, outputDir);
+
+        List<File> extractedFiles = Arrays.asList(outputDir.listFiles());
+        assertEquals(2, extractedFiles.size());
+        assertTrue(extractedFiles.stream().map(File::getName).filter(name -> name.equals("omit")).findAny().isPresent());
+        assertTrue(extractedFiles.stream().map(File::getName).filter(name -> name.equals("regular")).findAny().isPresent());
+        assertTrue(extractedFiles.stream().findFirst().get().isDirectory());
+    }
+
+    @Test
+    void testTarZstd() throws IOException {
+        ImageLayerArchiveExtractor imageLayerArchiveExtractor = new ImageLayerArchiveExtractor();
+        FileOperations fileOperations = new FileOperations();
+        File tarFile = new File("src/test/resources/layers/zstd/123456");
+        File outputDir = new File(tempDir, "output");
+
+        imageLayerArchiveExtractor.extractLayerZstdTarToDir(fileOperations, tarFile, outputDir);
 
         List<File> extractedFiles = Arrays.asList(outputDir.listFiles());
         assertEquals(2, extractedFiles.size());
