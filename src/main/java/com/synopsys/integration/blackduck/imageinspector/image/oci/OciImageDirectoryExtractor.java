@@ -91,7 +91,8 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
 
-
+        // If we ever need more detail (os/architecture, history, cmd, etc):
+        // imageManifest.config.digest has the filename (in the blobs dir) of the file that has that detail
         String pathToImageConfigFileFromRoot = findImageConfigFilePath(imageManifest);
         List<String> layerInternalIds = imageManifest.getLayers().stream()
                                             .map(OciDescriptor::getDigest)
