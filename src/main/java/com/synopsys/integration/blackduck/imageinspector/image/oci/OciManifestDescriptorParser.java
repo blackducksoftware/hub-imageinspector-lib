@@ -13,6 +13,8 @@ import com.synopsys.integration.blackduck.imageinspector.image.oci.model.OciImag
 import com.synopsys.integration.exception.IntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 
 public class OciManifestDescriptorParser {
     private static final String MANIFEST_FILE_MEDIA_TYPE = "application/vnd.oci.image.manifest.v1+json";
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ManifestRepoTagMatcher manifestRepoTagMatcher;
 
     public OciManifestDescriptorParser(ManifestRepoTagMatcher manifestRepoTagMatcher) {
@@ -37,9 +40,13 @@ public class OciManifestDescriptorParser {
             throw new IntegrationException(String.format("No manifest descriptor with media type %s was found in OCI image index", MANIFEST_FILE_MEDIA_TYPE));
         }
         if ((trueManifests.size() == 1) && StringUtils.isBlank(givenRepo)) {
+            logger.debug(String.format("User did not specify a repo:tag, and there's only one manifest; inspecting that one; digest=%s", trueManifests.get(0).getDigest()));
             return trueManifests.get(0);
         }
-        if (StringUtils.isBlank(givenTag)) {
+        if ((trueManifests.size() > 1) && StringUtils.isBlank(givenRepo)) {
+            throw new IntegrationException("When the image contains multiple manifests, the target image and tag to inspect must be specified");
+        }
+        if (StringUtils.isNotBlank(givenRepo) && StringUtils.isBlank(givenTag)) {
             givenTag = "latest";
         }
         // Safe to assume both repo and tag have values

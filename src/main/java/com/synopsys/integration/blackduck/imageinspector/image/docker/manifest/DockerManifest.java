@@ -99,9 +99,7 @@ public class DockerManifest extends Stringable {
 
     private void validateImageSpecificity(final List<DockerImageInfo> images, final String targetImageName, final String targetTagName) throws IntegrationException {
         if (images.size() > 1 && (StringUtils.isBlank(targetImageName) || StringUtils.isBlank(targetTagName))) {
-            final String msg = "When the manifest contains multiple images or tags, the target image and tag to inspect must be specified";
-            logger.debug(msg);
-            throw new IntegrationException(msg);
+            throw new IntegrationException("When the manifest contains multiple images or tags, the target image and tag to inspect must be specified");
         }
     }
 
