@@ -109,8 +109,7 @@ public class DockerManifest extends Stringable {
         logger.debug("getManifestContents(): extracting manifest file content");
         final String manifestContentString = extractManifestFileContent();
         logger.trace(String.format("getManifestContents(): parsing: %s", manifestContentString));
-        final JsonParser parser = new JsonParser();
-        final JsonArray manifestContent = parser.parse(manifestContentString).getAsJsonArray();
+        final JsonArray manifestContent = JsonParser.parseString(manifestContentString).getAsJsonArray();
         final Gson gson = new Gson();
         for (final JsonElement element : manifestContent) {
             logger.trace(String.format("getManifestContents(): element: %s", element.toString()));
