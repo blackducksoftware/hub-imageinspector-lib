@@ -24,10 +24,7 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.com
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerApplier;
 import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
@@ -52,30 +49,38 @@ public class ImageInspectorApiIntTest {
     private static final String SIMPLE_IMAGE_TARFILE = "build/images/test/alpine.tar";
     private static final String MULTILAYER_IMAGE_TARFILE = "build/images/test/centos_minus_vim_plus_bacula.tar";
     private static final String NOPKGMGR_IMAGE_TARFILE = "build/images/test/nopkgmgr.tar";
-    // TODO need to build this:
-    private static final String OCI_IMAGE_TARFILE = "/tmp/ccc/centos_minus_vim_plus_bacula-oci.tar";
+    private static final String OCI_IMAGE_TARFILE = "src/test/resources/oci/u_multi_tagged_gutted.tar";
 
-    private static Os os;
-    private static ImageInspectorApi imageInspectorApi;
-    private static List<PkgMgr> pkgMgrs;
-    private static PackageGetter packageGetter;
-    private static RpmPkgMgr rpmPkgMgr;
+    private Os os;
+    private ImageInspectorApi imageInspectorApi;
+    private List<PkgMgr> pkgMgrs;
+    private PackageGetter packageGetter;
+    private RpmPkgMgr rpmPkgMgr;
+    private DpkgPkgMgr dpkgPkgMgr;
 
     private static final String[] apkOutput = { "ca-certificates-20171114-r0", "boost-unit_test_framework-1.62.0-r5" };
 
     @TempDir
     File tempDir;
 
-    @BeforeAll
-    public static void setup() throws IntegrationException, InterruptedException {
+    @BeforeEach
+    public void setup() throws IntegrationException, InterruptedException {
+        dpkgPkgMgr = Mockito.mock(DpkgPkgMgr.class);
+        List<ComponentDetails> ubuntuComps = new ArrayList<>();
+        ubuntuComps.add(new ComponentDetails("comp0", "version0", "testExternalId0", "testArch", "ubuntu"));
+        Mockito.when(dpkgPkgMgr.extractComponentsFromPkgMgrOutput(Mockito.any(File.class), Mockito.anyString(), Mockito.any(String[].class))).thenReturn(ubuntuComps);
+        Mockito.when(dpkgPkgMgr.getType()).thenReturn(PackageManagerEnum.DPKG);
+        Mockito.when(dpkgPkgMgr.getImagePackageManagerDirectory(Mockito.any(File.class))).thenReturn(new File("."));
+
         rpmPkgMgr = Mockito.mock(RpmPkgMgr.class);
-        List<ComponentDetails> comps = new ArrayList<>();
-        comps.add(new ComponentDetails("comp0", "version0", "testExternalId0", "testArch", "centos"));
-        Mockito.when(rpmPkgMgr.extractComponentsFromPkgMgrOutput(Mockito.any(File.class), Mockito.anyString(), Mockito.any(String[].class))).thenReturn(comps);
+        List<ComponentDetails> centosComps = new ArrayList<>();
+        centosComps.add(new ComponentDetails("comp0", "version0", "testExternalId0", "testArch", "centos"));
+        Mockito.when(rpmPkgMgr.extractComponentsFromPkgMgrOutput(Mockito.any(File.class), Mockito.anyString(), Mockito.any(String[].class))).thenReturn(centosComps);
+
         FileOperations fileOperations = new FileOperations();
         pkgMgrs = new ArrayList<>(3);
         pkgMgrs.add(new ApkPkgMgr(fileOperations));
-        pkgMgrs.add(new DpkgPkgMgr(fileOperations));
+        pkgMgrs.add(dpkgPkgMgr);
         pkgMgrs.add(rpmPkgMgr);
         os = Mockito.mock(Os.class);
 
@@ -156,54 +161,6 @@ public class ImageInspectorApiIntTest {
     }
 
     @Test
-    public void testOnRightOs() throws IntegrationException, InterruptedException {
-        doTest(null);
-    }
-
-    @Test
-    public void testOnRightOsDistroOverride() throws IntegrationException, InterruptedException {
-        doTest("overriddendistroname");
-    }
-
-    private void doTest(String targetLinuxDistroOverride) throws IntegrationException, InterruptedException {
-        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
-        String expectedForgeName;
-        if (StringUtils.isNotBlank(targetLinuxDistroOverride)) {
-            expectedForgeName = "@" + targetLinuxDistroOverride;
-        } else {
-            expectedForgeName = "@alpine";
-        }
-        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
-        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
-        ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
-                                                            .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
-                                                            .setBlackDuckProjectName(PROJECT)
-                                                            .setBlackDuckProjectVersion(PROJECT_VERSION)
-                                                            .setCurrentLinuxDistro("ALPINE")
-                                                            .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
-                                                            .setCleanupWorkingDir(true)
-                                                            .build();
-        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
-        System.out.printf("bdioDocument: %s\n", bdioDocument);
-        assertEquals(PROJECT, bdioDocument.getProject().name);
-        assertEquals(PROJECT_VERSION, bdioDocument.getProject().version);
-        assertEquals(apkOutput.length, bdioDocument.getComponents().size());
-        for (BdioComponent comp : bdioDocument.getComponents()) {
-            System.out.printf("comp: %s:%s:%s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            if (comp.name.equals("boost-unit_test_framework")) {
-                assertEquals("1.62.0-r5", comp.version);
-                assertEquals("boost-unit_test_framework/1.62.0-r5/x86_64", comp.bdioExternalIdentifier.externalId);
-                assertEquals(expectedForgeName, comp.bdioExternalIdentifier.forge);
-            } else {
-                assertEquals("ca-certificates", comp.name);
-                assertEquals("20171114-r0", comp.version);
-                assertEquals("ca-certificates/20171114-r0/x86_64", comp.bdioExternalIdentifier.externalId);
-                assertEquals(expectedForgeName, comp.bdioExternalIdentifier.forge);
-            }
-        }
-    }
-
-    @Test
     public void testAppOnlyFileSystem() throws IntegrationException, IOException, InterruptedException {
         ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
         Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("centos"));
@@ -231,32 +188,103 @@ public class ImageInspectorApiIntTest {
         assertTrue(containerFileSystemFile.length() < 80000000);
     }
 
-    @Disabled
     @Test
-    public void testOciImage() throws IntegrationException, IOException, InterruptedException {
+    public void testOciImageRepoTagNotSpecified() throws IntegrationException, IOException, InterruptedException {
+
         ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
-        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("centos"));
-        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
-        Mockito.when(rpmPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
-        Mockito.when(rpmPkgMgr.getType()).thenReturn(PackageManagerEnum.RPM);
-        Mockito.when(rpmPkgMgr.getImagePackageManagerDirectory(Mockito.any(File.class))).thenReturn(new File("."));
+        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("ubuntu"));
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
+        Mockito.when(dpkgPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
 
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
         ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
                 .setDockerTarfilePath(OCI_IMAGE_TARFILE)
-                //.setBlackDuckProjectName(PROJECT)
-                //.setBlackDuckProjectVersion(PROJECT_VERSION)
-                //.setGivenImageRepo("testrepo")
-                //.setGivenImageTag("testtag")
                 .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
-                .setCurrentLinuxDistro("CENTOS")
+                .setCurrentLinuxDistro("UBUNTU")
+                .setCleanupWorkingDir(true)
+                .build();
+        SimpleBdioDocument bdioDocument;
+        try {
+            bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
+            fail("Expected exception");
+        } catch (IntegrationException e) {
+            assertTrue(e.getMessage().contains("multiple manifests"));
+        }
+    }
+
+
+    @Test
+    public void testOciImageRepoTagSpecified() throws IntegrationException, IOException, InterruptedException {
+
+        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
+        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("ubuntu"));
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
+        Mockito.when(dpkgPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
+
+        File destinationFile = new File(tempDir, "out.tar.gz");
+        String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
+        ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
+                .setDockerTarfilePath(OCI_IMAGE_TARFILE)
+                .setGivenImageRepo("testrepo")
+                .setGivenImageTag("testtag")
+                .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+                .setCurrentLinuxDistro("UBUNTU")
                 .setCleanupWorkingDir(true)
                 .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
+        assertEquals("testrepo", bdioDocument.getProject().name);
+        assertEquals("testtag", bdioDocument.getProject().version);
 
         File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
-        System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());
-        assertTrue(containerFileSystemFile.length() > 10000000);
+        assertTrue(containerFileSystemFile.exists());
+    }
+
+    @Test
+    public void testOnRightOs() throws IntegrationException, InterruptedException {
+        doAlpineTest(null);
+    }
+
+    @Test
+    public void testOnRightOsDistroOverride() throws IntegrationException, InterruptedException {
+        doAlpineTest("overriddendistroname");
+    }
+
+    private void doAlpineTest(String targetLinuxDistroOverride) throws IntegrationException, InterruptedException {
+        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
+        String expectedForgeName;
+        if (StringUtils.isNotBlank(targetLinuxDistroOverride)) {
+            expectedForgeName = "@" + targetLinuxDistroOverride;
+        } else {
+            expectedForgeName = "@alpine";
+        }
+        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
+        ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
+                .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
+                .setBlackDuckProjectName(PROJECT)
+                .setBlackDuckProjectVersion(PROJECT_VERSION)
+                .setCurrentLinuxDistro("ALPINE")
+                .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
+                .setCleanupWorkingDir(true)
+                .build();
+        SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
+        System.out.printf("bdioDocument: %s\n", bdioDocument);
+        assertEquals(PROJECT, bdioDocument.getProject().name);
+        assertEquals(PROJECT_VERSION, bdioDocument.getProject().version);
+        assertEquals(apkOutput.length, bdioDocument.getComponents().size());
+        for (BdioComponent comp : bdioDocument.getComponents()) {
+            System.out.printf("comp: %s:%s:%s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
+            if (comp.name.equals("boost-unit_test_framework")) {
+                assertEquals("1.62.0-r5", comp.version);
+                assertEquals("boost-unit_test_framework/1.62.0-r5/x86_64", comp.bdioExternalIdentifier.externalId);
+                assertEquals(expectedForgeName, comp.bdioExternalIdentifier.forge);
+            } else {
+                assertEquals("ca-certificates", comp.name);
+                assertEquals("20171114-r0", comp.version);
+                assertEquals("ca-certificates/20171114-r0/x86_64", comp.bdioExternalIdentifier.externalId);
+                assertEquals(expectedForgeName, comp.bdioExternalIdentifier.forge);
+            }
+        }
     }
 }
