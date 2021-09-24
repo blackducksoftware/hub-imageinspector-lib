@@ -104,7 +104,7 @@ public class FileOperations {
             attrs = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class)
                         .readAttributes();
             attrsMsg = String.format("File %s: owner: %s, group: %s, perms: %s", file.getAbsolutePath(), attrs.owner().getName(), attrs.group().getName(), PosixFilePermissions.toString(attrs.permissions()));
-        } catch (final IOException e) {
+        } catch (Exception e) {
             attrsMsg = String.format("File %s: Error getting attributes: %s", file.getAbsolutePath(), e.getMessage());
         }
         return attrsMsg;
