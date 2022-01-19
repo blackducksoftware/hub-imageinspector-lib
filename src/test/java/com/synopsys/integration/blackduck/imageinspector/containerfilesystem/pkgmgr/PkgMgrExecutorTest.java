@@ -102,6 +102,11 @@ public class PkgMgrExecutorTest {
         public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final File imageFileSystem, final String linuxDistroName, final String[] pkgMgrListOutputLines) throws IntegrationException {
             return new ArrayList<>();
         }
+
+        @Override
+        public ComponentRelationshipPopulater createRelationshipPopulator() {
+            return null;
+        }
     }
 
     private class TestPkgMgrInitializer implements  PkgMgrInitializer {

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrInitializer;
 import com.synopsys.integration.exception.IntegrationException;
@@ -59,5 +60,10 @@ public class NullPkgMgr implements PkgMgr {
     @Override
     public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final File imageFileSystem, final String linuxDistroName, final String[] pkgMgrListOutputLines) throws IntegrationException {
         return new ArrayList<>();
+    }
+
+    @Override
+    public ComponentRelationshipPopulater createRelationshipPopulator() {
+        return null;
     }
 }

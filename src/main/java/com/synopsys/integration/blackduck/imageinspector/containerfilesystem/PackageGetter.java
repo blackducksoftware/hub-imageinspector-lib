@@ -8,6 +8,8 @@
 package com.synopsys.integration.blackduck.imageinspector.containerfilesystem;
 
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.exception.IntegrationException;
@@ -34,8 +36,11 @@ public class PackageGetter {
     public List<ComponentDetails> queryPkgMgrForDependencies(final ContainerFileSystemWithPkgMgrDb containerFileSystemWithPkgMgrDb) {
         final List<ComponentDetails> comps;
         try {
-            final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(cmdExecutor, containerFileSystemWithPkgMgrDb.getPkgMgr(), containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase());
-            comps = containerFileSystemWithPkgMgrDb.getPkgMgr().extractComponentsFromPkgMgrOutput(containerFileSystemWithPkgMgrDb.getContainerFileSystem().getTargetImageFileSystemFull(), containerFileSystemWithPkgMgrDb.getLinuxDistroName(), pkgMgrOutputLines);
+            PkgMgr pkgMgr = containerFileSystemWithPkgMgrDb.getPkgMgr();
+            final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(cmdExecutor, pkgMgr, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase());
+            comps = pkgMgr.extractComponentsFromPkgMgrOutput(containerFileSystemWithPkgMgrDb.getContainerFileSystem().getTargetImageFileSystemFull(), containerFileSystemWithPkgMgrDb.getLinuxDistroName(), pkgMgrOutputLines);
+            ComponentRelationshipPopulater relationshipPopulater = pkgMgr.createRelationshipPopulator();
+            relationshipPopulater.populateRelationshipInfo(comps, cmdExecutor);
         } catch (IntegrationException e) {
             logger.debug(String.format("Error querying package manager for components: %s", e.getMessage()));
             return new ArrayList<>(0);

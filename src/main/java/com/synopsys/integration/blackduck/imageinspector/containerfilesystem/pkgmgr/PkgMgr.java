@@ -23,4 +23,6 @@ public interface PkgMgr {
     List<String> getUpgradeCommand();
     List<String> getListCommand();
     List<ComponentDetails> extractComponentsFromPkgMgrOutput(final File imageFileSystem, final String linuxDistroName, final String[] pkgMgrListOutputLines) throws IntegrationException;
+    ComponentRelationshipPopulater createRelationshipPopulator();
+
 }
