@@ -10,7 +10,9 @@ package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pk
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import com.google.gson.Gson;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrInitializer;
@@ -115,4 +118,10 @@ public class RpmPkgMgr implements PkgMgr {
     public ComponentRelationshipPopulater createRelationshipPopulator() {
         return new RpmRelationshipPopulater();
     }
+
+    @Override
+    public DbRelationshipInfo getRelationshipInfo() {
+        return new DbRelationshipInfo(new HashMap<>(), new HashMap<>());
+    }
+
 }

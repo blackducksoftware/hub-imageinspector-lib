@@ -1,5 +1,6 @@
 package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
@@ -22,7 +24,7 @@ public class RpmRelationshipPopulater implements ComponentRelationshipPopulater 
     private static final Long CMD_TIMEOUT = 120000L;
 
     @Override
-    public List<ComponentDetails> populateRelationshipInfo(final List<ComponentDetails> components, final @Nullable CmdExecutor cmdExecutor) {
+    public List<ComponentDetails> populateRelationshipInfo(final List<ComponentDetails> components, final @Nullable CmdExecutor cmdExecutor, DbRelationshipInfo dbRelationshipInfo) {
         for (ComponentDetails component : components) {
             List<String> dependsCmd = new LinkedList<>(RPM_DEPENDS_CMD);
             dependsCmd.add(component.getName());

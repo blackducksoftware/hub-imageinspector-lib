@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
@@ -105,6 +106,11 @@ public class PkgMgrExecutorTest {
 
         @Override
         public ComponentRelationshipPopulater createRelationshipPopulator() {
+            return null;
+        }
+
+        @Override
+        public DbRelationshipInfo getRelationshipInfo() {
             return null;
         }
     }

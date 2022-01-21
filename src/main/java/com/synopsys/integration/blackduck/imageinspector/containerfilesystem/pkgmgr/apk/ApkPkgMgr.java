@@ -24,6 +24,8 @@ import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
@@ -34,6 +36,7 @@ import com.synopsys.integration.exception.IntegrationException;
 @Component
 public class ApkPkgMgr implements PkgMgr {
     private static final String STANDARD_PKG_MGR_DIR_PATH = "/lib/apk";
+    private static final String DB_INFO_FILE_PATH = "/lib/apk/db/installed";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final List<String> UPGRADE_DATABASE_COMMAND = null;
@@ -104,7 +107,20 @@ public class ApkPkgMgr implements PkgMgr {
             Optional<ComponentDetails> comp = createComponentForPackage(linuxDistroName, architectureName, packageLine);
             comp.ifPresent(components::add);
         }
+        //TODO- should relationship population happen here, instead of having to modify components after extracting them?
         return components;
+    }
+
+    @Override
+    public ComponentRelationshipPopulater createRelationshipPopulator() {
+        return new ApkRelationshipPopulater();
+    }
+
+    @Override
+    public DbRelationshipInfo getRelationshipInfo() {
+        ApkDbInfoFileParser apkDbInfoFileParser = new ApkDbInfoFileParser();
+        File dbInfoFile = new File(DB_INFO_FILE_PATH);
+        return apkDbInfoFileParser.parseDbRelationshipInfoFromFile(dbInfoFile);
     }
 
     private Optional<ComponentDetails> createComponentForPackage(final String linuxDistroName, final String architectureName, final String packageLine) {

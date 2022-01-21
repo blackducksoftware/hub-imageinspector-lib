@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrInitializer;
@@ -108,6 +111,16 @@ public class DpkgPkgMgr implements PkgMgr {
             }
         }
         return components;
+    }
+
+    @Override
+    public ComponentRelationshipPopulater createRelationshipPopulator() {
+        return null;
+    }
+
+    @Override
+    public DbRelationshipInfo getRelationshipInfo() {
+        return null;
     }
 
     private String extractComponent(final String[] componentInfoParts) {
