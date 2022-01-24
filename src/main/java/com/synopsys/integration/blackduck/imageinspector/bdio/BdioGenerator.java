@@ -143,7 +143,10 @@ public class BdioGenerator {
     private void addDependency(MutableDependencyGraph graph, Dependency parent, ComponentDetails comp) {
         Forge componentForge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
         logger.trace(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge.getName()));
-        addCompDependencyWithGivenForge(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge, parent);
+        Dependency dependency = addCompDependencyWithGivenForge(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge, parent);
+        for (ComponentDetails child : comp.getDependencies()) {
+            addDependency(graph, dependency, child);
+        }
     }
 
     private Dependency addLayerDependency(MutableDependencyGraph graph, String name) {
