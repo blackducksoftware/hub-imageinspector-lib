@@ -105,14 +105,10 @@ public class PkgMgrExecutorTest {
         }
 
         @Override
-        public ComponentRelationshipPopulater createRelationshipPopulator() {
+        public ComponentRelationshipPopulater createRelationshipPopulator(CmdExecutor cmdExecutor) {
             return null;
         }
 
-        @Override
-        public DbRelationshipInfo getRelationshipInfo() {
-            return null;
-        }
     }
 
     private class TestPkgMgrInitializer implements  PkgMgrInitializer {

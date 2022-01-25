@@ -10,5 +10,5 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkg
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 
 public interface ComponentRelationshipPopulater {
-    List<ComponentDetails> populateRelationshipInfo(List<ComponentDetails> components, @Nullable CmdExecutor cmdExecutor, DbRelationshipInfo dbRelationshipInfo);
+    List<ComponentDetails> populateRelationshipInfo(List<ComponentDetails> components);
 }

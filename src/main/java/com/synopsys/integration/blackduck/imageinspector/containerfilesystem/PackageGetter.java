@@ -42,9 +42,8 @@ public class PackageGetter {
             PkgMgr pkgMgr = containerFileSystemWithPkgMgrDb.getPkgMgr();
             final String[] pkgMgrOutputLines = pkgMgrExecutor.runPackageManager(cmdExecutor, pkgMgr, containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase());
             comps = pkgMgr.extractComponentsFromPkgMgrOutput(containerFileSystemWithPkgMgrDb.getContainerFileSystem().getTargetImageFileSystemFull(), containerFileSystemWithPkgMgrDb.getLinuxDistroName(), pkgMgrOutputLines);
-            ComponentRelationshipPopulater relationshipPopulater = pkgMgr.createRelationshipPopulator();
-            DbRelationshipInfo dbRelationshipInfo = pkgMgr.getRelationshipInfo();
-            relationshipPopulater.populateRelationshipInfo(comps, cmdExecutor, dbRelationshipInfo);
+            ComponentRelationshipPopulater relationshipPopulater = pkgMgr.createRelationshipPopulator(cmdExecutor);
+            relationshipPopulater.populateRelationshipInfo(comps);
         } catch (IntegrationException e) {
             logger.debug(String.format("Error querying package manager for components: %s", e.getMessage()));
             return new ArrayList<>(0);

@@ -11,8 +11,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,9 @@ import org.springframework.stereotype.Component;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.CommonRelationshipPopulater;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrInitializer;
@@ -35,9 +37,9 @@ public class DpkgPkgMgr implements PkgMgr {
     private static final String PATTERN_FOR_COMPONENT_DETAILS_SEPARATOR = "[  ]+";
     private static final String PATTERN_FOR_LINE_PRECEDING_COMPONENT_LIST = "\\+\\+\\+-=+-=+-=+-=+";
     private static final String STANDARD_PKG_MGR_DIR_PATH = "/var/lib/dpkg";
+    private static final String DB_INFO_FILE_PATH = "/var/lib/dpkg/status";
     private final PkgMgrInitializer pkgMgrInitializer;
     private final File inspectorPkgMgrDir;
-
     @Autowired
     public DpkgPkgMgr(final FileOperations fileOperations) {
         pkgMgrInitializer = new DpkgPkgMgrInitializer(fileOperations);
@@ -114,13 +116,14 @@ public class DpkgPkgMgr implements PkgMgr {
     }
 
     @Override
-    public ComponentRelationshipPopulater createRelationshipPopulator() {
-        return null;
+    public ComponentRelationshipPopulater createRelationshipPopulator(@Nullable CmdExecutor cmdExecutor) {
+        return new CommonRelationshipPopulater(getRelationshipInfo());
     }
 
-    @Override
     public DbRelationshipInfo getRelationshipInfo() {
-        return null;
+        DpkgDbInfoFileParser apkDbInfoFileParser = new DpkgDbInfoFileParser();
+        File dbInfoFile = new File(DB_INFO_FILE_PATH);
+        return apkDbInfoFileParser.parseDbRelationshipInfoFromFile(dbInfoFile);
     }
 
     private String extractComponent(final String[] componentInfoParts) {

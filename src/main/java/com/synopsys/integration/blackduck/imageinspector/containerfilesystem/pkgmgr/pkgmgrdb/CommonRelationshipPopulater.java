@@ -1,6 +1,5 @@
-package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk;
+package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,9 +13,15 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkg
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 
-public class ApkRelationshipPopulater implements ComponentRelationshipPopulater {
+public class CommonRelationshipPopulater implements ComponentRelationshipPopulater {
+    private DbRelationshipInfo dbRelationshipInfo;
+
+    public CommonRelationshipPopulater(final DbRelationshipInfo dbRelationshipInfo) {
+        this.dbRelationshipInfo = dbRelationshipInfo;
+    }
+
     @Override
-    public List<ComponentDetails> populateRelationshipInfo(final List<ComponentDetails> components, @Nullable final CmdExecutor cmdExecutor, DbRelationshipInfo dbRelationshipInfo) {
+    public List<ComponentDetails> populateRelationshipInfo(final List<ComponentDetails> components) {
         Map<String,ComponentDetails> componentNameVersionsToDetails = mapComponentNameVersionToDetails(components);
         Map<String, List<String>> compNamesToDependencies = dbRelationshipInfo.getCompNamesToDependencies();
         Map<String, String> providedBinariesToCompNames = dbRelationshipInfo.getProvidedBinariesToCompNames();

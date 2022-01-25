@@ -20,11 +20,18 @@ import com.synopsys.integration.exception.IntegrationException;
 
 public class RpmRelationshipPopulater implements ComponentRelationshipPopulater {
     private Logger logger = LoggerFactory.getLogger(getClass());
+
     private static final List<String> RPM_DEPENDS_CMD = Arrays.asList("rpm","-qR");
     private static final Long CMD_TIMEOUT = 120000L;
 
+    private final CmdExecutor cmdExecutor;
+
+    public RpmRelationshipPopulater(final CmdExecutor cmdExecutor) {
+        this.cmdExecutor = cmdExecutor;
+    }
+
     @Override
-    public List<ComponentDetails> populateRelationshipInfo(final List<ComponentDetails> components, final @Nullable CmdExecutor cmdExecutor, DbRelationshipInfo dbRelationshipInfo) {
+    public List<ComponentDetails> populateRelationshipInfo(final List<ComponentDetails> components) {
         for (ComponentDetails component : components) {
             List<String> dependsCmd = new LinkedList<>(RPM_DEPENDS_CMD);
             dependsCmd.add(component.getName());

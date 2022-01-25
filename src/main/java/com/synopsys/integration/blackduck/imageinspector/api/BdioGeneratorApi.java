@@ -22,8 +22,11 @@ import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Component
@@ -153,6 +156,9 @@ public class BdioGeneratorApi {
         final String codeLocationName, final String architecture) throws IntegrationException {
         final PkgMgr pkgMgr = pkgMgrFactory.createPkgMgr(pkgMgrType, architecture);
         List<ComponentDetails> comps = pkgMgr.extractComponentsFromPkgMgrOutput(null, linuxDistroName, pkgMgrListCmdOutputLines);
+        CmdExecutor cmdExecutor = new CmdExecutor(); //TODO- should this be constructor parameter?
+        ComponentRelationshipPopulater relationshipPopulater = pkgMgr.createRelationshipPopulator(cmdExecutor);
+        relationshipPopulater.populateRelationshipInfo(comps);
         logger.info(String.format("Extracted %d components from given package manager output", comps.size()));
         SimpleBdioDocument bdioDoc = bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);
         try {

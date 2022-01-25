@@ -1,4 +1,4 @@
-package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk;
+package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,10 +9,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.CommonRelationshipPopulater;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 
-public class ApkRelationshipPopulaterTest {
+public class CommonRelationshipPopulaterTest {
     @Test
     public void testPopulateRelationshipInfo() {
         Map<String, List<String>> compNamesToDependencies = new HashMap<>();
@@ -30,10 +31,8 @@ public class ApkRelationshipPopulaterTest {
         ComponentDetails alpineLayout = new ComponentDetails("alpine-layout", null, null, null, null);
         List<ComponentDetails> components = Arrays.asList(musl, busybox, alpineLayout);
 
-        CmdExecutor cmdExecutor = new CmdExecutor();
-
-        ApkRelationshipPopulater relationshipPopulater = new ApkRelationshipPopulater();
-        List<ComponentDetails> populatedComponents = relationshipPopulater.populateRelationshipInfo(components, cmdExecutor, dbRelationshipInfo);
+        CommonRelationshipPopulater relationshipPopulater = new CommonRelationshipPopulater(dbRelationshipInfo);
+        List<ComponentDetails> populatedComponents = relationshipPopulater.populateRelationshipInfo(components);
 
         ComponentDetails populatedBusybox = populatedComponents.stream()
             .filter(c -> c.getName().equals("busybox"))
