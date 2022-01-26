@@ -1,6 +1,7 @@
 package com.synopsys.integration.blackduck.imageinspector.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -184,8 +185,20 @@ public class ImageInspectorApiIntTest {
 
         File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
         System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());
-        assertTrue(containerFileSystemFile.length() > 10000000);
-        assertTrue(containerFileSystemFile.length() < 80000000);
+
+        ImageLayerArchiveExtractor archiveExtractor = new ImageLayerArchiveExtractor();
+        File extractedFilesDir = new File (tempDir, "extracted");
+        archiveExtractor.extractLayerGzipTarToDir(new FileOperations(), containerFileSystemFile, extractedFilesDir);
+
+        File[] extractedFiles = extractedFilesDir.listFiles();
+        assertEquals(1, extractedFiles.length);
+
+        File appLayersDir = extractedFiles[0];
+        File etcDir = new File(appLayersDir, "etc");
+        assertTrue(etcDir.exists());
+
+        File homeDir = new File(appLayersDir, "home");
+        assertFalse(homeDir.exists());
     }
 
     @Test
