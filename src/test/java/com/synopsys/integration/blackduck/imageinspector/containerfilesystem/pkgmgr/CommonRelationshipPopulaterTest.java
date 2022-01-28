@@ -32,16 +32,9 @@ public class CommonRelationshipPopulaterTest {
         List<ComponentDetails> components = Arrays.asList(musl, busybox, alpineLayout);
 
         CommonRelationshipPopulater relationshipPopulater = new CommonRelationshipPopulater(dbRelationshipInfo);
-        List<ComponentDetails> populatedComponents = relationshipPopulater.populateRelationshipInfo(components);
+        relationshipPopulater.populateRelationshipInfo(components);
 
-        ComponentDetails populatedBusybox = populatedComponents.stream()
-            .filter(c -> c.getName().equals("busybox"))
-            .findFirst().get();
-        Assertions.assertTrue(populatedBusybox.getDependencies().contains(musl));
-
-        ComponentDetails populatedAlpineLayout = populatedComponents.stream()
-            .filter(c -> c.getName().equals("alpine-layout"))
-            .findFirst().get();
-        Assertions.assertTrue(populatedAlpineLayout.getDependencies().contains(musl));
+        Assertions.assertTrue(busybox.getDependencies().contains(musl));
+        Assertions.assertTrue(alpineLayout.getDependencies().contains(musl));
     }
 }

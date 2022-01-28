@@ -1,7 +1,7 @@
 /*
  * hub-imageinspector-lib
  *
- * Copyright (c) 2021 Synopsys, Inc.
+ * Copyright (c) 2022 Synopsys, Inc.
  *
  * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
@@ -145,7 +145,7 @@ public class BdioGenerator {
         logger.trace(String.format("Generating component with name: %s, version: %s, arch: %s, forge: %s", comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge.getName()));
         Dependency dependency = addCompDependencyWithGivenForge(graph, comp.getName(), comp.getVersion(), comp.getArchitecture(), componentForge, parent);
         for (ComponentDetails child : comp.getDependencies()) {
-            addDependency(graph, dependency, child);
+            addCompDependencyWithGivenForge(graph, child.getName(), child.getVersion(), child.getArchitecture(), componentForge, dependency);
         }
     }
 
