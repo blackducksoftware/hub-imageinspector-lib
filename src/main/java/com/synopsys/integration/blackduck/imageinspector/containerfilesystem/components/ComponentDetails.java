@@ -21,16 +21,6 @@ public class ComponentDetails extends Stringable {
     private List<String> provides;
     private List<ComponentDetails> dependencies;
 
-    public ComponentDetails(final String name, final String version, final String externalId, final String architecture, final String linuxDistroName,
-        final List<ComponentDetails> dependencies) {
-        this.name = name;
-        this.version = version;
-        this.externalId = externalId;
-        this.architecture = architecture;
-        this.linuxDistroName = linuxDistroName;
-        this.dependencies = dependencies;
-    }
-
     public ComponentDetails(final String name, final String version, final String externalId, final String architecture, final String linuxDistroName) {
         this.name = name;
         this.version = version;

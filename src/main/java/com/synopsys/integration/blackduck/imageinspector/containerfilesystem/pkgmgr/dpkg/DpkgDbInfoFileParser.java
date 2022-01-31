@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 
 public class DpkgDbInfoFileParser {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private static final String PACKAGE = "Package";
     private static final String PROVIDES = "Provides";
     private static final String DEPENDS = "Depends";
@@ -67,6 +69,7 @@ public class DpkgDbInfoFileParser {
                 }
             }
         } catch (IOException e) {
+            logger.error(String.format("Unable to read file: %s", dbInfoFile.getAbsolutePath()));
             // if reading file fails, return object with empty maps
         }
         return new DbRelationshipInfo(compNamesToDependencies, providedBinariesToCompNames);

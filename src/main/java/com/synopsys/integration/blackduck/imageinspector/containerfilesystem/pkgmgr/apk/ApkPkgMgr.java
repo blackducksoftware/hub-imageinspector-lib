@@ -110,7 +110,6 @@ public class ApkPkgMgr implements PkgMgr {
             Optional<ComponentDetails> comp = createComponentForPackage(linuxDistroName, architectureName, packageLine);
             comp.ifPresent(components::add);
         }
-        //TODO- should relationship population happen here, instead of having to modify components after extracting them?
         return components;
     }
 

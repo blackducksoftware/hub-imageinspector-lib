@@ -12,10 +12,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 
 public class ApkDbInfoFileParser {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public DbRelationshipInfo parseDbRelationshipInfoFromFile(File dbInfoFile) {
         Map<String, List<String>> compNamesToDependencies = new HashMap<>();
@@ -46,6 +49,7 @@ public class ApkDbInfoFileParser {
                 }
             }
         } catch (IOException e) {
+            logger.error(String.format("Unable to read file: %s", dbInfoFile.getAbsolutePath()));
             // if reading file fails, return object with empty maps
         }
         return new DbRelationshipInfo(compNamesToDependencies, providedBinariesToCompNames);
