@@ -10,10 +10,13 @@ package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pk
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -121,7 +124,16 @@ public class ApkPkgMgr implements PkgMgr {
     public DbRelationshipInfo getRelationshipInfo() {
         ApkDbInfoFileParser apkDbInfoFileParser = new ApkDbInfoFileParser();
         File dbInfoFile = new File(DB_INFO_FILE_PATH);
-        return apkDbInfoFileParser.parseDbRelationshipInfoFromFile(dbInfoFile);
+        List<String> dbInfoFileLines = new LinkedList<>();
+        try {
+            dbInfoFileLines.addAll(Files.readAllLines(dbInfoFile.toPath()).stream()
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList()));
+        } catch (IOException e) {
+            logger.error(String.format("Unable to read file: %s", dbInfoFile.getAbsolutePath()));
+            // if reading file fails, return object with empty maps
+        }
+        return apkDbInfoFileParser.parseDbRelationshipInfoFromFile(dbInfoFileLines);
     }
 
     private Optional<ComponentDetails> createComponentForPackage(final String linuxDistroName, final String architectureName, final String packageLine) {

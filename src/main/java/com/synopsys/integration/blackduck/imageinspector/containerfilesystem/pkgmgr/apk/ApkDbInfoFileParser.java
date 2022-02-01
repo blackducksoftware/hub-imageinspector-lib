@@ -20,37 +20,29 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkg
 public class ApkDbInfoFileParser {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public DbRelationshipInfo parseDbRelationshipInfoFromFile(File dbInfoFile) {
+    public DbRelationshipInfo parseDbRelationshipInfoFromFile(List<String> dbInfoFileLines) {
         Map<String, List<String>> compNamesToDependencies = new HashMap<>();
         Map<String, String> providedBinariesToCompNames = new HashMap<>();
 
-        try {
-            List<String> lines = Files.readAllLines(dbInfoFile.toPath()).stream()
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toList());
-            String name = null;
-            for (String line : lines) {
-                char key = line.charAt(0);
-                String value = line.substring(2).trim();
-                if (key == 'P') {
-                    name = value;
-                } else if (key == 'p') {
-                    for (String piece : value.split(" ")) {
-                        providedBinariesToCompNames.put(piece.split("=")[0], name);
-                    }
-                } else if (key == 'r' || key == 'D') {
-                    List<String> deps = Optional.ofNullable(compNamesToDependencies.get(name)).orElse(new LinkedList<>());
-                    deps.addAll(Arrays.stream(value.split(" "))
-                        .map(dep -> dep.split(">=")[0])
-                        .map(dep -> dep.split("<=")[0])
-                        .map(dep -> dep.split("=")[0])
-                        .collect(Collectors.toList()));
-                    compNamesToDependencies.put(name, deps);
+        String name = null;
+        for (String line : dbInfoFileLines) {
+            char key = line.charAt(0);
+            String value = line.substring(2).trim();
+            if (key == 'P') {
+                name = value;
+            } else if (key == 'p') {
+                for (String piece : value.split(" ")) {
+                    providedBinariesToCompNames.put(piece.split("=")[0], name);
                 }
+            } else if (key == 'r' || key == 'D') {
+                List<String> deps = Optional.ofNullable(compNamesToDependencies.get(name)).orElse(new LinkedList<>());
+                deps.addAll(Arrays.stream(value.split(" "))
+                    .map(dep -> dep.split(">=")[0])
+                    .map(dep -> dep.split("<=")[0])
+                    .map(dep -> dep.split("=")[0])
+                    .collect(Collectors.toList()));
+                compNamesToDependencies.put(name, deps);
             }
-        } catch (IOException e) {
-            logger.error(String.format("Unable to read file: %s", dbInfoFile.getAbsolutePath()));
-            // if reading file fails, return object with empty maps
         }
         return new DbRelationshipInfo(compNamesToDependencies, providedBinariesToCompNames);
     }

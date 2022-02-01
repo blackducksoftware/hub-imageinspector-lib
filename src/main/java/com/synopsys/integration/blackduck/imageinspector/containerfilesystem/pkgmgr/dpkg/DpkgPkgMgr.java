@@ -8,10 +8,15 @@
 package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.dpkg;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk.ApkDbInfoFileParser;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.CommonRelationshipPopulater;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
@@ -121,9 +127,18 @@ public class DpkgPkgMgr implements PkgMgr {
     }
 
     public DbRelationshipInfo getRelationshipInfo() {
-        DpkgDbInfoFileParser apkDbInfoFileParser = new DpkgDbInfoFileParser();
+        DpkgDbInfoFileParser dpkgDbInfoFileParser = new DpkgDbInfoFileParser();
         File dbInfoFile = new File(DB_INFO_FILE_PATH);
-        return apkDbInfoFileParser.parseDbRelationshipInfoFromFile(dbInfoFile);
+        List<String> dbInfoFileLines = new LinkedList<>();
+        try {
+            dbInfoFileLines.addAll(Files.readAllLines(dbInfoFile.toPath()).stream()
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList()));
+        } catch (IOException e) {
+            logger.error(String.format("Unable to read file: %s", dbInfoFile.getAbsolutePath()));
+            // if reading file fails, return object with empty maps
+        }
+        return dpkgDbInfoFileParser.parseDbRelationshipInfoFromFile(dbInfoFileLines);
     }
 
     private String extractComponent(final String[] componentInfoParts) {

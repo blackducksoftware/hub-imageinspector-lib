@@ -32,45 +32,37 @@ public class DpkgDbInfoFileParser {
     private static final String DEPENDS = "Depends";
     private static final String PRE_DEPENDS = "Pre-Depends";
 
-    public DbRelationshipInfo parseDbRelationshipInfoFromFile(File dbInfoFile) {
+    public DbRelationshipInfo parseDbRelationshipInfoFromFile(List<String> dbInfoFileLines) {
         Map<String, List<String>> compNamesToDependencies = new HashMap<>();
         Map<String, String> providedBinariesToCompNames = new HashMap<>();
 
-        try {
-            List<String> lines = Files.readAllLines(dbInfoFile.toPath()).stream()
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toList());
-            String name = null;
-            for (String line : lines) {
-                String[] pieces = line.split(": ");
-                if (pieces.length < 2) {
-                    continue;
+        String name = null;
+        for (String line : dbInfoFileLines) {
+            String[] pieces = line.split(": ");
+            if (pieces.length < 2) {
+                continue;
+            }
+            String key = pieces[0];
+            String value = pieces[1].trim();
+            if (key.equals(PACKAGE)) {
+                name = value;
+            } else if (key.equals(PROVIDES)) {
+                for (String piece : value.split(",")) {
+                    providedBinariesToCompNames.put(piece.split("=")[0].trim(), name);
                 }
-                String key = pieces[0];
-                String value = pieces[1].trim();
-                if (key.equals(PACKAGE)) {
-                    name = value;
-                } else if (key.equals(PROVIDES)) {
-                    for (String piece : value.split(",")) {
-                        providedBinariesToCompNames.put(piece.split("=")[0].trim(), name);
-                    }
-                } else if (key.equals(DEPENDS) || key.equals(PRE_DEPENDS)) {
-                    List<String> deps = Optional.ofNullable(compNamesToDependencies.get(name)).orElse(new LinkedList<>());
-                    for (String rawDep : value.split(",")) {
-                        deps.addAll(Arrays.stream(rawDep.split("\\|"))
-                            .map(dep -> dep.split("\\(>=")[0].trim())
-                            .map(dep -> dep.split("\\(<=")[0].trim())
-                            .map(dep -> dep.split("\\(=")[0].trim())
-                            .map(dep -> dep.split("\\(<<")[0].trim())
-                            .map(dep -> dep.split("\\(>>")[0].trim())
-                            .collect(Collectors.toList()));
-                        compNamesToDependencies.put(name, deps);
-                    }
+            } else if (key.equals(DEPENDS) || key.equals(PRE_DEPENDS)) {
+                List<String> deps = Optional.ofNullable(compNamesToDependencies.get(name)).orElse(new LinkedList<>());
+                for (String rawDep : value.split(",")) {
+                    deps.addAll(Arrays.stream(rawDep.split("\\|"))
+                        .map(dep -> dep.split("\\(>=")[0].trim())
+                        .map(dep -> dep.split("\\(<=")[0].trim())
+                        .map(dep -> dep.split("\\(=")[0].trim())
+                        .map(dep -> dep.split("\\(<<")[0].trim())
+                        .map(dep -> dep.split("\\(>>")[0].trim())
+                        .collect(Collectors.toList()));
+                    compNamesToDependencies.put(name, deps);
                 }
             }
-        } catch (IOException e) {
-            logger.error(String.format("Unable to read file: %s", dbInfoFile.getAbsolutePath()));
-            // if reading file fails, return object with empty maps
         }
         return new DbRelationshipInfo(compNamesToDependencies, providedBinariesToCompNames);
     }
