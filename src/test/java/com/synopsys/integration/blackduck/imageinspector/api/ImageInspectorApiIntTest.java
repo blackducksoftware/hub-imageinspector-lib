@@ -17,6 +17,7 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.Lin
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PackageGetter;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PkgMgrDbExtractor;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmRelationshipPopulater;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactoryChooser;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchyLogger;
@@ -169,6 +170,10 @@ public class ImageInspectorApiIntTest {
         Mockito.when(rpmPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
         Mockito.when(rpmPkgMgr.getType()).thenReturn(PackageManagerEnum.RPM);
         Mockito.when(rpmPkgMgr.getImagePackageManagerDirectory(Mockito.any(File.class))).thenReturn(new File("."));
+
+        CmdExecutor cmdExecutor = Mockito.mock(CmdExecutor.class);
+        Mockito.when(cmdExecutor.executeCommand(Mockito.any(List.class), Mockito.any(Long.class))).thenReturn(new String[0]);
+        Mockito.when(rpmPkgMgr.createRelationshipPopulator(Mockito.any(CmdExecutor.class))).thenReturn(new RpmRelationshipPopulater(cmdExecutor));
 
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
