@@ -1,6 +1,8 @@
 package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.dpkg;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
@@ -11,10 +13,11 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkg
 
 public class DpkgDbInfoFileParserTest {
     @Test
-    public void testParseDbInfoFile() {
+    public void testParseDbInfoFile() throws IOException {
         File dbInfoFile = new File("src/test/resources/dbRelationshipParsing/dpkgStatus.txt");
         DpkgDbInfoFileParser dpkgDbInfoFileParser = new DpkgDbInfoFileParser();
-        DbRelationshipInfo dbRelationshipInfo = dpkgDbInfoFileParser.parseDbRelationshipInfoFromFile(dbInfoFile);
+        List<String> lines = Files.readAllLines(dbInfoFile.toPath());
+        DbRelationshipInfo dbRelationshipInfo = dpkgDbInfoFileParser.parseDbRelationshipInfoFromFile(lines);
         Map<String, List<String>> compNamesToDependencies = dbRelationshipInfo.getCompNamesToDependencies();
         Map<String, String> providedBinariesToCompNames = dbRelationshipInfo.getProvidedBinariesToCompNames();
 
