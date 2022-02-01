@@ -25,6 +25,9 @@ public class ApkDbInfoFileParser {
         Map<String, String> providedBinariesToCompNames = new HashMap<>();
 
         String name = null;
+        dbInfoFileLines = dbInfoFileLines.stream()
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.toList());
         for (String line : dbInfoFileLines) {
             char key = line.charAt(0);
             String value = line.substring(2).trim();

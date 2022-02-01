@@ -126,9 +126,7 @@ public class ApkPkgMgr implements PkgMgr {
         File dbInfoFile = new File(DB_INFO_FILE_PATH);
         List<String> dbInfoFileLines = new LinkedList<>();
         try {
-            dbInfoFileLines.addAll(Files.readAllLines(dbInfoFile.toPath()).stream()
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toList()));
+            dbInfoFileLines.addAll(Files.readAllLines(dbInfoFile.toPath()));
         } catch (IOException e) {
             logger.error(String.format("Unable to read file: %s", dbInfoFile.getAbsolutePath()));
             // if reading file fails, return object with empty maps

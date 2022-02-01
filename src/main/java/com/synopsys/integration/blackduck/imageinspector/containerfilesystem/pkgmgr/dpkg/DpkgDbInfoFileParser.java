@@ -37,6 +37,9 @@ public class DpkgDbInfoFileParser {
         Map<String, String> providedBinariesToCompNames = new HashMap<>();
 
         String name = null;
+        dbInfoFileLines = dbInfoFileLines.stream()
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.toList());
         for (String line : dbInfoFileLines) {
             String[] pieces = line.split(": ");
             if (pieces.length < 2) {
