@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
@@ -102,6 +103,12 @@ public class PkgMgrExecutorTest {
         public List<ComponentDetails> extractComponentsFromPkgMgrOutput(final File imageFileSystem, final String linuxDistroName, final String[] pkgMgrListOutputLines) throws IntegrationException {
             return new ArrayList<>();
         }
+
+        @Override
+        public ComponentRelationshipPopulater createRelationshipPopulator(CmdExecutor cmdExecutor) {
+            return null;
+        }
+
     }
 
     private class TestPkgMgrInitializer implements  PkgMgrInitializer {

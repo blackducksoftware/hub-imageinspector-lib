@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,9 @@ import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrFactory;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.CommonRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
 public class BdioGeneratorApiTest {
@@ -44,13 +48,16 @@ public class BdioGeneratorApiTest {
         comps.add(new ComponentDetails("apt", "1.6.8", "apt/1.6.8/amd64", "amd64", "ubuntu"));
         Mockito.when(pkgMgr.extractComponentsFromPkgMgrOutput(null, linuxDistroName, pkgMgrListCmdOutputLines)).thenReturn(comps);
 
+        DbRelationshipInfo dbRelationshipInfo = new DbRelationshipInfo(new HashMap<>(), new HashMap<>());
+        Mockito.when(pkgMgr.createRelationshipPopulator(Mockito.any(CmdExecutor.class))).thenReturn(new CommonRelationshipPopulater(dbRelationshipInfo));
+
         SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
         bdioDoc.setProject(new BdioProject());
         bdioDoc.getProject().name = "testBdioProject";
         Mockito.when(bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps)).thenReturn(bdioDoc);
         final String[] mockedOutput = { "mockedOutput"};
         Mockito.when(bdioGenerator.getBdioAsStringArray(bdioDoc)).thenReturn(mockedOutput);
-        final String[] bdioLines = api.pkgListToBdio( pkgMgrType, linuxDistroName, pkgMgrListCmdOutputLines,  blackDuckProjectName,  blackDuckProjectVersion, codeLocationName);
+        final String[] bdioLines = api.pkgListToBdio(pkgMgrType, linuxDistroName, pkgMgrListCmdOutputLines,  blackDuckProjectName,  blackDuckProjectVersion, codeLocationName);
         assertEquals(mockedOutput, bdioLines);
     }
 }

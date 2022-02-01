@@ -1,0 +1,14 @@
+Package: base-files
+Essential: yes
+Status: install ok installed
+Version: 11ubuntu5.4
+Replaces: base, dpkg (<= 1.15.0), miscutils
+Provides: base, libc6
+
+Package: bash
+Version: 5.0-6ubuntu1.1
+Depends: base-files (>= 2.1.12), debianutils (>= 2.15)
+
+Package: coreutils
+Version: 8.30-3ubuntu2
+Pre-Depends: libc6 (>> 2.15) | libtinfo6 (>= 6)

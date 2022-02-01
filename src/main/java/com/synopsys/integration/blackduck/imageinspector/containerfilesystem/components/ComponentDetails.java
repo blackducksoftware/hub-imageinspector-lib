@@ -7,6 +7,9 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.synopsys.integration.util.Stringable;
 
 public class ComponentDetails extends Stringable {
@@ -15,6 +18,8 @@ public class ComponentDetails extends Stringable {
     private final String externalId;
     private final String architecture;
     private final String linuxDistroName;
+    private List<String> provides;
+    private List<ComponentDetails> dependencies;
 
     public ComponentDetails(final String name, final String version, final String externalId, final String architecture, final String linuxDistroName) {
         this.name = name;
@@ -22,6 +27,7 @@ public class ComponentDetails extends Stringable {
         this.externalId = externalId;
         this.architecture = architecture;
         this.linuxDistroName = linuxDistroName;
+        this.dependencies = new LinkedList<>();
     }
 
     public String getName() {
@@ -43,4 +49,12 @@ public class ComponentDetails extends Stringable {
     public String getLinuxDistroName() {
         return linuxDistroName;
     }
+
+    public List<String> getProvides() { return provides; }
+
+    public void setProvides(final List<String> provides) { this.provides = provides;}
+
+    public List<ComponentDetails> getDependencies() { return dependencies; }
+
+    public void setDependencies(final List<ComponentDetails> dependencies) { this.dependencies = dependencies; }
 }
