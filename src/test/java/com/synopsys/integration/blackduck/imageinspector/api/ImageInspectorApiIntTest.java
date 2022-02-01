@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,8 @@ import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.Con
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.LinuxDistroExtractor;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PackageGetter;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PkgMgrDbExtractor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.CommonRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmRelationshipPopulater;
 import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactoryChooser;
@@ -213,6 +216,7 @@ public class ImageInspectorApiIntTest {
         Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("ubuntu"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
         Mockito.when(dpkgPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
+        Mockito.when(dpkgPkgMgr.createRelationshipPopulator(Mockito.any(CmdExecutor.class))).thenReturn(new CommonRelationshipPopulater(null));
 
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
@@ -239,6 +243,7 @@ public class ImageInspectorApiIntTest {
         Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("ubuntu"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
         Mockito.when(dpkgPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
+        Mockito.when(dpkgPkgMgr.createRelationshipPopulator(Mockito.any(CmdExecutor.class))).thenReturn(new CommonRelationshipPopulater(new DbRelationshipInfo(new HashMap<>(), new HashMap<>())));
 
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
