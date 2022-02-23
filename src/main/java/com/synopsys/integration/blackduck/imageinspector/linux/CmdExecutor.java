@@ -30,7 +30,6 @@ public class CmdExecutor {
 
     public String[] executeCommand(final List<String> commandParts, final Long timeoutMillisec) throws IntegrationException, UnsupportedEncodingException {
         logger.debug(String.format("Executing: %s with timeout %s", commandParts.get(0), timeoutMillisec));
-        System.out.println("******* EXECUTING:  + commandParts.get(0)");
         final CommandLine cmdLine = new CommandLine(commandParts.get(0));
         for (int i = 1; i < commandParts.size(); i++) {
             logger.debug(String.format("Adding arg to %s command line: %s", commandParts.get(0), commandParts.get(i)));
