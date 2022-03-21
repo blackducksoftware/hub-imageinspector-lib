@@ -12,39 +12,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import com.synopsys.integration.blackduck.imageinspector.ImageInspector;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemCompatibilityChecker;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.LinuxDistroExtractor;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PackageGetter;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PkgMgrDbExtractor;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.CommonRelationshipPopulater;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmRelationshipPopulater;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactoryChooser;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchyLogger;
-import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentHierarchyBuilder;
-import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerApplier;
-import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import com.synopsys.integration.bdio.model.BdioComponent;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.blackduck.imageinspector.ImageInspector;
 import com.synopsys.integration.blackduck.imageinspector.TestUtils;
-import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
-import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.blackduck.imageinspector.linux.Os;
+import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemCompatibilityChecker;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.LinuxDistroExtractor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PackageGetter;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.PkgMgrDbExtractor;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentHierarchyBuilder;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchyLogger;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrExecutor;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk.ApkPkgMgr;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.dpkg.DpkgPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.CommonRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmPkgMgr;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmRelationshipPopulater;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactoryChooser;
+import com.synopsys.integration.blackduck.imageinspector.image.common.ImageLayerApplier;
+import com.synopsys.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
+import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
+import com.synopsys.integration.blackduck.imageinspector.linux.FileOperations;
+import com.synopsys.integration.blackduck.imageinspector.linux.Os;
+import com.synopsys.integration.blackduck.imageinspector.linux.TarOperations;
 import com.synopsys.integration.exception.IntegrationException;
 
 @Tag("integration")
@@ -55,6 +57,7 @@ public class ImageInspectorApiIntTest {
     private static final String MULTILAYER_IMAGE_TARFILE = "build/images/test/centos_minus_vim_plus_bacula.tar";
     private static final String NOPKGMGR_IMAGE_TARFILE = "build/images/test/nopkgmgr.tar";
     private static final String OCI_IMAGE_TARFILE = "src/test/resources/oci/u_multi_tagged_gutted.tar";
+    private static final String IMAGE_TARFILE_GZIPPED = "src/test/resources/gutted.tar.gz";
 
     private Os os;
     private ImageInspectorApi imageInspectorApi;
@@ -102,10 +105,11 @@ public class ImageInspectorApiIntTest {
         ContainerFileSystemCompatibilityChecker containerFileSystemCompatibilityChecker = new ContainerFileSystemCompatibilityChecker();
         ImageLayerApplier imageLayerApplier = new ImageLayerApplier(fileOperations, new ImageLayerArchiveExtractor());
         ImageInspector imageInspector = new ImageInspector(os, pkgMgrDbExtractor, tarOperations,
-                new FileOperations(), imageLayerApplier,
-                containerFileSystemCompatibilityChecker, new BdioGenerator(),
-                new ImageDirectoryDataExtractorFactoryChooser(),
-                new ImageComponentHierarchyLogger());
+            new FileOperations(), imageLayerApplier,
+            containerFileSystemCompatibilityChecker, new BdioGenerator(),
+            new ImageDirectoryDataExtractorFactoryChooser(),
+            new ImageComponentHierarchyLogger()
+        );
         imageInspectorApi = new ImageInspectorApi(imageInspector, os);
         imageInspectorApi.setFileOperations(new FileOperations());
         imageInspectorApi.setBdioGenerator(TestUtils.createBdioGenerator());
@@ -122,18 +126,21 @@ public class ImageInspectorApiIntTest {
         Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         try {
             ImageInspectionRequest imageInspectionRequest = new ImageInspectionRequestBuilder()
-                                                                .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
-                                                                .setBlackDuckProjectName(PROJECT)
-                                                                .setBlackDuckProjectVersion(PROJECT_VERSION)
-                                                                .setOrganizeComponentsByLayer(false)
-                                                                .setIncludeRemovedComponents(false)
-                                                                .setCurrentLinuxDistro("CENTOS")
-                                                                .setCleanupWorkingDir(true)
-                                                                .build();
+                .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
+                .setBlackDuckProjectName(PROJECT)
+                .setBlackDuckProjectVersion(PROJECT_VERSION)
+                .setOrganizeComponentsByLayer(false)
+                .setIncludeRemovedComponents(false)
+                .setCurrentLinuxDistro("CENTOS")
+                .setCleanupWorkingDir(true)
+                .build();
             imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
             fail("Expected WrongInspectorOsException");
         } catch (WrongInspectorOsException e) {
-            System.out.println(String.format("Can't inspect on this OS; need to inspect on %s", e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()));
+            System.out.println(String.format(
+                "Can't inspect on this OS; need to inspect on %s",
+                e.getcorrectInspectorOs() == null ? "<unknown>" : e.getcorrectInspectorOs().name()
+            ));
             assertEquals(ImageInspectorOsEnum.ALPINE.name(), e.getcorrectInspectorOs().name());
         }
     }
@@ -147,15 +154,15 @@ public class ImageInspectorApiIntTest {
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
 
         ImageInspectionRequest imageInspectionRequest = new ImageInspectionRequestBuilder()
-                                                            .setDockerTarfilePath(NOPKGMGR_IMAGE_TARFILE)
-                                                            .setBlackDuckProjectName(PROJECT)
-                                                            .setBlackDuckProjectVersion(PROJECT_VERSION)
-                                                            .setOrganizeComponentsByLayer(false)
-                                                            .setIncludeRemovedComponents(false)
-                                                            .setCurrentLinuxDistro("UBUNTU")
-                                                            .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
-                                                            .setCleanupWorkingDir(true)
-                                                            .build();
+            .setDockerTarfilePath(NOPKGMGR_IMAGE_TARFILE)
+            .setBlackDuckProjectName(PROJECT)
+            .setBlackDuckProjectVersion(PROJECT_VERSION)
+            .setOrganizeComponentsByLayer(false)
+            .setIncludeRemovedComponents(false)
+            .setCurrentLinuxDistro("UBUNTU")
+            .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+            .setCleanupWorkingDir(true)
+            .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
         assertEquals(0, bdioDocument.getComponents().size());
 
@@ -181,21 +188,21 @@ public class ImageInspectorApiIntTest {
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
         ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
-                                                            .setDockerTarfilePath(MULTILAYER_IMAGE_TARFILE)
-                                                            .setBlackDuckProjectName(PROJECT)
-                                                            .setBlackDuckProjectVersion(PROJECT_VERSION)
-                                                            .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
-                                                            .setCurrentLinuxDistro("CENTOS")
-                                                            .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
-                                                            .setCleanupWorkingDir(true)
-                                                            .build();
+            .setDockerTarfilePath(MULTILAYER_IMAGE_TARFILE)
+            .setBlackDuckProjectName(PROJECT)
+            .setBlackDuckProjectVersion(PROJECT_VERSION)
+            .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+            .setCurrentLinuxDistro("CENTOS")
+            .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
+            .setCleanupWorkingDir(true)
+            .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
 
         File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
         System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());
 
         ImageLayerArchiveExtractor archiveExtractor = new ImageLayerArchiveExtractor();
-        File extractedFilesDir = new File (tempDir, "extracted");
+        File extractedFilesDir = new File(tempDir, "extracted");
         archiveExtractor.extractLayerGzipTarToDir(new FileOperations(), containerFileSystemFile, extractedFilesDir);
 
         File[] extractedFiles = extractedFilesDir.listFiles();
@@ -221,11 +228,11 @@ public class ImageInspectorApiIntTest {
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
         ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
-                .setDockerTarfilePath(OCI_IMAGE_TARFILE)
-                .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
-                .setCurrentLinuxDistro("UBUNTU")
-                .setCleanupWorkingDir(true)
-                .build();
+            .setDockerTarfilePath(OCI_IMAGE_TARFILE)
+            .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+            .setCurrentLinuxDistro("UBUNTU")
+            .setCleanupWorkingDir(true)
+            .build();
         SimpleBdioDocument bdioDocument;
         try {
             bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
@@ -235,7 +242,6 @@ public class ImageInspectorApiIntTest {
         }
     }
 
-
     @Test
     public void testOciImageRepoTagSpecified() throws IntegrationException, IOException, InterruptedException {
 
@@ -243,24 +249,47 @@ public class ImageInspectorApiIntTest {
         Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("ubuntu"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
         Mockito.when(dpkgPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
-        Mockito.when(dpkgPkgMgr.createRelationshipPopulator(Mockito.any(CmdExecutor.class))).thenReturn(new CommonRelationshipPopulater(new DbRelationshipInfo(new HashMap<>(), new HashMap<>())));
+        Mockito.when(dpkgPkgMgr.createRelationshipPopulator(Mockito.any(CmdExecutor.class)))
+            .thenReturn(new CommonRelationshipPopulater(new DbRelationshipInfo(new HashMap<>(), new HashMap<>())));
 
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
         ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
-                .setDockerTarfilePath(OCI_IMAGE_TARFILE)
-                .setGivenImageRepo("testrepo")
-                .setGivenImageTag("testtag")
-                .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
-                .setCurrentLinuxDistro("UBUNTU")
-                .setCleanupWorkingDir(true)
-                .build();
+            .setDockerTarfilePath(OCI_IMAGE_TARFILE)
+            .setGivenImageRepo("testrepo")
+            .setGivenImageTag("testtag")
+            .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
+            .setCurrentLinuxDistro("UBUNTU")
+            .setCleanupWorkingDir(true)
+            .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
         assertEquals("testrepo", bdioDocument.getProject().name);
         assertEquals("testtag", bdioDocument.getProject().version);
 
         File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
         assertTrue(containerFileSystemFile.exists());
+    }
+
+    @Test
+    public void testTarDotGz() throws IntegrationException, IOException, InterruptedException {
+
+        ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
+        Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("ubuntu"));
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
+        Mockito.when(dpkgPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
+        Mockito.when(dpkgPkgMgr.createRelationshipPopulator(Mockito.any(CmdExecutor.class))).thenReturn(new CommonRelationshipPopulater(null));
+
+        ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
+            .setDockerTarfilePath(IMAGE_TARFILE_GZIPPED)
+            .setCurrentLinuxDistro("UBUNTU")
+            .setCleanupWorkingDir(true)
+            .build();
+        try {
+            imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
+            fail("Expected exception");
+        } catch (InvalidArchiveFormatException e) {
+            assertTrue(e.getMessage().contains("UNIX tar"));
+        }
     }
 
     @Test
@@ -284,13 +313,13 @@ public class ImageInspectorApiIntTest {
         Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("alpine"));
         Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.ALPINE);
         ImageInspectionRequest imageInspectionRequest = (new ImageInspectionRequestBuilder())
-                .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
-                .setBlackDuckProjectName(PROJECT)
-                .setBlackDuckProjectVersion(PROJECT_VERSION)
-                .setCurrentLinuxDistro("ALPINE")
-                .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
-                .setCleanupWorkingDir(true)
-                .build();
+            .setDockerTarfilePath(SIMPLE_IMAGE_TARFILE)
+            .setBlackDuckProjectName(PROJECT)
+            .setBlackDuckProjectVersion(PROJECT_VERSION)
+            .setCurrentLinuxDistro("ALPINE")
+            .setTargetLinuxDistroOverride(targetLinuxDistroOverride)
+            .setCleanupWorkingDir(true)
+            .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
         System.out.printf("bdioDocument: %s\n", bdioDocument);
         assertEquals(PROJECT, bdioDocument.getProject().name);
