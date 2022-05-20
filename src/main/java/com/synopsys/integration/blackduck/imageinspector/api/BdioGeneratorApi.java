@@ -20,12 +20,13 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.bdio.model.dependency.ProjectDependency;
+import com.synopsys.integration.bdio.model.externalid.ExternalId;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrFactory;
 import com.synopsys.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.synopsys.integration.exception.IntegrationException;
 
@@ -50,7 +51,7 @@ public class BdioGeneratorApi {
      * @param pkgMgrFactory
      * @param bdioGenerator
      */
-    public BdioGeneratorApi(final Gson gson, final PkgMgrFactory pkgMgrFactory, final BdioGenerator bdioGenerator) {
+    public BdioGeneratorApi(Gson gson, PkgMgrFactory pkgMgrFactory, BdioGenerator bdioGenerator) {
         this.gson = gson;
         this.pkgMgrFactory = pkgMgrFactory;
         this.bdioGenerator = bdioGenerator;
@@ -68,8 +69,15 @@ public class BdioGeneratorApi {
      * @param codeLocationName        The Code Location ("Scan") name for which the BDIO should be generated
      * @throws IntegrationException
      */
-    public void pkgListToBdio(final PackageManagerEnum pkgMgrType, final String linuxDistroName, final String pkgMgrListCmdOutputPath, final String bdioOutputPath, final String blackDuckProjectName, final String blackDuckProjectVersion,
-        final String codeLocationName) throws IntegrationException {
+    public void pkgListToBdio(
+        PackageManagerEnum pkgMgrType,
+        String linuxDistroName,
+        String pkgMgrListCmdOutputPath,
+        String bdioOutputPath,
+        String blackDuckProjectName,
+        String blackDuckProjectVersion,
+        String codeLocationName
+    ) throws IntegrationException {
         pkgListToBdioWithArch(pkgMgrType, linuxDistroName, pkgMgrListCmdOutputPath, bdioOutputPath, blackDuckProjectName, blackDuckProjectVersion, codeLocationName, null);
     }
 
@@ -85,10 +93,24 @@ public class BdioGeneratorApi {
      * @return The BDIO generated from the given packages (JSON)
      * @throws IntegrationException
      */
-    public String[] pkgListToBdio(final PackageManagerEnum pkgMgrType, final String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationName)
+    public String[] pkgListToBdio(
+        PackageManagerEnum pkgMgrType,
+        String linuxDistroName,
+        String[] pkgMgrListCmdOutputLines,
+        String blackDuckProjectName,
+        String blackDuckProjectVersion,
+        String codeLocationName
+    )
         throws IntegrationException {
-        logger.info(String.format("pkgListToBdio(): pkgMgrType: %s; linuxDistroName: %s; pkgMgrListCmdOutputLines: %s, blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationName: %s",
-            pkgMgrType, linuxDistroName, pkgMgrListCmdOutputLines, blackDuckProjectName, blackDuckProjectVersion, codeLocationName));
+        logger.info(String.format(
+            "pkgListToBdio(): pkgMgrType: %s; linuxDistroName: %s; pkgMgrListCmdOutputLines: %s, blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationName: %s",
+            pkgMgrType,
+            linuxDistroName,
+            pkgMgrListCmdOutputLines,
+            blackDuckProjectName,
+            blackDuckProjectVersion,
+            codeLocationName
+        ));
 
         if (pkgMgrType != PackageManagerEnum.DPKG && pkgMgrType != PackageManagerEnum.RPM) {
             throw new UnsupportedOperationException(("The pkgListToBdio() method only supports DPKG and RPM"));
@@ -108,9 +130,25 @@ public class BdioGeneratorApi {
      * @param codeLocationName        The Code Location ("Scan") name for which the BDIO should be generated
      * @throws IntegrationException
      */
-    public void pkgListToBdioApk(final String architecture, String linuxDistroName, final String pkgMgrListCmdOutputPath, final String bdioOutputPath, final String blackDuckProjectName, final String blackDuckProjectVersion,
-        final String codeLocationName) throws IntegrationException {
-        pkgListToBdioWithArch(PackageManagerEnum.APK, linuxDistroName, pkgMgrListCmdOutputPath, bdioOutputPath, blackDuckProjectName, blackDuckProjectVersion, codeLocationName, architecture);
+    public void pkgListToBdioApk(
+        String architecture,
+        String linuxDistroName,
+        String pkgMgrListCmdOutputPath,
+        String bdioOutputPath,
+        String blackDuckProjectName,
+        String blackDuckProjectVersion,
+        String codeLocationName
+    ) throws IntegrationException {
+        pkgListToBdioWithArch(
+            PackageManagerEnum.APK,
+            linuxDistroName,
+            pkgMgrListCmdOutputPath,
+            bdioOutputPath,
+            blackDuckProjectName,
+            blackDuckProjectVersion,
+            codeLocationName,
+            architecture
+        );
     }
 
     /**
@@ -125,16 +163,40 @@ public class BdioGeneratorApi {
      * @return The BDIO generated from the given packages (JSON)
      * @throws IntegrationException
      */
-    public String[] pkgListToBdioApk(final String architecture, String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String blackDuckProjectName, final String blackDuckProjectVersion, final String codeLocationName)
+    public String[] pkgListToBdioApk(
+        String architecture,
+        String linuxDistroName,
+        String[] pkgMgrListCmdOutputLines,
+        String blackDuckProjectName,
+        String blackDuckProjectVersion,
+        String codeLocationName
+    )
         throws IntegrationException {
-        logger.info(String.format("pkgListToBdioApk(): architecture: %s; linuxDistroName: %s; pkgMgrListCmdOutputLines: %s, blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationName: %s",
-            architecture, linuxDistroName, pkgMgrListCmdOutputLines, blackDuckProjectName, blackDuckProjectVersion, codeLocationName));
+        logger.info(String.format(
+            "pkgListToBdioApk(): architecture: %s; linuxDistroName: %s; pkgMgrListCmdOutputLines: %s, blackDuckProjectName: %s; blackDuckProjectVersion: %s; codeLocationName: %s",
+            architecture,
+            linuxDistroName,
+            pkgMgrListCmdOutputLines,
+            blackDuckProjectName,
+            blackDuckProjectVersion,
+            codeLocationName
+        ));
 
-        return pkgListToBdioWithArch(PackageManagerEnum.APK, linuxDistroName, pkgMgrListCmdOutputLines, blackDuckProjectName, blackDuckProjectVersion, codeLocationName, architecture);
+        return pkgListToBdioWithArch(
+            PackageManagerEnum.APK,
+            linuxDistroName,
+            pkgMgrListCmdOutputLines,
+            blackDuckProjectName,
+            blackDuckProjectVersion,
+            codeLocationName,
+            architecture
+        );
     }
 
-    private void pkgListToBdioWithArch(final PackageManagerEnum pkgMgrType, final String linuxDistroName, final String pkgMgrListCmdOutputPath, final String bdioOutputPath, final String blackDuckProjectName,
-        final String blackDuckProjectVersion, final String codeLocationName, final String architecture) throws IntegrationException {
+    private void pkgListToBdioWithArch(
+        PackageManagerEnum pkgMgrType, String linuxDistroName, String pkgMgrListCmdOutputPath, String bdioOutputPath, String blackDuckProjectName,
+        String blackDuckProjectVersion, String codeLocationName, String architecture
+    ) throws IntegrationException {
         File pkgMgrListCmdOutputFile = new File(pkgMgrListCmdOutputPath);
         List<String> pkgMgrListCmdOutputLinesList;
         try {
@@ -143,7 +205,15 @@ public class BdioGeneratorApi {
             throw new IntegrationException(String.format("Error reading package manager list command output file %s", pkgMgrListCmdOutputFile.getAbsolutePath()), e);
         }
         String[] pkgMgrListCmdOutputLines = pkgMgrListCmdOutputLinesList.toArray(new String[pkgMgrListCmdOutputLinesList.size()]);
-        String[] bdioLines = pkgListToBdioWithArch(pkgMgrType, linuxDistroName, pkgMgrListCmdOutputLines, blackDuckProjectName, blackDuckProjectVersion, codeLocationName, architecture);
+        String[] bdioLines = pkgListToBdioWithArch(
+            pkgMgrType,
+            linuxDistroName,
+            pkgMgrListCmdOutputLines,
+            blackDuckProjectName,
+            blackDuckProjectVersion,
+            codeLocationName,
+            architecture
+        );
         File bdioOutputFile = new File(bdioOutputPath);
         try {
             FileUtils.writeLines(bdioOutputFile, Arrays.asList(bdioLines));
@@ -152,15 +222,24 @@ public class BdioGeneratorApi {
         }
     }
 
-    private String[] pkgListToBdioWithArch(final PackageManagerEnum pkgMgrType, final String linuxDistroName, final String[] pkgMgrListCmdOutputLines, final String blackDuckProjectName, final String blackDuckProjectVersion,
-        final String codeLocationName, final String architecture) throws IntegrationException {
-        final PkgMgr pkgMgr = pkgMgrFactory.createPkgMgr(pkgMgrType, architecture);
+    private String[] pkgListToBdioWithArch(
+        PackageManagerEnum pkgMgrType,
+        String linuxDistroName,
+        String[] pkgMgrListCmdOutputLines,
+        String blackDuckProjectName,
+        String blackDuckProjectVersion,
+        String codeLocationName,
+        String architecture
+    ) throws IntegrationException {
+        PkgMgr pkgMgr = pkgMgrFactory.createPkgMgr(pkgMgrType, architecture);
         List<ComponentDetails> comps = pkgMgr.extractComponentsFromPkgMgrOutput(null, linuxDistroName, pkgMgrListCmdOutputLines);
         CmdExecutor cmdExecutor = new CmdExecutor(); //TODO- should this be constructor parameter?
         ComponentRelationshipPopulater relationshipPopulater = pkgMgr.createRelationshipPopulator(cmdExecutor);
         relationshipPopulater.populateRelationshipInfo(comps);
         logger.info(String.format("Extracted %d components from given package manager output", comps.size()));
-        SimpleBdioDocument bdioDoc = bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps);
+        ExternalId projectExternalId = bdioGenerator.createProjectExternalId(blackDuckProjectName, blackDuckProjectVersion, linuxDistroName);
+        ProjectDependency projectDependency = bdioGenerator.createProjectDependency(blackDuckProjectName, blackDuckProjectVersion, projectExternalId);
+        SimpleBdioDocument bdioDoc = bdioGenerator.generateFlatBdioDocumentFromComponents(projectDependency, codeLocationName, projectExternalId, comps);
         try {
             return bdioGenerator.getBdioAsStringArray(bdioDoc);
         } catch (IOException e) {

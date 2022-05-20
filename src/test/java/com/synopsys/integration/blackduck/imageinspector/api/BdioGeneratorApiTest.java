@@ -13,6 +13,8 @@ import org.mockito.Mockito;
 import com.google.gson.Gson;
 import com.synopsys.integration.bdio.model.BdioProject;
 import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.synopsys.integration.bdio.model.dependency.ProjectDependency;
+import com.synopsys.integration.bdio.model.externalid.ExternalId;
 import com.synopsys.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
@@ -30,10 +32,10 @@ public class BdioGeneratorApiTest {
 
     @Test
     public void test() throws IntegrationException, IOException {
-        final PkgMgrFactory pkgMgrFactory = Mockito.mock(PkgMgrFactory.class);
-        final PkgMgr pkgMgr = Mockito.mock(PkgMgr.class);
-        final BdioGenerator bdioGenerator = Mockito.mock(BdioGenerator.class);
-        final BdioGeneratorApi api = new BdioGeneratorApi(new Gson(), pkgMgrFactory, bdioGenerator);
+        PkgMgrFactory pkgMgrFactory = Mockito.mock(PkgMgrFactory.class);
+        PkgMgr pkgMgr = Mockito.mock(PkgMgr.class);
+        BdioGenerator bdioGenerator = Mockito.mock(BdioGenerator.class);
+        BdioGeneratorApi api = new BdioGeneratorApi(new Gson(), pkgMgrFactory, bdioGenerator);
 
         final PackageManagerEnum pkgMgrType = PackageManagerEnum.DPKG;
         final String linuxDistroName = "ubuntu";
@@ -54,10 +56,13 @@ public class BdioGeneratorApiTest {
         SimpleBdioDocument bdioDoc = new SimpleBdioDocument();
         bdioDoc.setProject(new BdioProject());
         bdioDoc.getProject().name = "testBdioProject";
-        Mockito.when(bdioGenerator.generateFlatBdioDocumentFromComponents(codeLocationName, blackDuckProjectName, blackDuckProjectVersion, linuxDistroName, comps)).thenReturn(bdioDoc);
-        final String[] mockedOutput = { "mockedOutput"};
+
+        ExternalId projectExternalId = bdioGenerator.createProjectExternalId(blackDuckProjectName, blackDuckProjectVersion, linuxDistroName);
+        ProjectDependency projectDependency = bdioGenerator.createProjectDependency(blackDuckProjectName, blackDuckProjectVersion, projectExternalId);
+        Mockito.when(bdioGenerator.generateFlatBdioDocumentFromComponents(projectDependency, codeLocationName, projectExternalId, comps)).thenReturn(bdioDoc);
+        String[] mockedOutput = { "mockedOutput" };
         Mockito.when(bdioGenerator.getBdioAsStringArray(bdioDoc)).thenReturn(mockedOutput);
-        final String[] bdioLines = api.pkgListToBdio(pkgMgrType, linuxDistroName, pkgMgrListCmdOutputLines,  blackDuckProjectName,  blackDuckProjectVersion, codeLocationName);
+        String[] bdioLines = api.pkgListToBdio(pkgMgrType, linuxDistroName, pkgMgrListCmdOutputLines, blackDuckProjectName, blackDuckProjectVersion, codeLocationName);
         assertEquals(mockedOutput, bdioLines);
     }
 }
