@@ -33,4 +33,16 @@ public class OsTest {
         com.synopsys.integration.blackduck.imageinspector.linux.Os os = new com.synopsys.integration.blackduck.imageinspector.linux.Os();
         assertEquals("fedora", os.getLinuxDistroNameFromEtcDir(new File("src/test/resources/osdetection/fedora")).get());
     }
+
+    @Test
+    public void testGetLinuxDistroNameOracleLinux() {
+        com.synopsys.integration.blackduck.imageinspector.linux.Os os = new com.synopsys.integration.blackduck.imageinspector.linux.Os();
+        assertEquals("oracle_linux", os.getLinuxDistroNameFromEtcDir(new File("src/test/resources/osdetection/oracle-linux")).get());
+    }
+
+    @Test
+    public void testGetLinuxDistroNameOracleLinuxOsRelease() {
+        com.synopsys.integration.blackduck.imageinspector.linux.Os os = new com.synopsys.integration.blackduck.imageinspector.linux.Os();
+        assertEquals("oracle_linux", os.getLinuxDistroNameFromEtcDir(new File("src/test/resources/osdetection/oracle-linux-os-release")).get());
+    }
 }

@@ -46,6 +46,11 @@ public class Os {
         List<File> etcDirFiles = Arrays.asList(etcDirFile.listFiles());
         List<String> etcDirFilenames = etcDirFiles.stream().map(File::getName).collect(Collectors.toList());
 
+        if (isOracleLinux(etcDirFile, etcDirFilenames)) {
+            logger.trace("Target image Linux distro is an Oracle Linux");
+            return Optional.of("oracle_linux");
+        }
+
         Optional<String> distroName = Optional.empty();
         distroName = tryToDetermineDistro(etcDirFile, etcDirFilenames, distroName, "redhat-release");
         if (!distroName.isPresent()) {
@@ -56,6 +61,19 @@ public class Os {
         }
 
         return distroName;
+    }
+
+    private boolean isOracleLinux(File etcDirFile, List<String> etcDirFilenames) {
+        logger.trace("Trying /etc/oracle-release or /etc/os-release");
+        if (etcDirFilenames.contains("oracle-release")) {
+            logger.trace("Found oracle-release");
+            return true;
+        }
+        
+        File releaseFile = new File(etcDirFile, "os-release");
+        Optional<String> distroName = getLinuxDistroNameFromStandardReleaseFile(releaseFile);
+
+        return distroName.isPresent() && "ol".equalsIgnoreCase(distroName.get());
     }
 
     private Optional<String> tryToDetermineDistro(File etcDirFile, List<String> etcDirFilenames, Optional<String> distroName, String targetReleaseFilename) {
