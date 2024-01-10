@@ -97,8 +97,8 @@ public class RpmPkgMgr implements PkgMgr {
                 final RpmPackage rpmPackage = gson.fromJson(packageLine, RpmPackage.class);
                 final String packageName = rpmPackage.getName();
                 String packageVersion = rpmPackage.getVersion();
-                if (!NO_VALUE.equals(rpmPackage.getEpoch())) {
-                    packageVersion = String.format("%s:%s", rpmPackage.getEpoch(), rpmPackage.getVersion());
+                if (!NO_VALUE.equals(rpmPackage.getEpoch()) && rpmPackage.getEpoch() != null && !rpmPackage.getEpoch().equals("0")) {
+                    packageVersion = String.format("%s:%s", rpmPackage.getEpoch(), packageVersion);
                 }
                 String arch = "";
                 if (!NO_VALUE.equals(rpmPackage.getArch())) {
