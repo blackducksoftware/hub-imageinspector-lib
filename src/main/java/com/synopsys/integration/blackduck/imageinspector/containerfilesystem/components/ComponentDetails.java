@@ -23,7 +23,7 @@ public class ComponentDetails extends Stringable {
 
     public ComponentDetails(final String name, final String version, final String externalId, final String architecture, final String linuxDistroName) {
         this.name = name;
-        if (version.indexOf("0:") == 0) {
+        if (version != null && version.indexOf("0:") == 0) {
             this.version = stripEpocFromVersion(version);
             this.externalId = stripEpochFromExternalId(externalId);
         } else {
@@ -69,7 +69,7 @@ public class ComponentDetails extends Stringable {
     
     private String stripEpochFromExternalId(String externalId) {
         int pos;
-        if ((pos = externalId.indexOf("/0:")) > -1) {
+        if (externalId != null && (pos = externalId.indexOf("/0:")) > -1) {
             return externalId.substring(0, pos).concat(externalId.substring(pos + 3));
         }
         return externalId;
