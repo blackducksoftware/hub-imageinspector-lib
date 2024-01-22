@@ -11,8 +11,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.synopsys.integration.util.Stringable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ComponentDetails extends Stringable {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+    
     private final String name;
     private final String version;
     private final String externalId;
@@ -30,6 +34,8 @@ public class ComponentDetails extends Stringable {
             this.version = version;
             this.externalId = externalId;
         }
+        logger.debug("Input Version: {}, Final Version: {}", version, this.version);
+        logger.debug("Input External Id: {}, Final External Id: {}", externalId, this.externalId);
         this.architecture = architecture;
         this.linuxDistroName = linuxDistroName;
         this.dependencies = new LinkedList<>();
@@ -70,7 +76,7 @@ public class ComponentDetails extends Stringable {
     private String stripEpochFromExternalId(String externalId) {
         int pos;
         if (externalId != null && (pos = externalId.indexOf("/0:")) > -1) {
-            return externalId.substring(0, pos).concat(externalId.substring(pos + 3));
+            return externalId.substring(0, pos + 1).concat(externalId.substring(pos + 3));
         }
         return externalId;
     }
