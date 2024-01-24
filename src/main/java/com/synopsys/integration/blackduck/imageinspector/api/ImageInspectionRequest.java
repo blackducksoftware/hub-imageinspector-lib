@@ -117,4 +117,23 @@ public class ImageInspectionRequest extends Stringable {
     public String getPlatformTopLayerExternalId() {
         return platformTopLayerExternalId;
     }
+    
+    @Override
+    public String toString() {
+        return "loggingLevel: " + this.loggingLevel
+        + ",\nimageTarfilePath: " + this.imageTarfilePath
+        + ",\nblackDuckProjectName: " + this.blackDuckProjectName
+        + ",\nblackDuckProjectVersion: " + this.blackDuckProjectVersion
+        + ",\ncodeLocationPrefix: " + this.codeLocationPrefix
+        + ",\ngivenImageRepo: " + this.givenImageRepo
+        + ",\ngivenImageTag: " + this.givenImageTag
+        + ",\norganizeComponentsByLayer: " + this.organizeComponentsByLayer
+        + ",\nincludeRemovedComponents: " + this.includeRemovedComponents
+        + ",\ncleanupWorkingDir: " + this.cleanupWorkingDir
+        + ",\ncontainerFileSystemOutputPath: " + this.containerFileSystemOutputPath
+        + ",\ncontainerFileSystemExcludedPathListString: " + this.containerFileSystemExcludedPathListString
+        + ",\ncurrentLinuxDistro: " + this.currentLinuxDistro
+        + ",\ntargetLinuxDistroOverride: " + this.targetLinuxDistroOverride
+        + ",\nplatformTopLayerExternalId: " + this.platformTopLayerExternalId;
+    }
 }

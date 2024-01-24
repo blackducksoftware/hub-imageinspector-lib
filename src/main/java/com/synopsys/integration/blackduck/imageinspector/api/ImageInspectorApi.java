@@ -92,6 +92,7 @@ public class ImageInspectorApi {
         if (gson == null) {
             gson = new Gson();
         }
+        logger.info("ImageInspectionRequest: {}", imageInspectionRequest.toString());
         PackageGetter packageGetter = new PackageGetter(pkgMgrExecutor, cmdExecutor);
         ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
         return getBdio(componentHierarchyBuilder, imageInspectionRequest);
