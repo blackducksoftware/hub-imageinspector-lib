@@ -60,7 +60,6 @@ public class ImageInspector {
                           BdioGenerator bdioGenerator,
                           ImageDirectoryDataExtractorFactoryChooser imageDirectoryDataExtractorFactoryChooser,
                           ImageComponentHierarchyLogger imageComponentHierarchyLogger) {
-        logger.info("1/22/23");
         this.os = os;
         this.pkgMgrDbExtractor = pkgMgrDbExtractor;
         this.tarOperations = tarOperations;

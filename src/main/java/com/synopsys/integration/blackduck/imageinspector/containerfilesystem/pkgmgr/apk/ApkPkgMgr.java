@@ -154,7 +154,7 @@ public class ApkPkgMgr implements PkgMgr {
             return Optional.empty();
         }
         final String externalId = String.format(PkgMgrs.EXTERNAL_ID_STRING_FORMAT, component, version, architectureName);
-        logger.debug(String.format("Constructed externalId: %s", externalId));
+        logger.trace(String.format("Constructed externalId: %s", externalId));
         final ComponentDetails componentDetails = new ComponentDetails(component, version, externalId, architectureName, linuxDistroName);
         return Optional.of(componentDetails);
     }

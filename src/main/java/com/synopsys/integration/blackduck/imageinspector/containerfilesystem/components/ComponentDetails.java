@@ -7,17 +7,12 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components;
 
-import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.DataStripper;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.synopsys.integration.util.Stringable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ComponentDetails extends Stringable {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-    
     private final String name;
     private final String version;
     private final String externalId;
@@ -28,15 +23,8 @@ public class ComponentDetails extends Stringable {
 
     public ComponentDetails(final String name, final String version, final String externalId, final String architecture, final String linuxDistroName) {
         this.name = name;
-        if (version != null && version.indexOf("0:") == 0) {
-            this.version = DataStripper.stripEpocFromVersion(version);
-            this.externalId = DataStripper.stripEpochFromExternalId(externalId);
-        } else {
-            this.version = version;
-            this.externalId = externalId;
-        }
-        logger.debug("Input Version: {}, Final Version: {}", version, this.version);
-        logger.debug("Input External Id: {}, Final External Id: {}", externalId, this.externalId);
+        this.version = version;
+        this.externalId = externalId;
         this.architecture = architecture;
         this.linuxDistroName = linuxDistroName;
         this.dependencies = new LinkedList<>();
