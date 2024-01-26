@@ -14,11 +14,4 @@ public class DataStripper {
         return externalId;
     }
     
-    public static void main(String[] args) {
-        System.out.println(stripEpocFromVersion("1.62.0-r5"));
-        System.out.println(stripEpocFromVersion("0:1.62.0-r5"));
-        System.out.println(stripEpochFromExternalId("name/0:7.0.0"));
-        System.out.println(stripEpochFromExternalId("name/1:7.0.0"));
-    }
-    
 }
