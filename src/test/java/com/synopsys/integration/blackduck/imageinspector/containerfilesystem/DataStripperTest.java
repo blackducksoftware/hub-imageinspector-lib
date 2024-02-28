@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Test;
 public class DataStripperTest {
     
     @Test
-    void stripEpocFromVersionTest() {
-        assertEquals(null, DataStripper.stripEpocFromVersion(null));
-        assertEquals("", DataStripper.stripEpocFromVersion(""));
-        assertEquals("1:0:", DataStripper.stripEpocFromVersion("1:0:"));
-        assertEquals("0:", DataStripper.stripEpocFromVersion("0:0:"));
-        assertEquals(" ", DataStripper.stripEpocFromVersion(" "));
-        assertEquals("1.62.0-r5", DataStripper.stripEpocFromVersion("1.62.0-r5"));
-        assertEquals("1.62.0-r5", DataStripper.stripEpocFromVersion("0:1.62.0-r5"));
+    void stripEpochFromVersionTest() {
+        assertEquals(null, DataStripper.stripEpochFromVersion(null));
+        assertEquals("", DataStripper.stripEpochFromVersion(""));
+        assertEquals("1:0:", DataStripper.stripEpochFromVersion("1:0:"));
+        assertEquals("0:", DataStripper.stripEpochFromVersion("0:0:"));
+        assertEquals(" ", DataStripper.stripEpochFromVersion(" "));
+        assertEquals("1.62.0-r5", DataStripper.stripEpochFromVersion("1.62.0-r5"));
+        assertEquals("1.62.0-r5", DataStripper.stripEpochFromVersion("0:1.62.0-r5"));
     }
     
     @Test
