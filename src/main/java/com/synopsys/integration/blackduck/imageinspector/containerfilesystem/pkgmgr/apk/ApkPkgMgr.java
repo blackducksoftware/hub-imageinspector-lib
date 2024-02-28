@@ -147,7 +147,7 @@ public class ApkPkgMgr implements PkgMgr {
             logger.warn(String.format("apk output contains an invalid line: %s", packageLine));
             return Optional.empty();
         }
-        final String version = DataStripper.stripEpocFromVersion(extractVersion(parts));
+        final String version = DataStripper.stripEpochFromVersion(extractVersion(parts));
         final String component = extractComponent(parts);
         // if a package starts with a period, ignore it. It's a virtual meta package and the version information is missing
         if (component.startsWith(".")) {

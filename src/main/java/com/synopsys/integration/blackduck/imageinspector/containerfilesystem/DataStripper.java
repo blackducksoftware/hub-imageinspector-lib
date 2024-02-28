@@ -2,7 +2,7 @@ package com.synopsys.integration.blackduck.imageinspector.containerfilesystem;
 
 public class DataStripper {
     
-    public static String stripEpocFromVersion(String version) {
+    public static String stripEpochFromVersion(String version) {
         return version != null && version.startsWith("0:") ? version.substring(2) : version;
     }
     
