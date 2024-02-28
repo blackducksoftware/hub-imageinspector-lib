@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.synopsys.integration.blackduck.imageinspector.api.PackageManagerEnum;
+import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.DataStripper;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
 import com.synopsys.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.CommonRelationshipPopulater;
@@ -146,7 +147,7 @@ public class ApkPkgMgr implements PkgMgr {
             logger.warn(String.format("apk output contains an invalid line: %s", packageLine));
             return Optional.empty();
         }
-        final String version = extractVersion(parts);
+        final String version = DataStripper.stripEpochFromVersion(extractVersion(parts));
         final String component = extractComponent(parts);
         // if a package starts with a period, ignore it. It's a virtual meta package and the version information is missing
         if (component.startsWith(".")) {
