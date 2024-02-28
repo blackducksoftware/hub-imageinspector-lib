@@ -19,7 +19,7 @@ project.ext.moduleName = 'com.synopsys.integration.hub-imageinspector-lib'
 project.ext.javaUseAutoModuleName = 'true'
 project.ext.junitShowStandardStreams = 'true'
 
-version = '14.2.1'
+version = '14.2.1-SNAPSHOT'
 description = 'A library for creating Black Duck Input Output (BDIO) representing the packages installed in a Linux Docker image'
 
 apply plugin: "io.spring.dependency-management"
