@@ -117,8 +117,8 @@ public class ImageInspectorApi {
         }
 
         List<ImageDirectoryDataExtractorFactory> imageDirectoryDataExtractorFactories = Arrays.asList(
-            new DockerImageDirectoryDataExtractorFactory(new DockerImageFormatMatchesChecker(), new CommonImageConfigParser(gson), gson),
-            new OciImageDirectoryDataExtractorFactory(new OciImageFormatMatchesChecker(new OciLayoutParser(gson)), new CommonImageConfigParser(gson), gson)
+            new OciImageDirectoryDataExtractorFactory(new OciImageFormatMatchesChecker(new OciLayoutParser(gson)), new CommonImageConfigParser(gson), gson),
+            new DockerImageDirectoryDataExtractorFactory(new DockerImageFormatMatchesChecker(), new CommonImageConfigParser(gson), gson)
         );
         ImageInfoDerived imageInfoDerived = null;
         try {
