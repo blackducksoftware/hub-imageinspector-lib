@@ -7,18 +7,27 @@
  */
 package com.synopsys.integration.blackduck.imageinspector.api.name;
 
-import java.util.Optional;
-
 import com.synopsys.integration.blackduck.imageinspector.image.common.RepoTag;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class ImageNameResolver {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public RepoTag resolve(@Nullable String foundImageName, @Nullable String givenRepo, @Nullable String givenTag) {
         if (StringUtils.isBlank(foundImageName)) {
+            return new RepoTag(givenRepo, givenTag);
+        }
+        if (!foundImageName.contains(":")) {
+            if (givenTag.isBlank()) {
+                givenTag = "latest";
+            }
+            logger.trace(String.format("foundImageName %s in the manifest is not in repo:tag format, hence resolver will not use foundImageName for name resolution. Resolving RepoTag with givenRepo as %s and givenTag as %s", foundImageName, givenRepo, givenTag));
             return new RepoTag(givenRepo, givenTag);
         }
         String resolvedImageRepo = givenRepo;

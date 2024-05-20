@@ -36,13 +36,25 @@ public class ManifestRepoTagMatcher {
     }
 
     private boolean doesMatch(String manifestRepoTag, String targetRepoTag) {
-        logger.trace(String.format("Target repo tag %s; checking %s", targetRepoTag, manifestRepoTag));
+        // targetRepoTag is always passed in the format of repo:tag to be compatible with all image formats
+        // In case the manifestRepoTag is not in the repo:tag format, we check if this value matches the targetRepo or targetTag portion of targetRepoTag
+
+        logger.trace(String.format("targetRepoTag value resolved as %s; comparing this value with manifestRepoTag %s", targetRepoTag, manifestRepoTag));
+        if (!manifestRepoTag.contains(":") && targetRepoTag.contains(":")) {
+            logger.trace(String.format("The manifestRepoTag %s is not in the format repo:tag. Checking if this value matches the targetRepo or targetTag portion of targetRepoTag", manifestRepoTag));
+            String targetTag = StringUtils.substringAfterLast(targetRepoTag, ":");
+            String targetRepo = StringUtils.substringBeforeLast(targetRepoTag, ":");
+            if (StringUtils.compare(manifestRepoTag, targetRepo) == 0 || StringUtils.compare(manifestRepoTag, targetTag) == 0) {
+                logger.trace(String.format("Matched the targetRepo (%s) or targetTag (%s) portion of targetRepoTag (%s) to manifestRepoTag (%s)", targetRepo, targetTag, targetRepoTag, manifestRepoTag));
+                return true;
+            }
+        }
         if (StringUtils.compare(manifestRepoTag, targetRepoTag) == 0) {
-            logger.trace(String.format("Found the targetRepoTag %s", targetRepoTag));
+            logger.trace(String.format("Matched the targetRepoTag %s to manifestRepoTag %s", targetRepoTag, manifestRepoTag));
             return true;
         }
         if (targetRepoTag.endsWith("/" + manifestRepoTag)) {
-            logger.trace(String.format("Matched the targetRepoTag %s to %s by ignoring the repository prefix", targetRepoTag, manifestRepoTag));
+            logger.trace(String.format("Matched the targetRepoTag %s to manifestRepoTag %s by ignoring the repository prefix", targetRepoTag, manifestRepoTag));
             return true;
         }
         return false;
