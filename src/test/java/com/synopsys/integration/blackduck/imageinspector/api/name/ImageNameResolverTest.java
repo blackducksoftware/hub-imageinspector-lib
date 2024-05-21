@@ -36,6 +36,13 @@ public class ImageNameResolverTest {
     }
 
     @Test
+    public void testWithoutTag() {
+        RepoTag resolvedRepoTag = resolver.resolve("alpine", null, null);
+        assertEquals("alpine", resolvedRepoTag.getRepo().get());
+        assertEquals("latest", resolvedRepoTag.getTag().get());
+    }
+
+    @Test
     public void testWithUrlPortTag() {
         RepoTag resolvedRepoTag = resolver.resolve("https://artifactory.team.domain.com:5002/repo:tag", null, null);
         assertEquals("https://artifactory.team.domain.com:5002/repo", resolvedRepoTag.getRepo().get());
