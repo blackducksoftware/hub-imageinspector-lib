@@ -79,7 +79,16 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         OciImageIndex ociImageIndex = extractOciImageIndex(imageDir);
         OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex, givenRepo, givenTag);
         logger.debug(String.format("foundRepoTag: %s", manifestDescriptor.getRepoTagString().orElse("")));
-        RepoTag resolvedRepoTag = imageNameResolver.resolve(manifestDescriptor.getRepoTagString().orElse(null), givenRepo, givenTag);
+
+        String manifestRepoTag = manifestDescriptor.getRepoTagString().orElse(null);
+        if (manifestRepoTag != null && !manifestRepoTag.contains(":") && givenRepo != null) {
+            if (givenTag.isBlank()) {
+                givenTag = "latest";
+            }
+            manifestRepoTag = String.format("%s:%s", givenRepo, givenTag);
+        }
+        RepoTag resolvedRepoTag = imageNameResolver.resolve(manifestRepoTag, givenRepo, givenTag);
+
         logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", resolvedRepoTag.getRepo().orElse(""), resolvedRepoTag.getTag().orElse("")));
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
         String manifestFileText;

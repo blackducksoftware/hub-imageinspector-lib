@@ -23,13 +23,6 @@ public class ImageNameResolver {
         if (StringUtils.isBlank(foundImageName)) {
             return new RepoTag(givenRepo, givenTag);
         }
-        if (!foundImageName.contains(":")) {
-            if (givenTag.isBlank()) {
-                givenTag = "latest";
-            }
-            logger.trace(String.format("foundImageName %s in the manifest is not in repo:tag format, hence resolver will not use foundImageName for name resolution. Resolving RepoTag with givenRepo as %s and givenTag as %s", foundImageName, givenRepo, givenTag));
-            return new RepoTag(givenRepo, givenTag);
-        }
         String resolvedImageRepo = givenRepo;
         String resolvedImageTag = givenTag;
         if (StringUtils.isNotBlank(foundImageName)) {
