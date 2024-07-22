@@ -72,7 +72,7 @@ task createTestDockerfile(type: Dockerfile) {
 task copyTestDockerFile(type: Exec) {
     ignoreExitValue true
     commandLine "mkdir", "-p", "${buildDir}/images/test/centos_minus_vim_plus_bacula"
-    commandLine "cp", "src/test/resources/Dockerfile", "${buildDir}/images/test/centos_minus_vim_plus_bacula"
+    commandLine "cp", "src/test/resources/Dockerfile", "${buildDir}/images/test/centos_minus_vim_plus_bacula/Dockerfile"
 }
 
 task buildTestDockerImage(type: Exec, dependsOn: [removeTestBaseImage, removeTestImage, copyTestDockerFile]) {
