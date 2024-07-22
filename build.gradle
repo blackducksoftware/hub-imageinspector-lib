@@ -76,7 +76,7 @@ task copyTestDockerFile(type: Exec) {
 
 task buildTestDockerImage(type: Exec, dependsOn: [removeTestBaseImage, removeTestImage, copyTestDockerFile]) {
     commandLine "docker", "build", "--no-cache", "--tag", "blackducksoftware/centos_minus_vim_plus_bacula:1.0",     \
-            "${buildDir}/images/test"
+            "src/test/resources"
 }
 
 task buildTestDockerTarfile(type: Exec, dependsOn: buildTestDockerImage) {
