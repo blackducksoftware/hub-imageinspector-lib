@@ -71,12 +71,12 @@ task createTestDockerfile(type: Dockerfile) {
 
 task copyTestDockerFile(type: Exec, dependsOn: [createImagesDir]) {
 //    commandLine "mkdir", "-p", "${buildDir}/images/test/centos_minus_vim_plus_bacula"
-    commandLine "cp", "src/test/resources/Dockerfile", "${buildDir}/images/test/centos_minus_vim_plus_bacula/"
+    commandLine "cp", "src/test/resources/Dockerfile", "${buildDir}/images/test/Dockerfile"
 }
 
 task buildTestDockerImage(type: Exec, dependsOn: [removeTestBaseImage, removeTestImage, copyTestDockerFile]) {
     commandLine "docker", "build", "--no-cache", "--tag", "blackducksoftware/centos_minus_vim_plus_bacula:1.0",     \
-            "${buildDir}/images/test/centos_minus_vim_plus_bacula"
+            "${buildDir}/images/test"
 }
 
 task buildTestDockerTarfile(type: Exec, dependsOn: buildTestDockerImage) {
@@ -118,7 +118,7 @@ task pullAlpineLatest(type: Exec) {
 }
 
 task createImagesDir(type: Exec) {
-    commandLine "mkdir", "-p", "${buildDir}/images/test/centos_minus_vim_plus_bacula"
+    commandLine "mkdir", "-p", "${buildDir}/images/test"
 }
 
 task buildAlpineTestDockerTarfile(type: Exec, dependsOn: [createImagesDir, pullAlpineLatest]) {
