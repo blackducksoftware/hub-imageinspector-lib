@@ -69,7 +69,7 @@ task createTestDockerfile(type: Dockerfile) {
         bacula-console-5.2.13-23.1.el7'
 }
 
-task copyTestDockerFile(type: Exec, dependsOn: [createImagesDir]) {
+task copyTestDockerFile(type: Exec) {
 //    commandLine "mkdir", "-p", "${buildDir}/images/test/centos_minus_vim_plus_bacula"
     commandLine "cp", "src/test/resources/Dockerfile", "${buildDir}/images/test/Dockerfile"
 }
