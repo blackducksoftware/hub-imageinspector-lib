@@ -69,8 +69,8 @@ task createTestDockerfile(type: Dockerfile) {
         bacula-console-5.2.13-23.1.el7'
 }
 
-task copyTestDockerFile(type: Exec) {
-    commandLine "mkdir", "-p", "${buildDir}/images/test/centos_minus_vim_plus_bacula"
+task copyTestDockerFile(type: Exec, dependsOn: [createImagesDir]) {
+//    commandLine "mkdir", "-p", "${buildDir}/images/test/centos_minus_vim_plus_bacula"
     commandLine "cp", "src/test/resources/Dockerfile", "${buildDir}/images/test/centos_minus_vim_plus_bacula/"
 }
 
@@ -118,7 +118,7 @@ task pullAlpineLatest(type: Exec) {
 }
 
 task createImagesDir(type: Exec) {
-    commandLine "mkdir", "-p", "${buildDir}/images/test"
+    commandLine "mkdir", "-p", "${buildDir}/images/test/centos_minus_vim_plus_bacula"
 }
 
 task buildAlpineTestDockerTarfile(type: Exec, dependsOn: [createImagesDir, pullAlpineLatest]) {
