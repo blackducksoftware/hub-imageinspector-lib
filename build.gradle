@@ -53,13 +53,13 @@ task removeTestImage(type: Exec) {
 
 task removeTestBaseImage(type: Exec) {
     ignoreExitValue true
-    commandLine "docker", "rmi", "centos:7.3.1611"
+    commandLine "docker", "rmi", "quay.io/centos/centos:centos7.3.1611"
 }
 
 task createTestDockerfile(type: Dockerfile) {
     destFile = project.file("${buildDir}/images/test/centos_minus_vim_plus_bacula/Dockerfile")
     println "destFile: ${destFile}"
-    from 'centos:7.3.1611'
+    from 'quay.io/centos/centos:centos7.3.1611'
     environmentVariable('LANG', 'en_US.UTF-8')
 
     runCommand 'rpm -e vim-minimal && \
