@@ -61,16 +61,12 @@ task createTestDockerfile(type: Dockerfile) {
     println "destFile: ${destFile}"
     from 'centos:7.3.1611'
     environmentVariable('LANG', 'en_US.UTF-8')
-
-
-
     runCommand 'rpm -e vim-minimal && \
         yum install -y bacula-director-5.2.13-23.1.el7 bacula-storage-5.2.13-23.1.el7 bacula-client-5.2.13-23.1.el7 \
         bacula-console-5.2.13-23.1.el7'
 }
 
 task copyTestDockerFile(type: Exec) {
-//    commandLine "mkdir", "-p", "${buildDir}/images/test/centos_minus_vim_plus_bacula"
     commandLine "cp", "src/test/resources/Dockerfile", "${buildDir}/images/test/Dockerfile"
 }
 
