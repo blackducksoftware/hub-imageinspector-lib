@@ -48,12 +48,6 @@ dependencies {
 
     testImplementation 'org.mockito:mockito-all:1.10.19'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.2'
-
-    constraints {
-        implementation('ch.qos.logback:logback-core:1.2.13') {
-            because 'previous version has a vulnerability'
-        }
-    }
 }
 
 ////////////////////////////////////////////////
