@@ -8,7 +8,7 @@ buildscript {
         javaTargetCompatibility = 8
         javaSourceCompatibility = 8
     }
-    ext['logback.version'] = '1.2.13'
+
     dependencies { classpath "com.synopsys.integration:common-gradle-plugin:${managedCgpVersion}" }
 
     dependencies {
