@@ -8,7 +8,7 @@ buildscript {
         javaTargetCompatibility = 8
         javaSourceCompatibility = 8
     }
-
+    ext['logback.version'] = '1.2.13'
     dependencies { classpath "com.synopsys.integration:common-gradle-plugin:${managedCgpVersion}" }
 
     dependencies {
@@ -36,12 +36,16 @@ dependencyManagement {
         mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.12.4'
     }
+    dependencies {
+        dependency 'ch.qos.logback:logback-core:1.2.13'
+    }
 }
 
 dependencies {
     api 'com.synopsys.integration:integration-bdio:26.0.7'
     api 'org.springframework:spring-context'
     api 'org.apache.commons:commons-exec:1.3'
+
     implementation 'com.github.luben:zstd-jni:1.5.0-4'
     implementation 'ch.qos.logback:logback-classic:1.4.14'
 
