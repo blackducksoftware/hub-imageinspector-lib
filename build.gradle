@@ -2,7 +2,7 @@ import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 
 buildscript {
     apply from: "https://raw.githubusercontent.com/blackducksoftware/integration-resources/master/gradle_common/buildscript-repositories.gradle", to: buildscript
-    project.ext { managedCgpVersion = '2.0.4' }
+    apply from: 'https://raw.githubusercontent.com/blackducksoftware/integration-resources/master/gradle_common/buildscript-cgp-version.gradle'
 
     ext {
         javaTargetCompatibility = 8
@@ -24,7 +24,7 @@ project.ext.moduleName = 'com.synopsys.integration.hub-imageinspector-lib'
 project.ext.javaUseAutoModuleName = 'true'
 project.ext.junitShowStandardStreams = 'true'
 
-version = '14.3.7'
+version = '14.3.8-SNAPSHOT'
 description = 'A library for creating Black Duck Input Output (BDIO) representing the packages installed in a Linux Docker image'
 
 apply plugin: "io.spring.dependency-management"
