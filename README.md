@@ -6,4 +6,4 @@ The library used by the image inspector service (hub-imageinspector-ws) to inspe
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Where can I get the latest release? ##
-From [artifactory](https://sig-repo.synopsys.com/bds-integrations-release/com/synopsys/integration/hub-imageinspector-lib).
+From [artifactory](https://repo.blackduck.com/bds-integrations-release/com/synopsys/integration/hub-imageinspector-lib).
