@@ -20,7 +20,7 @@ plugins {
     id 'org.springframework.boot' version '2.6.6' apply false
 }
 
-project.ext.moduleName = 'com.synopsys.integration.hub-imageinspector-lib'
+project.ext.moduleName = 'com.blackduck.integration.hub-imageinspector-lib'
 project.ext.javaUseAutoModuleName = 'true'
 project.ext.junitShowStandardStreams = 'true'
 
@@ -42,7 +42,7 @@ dependencyManagement {
 }
 
 dependencies {
-    api 'com.synopsys.integration:integration-bdio:26.0.7'
+    api 'com.blackduck.integration:integration-bdio:26.0.7'
     api 'org.springframework:spring-context'
     api 'org.apache.commons:commons-exec:1.3'
 
