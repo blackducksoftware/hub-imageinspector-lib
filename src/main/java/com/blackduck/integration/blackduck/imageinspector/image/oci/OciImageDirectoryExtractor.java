@@ -1,9 +1,9 @@
 /*
  * hub-imageinspector-lib
  *
- * Copyright (c) 2024 Synopsys, Inc.
+ * Copyright (c) 2024 Black Duck Software, Inc.
  *
- * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
+ * Use subject to the terms and conditions of the Black Duck Software End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
 package com.blackduck.integration.blackduck.imageinspector.image.oci;
 
@@ -20,7 +20,7 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.archive.T
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciDescriptor;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageIndex;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageManifest;
-import com.synopsys.integration.blackduck.imageinspector.image.common.*;
+import com.blackduck.integration.blackduck.imageinspector.image.common.*;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

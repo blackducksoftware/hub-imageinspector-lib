@@ -1,16 +1,16 @@
 /*
  * hub-imageinspector-lib
  *
- * Copyright (c) 2024 Synopsys, Inc.
+ * Copyright (c) 2024 Black Duck Software, Inc.
  *
- * Use subject to the terms and conditions of the Synopsys End User Software License and Maintenance Agreement. All rights reserved worldwide.
+ * Use subject to the terms and conditions of the Black Duck Software End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
 package com.blackduck.integration.blackduck.imageinspector.image.docker;
 
 import com.blackduck.integration.blackduck.imageinspector.image.common.*;
 import com.blackduck.integration.blackduck.imageinspector.image.docker.manifest.DockerManifestFactory;
 import com.google.gson.Gson;
-import com.synopsys.integration.blackduck.imageinspector.image.common.*;
+import com.blackduck.integration.blackduck.imageinspector.image.common.*;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
 
 import java.io.File;
