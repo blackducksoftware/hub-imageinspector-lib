@@ -30,7 +30,7 @@ public class OciManifestDescriptorParser {
     }
 
     public OciDescriptor getManifestDescriptor(OciImageIndex ociImageIndex,
-       @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
+        @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
         // TODO- Probably also need to select one of multiple based on arch
         List<OciDescriptor> trueManifests =
             ociImageIndex.getManifests().stream()
