@@ -22,7 +22,7 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.archive.A
 import com.blackduck.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
 import com.blackduck.integration.blackduck.imageinspector.image.common.CommonImageConfigParser;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 
 public class OciImageDirectoryExtractorTest {

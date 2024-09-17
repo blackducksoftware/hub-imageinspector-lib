@@ -7,7 +7,7 @@
  */
 package com.blackduck.integration.blackduck.imageinspector.api;
 
-import com.synopsys.integration.util.Stringable;
+import com.blackduck.integration.util.Stringable;
 
 public class ImageInspectionRequest extends Stringable {
     private final String loggingLevel;

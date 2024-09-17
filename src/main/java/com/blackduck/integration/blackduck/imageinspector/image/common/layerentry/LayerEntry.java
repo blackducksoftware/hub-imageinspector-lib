@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import com.synopsys.integration.util.Stringable;
+import com.blackduck.integration.util.Stringable;
 
 public abstract class LayerEntry extends Stringable {
     private List<File> filesAddedByCurrentLayer = new LinkedList<>();

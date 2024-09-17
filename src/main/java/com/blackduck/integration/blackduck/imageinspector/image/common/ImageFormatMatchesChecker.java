@@ -7,7 +7,7 @@
  */
 package com.blackduck.integration.blackduck.imageinspector.image.common;
 
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 import java.io.File;
 

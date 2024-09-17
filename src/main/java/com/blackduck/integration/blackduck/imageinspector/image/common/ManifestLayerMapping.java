@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.synopsys.integration.util.Stringable;
+import com.blackduck.integration.util.Stringable;
 
 public class ManifestLayerMapping extends Stringable {
     @Nullable

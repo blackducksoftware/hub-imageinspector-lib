@@ -14,7 +14,7 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.*;
 import com.google.gson.Gson;
 import com.blackduck.integration.blackduck.imageinspector.image.common.*;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryDataExtractorFactory {
     private final OciImageFormatMatchesChecker ociImageFormatMatchesChecker;

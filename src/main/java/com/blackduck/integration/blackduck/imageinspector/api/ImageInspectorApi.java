@@ -32,10 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.blackduck.integration.bdio.model.SimpleBdioDocument;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
 import com.blackduck.integration.blackduck.imageinspector.linux.Os;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 @Component
 public class ImageInspectorApi {

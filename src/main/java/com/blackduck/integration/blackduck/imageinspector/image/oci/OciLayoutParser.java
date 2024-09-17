@@ -10,7 +10,7 @@ package com.blackduck.integration.blackduck.imageinspector.image.oci;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class OciLayoutParser {
     private final Gson gson;

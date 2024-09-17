@@ -1,7 +1,7 @@
 package com.blackduck.integration.blackduck.imageinspector.image.docker;
 
 import com.blackduck.integration.blackduck.imageinspector.image.common.ImageFormatMatchesChecker;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

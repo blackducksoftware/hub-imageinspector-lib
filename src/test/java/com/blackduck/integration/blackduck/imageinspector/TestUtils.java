@@ -8,7 +8,7 @@ import java.util.List;
 import com.blackduck.integration.blackduck.imageinspector.bdio.BdioGenerator;
 import org.apache.commons.io.FileUtils;
 
-import com.synopsys.integration.bdio.SimpleBdioFactory;
+import com.blackduck.integration.bdio.SimpleBdioFactory;
 
 public class TestUtils {
 

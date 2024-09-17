@@ -8,7 +8,7 @@
 package com.blackduck.integration.blackduck.imageinspector.image.oci;
 
 import com.blackduck.integration.blackduck.imageinspector.image.common.ImageFormatMatchesChecker;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

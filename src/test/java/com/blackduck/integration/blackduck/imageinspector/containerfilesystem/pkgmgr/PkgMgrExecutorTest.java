@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
 import com.blackduck.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class PkgMgrExecutorTest {
     private static final File inspectorPkgMgrDir = new File("test/fakePkgMgrDir");

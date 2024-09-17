@@ -11,7 +11,7 @@ import com.google.gson.Gson;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class RpmPkgMgrTest {
 

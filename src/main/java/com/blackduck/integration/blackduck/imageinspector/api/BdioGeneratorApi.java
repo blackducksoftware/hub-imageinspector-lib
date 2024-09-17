@@ -20,15 +20,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.bdio.model.dependency.ProjectDependency;
-import com.synopsys.integration.bdio.model.externalid.ExternalId;
+import com.blackduck.integration.bdio.model.SimpleBdioDocument;
+import com.blackduck.integration.bdio.model.dependency.ProjectDependency;
+import com.blackduck.integration.bdio.model.externalid.ExternalId;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.ComponentRelationshipPopulater;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrFactory;
 import com.blackduck.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 @Component
 public class BdioGeneratorApi {

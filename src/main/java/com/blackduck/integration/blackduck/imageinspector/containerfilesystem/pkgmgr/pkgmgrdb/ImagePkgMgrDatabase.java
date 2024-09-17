@@ -10,7 +10,7 @@ package com.blackduck.integration.blackduck.imageinspector.containerfilesystem.p
 import java.io.File;
 
 import com.blackduck.integration.blackduck.imageinspector.api.PackageManagerEnum;
-import com.synopsys.integration.util.Stringable;
+import com.blackduck.integration.util.Stringable;
 
 public class ImagePkgMgrDatabase extends Stringable {
     private final File extractedPackageManagerDirectory;

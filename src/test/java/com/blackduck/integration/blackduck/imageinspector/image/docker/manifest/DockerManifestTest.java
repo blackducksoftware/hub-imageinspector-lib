@@ -10,7 +10,7 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.ManifestR
 import org.junit.jupiter.api.Test;
 
 import com.blackduck.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class DockerManifestTest {
 

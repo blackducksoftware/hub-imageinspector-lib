@@ -27,8 +27,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.blackduck.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 import com.blackduck.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
-import com.synopsys.integration.exception.IntegrationException;
-import com.synopsys.integration.util.Stringable;
+import com.blackduck.integration.exception.IntegrationException;
+import com.blackduck.integration.util.Stringable;
 
 public class DockerManifest extends Stringable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());

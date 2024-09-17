@@ -8,7 +8,7 @@
 package com.blackduck.integration.blackduck.imageinspector.image.common;
 
 import com.blackduck.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;

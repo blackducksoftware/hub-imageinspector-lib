@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.blackduck.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciDescriptor;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageIndex;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class OciManifestDescriptorParserTest {
     String manifestMediaType = "application/vnd.oci.image.manifest.v1+json";

@@ -11,7 +11,7 @@ import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciIma
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 import java.io.File;
 import java.io.IOException;

@@ -10,7 +10,7 @@ package com.blackduck.integration.blackduck.imageinspector.containerfilesystem.c
 import java.util.LinkedList;
 import java.util.List;
 
-import com.synopsys.integration.util.Stringable;
+import com.blackduck.integration.util.Stringable;
 
 public class ComponentDetails extends Stringable {
     private final String name;

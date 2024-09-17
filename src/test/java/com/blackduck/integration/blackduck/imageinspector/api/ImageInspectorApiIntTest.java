@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
-import com.synopsys.integration.bdio.model.BdioComponent;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.blackduck.integration.bdio.model.BdioComponent;
+import com.blackduck.integration.bdio.model.SimpleBdioDocument;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemCompatibilityChecker;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.LinuxDistroExtractor;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.PackageGetter;
@@ -47,7 +47,7 @@ import com.blackduck.integration.blackduck.imageinspector.linux.CmdExecutor;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
 import com.blackduck.integration.blackduck.imageinspector.linux.Os;
 import com.blackduck.integration.blackduck.imageinspector.linux.TarOperations;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 @Tag("integration")
 public class ImageInspectorApiIntTest {

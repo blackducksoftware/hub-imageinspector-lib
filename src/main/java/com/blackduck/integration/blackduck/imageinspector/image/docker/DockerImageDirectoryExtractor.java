@@ -17,7 +17,7 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.ImageDire
 import com.blackduck.integration.blackduck.imageinspector.image.common.FullLayerMapping;
 import com.blackduck.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -16,8 +16,8 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.ImageInfo
 import com.blackduck.integration.blackduck.imageinspector.image.common.ManifestLayerMapping;
 import org.junit.jupiter.api.Test;
 
-import com.synopsys.integration.bdio.model.BdioProject;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.blackduck.integration.bdio.model.BdioProject;
+import com.blackduck.integration.bdio.model.SimpleBdioDocument;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.PackageManagerToImageInspectorOsMapping;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.apk.ApkPkgMgr;

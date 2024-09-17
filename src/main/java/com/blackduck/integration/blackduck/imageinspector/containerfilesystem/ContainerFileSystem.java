@@ -10,7 +10,7 @@ package com.blackduck.integration.blackduck.imageinspector.containerfilesystem;
 import java.io.File;
 import java.util.Optional;
 
-import com.synopsys.integration.util.Stringable;
+import com.blackduck.integration.util.Stringable;
 
 public class ContainerFileSystem extends Stringable {
 

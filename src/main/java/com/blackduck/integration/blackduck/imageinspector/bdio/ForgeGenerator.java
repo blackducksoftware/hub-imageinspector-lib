@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.synopsys.integration.bdio.model.Forge;
+import com.blackduck.integration.bdio.model.Forge;
 
 public class ForgeGenerator {
     private static final String REDHAT_KB_NAME = "redhat";

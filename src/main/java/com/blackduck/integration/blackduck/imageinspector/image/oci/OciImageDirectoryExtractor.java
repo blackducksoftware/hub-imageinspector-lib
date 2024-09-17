@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     private static final String INDEX_FILE_NAME = "index.json";

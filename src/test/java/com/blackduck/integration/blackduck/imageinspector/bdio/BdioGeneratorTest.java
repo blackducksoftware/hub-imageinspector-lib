@@ -14,11 +14,11 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.bdio.model.BdioComponent;
-import com.synopsys.integration.bdio.model.BdioRelationship;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.bdio.model.dependency.ProjectDependency;
-import com.synopsys.integration.bdio.model.externalid.ExternalId;
+import com.blackduck.integration.bdio.model.BdioComponent;
+import com.blackduck.integration.bdio.model.BdioRelationship;
+import com.blackduck.integration.bdio.model.SimpleBdioDocument;
+import com.blackduck.integration.bdio.model.dependency.ProjectDependency;
+import com.blackduck.integration.bdio.model.externalid.ExternalId;
 import com.blackduck.integration.blackduck.imageinspector.TestUtils;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchy;
@@ -28,7 +28,7 @@ import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pk
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmPkgMgr;
 import com.blackduck.integration.blackduck.imageinspector.image.common.LayerDetails;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class BdioGeneratorTest {
 

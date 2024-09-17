@@ -11,7 +11,7 @@ import java.util.List;
 
 import com.blackduck.integration.blackduck.imageinspector.image.common.ImageLayerSorter;
 import com.blackduck.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

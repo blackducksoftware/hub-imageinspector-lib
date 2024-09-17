@@ -8,7 +8,7 @@
 package com.blackduck.integration.blackduck.imageinspector.image.common;
 
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchy;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.blackduck.integration.bdio.model.SimpleBdioDocument;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemWithPkgMgrDb;
 
 // Comprehensive info about an image, including

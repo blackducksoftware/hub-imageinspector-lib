@@ -15,7 +15,7 @@ import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.co
 import org.jetbrains.annotations.Nullable;
 
 import com.blackduck.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public interface PkgMgr {
     boolean isApplicable(final File targetImageFileSystemRootDir);

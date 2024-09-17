@@ -14,13 +14,11 @@ import java.util.Optional;
 
 import com.blackduck.integration.blackduck.imageinspector.api.*;
 import com.blackduck.integration.blackduck.imageinspector.image.common.*;
-import com.blackduck.integration.blackduck.imageinspector.api.*;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystem;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemCompatibilityChecker;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.ContainerFileSystemWithPkgMgrDb;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.PkgMgrDbExtractor;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
-import com.blackduck.integration.blackduck.imageinspector.image.common.*;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ComponentHierarchyBuilder;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchy;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchyLogger;
@@ -28,7 +26,7 @@ import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
 import com.blackduck.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.blackduck.integration.blackduck.imageinspector.linux.Os;
 import com.blackduck.integration.blackduck.imageinspector.linux.TarOperations;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.blackduck.integration.bdio.model.SimpleBdioDocument;
 import com.blackduck.integration.blackduck.imageinspector.api.name.Names;
 import com.blackduck.integration.blackduck.imageinspector.bdio.BdioGenerator;
 

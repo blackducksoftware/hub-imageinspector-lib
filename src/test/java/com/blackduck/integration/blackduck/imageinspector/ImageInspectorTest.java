@@ -18,7 +18,7 @@ import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.Pk
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchyLogger;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
 import com.blackduck.integration.blackduck.imageinspector.image.common.*;
-import com.synopsys.integration.blackduck.imageinspector.image.common.*;
+import com.blackduck.integration.blackduck.imageinspector.image.common.*;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ImageComponentHierarchy;
 import com.blackduck.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
 import com.blackduck.integration.blackduck.imageinspector.linux.Os;

@@ -37,7 +37,7 @@ import com.blackduck.integration.blackduck.imageinspector.linux.LinuxFileSystem;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrInitializer;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrs;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 @Component
 public class ApkPkgMgr implements PkgMgr {

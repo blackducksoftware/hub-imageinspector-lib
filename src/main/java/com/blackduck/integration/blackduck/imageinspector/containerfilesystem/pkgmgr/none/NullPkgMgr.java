@@ -20,7 +20,7 @@ import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pk
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrInitializer;
 import com.blackduck.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 @Component
 public class NullPkgMgr implements PkgMgr {

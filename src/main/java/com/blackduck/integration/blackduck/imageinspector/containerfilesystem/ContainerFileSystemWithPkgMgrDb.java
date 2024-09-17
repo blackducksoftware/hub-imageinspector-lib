@@ -9,7 +9,7 @@ package com.blackduck.integration.blackduck.imageinspector.containerfilesystem;
 
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
-import com.synopsys.integration.util.Stringable;
+import com.blackduck.integration.util.Stringable;
 
 public class ContainerFileSystemWithPkgMgrDb extends Stringable {
     private final ContainerFileSystem containerFileSystem;

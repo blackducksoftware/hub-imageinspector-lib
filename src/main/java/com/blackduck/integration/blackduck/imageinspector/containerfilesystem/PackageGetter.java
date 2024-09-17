@@ -12,7 +12,7 @@ import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pk
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrExecutor;
 import com.blackduck.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

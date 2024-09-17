@@ -10,7 +10,7 @@ package com.blackduck.integration.blackduck.imageinspector.image.oci;
 import com.blackduck.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciDescriptor;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageIndex;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

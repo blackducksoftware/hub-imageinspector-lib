@@ -10,7 +10,7 @@ package com.blackduck.integration.blackduck.imageinspector.image.docker.manifest
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
-import com.synopsys.integration.util.Stringable;
+import com.blackduck.integration.util.Stringable;
 
 public class DockerImageInfo extends Stringable {
 

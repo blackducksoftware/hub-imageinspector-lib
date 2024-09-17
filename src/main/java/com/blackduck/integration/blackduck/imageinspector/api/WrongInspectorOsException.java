@@ -7,7 +7,7 @@
  */
 package com.blackduck.integration.blackduck.imageinspector.api;
 
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class WrongInspectorOsException extends IntegrationException {
     private static final long serialVersionUID = -1109859596321015457L;

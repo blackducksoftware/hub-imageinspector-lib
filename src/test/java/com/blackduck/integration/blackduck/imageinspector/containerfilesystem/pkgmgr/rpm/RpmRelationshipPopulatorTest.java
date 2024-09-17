@@ -10,7 +10,7 @@ import org.mockito.Mockito;
 
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.blackduck.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class RpmRelationshipPopulatorTest {
     @Test

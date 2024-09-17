@@ -17,11 +17,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.bdio.BdioReader;
-import com.synopsys.integration.bdio.model.BdioComponent;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
+import com.blackduck.integration.bdio.BdioReader;
+import com.blackduck.integration.bdio.model.BdioComponent;
+import com.blackduck.integration.bdio.model.SimpleBdioDocument;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrFactory;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class BdioGeneratorApiFuncTest {
     private final Gson gson = new Gson();

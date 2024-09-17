@@ -12,17 +12,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.google.gson.Gson;
-import com.synopsys.integration.bdio.model.BdioProject;
-import com.synopsys.integration.bdio.model.SimpleBdioDocument;
-import com.synopsys.integration.bdio.model.dependency.ProjectDependency;
-import com.synopsys.integration.bdio.model.externalid.ExternalId;
+import com.blackduck.integration.bdio.model.BdioProject;
+import com.blackduck.integration.bdio.model.SimpleBdioDocument;
+import com.blackduck.integration.bdio.model.dependency.ProjectDependency;
+import com.blackduck.integration.bdio.model.externalid.ExternalId;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.components.ComponentDetails;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgrFactory;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.CommonRelationshipPopulater;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.blackduck.integration.blackduck.imageinspector.linux.CmdExecutor;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 
 public class BdioGeneratorApiTest {
     private static final String[] pkgMgrListCmdOutputLines = {

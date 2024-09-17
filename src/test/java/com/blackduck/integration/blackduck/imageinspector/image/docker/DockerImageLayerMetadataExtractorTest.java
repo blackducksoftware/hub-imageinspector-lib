@@ -4,7 +4,7 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.FullLayer
 import com.blackduck.integration.blackduck.imageinspector.image.common.LayerDetailsBuilder;
 import com.blackduck.integration.blackduck.imageinspector.image.common.LayerMetadata;
 import com.blackduck.integration.blackduck.imageinspector.image.common.archive.TypedArchiveFile;
-import com.synopsys.integration.exception.IntegrationException;
+import com.blackduck.integration.exception.IntegrationException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
