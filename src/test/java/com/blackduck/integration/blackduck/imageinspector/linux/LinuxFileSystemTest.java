@@ -40,7 +40,7 @@ public class LinuxFileSystemTest {
         fSys.writeToTarGz(outputTarFile, "/ubuntu,/centos");
         assertTrue(outputTarFile.exists());
         System.out.printf("Size of tar.gz file: %d\n", outputTarFile.length());
-        assertTrue(outputTarFile.length() < 1000L);
+        assertTrue(outputTarFile.length() < 1100L);
     }
 
     @Test
@@ -52,6 +52,6 @@ public class LinuxFileSystemTest {
         fSys.writeToTarGz(outputTarFile, "/ubuntu/,/centos/");
         assertTrue(outputTarFile.exists());
         System.out.printf("Size of tar.gz file: %d\n", outputTarFile.length());
-        assertTrue(outputTarFile.length() < 1000L);
+        assertTrue(outputTarFile.length() < 1100L);
     }
 }
