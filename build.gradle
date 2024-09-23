@@ -9,7 +9,7 @@ buildscript {
         javaSourceCompatibility = 8
     }
     ext['logback.version'] = '1.2.13'
-    dependencies { classpath "com.synopsys.integration:common-gradle-plugin:${managedCgpVersion}" }
+    dependencies { classpath "com.blackduck.integration:common-gradle-plugin:${managedCgpVersion}" }
 
     dependencies {
         classpath 'com.bmuschko:gradle-docker-plugin:6.7.0'
@@ -20,16 +20,16 @@ plugins {
     id 'org.springframework.boot' version '2.6.6' apply false
 }
 
-project.ext.moduleName = 'com.synopsys.integration.hub-imageinspector-lib'
+project.ext.moduleName = 'com.blackduck.integration.hub-imageinspector-lib'
 project.ext.javaUseAutoModuleName = 'true'
 project.ext.junitShowStandardStreams = 'true'
 
-version = '14.3.8-SNAPSHOT'
+version = '15.0.0-SNAPSHOT'
 description = 'A library for creating Black Duck Input Output (BDIO) representing the packages installed in a Linux Docker image'
 
 apply plugin: "io.spring.dependency-management"
 apply plugin: 'com.bmuschko.docker-remote-api'
-apply plugin: 'com.synopsys.integration.library'
+apply plugin: 'com.blackduck.integration.library'
 
 dependencyManagement {
     imports {
@@ -42,7 +42,7 @@ dependencyManagement {
 }
 
 dependencies {
-    api 'com.synopsys.integration:integration-bdio:26.0.7'
+    api 'com.blackduck.integration:integration-bdio:27.0.0'
     api 'org.springframework:spring-context'
     api 'org.apache.commons:commons-exec:1.3'
 
