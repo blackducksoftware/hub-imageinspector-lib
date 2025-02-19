@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 public class OciManifestDescriptorParser {
     private static final String MANIFEST_FILE_MEDIA_TYPE = "application/vnd.oci.image.manifest.v1+json";
+    private static final String INDEX_FILE_MEDIA_TYPE = "application/vnd.oci.image.index.v1+json";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ManifestRepoTagMatcher manifestRepoTagMatcher;
 
@@ -34,10 +35,10 @@ public class OciManifestDescriptorParser {
         // TODO- Probably also need to select one of multiple based on arch
         List<OciDescriptor> trueManifests =
             ociImageIndex.getManifests().stream()
-                .filter(man -> MANIFEST_FILE_MEDIA_TYPE.equals(man.getMediaType()))
+                .filter(man -> MANIFEST_FILE_MEDIA_TYPE.equals(man.getMediaType()) || INDEX_FILE_MEDIA_TYPE.equals(man.getMediaType()))
                 .collect(Collectors.toList());
         if (trueManifests.size() == 0) {
-            throw new IntegrationException(String.format("No manifest descriptor with media type %s was found in OCI image index", MANIFEST_FILE_MEDIA_TYPE));
+            throw new IntegrationException(String.format("No manifest descriptor with either media type %s or %s was found in OCI image index", INDEX_FILE_MEDIA_TYPE, MANIFEST_FILE_MEDIA_TYPE));
         }
         if ((trueManifests.size() == 1)) {
             logger.debug(String.format("There is only one manifest; inspecting that one; digest=%s", trueManifests.get(0).getDigest()));
