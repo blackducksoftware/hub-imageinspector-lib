@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,10 +34,17 @@ public class OciManifestDescriptorParser {
     public OciDescriptor getManifestDescriptor(OciImageIndex ociImageIndex,
         @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
         // TODO- Probably also need to select one of multiple based on arch
-        List<OciDescriptor> trueManifests =
-            ociImageIndex.getManifests().stream()
-                .filter(man -> MANIFEST_FILE_MEDIA_TYPE.equals(man.getMediaType()) || INDEX_FILE_MEDIA_TYPE.equals(man.getMediaType()))
-                .collect(Collectors.toList());
+//        List<OciDescriptor> trueManifests =
+//            ociImageIndex.getManifests().stream()
+//                .filter(man -> MANIFEST_FILE_MEDIA_TYPE.equals(man.getMediaType()) || INDEX_FILE_MEDIA_TYPE.equals(man.getMediaType()))
+//                .collect(Collectors.toList());
+        List<OciDescriptor> trueManifests = new ArrayList<>();
+        for (OciDescriptor ociDescriptor : ociImageIndex.getManifests()) {
+            logger.debug("Found a media type in manifest: %s", ociDescriptor.getMediaType());
+            if (MANIFEST_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType()) || INDEX_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType())) {
+                trueManifests.add(ociDescriptor);
+            }
+        }
         if (trueManifests.size() == 0) {
             throw new IntegrationException(String.format("No manifest descriptor with either media type %s or %s was found in OCI image index", INDEX_FILE_MEDIA_TYPE, MANIFEST_FILE_MEDIA_TYPE));
         }
