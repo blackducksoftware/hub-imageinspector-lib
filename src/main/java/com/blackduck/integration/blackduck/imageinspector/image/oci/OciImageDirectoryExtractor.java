@@ -148,8 +148,12 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         // Parse manifest file for names + archive formats of layer files
         String manifestFileText = fileOperations.readFileToString(manifestFile);
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
-
+        
         List<TypedArchiveFile> layerArchives = new LinkedList<>();
+        if (imageManifest == null) {
+            logger.debug("Manifest object could not be generated from JSON text: {}", manifestFileText);
+            return layerArchives;
+        }
         for (OciDescriptor layer : imageManifest.getLayers()) {
             String pathToLayerFile = parsePathToBlobFileFromDigest(layer.getDigest());
             File layerFile;

@@ -40,16 +40,16 @@ public class OciManifestDescriptorParser {
 //                .collect(Collectors.toList());
         List<OciDescriptor> trueManifests = new ArrayList<>();
         for (OciDescriptor ociDescriptor : ociImageIndex.getManifests()) {
-            logger.debug("Found a media type in manifest: %s", ociDescriptor.getMediaType());
+            logger.debug("Found a media type in manifest: {}", ociDescriptor.getMediaType());
             if (MANIFEST_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType()) || INDEX_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType())) {
                 trueManifests.add(ociDescriptor);
             }
         }
         if (trueManifests.size() == 0) {
-            throw new IntegrationException(String.format("No manifest descriptor with either media type %s or %s was found in OCI image index", INDEX_FILE_MEDIA_TYPE, MANIFEST_FILE_MEDIA_TYPE));
+            throw new IntegrationException(String.format("No manifest descriptor with either media type {} or {} was found in OCI image index", INDEX_FILE_MEDIA_TYPE, MANIFEST_FILE_MEDIA_TYPE));
         }
         if ((trueManifests.size() == 1)) {
-            logger.debug(String.format("There is only one manifest; inspecting that one; digest=%s", trueManifests.get(0).getDigest()));
+            logger.debug(String.format("There is only one manifest; inspecting that one; digest={}", trueManifests.get(0).getDigest()));
             return trueManifests.get(0);
         }
         if ((trueManifests.size() > 1) && StringUtils.isBlank(givenRepo)) {
@@ -68,7 +68,7 @@ public class OciManifestDescriptorParser {
             .filter(m -> manifestRepoTagMatcher.findMatch(m.getRepoTagString().get(), givenRepoTag).isPresent())
             .findFirst();
         if (!matchingManifest.isPresent()) {
-            throw new IntegrationException(String.format("Unable to find manifest matching repo:tag: %s", givenRepoTag));
+            throw new IntegrationException(String.format("Unable to find manifest matching repo:tag: {}", givenRepoTag));
         }
         return matchingManifest.get();
     }
