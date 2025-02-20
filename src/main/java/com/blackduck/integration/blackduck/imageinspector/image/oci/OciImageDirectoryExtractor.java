@@ -150,7 +150,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
         
         List<TypedArchiveFile> layerArchives = new LinkedList<>();
-        if (imageManifest == null) {
+        if (imageManifest == null || imageManifest.getLayers() == null) {
             logger.debug("Manifest object could not be generated from JSON text: {}", manifestFileText);
             return layerArchives;
         }
