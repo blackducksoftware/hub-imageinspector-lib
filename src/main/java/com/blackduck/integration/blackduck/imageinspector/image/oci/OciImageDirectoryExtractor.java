@@ -221,7 +221,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         }
     }
     
-    private String findImageConfigFilePath(String imageDir, List<OciDescriptor> imageConfigs) {
+    private String findImageConfigFilePath(String imageDir, List<OciDescriptor> imageConfigs) throws IntegrationException {
         for (OciDescriptor imageConfig : imageConfigs) {
             if (imageConfig != null && imageConfig.getMediaType() != null && imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
                 String pathToConfigFileFromRoot = String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(imageConfig.getDigest()));
