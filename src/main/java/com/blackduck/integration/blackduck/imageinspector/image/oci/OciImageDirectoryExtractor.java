@@ -101,11 +101,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
         if (imageManifest == null || imageManifest.getConfig() == null) {
-            logger.debug("JSON text is not of Image Manifest type. Attempting to match with Image Index type.");
-            imageManifest = gson.fromJson(manifestFileText, OciImageIndex.class);
-            if (imageManifest == null || imageManifest.getConfig() == null) {
-                throw new IntegrationException("Unable to find a matching manifest with config file");
-            }
+            logger.debug("JSON text is not of Image Manifest type: {}", manifestFileText);
         }
         
         // If we ever need more detail (os/architecture, history, cmd, etc):
@@ -206,7 +202,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     private String findImageConfigFilePath(OciDescriptor imageConfig) throws IntegrationException {
-        if (imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
+        if (imageConfig != null && imageConfig.getMediaType() != null && imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
             return String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(imageConfig.getDigest()));
         } else {
             throw new IntegrationException("Unable to find config file");
