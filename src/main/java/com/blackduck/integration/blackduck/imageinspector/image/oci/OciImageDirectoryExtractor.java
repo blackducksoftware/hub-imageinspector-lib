@@ -94,6 +94,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
         String manifestFileText;
         try {
+            logger.debug("Path to the manifest file about to be read: {}", manifestFile.toPath().toString());
             manifestFileText = fileOperations.readFileToString(manifestFile);
         } catch (IOException e) {
             throw new IntegrationException(String.format("Unable to parse manifest file %s", manifestFile.getAbsolutePath()));
@@ -102,6 +103,10 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
         if (imageManifest == null || imageManifest.getConfig() == null) {
             logger.debug("JSON text is not of Image Manifest type: {}", manifestFileText);
+            OciImageIndex imageIndex = gson.fromJson(manifestFileText, OciImageIndex.class);
+            if (imageIndex == null || imageIndex. == null) {
+                throw new IntegrationException("Unable to find a matching manifest with config file");
+            }
         }
         
         // If we ever need more detail (os/architecture, history, cmd, etc):
