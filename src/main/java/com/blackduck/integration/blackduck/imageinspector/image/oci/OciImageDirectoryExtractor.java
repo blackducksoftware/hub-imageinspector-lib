@@ -99,22 +99,29 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         } catch (IOException e) {
             throw new IntegrationException(String.format("Unable to parse manifest file %s", manifestFile.getAbsolutePath()));
         }
-
+        
+        String pathToImageConfigFileFromRoot;
+        List<String> layerInternalIds;
+        
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
         if (imageManifest == null || imageManifest.getConfig() == null) {
             logger.debug("JSON text is not of Image Manifest type: {}", manifestFileText);
             OciImageIndex imageIndex = gson.fromJson(manifestFileText, OciImageIndex.class);
-            if (imageIndex == null || imageIndex. == null) {
+            if (imageIndex == null || imageIndex.getManifests() == null) {
                 throw new IntegrationException("Unable to find a matching manifest with config file");
             }
-        }
-        
-        // If we ever need more detail (os/architecture, history, cmd, etc):
-        // imageManifest.config.digest has the filename (in the blobs dir) of the file that has that detail
-        String pathToImageConfigFileFromRoot = findImageConfigFilePath(imageManifest.getConfig());
-        List<String> layerInternalIds = imageManifest.getLayers().stream()
+            pathToImageConfigFileFromRoot = findImageConfigFilePath(imageDir.getAbsolutePath(), imageIndex.getManifests());
+            layerInternalIds = imageIndex.getManifests().stream()
+                                                .map(OciDescriptor::getDigest)
+                                                .collect(Collectors.toList());
+        } else {
+            // If we ever need more detail (os/architecture, history, cmd, etc):
+            // imageManifest.config.digest has the filename (in the blobs dir) of the file that has that detail
+            pathToImageConfigFileFromRoot = findImageConfigFilePath(imageManifest.getConfig());
+            layerInternalIds = imageManifest.getLayers().stream()
                                             .map(OciDescriptor::getDigest)
                                             .collect(Collectors.toList());
+        }
 
         ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(resolvedRepoTag.getRepo().orElse(""), resolvedRepoTag.getTag().orElse(""), pathToImageConfigFileFromRoot, layerInternalIds);
 
@@ -212,6 +219,18 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         } else {
             throw new IntegrationException("Unable to find config file");
         }
+    }
+    
+    private String findImageConfigFilePath(String imageDir, List<OciDescriptor> imageConfigs) {
+        for (OciDescriptor imageConfig : imageConfigs) {
+            if (imageConfig != null && imageConfig.getMediaType() != null && imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
+                String pathToConfigFileFromRoot = String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(imageConfig.getDigest()));
+                if (new File(imageDir + "/" + pathToConfigFileFromRoot).exists()) {
+                    return pathToConfigFileFromRoot;
+                }
+            }
+        }
+        throw new IntegrationException("Unable to find config file");
     }
 
 }
