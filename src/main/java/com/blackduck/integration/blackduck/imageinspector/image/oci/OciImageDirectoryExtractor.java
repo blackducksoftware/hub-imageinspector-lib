@@ -110,10 +110,17 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             if (imageIndex == null || imageIndex.getManifests() == null) {
                 throw new IntegrationException("Unable to find a matching manifest with config file");
             }
-            pathToImageConfigFileFromRoot = findImageConfigFilePath(imageDir.getAbsolutePath(), imageIndex.getManifests());
-            layerInternalIds = imageIndex.getManifests().stream()
-                                                .map(OciDescriptor::getDigest)
-                                                .collect(Collectors.toList());
+            File rootManifestfile = new File(imageDir, "/manifest.json");
+            try {
+                String rootManifestFileText = fileOperations.readFileToString(rootManifestfile);
+                OciImageManifest rootImageManifest = gson.fromJson(rootManifestFileText, OciImageManifest.class);
+                pathToImageConfigFileFromRoot = findImageConfigFilePath(rootImageManifest.getConfig());
+                layerInternalIds = imageIndex.getManifests().stream()
+                                                    .map(OciDescriptor::getDigest)
+                                                    .collect(Collectors.toList());
+            } catch (IOException ex) {
+                throw new IntegrationException("Unable to find a matching manifest with config file in the root: {}", ex);
+            }
         } else {
             // If we ever need more detail (os/architecture, history, cmd, etc):
             // imageManifest.config.digest has the filename (in the blobs dir) of the file that has that detail
@@ -220,17 +227,4 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             throw new IntegrationException("Unable to find config file");
         }
     }
-    
-    private String findImageConfigFilePath(String imageDir, List<OciDescriptor> imageConfigs) throws IntegrationException {
-        for (OciDescriptor imageConfig : imageConfigs) {
-            if (imageConfig != null && imageConfig.getMediaType() != null && imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
-                String pathToConfigFileFromRoot = String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(imageConfig.getDigest()));
-                if (new File(imageDir + "/" + pathToConfigFileFromRoot).exists()) {
-                    return pathToConfigFileFromRoot;
-                }
-            }
-        }
-        throw new IntegrationException("Unable to find config file");
-    }
-
 }
