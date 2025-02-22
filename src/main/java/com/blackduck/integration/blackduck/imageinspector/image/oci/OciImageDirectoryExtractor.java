@@ -110,7 +110,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             if (imageIndex == null || imageIndex.getManifests() == null) {
                 throw new IntegrationException("Unable to find a matching manifest with config file");
             }
-            File rootManifestfile = new File(imageDir, "/manifest.json");
+            File rootManifestfile = new File(imageDir, "manifest.json");
             try {
                 String rootManifestFileText = fileOperations.readFileToString(rootManifestfile);
                 OciImageManifest rootImageManifest = gson.fromJson(rootManifestFileText, OciImageManifest.class);
