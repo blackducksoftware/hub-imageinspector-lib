@@ -127,9 +127,13 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                 if (pathToImageConfigFileFromRoot == null) {
                     throw new IntegrationException("Unable to find config in root manifest.");
                 }
+                
             } catch (IOException ex) {
                 throw new IntegrationException("Unable to find a matching manifest with config file in the root: {}", ex);
             }
+            layerInternalIds = imageIndex.getManifests().stream()
+                                            .map(OciDescriptor::getDigest)
+                                            .collect(Collectors.toList());
         } else {
             // If we ever need more detail (os/architecture, history, cmd, etc):
             // imageManifest.config.digest has the filename (in the blobs dir) of the file that has that detail
