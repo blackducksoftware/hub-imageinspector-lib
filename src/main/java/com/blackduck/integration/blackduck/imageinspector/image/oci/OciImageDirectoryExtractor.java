@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
 import com.blackduck.integration.exception.IntegrationException;
+import java.util.Arrays;
 
 public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     private static final String INDEX_FILE_NAME = "index.json";
@@ -100,7 +101,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             throw new IntegrationException(String.format("Unable to parse manifest file %s", manifestFile.getAbsolutePath()));
         }
         
-        String pathToImageConfigFileFromRoot;
+        String pathToImageConfigFileFromRoot = null;
         List<String> layerInternalIds;
         
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
@@ -113,11 +114,19 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             File rootManifestfile = new File(imageDir, "manifest.json");
             try {
                 String rootManifestFileText = fileOperations.readFileToString(rootManifestfile);
-                OciImageManifest rootImageManifest = gson.fromJson(rootManifestFileText, OciImageManifest.class);
-                pathToImageConfigFileFromRoot = findImageConfigFilePath(rootImageManifest.getConfig());
-                layerInternalIds = imageIndex.getManifests().stream()
-                                                    .map(OciDescriptor::getDigest)
-                                                    .collect(Collectors.toList());
+                List<OciImageManifest> rootImageManifests = Arrays.asList(gson.fromJson(rootManifestFileText, OciImageManifest[].class));
+                if (rootImageManifests.isEmpty()) {
+                    throw new IntegrationException("Unable to find a matching manifest with config file in the root");
+                }
+                for (OciImageManifest rootImageManifest : rootImageManifests) {
+                    if (rootImageManifest.getConfig() != null) {
+                        pathToImageConfigFileFromRoot = findImageConfigFilePath(rootImageManifest.getConfig());
+                        break;
+                    }
+                }
+                if (pathToImageConfigFileFromRoot == null) {
+                    throw new IntegrationException("Unable to find config in root manifest.");
+                }
             } catch (IOException ex) {
                 throw new IntegrationException("Unable to find a matching manifest with config file in the root: {}", ex);
             }
