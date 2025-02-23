@@ -117,8 +117,11 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                 List<OciImageManifest> rootImageManifests = Arrays.asList(gson.fromJson(rootManifestFileText, OciImageManifest[].class));
                 if (rootImageManifests.isEmpty()) {
                     throw new IntegrationException("Unable to find a matching manifest with config file in the root");
+                } else {
+                    logger.debug("rootImageManifests size: {}", rootImageManifests.size());
                 }
                 for (OciImageManifest rootImageManifest : rootImageManifests) {
+                    logger.debug("Checking a manifest in root with media type: {}", rootImageManifest.getMediaType());
                     if (rootImageManifest.getConfig() != null) {
                         pathToImageConfigFileFromRoot = findImageConfigFilePath(rootImageManifest.getConfig());
                         break;
@@ -234,6 +237,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     private String findImageConfigFilePath(OciDescriptor imageConfig) throws IntegrationException {
+        logger.info("findImageConfigFilePath{imageConfig}");
         if (imageConfig != null && imageConfig.getMediaType() != null && imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
             return String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(imageConfig.getDigest()));
         } else {
