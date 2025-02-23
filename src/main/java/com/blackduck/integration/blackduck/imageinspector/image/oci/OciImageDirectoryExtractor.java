@@ -21,6 +21,7 @@ import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciDes
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageIndex;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageManifest;
 import com.blackduck.integration.blackduck.imageinspector.image.common.*;
+import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageRootManifest;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,16 +115,16 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             File rootManifestfile = new File(imageDir, "manifest.json");
             try {
                 String rootManifestFileText = fileOperations.readFileToString(rootManifestfile);
-                List<OciImageManifest> rootImageManifests = Arrays.asList(gson.fromJson(rootManifestFileText, OciImageManifest[].class));
+                List<OciImageRootManifest> rootImageManifests = Arrays.asList(gson.fromJson(rootManifestFileText, OciImageRootManifest[].class));
                 if (rootImageManifests.isEmpty()) {
                     throw new IntegrationException("Unable to find a matching manifest with config file in the root");
                 } else {
                     logger.debug("rootImageManifests size: {}", rootImageManifests.size());
                 }
-                for (OciImageManifest rootImageManifest : rootImageManifests) {
-                    logger.debug("Checking a manifest in root with media type: {}", rootImageManifest.getMediaType());
+                for (OciImageRootManifest rootImageManifest : rootImageManifests) {
+                    logger.debug("Checking a manifest in root with config: {}", rootImageManifest.getConfig());
                     if (rootImageManifest.getConfig() != null) {
-                        pathToImageConfigFileFromRoot = findImageConfigFilePath(rootImageManifest.getConfig());
+                        pathToImageConfigFileFromRoot = String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(rootImageManifest.getConfig()));;
                         break;
                     }
                 }
