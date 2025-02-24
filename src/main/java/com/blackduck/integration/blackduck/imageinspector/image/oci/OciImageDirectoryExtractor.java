@@ -72,7 +72,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
 
         try {
-            return parseLayerArchives(manifestFile, blobsDir);
+            return parseLayerArchives(manifestFile, blobsDir, imageDir);
         } catch (IOException e) {
             throw new IntegrationException(String.format("Error parsing layer archives from manifest file %s: %s", manifestFile.getAbsolutePath(), e.getMessage()), e);
         }
@@ -172,7 +172,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         }
     }
 
-    private List<TypedArchiveFile> parseLayerArchives(File manifestFile, File blobsDir) throws IOException {
+    private List<TypedArchiveFile> parseLayerArchives(File manifestFile, File blobsDir, File imageDir) throws IOException {
         // Parse manifest file for names + archive formats of layer files
         String manifestFileText = fileOperations.readFileToString(manifestFile);
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
@@ -194,8 +194,13 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             String pathToLayerFile = parsePathToBlobFileFromDigest(layer.getDigest());
             File layerFile;
             try {
-                logger.debug("blobsDir: {}, pathToLayerFile: {}", blobsDir, pathToLayerFile);
-                layerFile = findBlob(blobsDir, pathToLayerFile);
+                if (pathToLayerFile.startsWith(BLOBS_DIR_NAME)) {
+                    logger.debug("blobsDir: {}, pathToLayerFile: {}", blobsDir, pathToLayerFile);
+                    layerFile = findBlob(blobsDir, pathToLayerFile);
+                } else {
+                    logger.debug("imageDir: {}, pathToLayerFile: {}", imageDir, pathToLayerFile);
+                    layerFile = findBlob(imageDir, pathToLayerFile);
+                }
             } catch (IntegrationException e) {
                 logger.error(e.getMessage());
                 continue;

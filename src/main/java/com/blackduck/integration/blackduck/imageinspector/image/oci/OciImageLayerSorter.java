@@ -21,6 +21,12 @@ public class OciImageLayerSorter extends ImageLayerSorter {
     @Override
     protected TypedArchiveFile getLayerArchive(final List<TypedArchiveFile> unOrderedLayerArchives, final String layerInternalId) throws IntegrationException {
         TypedArchiveFile layerArchive = null;
+        if (unOrderedLayerArchives != null) {
+            logger.debug("layerInternalId: {}, unOrderedLayerArchives size: {}", layerInternalId, unOrderedLayerArchives.size());
+        } else {
+            logger.debug("layerInternalId: {}, unOrderedLayerArchives: {}", layerInternalId, unOrderedLayerArchives);
+        }
+        }
         for (final TypedArchiveFile candidateLayerTar : unOrderedLayerArchives) {
             String candidateId = String.format("%s:%s", candidateLayerTar.getFile().getParentFile().getName(), candidateLayerTar.getFile().getName());
             logger.debug("layerInternalId: {}, candidateId: {}", layerInternalId, candidateId);
