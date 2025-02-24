@@ -195,11 +195,11 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             File layerFile;
             try {
                 if (pathToLayerFile.startsWith(BLOBS_DIR_NAME)) {
-                    logger.debug("blobsDir: {}, pathToLayerFile: {}", blobsDir, pathToLayerFile);
-                    layerFile = findBlob(blobsDir, pathToLayerFile);
-                } else {
                     logger.debug("imageDir: {}, pathToLayerFile: {}", imageDir, pathToLayerFile);
                     layerFile = findBlob(imageDir, pathToLayerFile);
+                } else {
+                    logger.debug("blobsDir: {}, pathToLayerFile: {}", blobsDir, pathToLayerFile);
+                    layerFile = findBlob(blobsDir, pathToLayerFile);
                 }
             } catch (IntegrationException e) {
                 logger.error(e.getMessage());
