@@ -117,7 +117,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             try {
                 String rootManifestFileText = fileOperations.readFileToString(rootManifestfile);
                 String configRelativePathFromRoot = getConfigDigestFromRootManifestText(rootManifestFileText);
-                logger.debug("Root Manifest: \n{}", rootManifestFileText);
+                logger.debug("configRelativePathFromRoot: \n{}", configRelativePathFromRoot);
                 if (configRelativePathFromRoot == null) {
                     throw new IntegrationException("Unable to find config in root manifest.");
                 }
@@ -240,7 +240,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         int start = rootManifestFileText.indexOf(CONFIG_FIELD_NAME) + CONFIG_FIELD_NAME.length();
         int end = rootManifestFileText.indexOf('"', start + 1);
         if (start > -1 && end > start) {
-            return rootManifestFileText.substring(start, end);
+            return rootManifestFileText.substring(start, end).replace(":", "/");
         }
         return null;
     }
