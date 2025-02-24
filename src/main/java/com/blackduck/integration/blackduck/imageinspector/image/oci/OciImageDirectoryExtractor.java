@@ -106,6 +106,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         String pathToImageConfigFileFromRoot = null;
         List<String> layerInternalIds;
         
+        List<String> layerExternalIds;
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
         if (imageManifest == null || imageManifest.getConfig() == null) {
             logger.debug("JSON text is not of Image Manifest type: {}", manifestFileText);
@@ -135,10 +136,13 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                                             .map(OciDescriptor::getDigest)
                                             .collect(Collectors.toList());
         }
+        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(
+                resolvedRepoTag.getRepo().orElse(""), 
+                resolvedRepoTag.getTag().orElse(""), 
+                pathToImageConfigFileFromRoot, 
+                layerInternalIds);
 
-        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(resolvedRepoTag.getRepo().orElse(""), resolvedRepoTag.getTag().orElse(""), pathToImageConfigFileFromRoot, layerInternalIds);
-
-        List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
+        layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
     }
 
@@ -173,8 +177,10 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     private List<TypedArchiveFile> parseLayerArchives(File manifestFile, File blobsDir, File imageDir) throws IOException {
+        
         // Parse manifest file for names + archive formats of layer files
         String manifestFileText = fileOperations.readFileToString(manifestFile);
+        logger.debug("parseLayerArchives - manifestFileText: {}, blobsDir: {}, imageDir: {}", manifestFileText, blobsDir, imageDir);
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
         List<OciDescriptor> layersOrManifests;
         List<TypedArchiveFile> layerArchives = new LinkedList<>();
@@ -190,8 +196,10 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         } else {
             layersOrManifests = imageManifest.getLayers();
         }
+        logger.debug("parseLayerArchives - layersOrManifests.size(): {}", layersOrManifests.size());
         for (OciDescriptor layer : layersOrManifests) {
             String pathToLayerFile = parsePathToBlobFileFromDigest(layer.getDigest());
+            logger.debug("parseLayerArchives - pathToLayerFile: {}", pathToLayerFile);
             File layerFile;
             try {
                 if (pathToLayerFile.startsWith(BLOBS_DIR_NAME)) {
@@ -215,7 +223,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             }
             layerArchives.add(new TypedArchiveFile(archiveFileType, layerFile));
         }
-
+        logger.debug("parseLayerArchives - layerArchives.size(): {}", layerArchives.size());
         return layerArchives;
     }
 
