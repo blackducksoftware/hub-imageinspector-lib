@@ -26,7 +26,6 @@ public class OciImageLayerSorter extends ImageLayerSorter {
         } else {
             logger.debug("layerInternalId: {}, unOrderedLayerArchives: {}", layerInternalId, unOrderedLayerArchives);
         }
-        }
         for (final TypedArchiveFile candidateLayerTar : unOrderedLayerArchives) {
             String candidateId = String.format("%s:%s", candidateLayerTar.getFile().getParentFile().getName(), candidateLayerTar.getFile().getName());
             logger.debug("layerInternalId: {}, candidateId: {}", layerInternalId, candidateId);
