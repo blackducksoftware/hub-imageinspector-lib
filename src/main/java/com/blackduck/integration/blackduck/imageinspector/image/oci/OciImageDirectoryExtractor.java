@@ -194,6 +194,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             String pathToLayerFile = parsePathToBlobFileFromDigest(layer.getDigest());
             File layerFile;
             try {
+                logger.debug("blobsDir: {}, pathToLayerFile: {}", blobsDir, pathToLayerFile);
                 layerFile = findBlob(blobsDir, pathToLayerFile);
             } catch (IntegrationException e) {
                 logger.error(e.getMessage());
