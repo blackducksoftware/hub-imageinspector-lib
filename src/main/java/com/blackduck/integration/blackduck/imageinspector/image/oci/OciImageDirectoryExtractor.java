@@ -116,12 +116,11 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             File rootManifestfile = new File(imageDir, "manifest.json");
             try {
                 String rootManifestFileText = fileOperations.readFileToString(rootManifestfile);
-                String configRelativePathFromRoot = getConfigDigestFromRootManifestText(rootManifestFileText);
-                logger.debug("configRelativePathFromRoot: \n{}", configRelativePathFromRoot);
-                if (configRelativePathFromRoot == null) {
+                pathToImageConfigFileFromRoot = getConfigDigestFromRootManifestText(rootManifestFileText);
+                logger.debug("configRelativePathFromRoot: \n{}", pathToImageConfigFileFromRoot);
+                if (pathToImageConfigFileFromRoot == null) {
                     throw new IntegrationException("Unable to find config in root manifest.");
                 }
-                pathToImageConfigFileFromRoot = String.format("%s/%s", BLOBS_DIR_NAME, configRelativePathFromRoot);
             } catch (IOException ex) {
                 throw new IntegrationException("Unable to find a matching manifest with config file in the root: {}", ex);
             }
