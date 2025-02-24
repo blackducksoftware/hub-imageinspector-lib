@@ -166,6 +166,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             // ac- based on the linked doc, I think we should just treat them normally (as if they were their "distributable" counterparts)
         } else if (mediaType.contains("application/vnd.oci.image.manifest.v1+json")) {
             // TODO: Re-write the workflow to avoid this method for this media type.
+            return ArchiveFileType.TAR;
         }
         if (mediaType.endsWith(LAYER_ARCHIVE_TAR_MEDIA_TYPE_SUFFIX)) {
             return ArchiveFileType.TAR;
