@@ -34,6 +34,7 @@ import java.util.Arrays;
 public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     private static final String INDEX_FILE_NAME = "index.json";
     private static final String BLOBS_DIR_NAME = "blobs";
+    private static final String CONFIG_FIELD_NAME = "\"Config\":\"";
 
     private static final String INDEX_FILE_MEDIA_TYPE = "application/vnd.oci.image.index.v1+json";
     private static final String CONFIG_FILE_MEDIA_TYPE = "application/vnd.oci.image.config.v1+json";
@@ -115,24 +116,12 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             File rootManifestfile = new File(imageDir, "manifest.json");
             try {
                 String rootManifestFileText = fileOperations.readFileToString(rootManifestfile);
+                String configRelativePathFromRoot = getConfigDigestFromRootManifestText(rootManifestFileText);
                 logger.debug("Root Manifest: \n{}", rootManifestFileText);
-                List<OciImageRootManifest> rootImageManifests = Arrays.asList(gson.fromJson(rootManifestFileText, OciImageRootManifest[].class));
-                if (rootImageManifests.isEmpty()) {
-                    throw new IntegrationException("Unable to find a matching manifest with config file in the root");
-                } else {
-                    logger.debug("rootImageManifests size: {}", rootImageManifests.size());
-                }
-                for (OciImageRootManifest rootImageManifest : rootImageManifests) {
-                    logger.debug("Checking a manifest in root with config: {}", rootImageManifest.getConfig());
-                    if (rootImageManifest.getConfig() != null) {
-                        pathToImageConfigFileFromRoot = String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(rootImageManifest.getConfig()));;
-                        break;
-                    }
-                }
-                if (pathToImageConfigFileFromRoot == null) {
+                if (configRelativePathFromRoot == null) {
                     throw new IntegrationException("Unable to find config in root manifest.");
                 }
-                
+                pathToImageConfigFileFromRoot = String.format("%s/%s", BLOBS_DIR_NAME, configRelativePathFromRoot);
             } catch (IOException ex) {
                 throw new IntegrationException("Unable to find a matching manifest with config file in the root: {}", ex);
             }
@@ -245,5 +234,14 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         } else {
             throw new IntegrationException("Unable to find config file");
         }
+    }
+    
+    private String getConfigDigestFromRootManifestText(String rootManifestFileText) {
+        int start = rootManifestFileText.indexOf(CONFIG_FIELD_NAME) + CONFIG_FIELD_NAME.length();
+        int end = rootManifestFileText.indexOf('"', start + 1);
+        if (start > -1 && end > start) {
+            return rootManifestFileText.substring(start, end);
+        }
+        return null;
     }
 }
