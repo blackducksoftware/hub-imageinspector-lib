@@ -213,12 +213,13 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
                 logger.error(e.getMessage());
                 continue;
             }
-
+            logger.debug("parseLayerArchives - layerFile: {}", layerFile);
             ArchiveFileType archiveFileType;
             try {
+                logger.debug("parseLayerArchives - layer.getMediaType(): {}", layer.getMediaType());
                 archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layer.getMediaType());
             } catch (IntegrationException e) {
-                logger.trace(e.getMessage());
+                logger.error(e.getMessage());
                 continue;
             }
             layerArchives.add(new TypedArchiveFile(archiveFileType, layerFile));
