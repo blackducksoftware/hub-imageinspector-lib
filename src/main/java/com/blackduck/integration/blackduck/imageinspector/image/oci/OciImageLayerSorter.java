@@ -23,6 +23,7 @@ public class OciImageLayerSorter extends ImageLayerSorter {
         TypedArchiveFile layerArchive = null;
         for (final TypedArchiveFile candidateLayerTar : unOrderedLayerArchives) {
             String candidateId = String.format("%s:%s", candidateLayerTar.getFile().getParentFile().getName(), candidateLayerTar.getFile().getName());
+            logger.debug("layerInternalId: {}, candidateId: {}", layerInternalId, candidateId);
             if (layerInternalId.equals(candidateId)) {
                 logger.trace(String.format("Found layer archive for layer %s: ", layerInternalId, candidateLayerTar.getFile().getAbsolutePath()));
                 layerArchive = candidateLayerTar;
