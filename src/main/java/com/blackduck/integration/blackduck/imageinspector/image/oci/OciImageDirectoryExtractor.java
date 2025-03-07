@@ -20,8 +20,6 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.archive.T
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciDescriptor;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageIndex;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageManifest;
-import com.blackduck.integration.blackduck.imageinspector.image.common.*;
-import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageRootManifest;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
 import com.blackduck.integration.exception.IntegrationException;
-import java.util.Arrays;
 
 public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     private static final String INDEX_FILE_NAME = "index.json";
@@ -86,7 +83,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
         String manifestRepoTag = manifestDescriptor.getRepoTagString().orElse(null);
         if (manifestRepoTag != null && !manifestRepoTag.contains(":") && givenRepo != null) {
-            if (givenTag.isBlank()) {
+            if (givenTag != null && givenTag.isBlank()) {
                 givenTag = "latest";
             }
             manifestRepoTag = String.format("%s:%s", givenRepo, givenTag);
@@ -160,7 +157,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         return findBlob(blobsDir, pathToManifestFile);
     }
 
-    private ArchiveFileType parseArchiveTypeFromLayerDescriptorMediaType(String mediaType) throws IntegrationException {
+    private ArchiveFileType parseArchiveTypeFromLayerDescriptorMediaType(String mediaType, String digest) throws IntegrationException {
         if (mediaType.contains("nondistributable")) {
             //TODO- what do we do with archives "nondistributable" media types? https://github.com/opencontainers/image-spec/blob/main/layer.md#non-distributable-layers
             // ac- based on the linked doc, I think we should just treat them normally (as if they were their "distributable" counterparts)
@@ -172,7 +169,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         } else if (mediaType.endsWith(LAYER_ARCHIVE_TAR_ZSTD_MEDIA_TYPE_SUFFIX)) {
             return ArchiveFileType.TAR_ZSTD;
         } else {
-            throw new IntegrationException(String.format("Possible unsupported input archive file type. Please refer to Docker Inspector documentation Unrecognized layer media type: %s", mediaType));
+            throw new IntegrationException(String.format("Possible unsupported input archive file type. Please refer to Docker Inspector documentation [link]. Unrecognized media type %s of layer %s.", mediaType, digest));
         }
     }
 
@@ -217,7 +214,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
             ArchiveFileType archiveFileType;
             try {
                 logger.debug("parseLayerArchives - layer.getMediaType(): {}", layer.getMediaType());
-                archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layer.getMediaType());
+                archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layer.getMediaType(), layer.getDigest());
             } catch (IntegrationException e) {
                 logger.error(e.getMessage());
                 continue;
