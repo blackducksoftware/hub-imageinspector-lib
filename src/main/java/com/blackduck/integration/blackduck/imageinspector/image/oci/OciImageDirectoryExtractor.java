@@ -169,7 +169,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         } else if (mediaType.endsWith(LAYER_ARCHIVE_TAR_ZSTD_MEDIA_TYPE_SUFFIX)) {
             return ArchiveFileType.TAR_ZSTD;
         } else {
-            throw new IntegrationException(String.format("Possible unsupported input archive file type. Please refer to Docker Inspector documentation [link]. Unrecognized media type %s of layer %s.", mediaType, digest));
+            throw new IntegrationException(String.format("Possible unsupported input archive file type. Please refer to the relevant Docker Inspector documentation at https://documentation.blackduck.com/bundle/detect/page/packagemgrs/docker/formats.html. Unrecognized media type %s of layer %s.", mediaType, digest));
         }
     }
 
