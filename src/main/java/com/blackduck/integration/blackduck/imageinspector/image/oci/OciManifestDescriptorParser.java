@@ -34,10 +34,6 @@ public class OciManifestDescriptorParser {
     public OciDescriptor getManifestDescriptor(OciImageIndex ociImageIndex,
         @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
         // TODO- Probably also need to select one of multiple based on arch
-//        List<OciDescriptor> trueManifests =
-//            ociImageIndex.getManifests().stream()
-//                .filter(man -> MANIFEST_FILE_MEDIA_TYPE.equals(man.getMediaType()) || INDEX_FILE_MEDIA_TYPE.equals(man.getMediaType()))
-//                .collect(Collectors.toList());
         List<OciDescriptor> trueManifests = new ArrayList<>();
         for (OciDescriptor ociDescriptor : ociImageIndex.getManifests()) {
             logger.debug("Found a media type in manifest: {}", ociDescriptor.getMediaType());
