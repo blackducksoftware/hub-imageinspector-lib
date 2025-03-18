@@ -1,7 +1,7 @@
 /*
  * hub-imageinspector-lib
  *
- * Copyright (c) 2024 Black Duck Software, Inc.
+ * Copyright (c) 2025 Black Duck Software, Inc.
  *
  * Use subject to the terms and conditions of the Black Duck Software End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class OciManifestDescriptorParser {
     private static final String MANIFEST_FILE_MEDIA_TYPE = "application/vnd.oci.image.manifest.v1+json";
@@ -41,7 +40,7 @@ public class OciManifestDescriptorParser {
                 trueManifests.add(ociDescriptor);
             }
         }
-        if (trueManifests.size() == 0) {
+        if (trueManifests.isEmpty()) {
             throw new IntegrationException(String.format("No manifest descriptor with either media type {} or {} was found in OCI image index", INDEX_FILE_MEDIA_TYPE, MANIFEST_FILE_MEDIA_TYPE));
         }
         if ((trueManifests.size() == 1)) {
