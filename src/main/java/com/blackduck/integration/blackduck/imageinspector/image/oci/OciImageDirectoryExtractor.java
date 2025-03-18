@@ -239,7 +239,6 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     }
 
     private String findImageConfigFilePath(OciDescriptor imageConfig) throws IntegrationException {
-        logger.info("findImageConfigFilePath{imageConfig}");
         if (imageConfig != null && imageConfig.getMediaType() != null && imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
             return String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(imageConfig.getDigest()));
         } else {
