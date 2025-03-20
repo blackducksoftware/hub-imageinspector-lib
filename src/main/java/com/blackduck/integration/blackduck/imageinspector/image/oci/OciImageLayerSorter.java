@@ -1,7 +1,7 @@
 /*
  * hub-imageinspector-lib
  *
- * Copyright (c) 2024 Black Duck Software, Inc.
+ * Copyright (c) 2025 Black Duck Software, Inc.
  *
  * Use subject to the terms and conditions of the Black Duck Software End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
@@ -21,8 +21,14 @@ public class OciImageLayerSorter extends ImageLayerSorter {
     @Override
     protected TypedArchiveFile getLayerArchive(final List<TypedArchiveFile> unOrderedLayerArchives, final String layerInternalId) throws IntegrationException {
         TypedArchiveFile layerArchive = null;
+        if (unOrderedLayerArchives != null) {
+            logger.debug("layerInternalId: {}, unOrderedLayerArchives size: {}", layerInternalId, unOrderedLayerArchives.size());
+        } else {
+            logger.debug("layerInternalId: {}, unOrderedLayerArchives: {}", layerInternalId, unOrderedLayerArchives);
+        }
         for (final TypedArchiveFile candidateLayerTar : unOrderedLayerArchives) {
             String candidateId = String.format("%s:%s", candidateLayerTar.getFile().getParentFile().getName(), candidateLayerTar.getFile().getName());
+            logger.debug("layerInternalId: {}, candidateId: {}", layerInternalId, candidateId);
             if (layerInternalId.equals(candidateId)) {
                 logger.trace(String.format("Found layer archive for layer %s: ", layerInternalId, candidateLayerTar.getFile().getAbsolutePath()));
                 layerArchive = candidateLayerTar;

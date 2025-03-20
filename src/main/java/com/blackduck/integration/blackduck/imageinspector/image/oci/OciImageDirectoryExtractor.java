@@ -1,7 +1,7 @@
 /*
  * hub-imageinspector-lib
  *
- * Copyright (c) 2024 Black Duck Software, Inc.
+ * Copyright (c) 2025 Black Duck Software, Inc.
  *
  * Use subject to the terms and conditions of the Black Duck Software End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
@@ -20,7 +20,6 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.archive.T
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciDescriptor;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageIndex;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageManifest;
-import com.blackduck.integration.blackduck.imageinspector.image.common.*;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +31,7 @@ import com.blackduck.integration.exception.IntegrationException;
 public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     private static final String INDEX_FILE_NAME = "index.json";
     private static final String BLOBS_DIR_NAME = "blobs";
+    private static final String CONFIG_FIELD_NAME = "\"Config\":\"";
 
     private static final String INDEX_FILE_MEDIA_TYPE = "application/vnd.oci.image.index.v1+json";
     private static final String CONFIG_FILE_MEDIA_TYPE = "application/vnd.oci.image.config.v1+json";
@@ -69,7 +69,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
 
         try {
-            return parseLayerArchives(manifestFile, blobsDir);
+            return parseLayerArchives(manifestFile, blobsDir, imageDir);
         } catch (IOException e) {
             throw new IntegrationException(String.format("Error parsing layer archives from manifest file %s: %s", manifestFile.getAbsolutePath(), e.getMessage()), e);
         }
@@ -83,7 +83,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
         String manifestRepoTag = manifestDescriptor.getRepoTagString().orElse(null);
         if (manifestRepoTag != null && !manifestRepoTag.contains(":") && givenRepo != null) {
-            if (givenTag.isBlank()) {
+            if (givenTag != null && givenTag.isBlank()) {
                 givenTag = "latest";
             }
             manifestRepoTag = String.format("%s:%s", givenRepo, givenTag);
@@ -94,23 +94,52 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         File manifestFile = findManifestFile(imageDir, manifestDescriptor);
         String manifestFileText;
         try {
+            logger.debug("Path to the manifest file about to be read: {}", manifestFile.toPath().toString());
             manifestFileText = fileOperations.readFileToString(manifestFile);
         } catch (IOException e) {
             throw new IntegrationException(String.format("Unable to parse manifest file %s", manifestFile.getAbsolutePath()));
         }
-
+        
+        String pathToImageConfigFileFromRoot = null;
+        List<String> layerInternalIds;
+        
+        List<String> layerExternalIds;
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
-
-        // If we ever need more detail (os/architecture, history, cmd, etc):
-        // imageManifest.config.digest has the filename (in the blobs dir) of the file that has that detail
-        String pathToImageConfigFileFromRoot = findImageConfigFilePath(imageManifest);
-        List<String> layerInternalIds = imageManifest.getLayers().stream()
+        if (imageManifest == null || imageManifest.getConfig() == null) {
+            logger.debug("JSON text is not of Image Manifest type: {}", manifestFileText);
+            OciImageIndex imageIndex = gson.fromJson(manifestFileText, OciImageIndex.class);
+            if (imageIndex == null || imageIndex.getManifests() == null) {
+                throw new IntegrationException("Unable to find a matching manifest with config file");
+            }
+            File rootManifestfile = new File(imageDir, "manifest.json");
+            try {
+                String rootManifestFileText = fileOperations.readFileToString(rootManifestfile);
+                pathToImageConfigFileFromRoot = getConfigDigestFromRootManifestText(rootManifestFileText);
+                logger.debug("configRelativePathFromRoot: \n{}", pathToImageConfigFileFromRoot);
+                if (pathToImageConfigFileFromRoot == null) {
+                    throw new IntegrationException("Unable to find config in root manifest.");
+                }
+            } catch (IOException ex) {
+                throw new IntegrationException("Unable to find a matching manifest with config file in the root: {}", ex);
+            }
+            layerInternalIds = imageIndex.getManifests().stream()
                                             .map(OciDescriptor::getDigest)
                                             .collect(Collectors.toList());
+        } else {
+            // If we ever need more detail (os/architecture, history, cmd, etc):
+            // imageManifest.config.digest has the filename (in the blobs dir) of the file that has that detail
+            pathToImageConfigFileFromRoot = findImageConfigFilePath(imageManifest.getConfig());
+            layerInternalIds = imageManifest.getLayers().stream()
+                                            .map(OciDescriptor::getDigest)
+                                            .collect(Collectors.toList());
+        }
+        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(
+                resolvedRepoTag.getRepo().orElse(""), 
+                resolvedRepoTag.getTag().orElse(""), 
+                pathToImageConfigFileFromRoot, 
+                layerInternalIds);
 
-        ManifestLayerMapping manifestLayerMapping = new ManifestLayerMapping(resolvedRepoTag.getRepo().orElse(""), resolvedRepoTag.getTag().orElse(""), pathToImageConfigFileFromRoot, layerInternalIds);
-
-        List<String> layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
+        layerExternalIds = commonImageConfigParser.getExternalLayerIdsFromImageConfigFile(imageDir, pathToImageConfigFileFromRoot);
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
     }
 
@@ -128,7 +157,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         return findBlob(blobsDir, pathToManifestFile);
     }
 
-    private ArchiveFileType parseArchiveTypeFromLayerDescriptorMediaType(String mediaType) throws IntegrationException {
+    private ArchiveFileType parseArchiveTypeFromLayerDescriptorMediaType(String mediaType, String digest) throws IntegrationException {
         if (mediaType.contains("nondistributable")) {
             //TODO- what do we do with archives "nondistributable" media types? https://github.com/opencontainers/image-spec/blob/main/layer.md#non-distributable-layers
             // ac- based on the linked doc, I think we should just treat them normally (as if they were their "distributable" counterparts)
@@ -140,36 +169,59 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         } else if (mediaType.endsWith(LAYER_ARCHIVE_TAR_ZSTD_MEDIA_TYPE_SUFFIX)) {
             return ArchiveFileType.TAR_ZSTD;
         } else {
-            throw new IntegrationException(String.format("Unrecognized layer media type: %s", mediaType));
+            throw new IntegrationException(String.format("Possible unsupported input archive file type. Please refer to the relevant Docker Inspector documentation at https://documentation.blackduck.com/bundle/detect/page/packagemgrs/docker/formats.html. Unrecognized media type %s of layer %s.", mediaType, digest));
         }
     }
 
-    private List<TypedArchiveFile> parseLayerArchives(File manifestFile, File blobsDir) throws IOException {
+    private List<TypedArchiveFile> parseLayerArchives(File manifestFile, File blobsDir, File imageDir) throws IOException {
+        
         // Parse manifest file for names + archive formats of layer files
         String manifestFileText = fileOperations.readFileToString(manifestFile);
+        logger.debug("parseLayerArchives - manifestFileText: {}, blobsDir: {}, imageDir: {}", manifestFileText, blobsDir, imageDir);
         OciImageManifest imageManifest = gson.fromJson(manifestFileText, OciImageManifest.class);
-
+        List<OciDescriptor> layersOrManifests;
         List<TypedArchiveFile> layerArchives = new LinkedList<>();
-        for (OciDescriptor layer : imageManifest.getLayers()) {
+        if (imageManifest == null || imageManifest.getLayers() == null) {
+            logger.debug("JSON text did not match Image Manifest: {}\n", manifestFileText);
+            OciImageIndex imageIndex = gson.fromJson(manifestFileText, OciImageIndex.class);
+            if (imageIndex == null || imageIndex.getManifests() == null) {
+                logger.debug("JSON text did not match Image Index either.");
+                return layerArchives;
+            } else {
+                layersOrManifests = imageIndex.getManifests();
+            }
+        } else {
+            layersOrManifests = imageManifest.getLayers();
+        }
+        logger.debug("parseLayerArchives - layersOrManifests.size(): {}", layersOrManifests.size());
+        for (OciDescriptor layer : layersOrManifests) {
             String pathToLayerFile = parsePathToBlobFileFromDigest(layer.getDigest());
+            logger.debug("parseLayerArchives - pathToLayerFile: {}", pathToLayerFile);
             File layerFile;
             try {
-                layerFile = findBlob(blobsDir, pathToLayerFile);
+                if (pathToLayerFile.startsWith(BLOBS_DIR_NAME)) {
+                    logger.debug("imageDir: {}, pathToLayerFile: {}", imageDir, pathToLayerFile);
+                    layerFile = findBlob(imageDir, pathToLayerFile);
+                } else {
+                    logger.debug("blobsDir: {}, pathToLayerFile: {}", blobsDir, pathToLayerFile);
+                    layerFile = findBlob(blobsDir, pathToLayerFile);
+                }
             } catch (IntegrationException e) {
                 logger.error(e.getMessage());
                 continue;
             }
-
+            logger.debug("parseLayerArchives - layerFile: {}", layerFile);
             ArchiveFileType archiveFileType;
             try {
-                archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layer.getMediaType());
+                logger.debug("parseLayerArchives - layer.getMediaType(): {}", layer.getMediaType());
+                archiveFileType = parseArchiveTypeFromLayerDescriptorMediaType(layer.getMediaType(), layer.getDigest());
             } catch (IntegrationException e) {
-                logger.trace(e.getMessage());
+                logger.error(e.getMessage());
                 continue;
             }
             layerArchives.add(new TypedArchiveFile(archiveFileType, layerFile));
         }
-
+        logger.debug("parseLayerArchives - layerArchives.size(): {}", layerArchives.size());
         return layerArchives;
     }
 
@@ -186,13 +238,20 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         return blob;
     }
 
-    private String findImageConfigFilePath(OciImageManifest imageManifest) throws IntegrationException {
-        OciDescriptor imageConfig = imageManifest.getConfig();
-        if (imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
+    private String findImageConfigFilePath(OciDescriptor imageConfig) throws IntegrationException {
+        if (imageConfig != null && imageConfig.getMediaType() != null && imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
             return String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(imageConfig.getDigest()));
         } else {
             throw new IntegrationException("Unable to find config file");
         }
     }
-
+    
+    private String getConfigDigestFromRootManifestText(String rootManifestFileText) {
+        int start = rootManifestFileText.indexOf(CONFIG_FIELD_NAME) + CONFIG_FIELD_NAME.length();
+        int end = rootManifestFileText.indexOf('"', start + 1);
+        if (start > -1 && end > start) {
+            return rootManifestFileText.substring(start, end).replace(":", "/");
+        }
+        return null;
+    }
 }
