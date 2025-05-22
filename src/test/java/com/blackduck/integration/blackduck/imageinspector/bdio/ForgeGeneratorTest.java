@@ -28,4 +28,9 @@ public class ForgeGeneratorTest {
         assertEquals("@opensuse", ForgeGenerator.createComponentForge("openSUSE Leap").getName());
         assertEquals("@opensuse", ForgeGenerator.createComponentForge("openSUSE Tumbleweed").getName());
     }
+
+    @Test
+    public void testComponentForgePhoton() {
+
+    }
 }

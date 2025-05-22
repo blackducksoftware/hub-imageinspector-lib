@@ -14,8 +14,12 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackduck.integration.bdio.model.Forge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ForgeGenerator {
+    private static final Logger logger = LoggerFactory.getLogger(ForgeGenerator.class);
+
     private static final String REDHAT_KB_NAME = "redhat";
     private static final String REDHAT_DISTRO_NAME = "rhel";
 
@@ -58,6 +62,7 @@ public class ForgeGenerator {
     }
 
     public static Forge createComponentForge(final String linuxDistroName) {
+        logger.debug("Creating Component forge for {}", linuxDistroName);
         return createForge(linuxDistroName, true);
     }
 

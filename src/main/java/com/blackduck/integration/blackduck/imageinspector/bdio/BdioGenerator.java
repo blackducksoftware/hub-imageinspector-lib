@@ -164,9 +164,10 @@ public class BdioGenerator {
     }
 
     private void addDependency(ProjectDependencyGraph graph, Dependency parent, ComponentDetails comp) {
+        logger.debug("Generating forge"); // just write a test case damn
         Forge componentForge = ForgeGenerator.createComponentForge(comp.getLinuxDistroName());
         logger.trace(String.format(
-            "Generating component with name: %s, version: %s, arch: %s, forge: %s", // Generating component with name: filesystem, version: 1.1-4.ph4, arch: x86_64, forge: @vmware photon os
+            "Generating component with naaame: %s, version: %s, arch: %s, forge: %s", // Generating component with name: filesystem, version: 1.1-4.ph4, arch: x86_64, forge: @vmware photon os
             comp.getName(),
             comp.getVersion(),
             comp.getArchitecture(),
