@@ -14,8 +14,12 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackduck.integration.bdio.model.Forge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ForgeGenerator {
+    private static final Logger logger = LoggerFactory.getLogger(ForgeGenerator.class);
+
     private static final String REDHAT_KB_NAME = "redhat";
     private static final String REDHAT_DISTRO_NAME = "rhel";
 
@@ -25,6 +29,9 @@ public class ForgeGenerator {
 
     private static final String AMAZON_KB_NAME = "centos";
     private static final String AMAZON_DISTRO_NAME = "amzn";
+
+    private static final String PHOTON_OS_KB_NAME = "photon";
+    private static final String PHOTON_OS_DISTRO_NAME = "vmware photon os";
 
     // For cases where the KB name does not match the Linux distro ID found in os-release/lsb-release,
     // this table provides the mapping.
@@ -40,6 +47,7 @@ public class ForgeGenerator {
         linuxDistroNameToKbForgeNameMapping.put(OPENSUSE_DISTRO_NAME1, OPENSUSE_KB_NAME);
         linuxDistroNameToKbForgeNameMapping.put(OPENSUSE_DISTRO_NAME2, OPENSUSE_KB_NAME);
         linuxDistroNameToKbForgeNameMapping.put(AMAZON_DISTRO_NAME, AMAZON_KB_NAME);
+        linuxDistroNameToKbForgeNameMapping.put(PHOTON_OS_DISTRO_NAME, PHOTON_OS_KB_NAME);
     }
 
     private ForgeGenerator() {
@@ -54,6 +62,7 @@ public class ForgeGenerator {
     }
 
     public static Forge createComponentForge(final String linuxDistroName) {
+        logger.debug("Creating Component forge for {}", linuxDistroName);
         return createForge(linuxDistroName, true);
     }
 
@@ -61,8 +70,8 @@ public class ForgeGenerator {
         if (StringUtils.isBlank(linuxDistroName)) {
             return new Forge("/","none");
         }
-        final String linuxDistroNameLowerCase = linuxDistroName.toLowerCase();
-        Optional<String> overriddenKbName = findMatch(linuxDistroNameLowerCase);
+        final String linuxDistroNameLowerCase = linuxDistroName.toLowerCase(); // "vmware photon os"
+        Optional<String> overriddenKbName = findMatch(linuxDistroNameLowerCase); // TODO: override to "photon" here
         String kbName = overriddenKbName.orElse(linuxDistroNameLowerCase);
         return new Forge("/", kbName, doPreferredAliasNamespace);
     }
