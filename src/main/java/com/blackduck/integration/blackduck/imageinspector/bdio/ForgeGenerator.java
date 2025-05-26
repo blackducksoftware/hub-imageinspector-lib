@@ -77,6 +77,7 @@ public class ForgeGenerator {
     }
 
     private static Optional<String> findMatch(final String linuxDistroNameLowerCase) {
+        logger.debug("Looking up Forge for {}", linuxDistroNameLowerCase);
         for (Map.Entry<String, String> mappingEntry : linuxDistroNameToKbForgeNameMapping.entrySet()) {
             if (linuxDistroNameLowerCase.startsWith(mappingEntry.getKey().toLowerCase())) {
                 return Optional.of(mappingEntry.getValue());

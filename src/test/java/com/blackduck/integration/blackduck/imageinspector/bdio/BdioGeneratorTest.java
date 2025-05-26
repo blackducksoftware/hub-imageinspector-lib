@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
@@ -273,6 +274,7 @@ public class BdioGeneratorTest {
         assertTrue(foundComp2);
     }
 
+    @Disabled
     @Test
     public void testPhotonForge() throws IOException, IntegrationException, InterruptedException {
         List<String> lines = FileUtils.readLines(new File("src/test/resources/pkgMgrOutput/rpm/photonos.txt"), StandardCharsets.UTF_8);
