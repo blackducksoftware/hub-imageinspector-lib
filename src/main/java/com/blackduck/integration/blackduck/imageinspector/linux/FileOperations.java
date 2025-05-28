@@ -195,7 +195,7 @@ public class FileOperations {
             if (mustPrune(dirEntry)) {
                 final boolean deleteSucceeded = Files.deleteIfExists(dirEntry.toPath());
                 if (!deleteSucceeded) {
-                    logger.warn("Delete of dangling or circular symlink {} failed", dirEntry.getAbsolutePath());
+                    logger.warn("Delete of problematic symlink {} failed", dirEntry.getAbsolutePath());
                 }
             } else if (dirEntry.isDirectory()) {
                 pruneProblematicSymLinksRecursively(dirEntry);
