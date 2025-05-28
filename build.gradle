@@ -24,7 +24,7 @@ project.ext.moduleName = 'com.blackduck.integration.hub-imageinspector-lib'
 project.ext.javaUseAutoModuleName = 'true'
 project.ext.junitShowStandardStreams = 'true'
 
-version = '15.0.3-SNAPSHOT'
+version = '15.0.3-IDETECT-4714-prune-dir-links-SNAPSHOT'
 description = 'A library for creating Black Duck Input Output (BDIO) representing the packages installed in a Linux Docker image'
 
 apply plugin: "io.spring.dependency-management"
