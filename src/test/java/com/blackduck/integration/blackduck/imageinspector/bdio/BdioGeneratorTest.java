@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
@@ -272,34 +271,6 @@ public class BdioGeneratorTest {
         }
         assertTrue(foundComp1);
         assertTrue(foundComp2);
-    }
-
-    @Disabled
-    @Test
-    public void testPhotonForge() throws IOException, IntegrationException, InterruptedException {
-        List<String> lines = FileUtils.readLines(new File("src/test/resources/pkgMgrOutput/rpm/photonos.txt"), StandardCharsets.UTF_8);
-        String[] pkgMgrOutputLines = lines.toArray(new String[0]);
-        SimpleBdioDocument bdio = getBdioDocumentForRpmPackages(pkgMgrOutputLines);
-        String comp1Name = "cracklib";
-        String comp1Version = "2.9.0-11.el7";
-        String comp1Arch = "x86_64";
-        boolean foundComp1 = false;
-        boolean foundComp2 = false;
-        for (BdioComponent comp : bdio.getComponents()) {
-            System.out.printf("name: %s, version: %s, externalId: %s\n", comp.name, comp.version, comp.bdioExternalIdentifier.externalId);
-            assertEquals("@centos", comp.bdioExternalIdentifier.forge);
-            if (comp1Name.equals(comp.name)) {
-                foundComp1 = true;
-                assertEquals(String.format("%s/%s/%s", comp1Name, comp1Version, comp1Arch), comp.bdioExternalIdentifier.externalId);
-            }
-            if ("cracklib-dicts".equals(comp.name)) {
-                foundComp2 = true;
-                assertEquals("cracklib-dicts/2.9.0-11.el7/x86_64", comp.bdioExternalIdentifier.externalId);
-            }
-        }
-        assertTrue(foundComp1, String.format("component %s/%s/%s not found", comp1Name, comp1Version, comp1Arch));
-        assertTrue(foundComp2);
-        assertEquals(189, bdio.getComponents().size());
     }
 
     @Test
