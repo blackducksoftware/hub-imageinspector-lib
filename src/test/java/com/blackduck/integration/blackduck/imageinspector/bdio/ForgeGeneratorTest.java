@@ -20,6 +20,7 @@ public class ForgeGeneratorTest {
         assertEquals("@fedora", ForgeGenerator.createComponentForge("fedora").getName());
         assertEquals("none", ForgeGenerator.createComponentForge(null).getName());
         assertEquals("@centos", ForgeGenerator.createComponentForge("amzn").getName());
+        assertEquals("@photon", ForgeGenerator.createComponentForge("vmware photon os").getName());
     }
 
     @Test

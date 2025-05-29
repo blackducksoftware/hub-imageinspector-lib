@@ -1,7 +1,7 @@
 /*
  * hub-imageinspector-lib
  *
- * Copyright (c) 2024 Black Duck Software, Inc.
+ * Copyright (c) 2025 Black Duck Software, Inc.
  *
  * Use subject to the terms and conditions of the Black Duck Software End User Software License and Maintenance Agreement. All rights reserved worldwide.
  */
@@ -26,6 +26,9 @@ public class ForgeGenerator {
     private static final String AMAZON_KB_NAME = "centos";
     private static final String AMAZON_DISTRO_NAME = "amzn";
 
+    private static final String PHOTON_KB_NAME = "photon";
+    private static final String PHOTON_DISTRO_NAME = "vmware photon os";
+
     // For cases where the KB name does not match the Linux distro ID found in os-release/lsb-release,
     // this table provides the mapping.
     // If the KB name matches the Linux distro ID found in os-release/lsb-release, there is
@@ -40,6 +43,7 @@ public class ForgeGenerator {
         linuxDistroNameToKbForgeNameMapping.put(OPENSUSE_DISTRO_NAME1, OPENSUSE_KB_NAME);
         linuxDistroNameToKbForgeNameMapping.put(OPENSUSE_DISTRO_NAME2, OPENSUSE_KB_NAME);
         linuxDistroNameToKbForgeNameMapping.put(AMAZON_DISTRO_NAME, AMAZON_KB_NAME);
+        linuxDistroNameToKbForgeNameMapping.put(PHOTON_DISTRO_NAME, PHOTON_KB_NAME);
     }
 
     private ForgeGenerator() {
