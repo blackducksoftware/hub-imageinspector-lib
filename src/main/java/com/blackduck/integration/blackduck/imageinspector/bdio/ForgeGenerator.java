@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ForgeGenerator {
-    private static final Logger logger = LoggerFactory.getLogger(ForgeGenerator.class);
 
     private static final String REDHAT_KB_NAME = "redhat";
     private static final String REDHAT_DISTRO_NAME = "rhel";
