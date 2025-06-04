@@ -42,7 +42,7 @@ dependencyManagement {
 }
 
 dependencies {
-    api 'com.blackduck.integration:integration-bdio:27.0.0'
+    api 'com.blackduck.integration:integration-bdio:27.0.2'
     api 'org.springframework:spring-context:5.3.34'
     api 'org.apache.commons:commons-exec:1.3'
 
