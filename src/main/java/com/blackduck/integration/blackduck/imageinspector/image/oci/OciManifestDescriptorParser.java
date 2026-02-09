@@ -10,12 +10,14 @@ package com.blackduck.integration.blackduck.imageinspector.image.oci;
 import com.blackduck.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciDescriptor;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageIndex;
+import com.blackduck.integration.blackduck.imageinspector.image.oci.util.OciImageHelper;
 import com.blackduck.integration.exception.IntegrationException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,29 +27,43 @@ public class OciManifestDescriptorParser {
     private static final String INDEX_FILE_MEDIA_TYPE = "application/vnd.oci.image.index.v1+json";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ManifestRepoTagMatcher manifestRepoTagMatcher;
+    private final OciImageHelper ociImageHelper;
+    List<OciDescriptor> manifestDescriptors;
 
-    public OciManifestDescriptorParser(ManifestRepoTagMatcher manifestRepoTagMatcher) {
+    public OciManifestDescriptorParser(ManifestRepoTagMatcher manifestRepoTagMatcher,  OciImageHelper ociImageHelper) {
         this.manifestRepoTagMatcher = manifestRepoTagMatcher;
+        this.ociImageHelper = ociImageHelper;
     }
 
     public OciDescriptor getManifestDescriptor(OciImageIndex ociImageIndex,
-        @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
+                                               @Nullable String givenRepo, @Nullable String givenTag, File imageDir) throws IntegrationException {
         // TODO- Probably also need to select one of multiple based on arch
-        List<OciDescriptor> trueManifests = new ArrayList<>();
+        List<OciDescriptor> nestedImageIndex = new ArrayList<>();
         for (OciDescriptor ociDescriptor : ociImageIndex.getManifests()) {
             logger.debug("Found a media type in manifest: {}", ociDescriptor.getMediaType());
-            if (MANIFEST_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType()) || INDEX_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType())) {
-                trueManifests.add(ociDescriptor);
+            if (MANIFEST_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType())) {
+                if (ociDescriptor.getPlatform() != null && ociDescriptor.getPlatform().isPresent()) {
+                    manifestDescriptors.add(ociDescriptor);
+                }
+            } else if (INDEX_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType())) {
+                nestedImageIndex.add(ociDescriptor);
             }
         }
-        if (trueManifests.isEmpty()) {
+        if (manifestDescriptors.isEmpty()) {
+            if(!nestedImageIndex.isEmpty()) {
+                for(OciDescriptor ociDescriptor : nestedImageIndex) {
+                    File manifestFile = ociImageHelper.findManifestFile(imageDir, ociDescriptor);
+                    OciImageIndex imageIndex = ociImageHelper.loadIndex(manifestFile);
+                    getManifestDescriptor(imageIndex, givenRepo, givenTag, imageDir);
+                }
+            }
             throw new IntegrationException(String.format("No manifest descriptor with either media type {} or {} was found in OCI image index", INDEX_FILE_MEDIA_TYPE, MANIFEST_FILE_MEDIA_TYPE));
         }
-        if ((trueManifests.size() == 1)) {
-            logger.debug(String.format("There is only one manifest; inspecting that one; digest={}", trueManifests.get(0).getDigest()));
-            return trueManifests.get(0);
+        if ((manifestDescriptors.size() == 1)) {
+            logger.debug(String.format("There is only one manifest; inspecting that one; digest={}", manifestDescriptors.get(0).getDigest()));
+            return manifestDescriptors.get(0);
         }
-        if ((trueManifests.size() > 1) && StringUtils.isBlank(givenRepo)) {
+        if ((manifestDescriptors.size() > 1) && StringUtils.isBlank(givenRepo)) {
             throw new IntegrationException("When the image contains multiple manifests, the target image and tag to inspect must be specified");
         }
         if (StringUtils.isNotBlank(givenRepo) && StringUtils.isBlank(givenTag)) {
@@ -58,7 +74,7 @@ public class OciManifestDescriptorParser {
         // Safe to assume both repo and tag have values at this point
         String givenRepoTag = String.format("%s:%s", givenRepo, givenTag);
 
-        Optional<OciDescriptor> matchingManifest = trueManifests.stream()
+        Optional<OciDescriptor> matchingManifest = manifestDescriptors.stream()
             .filter(m -> m.getRepoTagString().isPresent())
             .filter(m -> manifestRepoTagMatcher.findMatch(m.getRepoTagString().get(), givenRepoTag).isPresent())
             .findFirst();

@@ -20,6 +20,7 @@ import com.blackduck.integration.blackduck.imageinspector.image.common.archive.T
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciDescriptor;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageIndex;
 import com.blackduck.integration.blackduck.imageinspector.image.oci.model.OciImageManifest;
+import com.blackduck.integration.blackduck.imageinspector.image.oci.util.OciImageHelper;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,6 @@ import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
 import com.blackduck.integration.exception.IntegrationException;
 
 public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
-    private static final String INDEX_FILE_NAME = "index.json";
     private static final String BLOBS_DIR_NAME = "blobs";
     private static final String CONFIG_FIELD_NAME = "\"Config\":\"";
 
@@ -46,16 +46,16 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
     private final FileOperations fileOperations;
     private final ImageNameResolver imageNameResolver;
     private final CommonImageConfigParser commonImageConfigParser;
-    private final OciImageIndexFileParser ociImageIndexFileParser;
+    private final OciImageHelper ociImageHelper;
     private final OciManifestDescriptorParser ociManifestDescriptorParser;
 
     public OciImageDirectoryExtractor(final Gson gson, FileOperations fileOperations, ImageNameResolver imageNameResolver, CommonImageConfigParser commonImageConfigParser,
-                                      OciImageIndexFileParser ociImageIndexFileParser, OciManifestDescriptorParser ociManifestDescriptorParser) {
+                                      OciImageHelper ociImageHelper, OciManifestDescriptorParser ociManifestDescriptorParser) {
         this.gson = gson;
         this.fileOperations = fileOperations;
         this.imageNameResolver = imageNameResolver;
         this.commonImageConfigParser = commonImageConfigParser;
-        this.ociImageIndexFileParser = ociImageIndexFileParser;
+        this.ociImageHelper = ociImageHelper;
         this.ociManifestDescriptorParser = ociManifestDescriptorParser;
     }
 
@@ -64,9 +64,9 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
 
         // TODO this code is repeated below / executed twice
-        OciImageIndex ociImageIndex = extractOciImageIndex(imageDir);
-        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex, givenRepo, givenTag);
-        File manifestFile = findManifestFile(imageDir, manifestDescriptor);
+        OciImageIndex ociImageIndex = ociImageHelper.extractOciImageIndex(imageDir);
+        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex, givenRepo, givenTag, imageDir);
+        File manifestFile = ociImageHelper.findManifestFile(imageDir, manifestDescriptor);
 
         try {
             return parseLayerArchives(manifestFile, blobsDir, imageDir);
@@ -77,8 +77,8 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
 
     @Override
     public FullLayerMapping getLayerMapping(final File imageDir, @Nullable String givenRepo, @Nullable String givenTag) throws IntegrationException {
-        OciImageIndex ociImageIndex = extractOciImageIndex(imageDir);
-        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex, givenRepo, givenTag);
+        OciImageIndex ociImageIndex = ociImageHelper.extractOciImageIndex(imageDir);
+        OciDescriptor manifestDescriptor = ociManifestDescriptorParser.getManifestDescriptor(ociImageIndex, givenRepo, givenTag, imageDir);
         logger.debug(String.format("foundRepoTag: %s", manifestDescriptor.getRepoTagString().orElse("")));
 
         String manifestRepoTag = manifestDescriptor.getRepoTagString().orElse(null);
@@ -91,7 +91,7 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         RepoTag resolvedRepoTag = imageNameResolver.resolve(manifestRepoTag, givenRepo, givenTag);
 
         logger.debug(String.format("Based on manifest, translated repoTag to: repo: %s, tag: %s", resolvedRepoTag.getRepo().orElse(""), resolvedRepoTag.getTag().orElse("")));
-        File manifestFile = findManifestFile(imageDir, manifestDescriptor);
+        File manifestFile = ociImageHelper.findManifestFile(imageDir, manifestDescriptor);
         String manifestFileText;
         try {
             logger.debug("Path to the manifest file about to be read: {}", manifestFile.toPath().toString());
@@ -143,20 +143,6 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         return new FullLayerMapping(manifestLayerMapping, layerExternalIds);
     }
 
-    private OciImageIndex extractOciImageIndex(File imageDir) throws IntegrationException {
-        File indexFile = new File (imageDir, INDEX_FILE_NAME);
-        return ociImageIndexFileParser.loadIndex(indexFile);
-    }
-
-    private File findManifestFile(File imageDir, OciDescriptor manifestDescriptor) throws IntegrationException {
-        String manifestFileDigest = manifestDescriptor.getDigest();
-
-        String pathToManifestFile = parsePathToBlobFileFromDigest(manifestFileDigest);
-        logger.trace("Path to manifest file: {}", pathToManifestFile);
-        File blobsDir = new File(imageDir, BLOBS_DIR_NAME);
-        return findBlob(blobsDir, pathToManifestFile);
-    }
-
     private ArchiveFileType parseArchiveTypeFromLayerDescriptorMediaType(String mediaType, String digest) throws IntegrationException {
         if (mediaType.contains("nondistributable")) {
             //TODO- what do we do with archives "nondistributable" media types? https://github.com/opencontainers/image-spec/blob/main/layer.md#non-distributable-layers
@@ -195,16 +181,16 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         }
         logger.debug("parseLayerArchives - layersOrManifests.size(): {}", layersOrManifests.size());
         for (OciDescriptor layer : layersOrManifests) {
-            String pathToLayerFile = parsePathToBlobFileFromDigest(layer.getDigest());
+            String pathToLayerFile = ociImageHelper.parsePathToBlobFileFromDigest(layer.getDigest());
             logger.debug("parseLayerArchives - pathToLayerFile: {}", pathToLayerFile);
             File layerFile;
             try {
                 if (pathToLayerFile.startsWith(BLOBS_DIR_NAME)) {
                     logger.debug("imageDir: {}, pathToLayerFile: {}", imageDir, pathToLayerFile);
-                    layerFile = findBlob(imageDir, pathToLayerFile);
+                    layerFile = ociImageHelper.findBlob(imageDir, pathToLayerFile);
                 } else {
                     logger.debug("blobsDir: {}, pathToLayerFile: {}", blobsDir, pathToLayerFile);
-                    layerFile = findBlob(blobsDir, pathToLayerFile);
+                    layerFile = ociImageHelper.findBlob(blobsDir, pathToLayerFile);
                 }
             } catch (IntegrationException e) {
                 logger.error(e.getMessage());
@@ -225,22 +211,9 @@ public class OciImageDirectoryExtractor implements ImageDirectoryExtractor {
         return layerArchives;
     }
 
-    // Digests are in the format <hash algorithm>:<hash of content> and the path to the file from "blobs" dir is <hash algorithm>/<hash of contents>
-    private String parsePathToBlobFileFromDigest(String digest) {
-        return String.join("/", digest.split(":"));
-    }
-
-    private File findBlob(File blobsDir, String pathToBlob) throws IntegrationException {
-        File blob = new File(blobsDir, pathToBlob);
-        if (!blob.exists()) {
-            throw new IntegrationException(String.format("Blob referenced by image manifest could not be found at %s.", blob.getAbsolutePath()));
-        }
-        return blob;
-    }
-
     private String findImageConfigFilePath(OciDescriptor imageConfig) throws IntegrationException {
         if (imageConfig != null && imageConfig.getMediaType() != null && imageConfig.getMediaType().equals(CONFIG_FILE_MEDIA_TYPE)) {
-            return String.format("%s/%s", BLOBS_DIR_NAME, parsePathToBlobFileFromDigest(imageConfig.getDigest()));
+            return String.format("%s/%s", BLOBS_DIR_NAME, ociImageHelper.parsePathToBlobFileFromDigest(imageConfig.getDigest()));
         } else {
             throw new IntegrationException("Unable to find config file");
         }

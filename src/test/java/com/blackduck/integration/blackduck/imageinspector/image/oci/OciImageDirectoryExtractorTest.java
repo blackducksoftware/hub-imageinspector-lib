@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import com.blackduck.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 import com.blackduck.integration.blackduck.imageinspector.image.common.ManifestRepoTagMatcher;
+import com.blackduck.integration.blackduck.imageinspector.image.oci.util.OciImageHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,10 +38,12 @@ public class OciImageDirectoryExtractorTest {
         Gson gson = new Gson();
         FileOperations fileOperations = new FileOperations();
         CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
-        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
+        OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
+        OciImageHelper ociImageHelper = new OciImageHelper(ociImageIndexFileParser);
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher(), ociImageHelper);
         ImageNameResolver imageNameResolver = new ImageNameResolver();
         OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, imageNameResolver, configParser,
-                new OciImageIndexFileParser(gson, fileOperations),
+                new OciImageHelper(ociImageIndexFileParser),
                 ociManifestDescriptorParser);
 
         List<TypedArchiveFile> layerArchives = extractor.getLayerArchives(ociImageDir, null, null);
@@ -83,9 +86,10 @@ public class OciImageDirectoryExtractorTest {
         FileOperations fileOperations = new FileOperations();
         CommonImageConfigParser configParser = new CommonImageConfigParser(gson);
         OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
-        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
+        OciImageHelper ociImageHelper = new OciImageHelper(ociImageIndexFileParser);
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher(), ociImageHelper);
         ImageNameResolver imageNameResolver = new ImageNameResolver();
-        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, imageNameResolver, configParser, ociImageIndexFileParser,
+        OciImageDirectoryExtractor extractor = new OciImageDirectoryExtractor(gson, fileOperations, imageNameResolver, configParser, ociImageHelper,
                 ociManifestDescriptorParser);
         File alpineOciImageDir = new File(imagePath);
 

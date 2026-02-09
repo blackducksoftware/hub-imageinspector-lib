@@ -11,6 +11,7 @@ import java.io.File;
 
 import com.blackduck.integration.blackduck.imageinspector.api.name.ImageNameResolver;
 import com.blackduck.integration.blackduck.imageinspector.image.common.*;
+import com.blackduck.integration.blackduck.imageinspector.image.oci.util.OciImageHelper;
 import com.google.gson.Gson;
 import com.blackduck.integration.blackduck.imageinspector.image.common.*;
 import com.blackduck.integration.blackduck.imageinspector.linux.FileOperations;
@@ -36,9 +37,10 @@ public class OciImageDirectoryDataExtractorFactory implements ImageDirectoryData
     public ImageDirectoryDataExtractor createImageDirectoryDataExtractor() {
         FileOperations fileOperations = new FileOperations();
         OciImageIndexFileParser ociImageIndexFileParser = new OciImageIndexFileParser(gson, fileOperations);
-        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher());
+        OciImageHelper ociImageHelper = new OciImageHelper(ociImageIndexFileParser);
+        OciManifestDescriptorParser ociManifestDescriptorParser = new OciManifestDescriptorParser(new ManifestRepoTagMatcher(), ociImageHelper);
         ImageNameResolver imageNameResolver = new ImageNameResolver();
-        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, imageNameResolver, commonImageConfigParser, ociImageIndexFileParser, ociManifestDescriptorParser);
+        OciImageDirectoryExtractor ociImageDirectoryExtractor = new OciImageDirectoryExtractor(gson, fileOperations, imageNameResolver, commonImageConfigParser, ociImageHelper, ociManifestDescriptorParser);
         ImageLayerSorter imageOrderedLayerExtractor = new OciImageLayerSorter();
         LayerDataExtractor layerDataExtractor = new LayerDataExtractor(imageOrderedLayerExtractor);
         return new ImageDirectoryDataExtractor(ociImageDirectoryExtractor, layerDataExtractor);
