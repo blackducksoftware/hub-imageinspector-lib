@@ -44,6 +44,8 @@ public class OciManifestDescriptorParser {
             if (MANIFEST_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType())) {
                 if (ociDescriptor.getPlatform() != null && ociDescriptor.getPlatform().isPresent()) {
                     manifestDescriptors.add(ociDescriptor);
+                } else if (ociDescriptor.isPossibleImageManifest()) {
+                    manifestDescriptors.add(ociDescriptor);
                 }
             } else if (INDEX_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType())) {
                 nestedImageIndex.add(ociDescriptor);

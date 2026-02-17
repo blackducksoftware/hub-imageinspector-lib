@@ -72,4 +72,8 @@ public class OciDescriptor {
     public Optional<String> getRepoTagString() {
         return getAnnotation(REP_TAG_ANNOTATION_KEY);
     }
+
+    public boolean isPossibleImageManifest() {
+        return  annotations.entrySet().stream().anyMatch(entry -> entry.getKey().startsWith("org.opencontainers.image"));
+    }
 }
