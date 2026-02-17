@@ -31,7 +31,7 @@ public class OciManifestDescriptorParserTest {
         annotations2.put("org.opencontainers.image.ref.name", "tag:repo");
         OciDescriptor manifest2 = new OciDescriptor(manifestMediaType, "", "", annotations2, platform);
 
-        OciDescriptor manifest3 = new OciDescriptor(manifestMediaType, "", "", null, null);
+        OciDescriptor manifest3 = new OciDescriptor(manifestMediaType, "", "", null, platform);
 
         List<OciDescriptor> manifests = Arrays.asList(manifest1, manifest2, manifest3);
         OciImageIndex ociImageIndex = new OciImageIndex(manifests);

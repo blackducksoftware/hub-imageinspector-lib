@@ -28,7 +28,7 @@ public class OciManifestDescriptorParser {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ManifestRepoTagMatcher manifestRepoTagMatcher;
     private final OciImageHelper ociImageHelper;
-    List<OciDescriptor> manifestDescriptors;
+    List<OciDescriptor> manifestDescriptors = new ArrayList<>();
 
     public OciManifestDescriptorParser(ManifestRepoTagMatcher manifestRepoTagMatcher,  OciImageHelper ociImageHelper) {
         this.manifestRepoTagMatcher = manifestRepoTagMatcher;
