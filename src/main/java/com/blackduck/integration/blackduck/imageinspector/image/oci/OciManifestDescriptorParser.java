@@ -37,7 +37,11 @@ public class OciManifestDescriptorParser {
         for (OciDescriptor ociDescriptor : ociImageIndex.getManifests()) {
             logger.debug("Found a media type in manifest: {}", ociDescriptor.getMediaType());
             if (MANIFEST_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType()) || INDEX_FILE_MEDIA_TYPE.equals(ociDescriptor.getMediaType())) {
-                trueManifests.add(ociDescriptor);
+                if (ociDescriptor.getPlatform() != null && ociDescriptor.getPlatform().isPresent()) {
+                    trueManifests.add(ociDescriptor);
+                } else if (ociDescriptor.isPossibleImageManifest()) {
+                    trueManifests.add(ociDescriptor);
+                }
             }
         }
         if (trueManifests.isEmpty()) {

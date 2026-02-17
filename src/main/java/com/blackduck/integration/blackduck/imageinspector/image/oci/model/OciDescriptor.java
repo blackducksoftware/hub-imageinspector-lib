@@ -29,6 +29,9 @@ public class OciDescriptor {
     @SerializedName("annotations")
     private Map<String, String> annotations;
 
+    @SerializedName("platform")
+    private Map<String, String> platform;
+
     public OciDescriptor(final String mediaType, final String digest, final String size, final Map<String, String> annotations) {
         this.mediaType = mediaType;
         this.digest = digest;
@@ -61,7 +64,15 @@ public class OciDescriptor {
         return Optional.ofNullable(annotations.get(key));
     }
 
+    public Optional<Map<String, String>> getPlatform() {
+        return Optional.ofNullable(platform);
+    }
+
     public Optional<String> getRepoTagString() {
         return getAnnotation(REP_TAG_ANNOTATION_KEY);
+    }
+
+    public boolean isPossibleImageManifest() {
+        return  annotations.entrySet().stream().anyMatch(entry -> entry.getKey().startsWith("org.opencontainers.image"));
     }
 }
