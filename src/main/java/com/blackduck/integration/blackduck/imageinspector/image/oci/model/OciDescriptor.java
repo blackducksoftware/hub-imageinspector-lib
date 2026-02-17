@@ -73,6 +73,6 @@ public class OciDescriptor {
     }
 
     public boolean isPossibleImageManifest() {
-        return  annotations.entrySet().stream().anyMatch(entry -> entry.getKey().startsWith("org.opencontainers.image"));
+        return annotations != null && annotations.entrySet().stream().anyMatch(entry -> entry.getKey().startsWith("org.opencontainers.image"));
     }
 }
