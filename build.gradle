@@ -34,7 +34,7 @@ apply plugin: 'com.blackduck.integration.library'
 dependencyManagement {
     imports {
         mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
-        mavenBom 'com.fasterxml.jackson:jackson-bom:2.12.4'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.18.6'
     }
     dependencies {
         dependency 'ch.qos.logback:logback-core:1.2.13'
@@ -42,7 +42,7 @@ dependencyManagement {
 }
 
 dependencies {
-    api 'com.blackduck.integration:integration-bdio:27.0.2'
+    api 'com.blackduck.integration:integration-bdio:27.0.5'
     api 'org.springframework:spring-context:5.3.34'
     api 'org.apache.commons:commons-exec:1.3'
 
