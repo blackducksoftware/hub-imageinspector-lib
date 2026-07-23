@@ -21,8 +21,6 @@ public class PackageManagerToImageInspectorOsMapping {
                 return ImageInspectorOsEnum.ALPINE;
             case DPKG:
                 return ImageInspectorOsEnum.UBUNTU;
-            case RPM:
-                return ImageInspectorOsEnum.CENTOS;
             default:
                 return null;
         }
