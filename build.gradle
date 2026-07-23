@@ -26,7 +26,7 @@ project.ext.moduleName = 'com.blackduck.integration.hub-imageinspector-lib'
 project.ext.javaUseAutoModuleName = 'true'
 project.ext.junitShowStandardStreams = 'true'
 
-version = '15.0.6-SNAPSHOT'
+version = '15.0.7-SNAPSHOT'
 description = 'A library for creating Black Duck Input Output (BDIO) representing the packages installed in a Linux Docker image'
 
 apply plugin: "io.spring.dependency-management"
@@ -34,6 +34,12 @@ apply plugin: 'com.bmuschko.docker-remote-api'
 apply plugin: 'com.blackduck.integration.library'
 
 dependencyManagement {
+    // Don't publish BOM imports into the generated POM. The Spring Boot 2.x BOM
+    // manages Tomcat 9, which SCAS would flag even though this library doesn't
+    // use Tomcat. Consumers bring their own Spring Boot version management.
+    generatedPomCustomization {
+        enabled = false
+    }
     imports {
         mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.18.6'
