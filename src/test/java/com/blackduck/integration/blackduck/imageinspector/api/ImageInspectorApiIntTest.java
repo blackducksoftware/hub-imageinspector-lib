@@ -39,7 +39,6 @@ import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pk
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.DbRelationshipInfo;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmPkgMgr;
-import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.rpm.RpmRelationshipPopulater;
 import com.blackduck.integration.blackduck.imageinspector.image.common.ImageDirectoryDataExtractorFactoryChooser;
 import com.blackduck.integration.blackduck.imageinspector.image.common.ImageLayerApplier;
 import com.blackduck.integration.blackduck.imageinspector.image.common.archive.ImageLayerArchiveExtractor;
@@ -176,14 +175,7 @@ public class ImageInspectorApiIntTest {
     public void testAppOnlyFileSystem() throws IntegrationException, IOException, InterruptedException {
         ComponentHierarchyBuilder componentHierarchyBuilder = new ComponentHierarchyBuilder(packageGetter);
         Mockito.when(os.getLinuxDistroNameFromEtcDir(Mockito.any(File.class))).thenReturn(Optional.of("centos"));
-        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.CENTOS);
-        Mockito.when(rpmPkgMgr.isApplicable(Mockito.any(File.class))).thenReturn(true);
-        Mockito.when(rpmPkgMgr.getType()).thenReturn(PackageManagerEnum.RPM);
-        Mockito.when(rpmPkgMgr.getImagePackageManagerDirectory(Mockito.any(File.class))).thenReturn(new File("."));
-
-        CmdExecutor cmdExecutor = Mockito.mock(CmdExecutor.class);
-        Mockito.when(cmdExecutor.executeCommand(Mockito.any(List.class), Mockito.any(Long.class))).thenReturn(new String[0]);
-        Mockito.when(rpmPkgMgr.createRelationshipPopulator(Mockito.any(CmdExecutor.class))).thenReturn(new RpmRelationshipPopulater(cmdExecutor));
+        Mockito.when(os.deriveOs(Mockito.any(String.class))).thenReturn(ImageInspectorOsEnum.UBUNTU);
 
         File destinationFile = new File(tempDir, "out.tar.gz");
         String containerFileSystemOutputFilePath = destinationFile.getAbsolutePath();
@@ -192,11 +184,12 @@ public class ImageInspectorApiIntTest {
             .setBlackDuckProjectName(PROJECT)
             .setBlackDuckProjectVersion(PROJECT_VERSION)
             .setContainerFileSystemOutputPath(containerFileSystemOutputFilePath)
-            .setCurrentLinuxDistro("CENTOS")
+            .setCurrentLinuxDistro("UBUNTU")
             .setPlatformTopLayerExternalId("sha256:0e07d0d4c60c0a54ad297763c829584b15d1a4a848bf21fb69dc562feee5bf11")
             .setCleanupWorkingDir(true)
             .build();
         SimpleBdioDocument bdioDocument = imageInspectorApi.getBdio(componentHierarchyBuilder, imageInspectionRequest);
+        assertEquals(0, bdioDocument.getComponents().size());
 
         File containerFileSystemFile = new File(containerFileSystemOutputFilePath);
         System.out.printf("output file: %s\n", containerFileSystemFile.getAbsolutePath());
