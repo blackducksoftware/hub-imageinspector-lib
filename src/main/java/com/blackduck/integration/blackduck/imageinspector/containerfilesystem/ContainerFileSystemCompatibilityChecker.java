@@ -25,6 +25,10 @@ public class ContainerFileSystemCompatibilityChecker {
         }
         final ImageInspectorOsEnum neededInspectorOs = PackageManagerToImageInspectorOsMapping
                 .getImageInspectorOs(containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
+        if (neededInspectorOs == null) {
+            logger.info("No inspector OS mapping exists for package manager {}; treating image as unsupported", containerFileSystemWithPkgMgrDb.getImagePkgMgrDatabase().getPackageManager());
+            return;
+        }
         if (!neededInspectorOs.equals(currentOs)) {
             final String msg = String.format("This image needs to be inspected on %s", neededInspectorOs);
             throw new WrongInspectorOsException(neededInspectorOs, msg);

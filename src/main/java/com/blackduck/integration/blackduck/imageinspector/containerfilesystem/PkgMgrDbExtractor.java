@@ -7,6 +7,7 @@
  */
 package com.blackduck.integration.blackduck.imageinspector.containerfilesystem;
 
+import com.blackduck.integration.blackduck.imageinspector.api.PackageManagerEnum;
 import com.blackduck.integration.blackduck.imageinspector.api.PkgMgrDataNotFoundException;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.PkgMgr;
 import com.blackduck.integration.blackduck.imageinspector.containerfilesystem.pkgmgr.pkgmgrdb.ImagePkgMgrDatabase;
@@ -36,6 +37,10 @@ public class PkgMgrDbExtractor {
         } else {
             logger.trace(String.format("pkgMgrs.size(): %d", pkgMgrs.size()));
             for (PkgMgr pkgMgr : pkgMgrs) {
+                if (pkgMgr.getType() == PackageManagerEnum.RPM) {
+                    logger.info("RPM package manager database support has been retired; treating RPM-based images as unsupported");
+                    continue;
+                }
                 if (pkgMgr.isApplicable(containerFileSystem.getTargetImageFileSystemFull())) {
                     logger.trace(String.format("Package manager %s applies", pkgMgr.getType().toString()));
                     final ImagePkgMgrDatabase targetImagePkgMgr = new ImagePkgMgrDatabase(pkgMgr.getImagePackageManagerDirectory(containerFileSystem.getTargetImageFileSystemFull()),
